@@ -62,10 +62,21 @@ CSRF_TRUSTED_ORIGINS = [
     "https://mctitechnologies.com",
     "https://www.mctitechnologies.com",
 ]
+# ========================================
+# PRODUCTION HTTPS / SECURITY
+# ========================================
+
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+
+# Force HTTPS only in production
+SECURE_SSL_REDIRECT = not DEBUG
+
+# HSTS - start with 1 hour
+SECURE_HSTS_SECONDS = 3600 if not DEBUG else 0
+
 
 ROOT_URLCONF = 'config.urls'
 
@@ -165,3 +176,4 @@ LOGIN_URL = "/admin/login/"
 LOGIN_REDIRECT_URL = "/management-dashboard/"
 
 LOGOUT_REDIRECT_URL = "/admin/login/"
+
