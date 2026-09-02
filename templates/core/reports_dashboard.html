@@ -1,0 +1,1332 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Reports Dashboard | MCTI
+    </title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #111827;
+        }
+
+        /* ========================================
+        SIDEBAR
+        ======================================== */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+
+            width: 250px;
+
+            background: #111827;
+            color: white;
+
+            padding: 25px 18px;
+
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+
+            margin-bottom: 8px;
+        }
+
+        .logo span {
+            color: #f97316;
+        }
+
+        .sidebar-subtitle {
+            font-size: 12px;
+            color: #9ca3af;
+
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+
+            display: block;
+
+            padding: 12px 14px;
+
+            margin-bottom: 7px;
+
+            text-decoration: none;
+
+            color: #d1d5db;
+
+            border-radius: 8px;
+
+            font-size: 14px;
+
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: #1f2937;
+            color: white;
+        }
+
+        .sidebar a.active {
+            background: #f97316;
+            color: white;
+        }
+
+        /* ========================================
+        MAIN
+        ======================================== */
+
+        .main {
+            margin-left: 250px;
+            min-height: 100vh;
+        }
+
+        /* ========================================
+        TOPBAR
+        ======================================== */
+
+        .topbar {
+
+            height: 70px;
+
+            background: white;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 30px;
+
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .topbar-title {
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+
+            font-size: 13px;
+        }
+
+        .logout-btn {
+            text-decoration: none;
+
+            background: #111827;
+            color: white;
+
+            padding: 8px 13px;
+
+            border-radius: 7px;
+        }
+
+        /* ========================================
+        CONTENT
+        ======================================== */
+
+        .content {
+            padding: 30px;
+        }
+
+        .page-header {
+            margin-bottom: 25px;
+        }
+
+        .page-header h1 {
+            font-size: 26px;
+            margin-bottom: 6px;
+        }
+
+        .page-header p {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* ========================================
+        FILTER
+        ======================================== */
+
+        .filter-card {
+
+            background: white;
+
+            padding: 22px;
+
+            border-radius: 12px;
+
+            margin-bottom: 25px;
+
+            box-shadow:
+                0 2px 8px
+                rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-card h3 {
+            margin-bottom: 18px;
+            font-size: 16px;
+        }
+
+        .filter-form {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 15px;
+
+            align-items: end;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .field label {
+
+            font-size: 12px;
+
+            color: #6b7280;
+
+            font-weight: bold;
+        }
+
+        .field select,
+        .field input {
+
+            height: 42px;
+
+            padding: 0 12px;
+
+            border: 1px solid #d1d5db;
+
+            border-radius: 8px;
+
+            background: white;
+        }
+
+        .filter-button {
+
+            height: 42px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #f97316;
+            color: white;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .filter-button:hover {
+            background: #ea580c;
+        }
+
+        .reset-link {
+
+            height: 42px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            text-decoration: none;
+
+            background: #111827;
+            color: white;
+
+            border-radius: 8px;
+
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* ========================================
+        SUMMARY
+        ======================================== */
+
+        .summary-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(5, 1fr);
+
+            gap: 18px;
+
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
+
+            background: white;
+
+            padding: 22px;
+
+            border-radius: 12px;
+
+            border-left: 4px solid #f97316;
+
+            box-shadow:
+                0 2px 8px
+                rgba(0, 0, 0, 0.05);
+        }
+
+        .summary-label {
+
+            font-size: 12px;
+
+            font-weight: bold;
+
+            color: #6b7280;
+
+            text-transform: uppercase;
+
+            margin-bottom: 10px;
+        }
+
+        .summary-value {
+
+            font-size: 28px;
+
+            font-weight: bold;
+
+            color: #111827;
+        }
+
+        /* ========================================
+        REPORT INFORMATION
+        ======================================== */
+
+        .report-info {
+
+            background: white;
+
+            padding: 20px;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 2px 8px
+                rgba(0, 0, 0, 0.05);
+        }
+
+        .report-info h3 {
+            margin-bottom: 15px;
+        }
+
+        .info-row {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 25px;
+
+            font-size: 14px;
+        }
+
+        .info-item {
+            color: #6b7280;
+        }
+
+        .info-item strong {
+            color: #111827;
+        }
+
+        /* ========================================
+        RESPONSIVE
+        ======================================== */
+
+        @media (
+            max-width: 1100px
+        ) {
+
+            .summary-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .filter-form {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+        }
+
+        @media (
+            max-width: 768px
+        ) {
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-form {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- ========================================
+    SIDEBAR
+    ======================================== -->
+
+    <div class="sidebar">
+
+        <div class="logo">
+            MCTI <span>Technologies</span>
+        </div>
+
+        <div class="sidebar-subtitle">
+            Management System
+        </div>
+
+        <a href="{% url 'management_dashboard' %}">
+            Dashboard
+        </a>
+
+        <a href="{% url 'branch_dashboard' %}">
+            Branch Performance
+        </a>
+
+        <a href="{% url 'enquiry_dashboard' %}">
+            Enquiries
+        </a>
+
+        <a href="{% url 'admission_list' %}">
+            Admissions
+        </a>
+
+        <a href="{% url 'student_list' %}">
+            Students
+        </a>
+
+        <a href="{% url 'fee_payment_list' %}">
+            Fee Payments
+        </a>
+
+        <a href="{% url 'staff_list' %}">
+            Staff
+        </a>
+
+        <a
+            href="{% url 'reports_dashboard' %}"
+            class="active"
+        >
+            Reports
+        </a>
+
+        {% if request.user.is_superuser %}
+
+            <a href="/admin/">
+                Django Backend
+            </a>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- ========================================
+    MAIN
+    ======================================== -->
+
+    <div class="main">
+
+        <div class="topbar">
+
+            <div class="topbar-title">
+                Reports Dashboard
+            </div>
+
+            <div class="user-area">
+
+                <span>
+                    {{ request.user.username }}
+                </span>
+
+                <a
+                    href="{% url 'staff_logout' %}"
+                    class="logout-btn"
+                >
+                    Logout
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="content">
+
+            <!-- ========================================
+            HEADER
+            ======================================== -->
+
+            <div class="page-header">
+
+                <h1>
+                    Reports & Analytics
+                </h1>
+
+                <p>
+                    Analyse enquiries, admissions,
+                    collections and conversion performance.
+                </p>
+
+            </div>
+
+
+            <!-- ========================================
+            FILTER
+            ======================================== -->
+
+            <div class="filter-card">
+
+                <h3>
+                    Report Filter
+                </h3>
+
+                <form
+                    method="get"
+                    class="filter-form"
+                >
+
+                    <div class="field">
+
+                        <label>
+                            Branch
+                        </label>
+
+                        <select name="branch">
+
+                            {% for value, label in branches %}
+
+                                <option
+                                    value="{{ value }}"
+                                    {% if branch_filter == value %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ label }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Period
+                        </label>
+
+                        <select name="date_filter">
+
+                            <option
+                                value="all"
+                                {% if date_filter == 'all' %}
+                                    selected
+                                {% endif %}
+                            >
+                                All Time
+                            </option>
+
+                            <option
+                                value="today"
+                                {% if date_filter == 'today' %}
+                                    selected
+                                {% endif %}
+                            >
+                                Today
+                            </option>
+
+                            <option
+                                value="this_month"
+                                {% if date_filter == 'this_month' %}
+                                    selected
+                                {% endif %}
+                            >
+                                This Month
+                            </option>
+
+                            <option
+                                value="last_month"
+                                {% if date_filter == 'last_month' %}
+                                    selected
+                                {% endif %}
+                            >
+                                Last Month
+                            </option>
+
+                            <option
+                                value="custom"
+                                {% if date_filter == 'custom' %}
+                                    selected
+                                {% endif %}
+                            >
+                                Custom Date
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            From Date
+                        </label>
+
+                        <input
+                            type="date"
+                            name="start_date"
+                            value="{{ custom_start }}"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            To Date
+                        </label>
+
+                        <input
+                            type="date"
+                            name="end_date"
+                            value="{{ custom_end }}"
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="filter-button"
+                    >
+                        Apply Filter
+                    </button>
+
+
+                    <a
+                        href="{% url 'reports_dashboard' %}"
+                        class="reset-link"
+                    >
+                        Reset
+                    </a>
+                    <a
+                      href="{% url 'export_reports_excel' %}?branch={{ branch_filter }}&date_filter={{ date_filter }}&start_date={{ custom_start }}&end_date={{ custom_end }}"
+                      class="reset-link"
+                      style="background:#15803d;"
+                  >
+                      Export Excel
+                  </a>
+                </form>
+
+            </div>
+
+
+            <!-- ========================================
+            SUMMARY CARDS
+            ======================================== -->
+
+            <div class="summary-grid">
+
+                <div class="summary-card">
+
+                    <div class="summary-label">
+                        Enquiries
+                    </div>
+
+                    <div class="summary-value">
+                        {{ total_enquiries }}
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-label">
+                        Converted Leads
+                    </div>
+
+                    <div class="summary-value">
+                        {{ total_converted }}
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-label">
+                        Admissions
+                    </div>
+
+                    <div class="summary-value">
+                        {{ total_admissions }}
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-label">
+                        Collection
+                    </div>
+
+                    <div class="summary-value">
+                        ₹{{ total_collection|floatformat:0 }}
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-label">
+                        Conversion
+                    </div>
+
+                    <div class="summary-value">
+                        {{ conversion_rate }}%
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================================
+            REPORT INFORMATION
+            ======================================== -->
+
+            <div class="report-info">
+
+                <h3>
+                    Current Report
+                </h3>
+
+                <div class="info-row">
+
+                    <div class="info-item">
+                        Branch:
+                        <strong>
+                            {% if branch_filter %}
+                                {{ branch_filter|title }}
+                            {% else %}
+                                All Branches
+                            {% endif %}
+                        </strong>
+                    </div>
+
+                    <div class="info-item">
+                        Period:
+                        <strong>
+                            {% if date_filter == "today" %}
+                                Today
+                            {% elif date_filter == "this_month" %}
+                                This Month
+                            {% elif date_filter == "last_month" %}
+                                Last Month
+                            {% elif date_filter == "custom" %}
+                                {{ start_date }} - {{ end_date }}
+                            {% else %}
+                                All Time
+                            {% endif %}
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================================
+            DETAILED REPORT TABLE
+            ======================================== -->
+
+            <div
+                class="report-info"
+                style="margin-top:25px;"
+            >
+
+                <h3>
+                    Detailed Report
+                </h3>
+
+                <div style="overflow-x:auto;">
+
+                    <table
+                        style="
+                            width:100%;
+                            border-collapse:collapse;
+                            min-width:900px;
+                        "
+                    >
+
+                        <thead>
+
+                            <tr
+                                style="
+                                    background:#111827;
+                                    color:white;
+                                    text-align:left;
+                                "
+                            >
+                                <th style="padding:12px;">Date</th>
+                                <th style="padding:12px;">Name</th>
+                                <th style="padding:12px;">Course</th>
+                                <th style="padding:12px;">Branch</th>
+                                <th style="padding:12px;">Type</th>
+                                <th style="padding:12px;">Status / Mode</th>
+                                <th style="padding:12px;">Amount</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for row in report_rows %}
+
+                                <tr style="border-bottom:1px solid #e5e7eb;">
+
+                                    <td style="padding:12px;">
+                                        {{ row.date|date:"d M Y" }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ row.name }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ row.course }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ row.branch }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+
+                                        {% if row.type == "Enquiry" %}
+
+                                            <span
+                                                style="
+                                                    background:#dbeafe;
+                                                    color:#1d4ed8;
+                                                    padding:5px 9px;
+                                                    border-radius:6px;
+                                                    font-size:12px;
+                                                    font-weight:bold;
+                                                "
+                                            >
+                                                Enquiry
+                                            </span>
+
+                                        {% elif row.type == "Admission" %}
+
+                                            <span
+                                                style="
+                                                    background:#dcfce7;
+                                                    color:#15803d;
+                                                    padding:5px 9px;
+                                                    border-radius:6px;
+                                                    font-size:12px;
+                                                    font-weight:bold;
+                                                "
+                                            >
+                                                Admission
+                                            </span>
+
+                                        {% else %}
+
+                                            <span
+                                                style="
+                                                    background:#ffedd5;
+                                                    color:#c2410c;
+                                                    padding:5px 9px;
+                                                    border-radius:6px;
+                                                    font-size:12px;
+                                                    font-weight:bold;
+                                                "
+                                            >
+                                                Collection
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ row.status }}
+                                    </td>
+
+                                    <td
+                                        style="
+                                            padding:12px;
+                                            font-weight:bold;
+                                        "
+                                    >
+                                        {% if row.amount != None %}
+                                            ₹{{ row.amount|floatformat:0 }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                </tr>
+
+                            {% empty %}
+
+                                <tr>
+                                    <td
+                                        colspan="7"
+                                        style="
+                                            padding:30px;
+                                            text-align:center;
+                                            color:#6b7280;
+                                        "
+                                    >
+                                        No report data found for selected filters.
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================================
+            ENQUIRY REPORT
+            ======================================== -->
+
+            <div
+                class="report-info"
+                style="margin-top:25px;"
+            >
+
+                <h3>
+                    Enquiry Report
+                </h3>
+
+                <div style="overflow-x:auto;">
+
+                    <table
+                        style="
+                            width:100%;
+                            border-collapse:collapse;
+                            min-width:1100px;
+                        "
+                    >
+
+                        <thead>
+                            <tr
+                                style="
+                                    background:#111827;
+                                    color:#ffffff;
+                                    text-align:left;
+                                "
+                            >
+                                <th style="padding:12px;">Date</th>
+                                <th style="padding:12px;">Lead Name</th>
+                                <th style="padding:12px;">Mobile</th>
+                                <th style="padding:12px;">Course</th>
+                                <th style="padding:12px;">Branch</th>
+                                <th style="padding:12px;">Assigned Staff</th>
+                                <th style="padding:12px;">Status</th>
+                                <th style="padding:12px;">Follow-up Date</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for enquiry in enquiry_report %}
+
+                                <tr style="border-bottom:1px solid #e5e7eb;">
+
+                                    <td style="padding:12px;">
+                                        {{ enquiry.created_at|date:"d M Y" }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ enquiry.name }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ enquiry.mobile }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {% if enquiry.course %}
+                                            {{ enquiry.course.title }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ enquiry.branch|default:"-" }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {% if enquiry.assigned_user %}
+                                            {{ enquiry.assigned_user.get_full_name|default:enquiry.assigned_user.username }}
+                                        {% else %}
+                                            Not Assigned
+                                        {% endif %}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ enquiry.get_status_display }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {% if enquiry.followup_date %}
+                                            {{ enquiry.followup_date|date:"d M Y" }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                </tr>
+
+                            {% empty %}
+
+                                <tr>
+                                    <td
+                                        colspan="8"
+                                        style="
+                                            padding:25px;
+                                            text-align:center;
+                                            color:#6b7280;
+                                        "
+                                    >
+                                        No enquiry records found.
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================================
+            ADMISSION REPORT
+            ======================================== -->
+
+            <div
+                class="report-info"
+                style="margin-top:25px;"
+            >
+
+                <h3>
+                    Admission Report
+                </h3>
+
+                <div style="overflow-x:auto;">
+
+                    <table
+                        style="
+                            width:100%;
+                            border-collapse:collapse;
+                            min-width:1200px;
+                        "
+                    >
+
+                        <thead>
+                            <tr
+                                style="
+                                    background:#111827;
+                                    color:#ffffff;
+                                    text-align:left;
+                                "
+                            >
+                                <th style="padding:12px;">Admission No</th>
+                                <th style="padding:12px;">Date</th>
+                                <th style="padding:12px;">Student</th>
+                                <th style="padding:12px;">Course</th>
+                                <th style="padding:12px;">Branch</th>
+                                <th style="padding:12px;">Total Fee</th>
+                                <th style="padding:12px;">Paid</th>
+                                <th style="padding:12px;">Balance</th>
+                                <th style="padding:12px;">Status</th>
+                                <th style="padding:12px;">Created By</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for admission in admission_report %}
+
+                                <tr style="border-bottom:1px solid #e5e7eb;">
+
+                                    <td style="padding:12px;">
+                                        {{ admission.admission_number }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ admission.admission_date|date:"d M Y" }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ admission.student_name }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {% if admission.course %}
+                                            {{ admission.course.title }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ admission.branch|default:"-" }}
+                                    </td>
+
+                                    <td style="padding:12px; font-weight:bold;">
+                                        ₹{{ admission.total_fee|floatformat:0 }}
+                                    </td>
+
+                                    <td style="padding:12px; font-weight:bold;">
+                                        ₹{{ admission.paid_fee|floatformat:0 }}
+                                    </td>
+
+                                    <td style="padding:12px; font-weight:bold;">
+                                        ₹{{ admission.balance_fee|floatformat:0 }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ admission.get_payment_status_display }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {% if admission.created_by %}
+                                            {{ admission.created_by.get_full_name|default:admission.created_by.username }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                </tr>
+
+                            {% empty %}
+
+                                <tr>
+                                    <td
+                                        colspan="10"
+                                        style="
+                                            padding:25px;
+                                            text-align:center;
+                                            color:#6b7280;
+                                        "
+                                    >
+                                        No admission records found.
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================================
+            COLLECTION REPORT
+            ======================================== -->
+
+            <div
+                class="report-info"
+                style="margin-top:25px;"
+            >
+
+                <h3>
+                    Collection Report
+                </h3>
+
+                <div style="overflow-x:auto;">
+
+                    <table
+                        style="
+                            width:100%;
+                            border-collapse:collapse;
+                            min-width:1100px;
+                        "
+                    >
+
+                        <thead>
+                            <tr
+                                style="
+                                    background:#111827;
+                                    color:#ffffff;
+                                    text-align:left;
+                                "
+                            >
+                                <th style="padding:12px;">Receipt No</th>
+                                <th style="padding:12px;">Date</th>
+                                <th style="padding:12px;">Student</th>
+                                <th style="padding:12px;">Course</th>
+                                <th style="padding:12px;">Branch</th>
+                                <th style="padding:12px;">Amount</th>
+                                <th style="padding:12px;">Payment Mode</th>
+                                <th style="padding:12px;">Collected By</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for payment in collection_report %}
+
+                                <tr style="border-bottom:1px solid #e5e7eb;">
+
+                                    <td style="padding:12px;">
+                                        {{ payment.receipt_number }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ payment.payment_date|date:"d M Y" }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ payment.student.name }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {% if payment.student.course %}
+                                            {{ payment.student.course.title }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ payment.student.branch|default:"-" }}
+                                    </td>
+
+                                    <td style="padding:12px; font-weight:bold;">
+                                        ₹{{ payment.amount|floatformat:0 }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {{ payment.get_payment_mode_display }}
+                                    </td>
+
+                                    <td style="padding:12px;">
+                                        {% if payment.collected_by %}
+                                            {{ payment.collected_by.get_full_name|default:payment.collected_by.username }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                </tr>
+
+                            {% empty %}
+
+                                <tr>
+                                    <td
+                                        colspan="8"
+                                        style="
+                                            padding:25px;
+                                            text-align:center;
+                                            color:#6b7280;
+                                        "
+                                    >
+                                        No collection records found.
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

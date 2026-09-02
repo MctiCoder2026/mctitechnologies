@@ -1,0 +1,110 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Staff Login | MCTI Technologies
+{% endblock %}
+
+{% block content %}
+
+<section class="mcti-dashboard">
+
+    <div class="mcti-dashboard-container">
+
+        <div class="mcti-detail-card"
+             style="max-width:500px; margin:60px auto;">
+
+            <div class="mcti-detail-card-header">
+
+                <span>
+                    MCTI TECHNOLOGIES
+                </span>
+
+                <h2>
+                    Staff Login
+                </h2>
+
+                <p>
+                    Login to access Lead Management.
+                </p>
+
+            </div>
+
+
+            {% if form.errors %}
+
+                <div style="
+                    padding:12px;
+                    margin-bottom:20px;
+                    background:#ffe5e5;
+                    border-radius:8px;
+                    color:#b00020;
+                ">
+
+                    Username or password is incorrect.
+
+                </div>
+
+            {% endif %}
+
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+
+                <div class="mcti-message-field">
+
+                    <label for="id_username">
+                        Username
+                    </label>
+
+                    <input
+                        type="text"
+                        name="username"
+                        id="id_username"
+                        required
+                        autofocus
+                        style="width:100%;"
+                    >
+
+                </div>
+
+
+                <div class="mcti-message-field">
+
+                    <label for="id_password">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        name="password"
+                        id="id_password"
+                        required
+                        style="width:100%;"
+                    >
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="mcti-save-btn"
+                    style="width:100%;"
+                >
+
+                    Login
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}
+

@@ -1,0 +1,964 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Fee Receipt - {{ payment.receipt_number }}</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --orange: #ff6b00;
+    --orange-dark: #e85d00;
+    --orange-light: #fff3e8;
+
+    --black: #111111;
+    --white: #ffffff;
+
+    --bg: #f4f4f4;
+    --border: #e5e5e5;
+    --muted: #777777;
+
+    --green: #198754;
+    --green-light: #eaf7ef;
+}
+
+body {
+    margin: 0;
+    padding: 30px;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--black);
+}
+
+.page {
+    max-width: 950px;
+    margin: auto;
+}
+
+/* =========================
+   TOP ACTION
+========================= */
+
+.actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.back-btn,
+.print-btn {
+    border: none;
+    text-decoration: none;
+    padding: 11px 18px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.back-btn {
+    background: var(--white);
+    color: var(--black);
+    border: 1px solid var(--border);
+}
+
+.back-btn:hover {
+    border-color: var(--orange);
+    color: var(--orange);
+}
+
+.print-btn {
+    background: var(--orange);
+    color: var(--white);
+}
+
+.print-btn:hover {
+    background: var(--orange-dark);
+}
+
+/* =========================
+   RECEIPT
+========================= */
+
+.receipt {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+    padding: 26px 32px;
+    border-left: 6px solid var(--orange);
+    border-bottom: 1px solid var(--border);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 25px;
+}
+
+.logo-text {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: .5px;
+}
+
+.logo-mcti {
+    color: var(--orange);
+}
+
+.logo-tech {
+    color: var(--black);
+}
+
+.institute-name {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.tagline {
+    margin-top: 8px;
+    color: var(--orange);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+/* =========================
+   RECEIPT NUMBER
+========================= */
+
+.receipt-info {
+    text-align: right;
+}
+
+.receipt-label {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .8px;
+}
+
+.receipt-number {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 8px 13px;
+    background: var(--orange-light);
+    border-left: 4px solid var(--orange);
+    border-radius: 6px;
+    font-size: 17px;
+    font-weight: 900;
+}
+
+.receipt-date {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+/* =========================
+   TITLE
+========================= */
+
+.receipt-title {
+    text-align: center;
+    padding: 22px 20px;
+    background: #fafafa;
+    border-bottom: 1px solid var(--border);
+}
+
+.receipt-title h2 {
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: 2px;
+}
+
+.receipt-title p {
+    margin: 7px 0 0;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+/* =========================
+   SECTION
+========================= */
+
+.section {
+    padding: 25px 32px 0;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 14px;
+    padding-bottom: 9px;
+
+    border-bottom: 1px solid var(--border);
+
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .8px;
+}
+
+.section-title::before {
+    content: "";
+    width: 4px;
+    height: 16px;
+    background: var(--orange);
+    border-radius: 2px;
+}
+
+/* =========================
+   STUDENT DETAILS
+========================= */
+
+.student-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.field {
+    padding: 13px;
+    background: #fafafa;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.field-label {
+    display: block;
+    margin-bottom: 6px;
+
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+}
+
+.field-value {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* =========================
+   PAYMENT TABLE
+========================= */
+
+.payment-table {
+    width: 100%;
+    border-collapse: collapse;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.payment-table th {
+    padding: 12px;
+    background: var(--black);
+    color: var(--white);
+
+    text-align: left;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+}
+
+.payment-table td {
+    padding: 14px 12px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+}
+
+.payment-table th:last-child,
+.payment-table td:last-child {
+    text-align: right;
+}
+
+.amount {
+    color: var(--orange);
+    font-size: 15px !important;
+    font-weight: 900;
+}
+
+/* =========================
+   FEE SUMMARY
+========================= */
+
+.summary {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 18px;
+}
+
+.summary-box {
+    width: 360px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+
+    padding: 11px 15px;
+
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+}
+
+.summary-row span:last-child {
+    font-weight: 800;
+}
+
+.summary-row.current {
+    background: var(--orange-light);
+    border-left: 4px solid var(--orange);
+}
+
+.summary-row.total {
+    background: #fafafa;
+}
+
+.summary-row.balance {
+    background: var(--orange);
+    color: var(--white);
+    border-bottom: none;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.summary-row.balance span:last-child {
+    font-size: 17px;
+}
+
+/* =========================
+   STATUS
+========================= */
+
+.status-box {
+    text-align: right;
+    margin-top: 15px;
+}
+
+.status {
+    display: inline-block;
+    padding: 7px 15px;
+
+    background: var(--green-light);
+    color: var(--green);
+
+    border: 1px solid #c9ead6;
+    border-radius: 20px;
+
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer {
+    padding: 28px 32px 32px;
+}
+
+.remarks {
+    margin-bottom: 45px;
+    padding: 12px 14px;
+
+    background: var(--orange-light);
+    border-left: 4px solid var(--orange);
+    border-radius: 6px;
+
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.remarks strong {
+    color: var(--black);
+}
+
+.signatures {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.signature {
+    width: 200px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.signature-line {
+    border-top: 1px solid var(--black);
+    margin-bottom: 7px;
+}
+
+.thank-you {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 15px;
+
+    border-top: 1px solid var(--border);
+
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.thank-you strong {
+    color: var(--orange);
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 700px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .actions {
+        gap: 10px;
+    }
+
+    .back-btn,
+    .print-btn {
+        flex: 1;
+        text-align: center;
+    }
+
+    .header {
+        padding: 22px 20px;
+    }
+
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .receipt-info {
+        text-align: left;
+    }
+
+    .logo-text {
+        font-size: 25px;
+    }
+
+    .section {
+        padding: 20px;
+    }
+
+    .student-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .summary {
+        justify-content: stretch;
+    }
+
+    .summary-box {
+        width: 100%;
+    }
+
+    .footer {
+        padding: 25px 20px;
+    }
+
+}
+
+/* =========================
+   PRINT
+========================= */
+
+@media print {
+
+    @page {
+        size: A4;
+        margin: 10mm;
+    }
+
+    body {
+        padding: 0;
+        background: white;
+    }
+
+    .page {
+        max-width: none;
+    }
+
+    .actions {
+        display: none;
+    }
+
+    .receipt {
+        box-shadow: none;
+        border-radius: 0;
+    }
+
+    .header,
+    .payment-table th,
+    .summary-row.balance,
+    .summary-row.current,
+    .field,
+    .status,
+    .remarks,
+    .receipt-number {
+
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="page">
+
+<!-- =========================
+     ACTIONS
+========================= -->
+
+<div class="actions">
+
+
+<a
+    href="{% url 'fee_payment_list' %}"
+    class="back-btn"
+>
+    ← Fee Payments
+</a>
+
+<button
+    class="print-btn"
+    onclick="window.print()"
+>
+    🖨 Print Receipt
+</button>
+
+
+</div>
+
+<!-- =========================
+     RECEIPT
+========================= -->
+
+<div class="receipt">
+
+<!-- HEADER -->
+
+<div class="header">
+
+
+<div class="header-content">
+
+    <div>
+
+        <h1 class="logo-text">
+
+            <span class="logo-mcti">
+                MCTI
+            </span>
+
+            <span class="logo-tech">
+                Technologies
+            </span>
+
+        </h1>
+
+        <p class="institute-name">
+            Maharashtra Computer Training Institute
+        </p>
+
+        <div class="tagline">
+            Education • Skills • Careers
+        </div>
+
+    </div>
+
+
+    <div class="receipt-info">
+
+        <div class="receipt-label">
+            RECEIPT NUMBER
+        </div>
+
+        <div class="receipt-number">
+            {{ payment.receipt_number }}
+        </div>
+
+        <div class="receipt-date">
+            Date: {{ payment.payment_date }}
+        </div>
+
+    </div>
+
+</div>
+
+
+</div>
+
+<!-- TITLE -->
+
+<div class="receipt-title">
+
+
+<h2>
+    FEE RECEIPT
+</h2>
+
+<p>
+    Official Payment Acknowledgement
+</p>
+
+
+</div>
+
+<!-- STUDENT -->
+
+<div class="section">
+
+
+<div class="section-title">
+    STUDENT DETAILS
+</div>
+
+
+<div class="student-grid">
+
+    <div class="field">
+
+        <span class="field-label">
+            Student ID
+        </span>
+
+        <span class="field-value">
+            {{ payment.student.student_id }}
+        </span>
+
+    </div>
+
+
+    <div class="field">
+
+        <span class="field-label">
+            Student Name
+        </span>
+
+        <span class="field-value">
+            {{ payment.student.name }}
+        </span>
+
+    </div>
+
+
+    <div class="field">
+
+        <span class="field-label">
+            Mobile
+        </span>
+
+        <span class="field-value">
+            {{ payment.student.mobile }}
+        </span>
+
+    </div>
+
+
+    <div class="field">
+
+        <span class="field-label">
+            Course
+        </span>
+
+        <span class="field-value">
+
+            {% if payment.student.course %}
+                {{ payment.student.course.title }}
+            {% else %}
+                -
+            {% endif %}
+
+        </span>
+
+    </div>
+
+
+    <div class="field">
+
+        <span class="field-label">
+            Branch
+        </span>
+
+        <span class="field-value">
+            {{ payment.student.branch|default:"-" }}
+        </span>
+
+    </div>
+
+
+    <div class="field">
+
+        <span class="field-label">
+            Admission Number
+        </span>
+
+        <span class="field-value">
+
+            {% if payment.student.admission %}
+                {{ payment.student.admission.admission_number }}
+            {% else %}
+                -
+            {% endif %}
+
+        </span>
+
+    </div>
+
+</div>
+
+
+</div>
+
+<!-- PAYMENT -->
+
+<div class="section">
+
+```
+<div class="section-title">
+    PAYMENT DETAILS
+</div>
+
+
+<table class="payment-table">
+
+    <thead>
+
+        <tr>
+
+            <th>Description</th>
+
+            <th>Payment Mode</th>
+
+            <th>Transaction ID</th>
+
+            <th>Amount</th>
+
+        </tr>
+
+    </thead>
+
+
+    <tbody>
+
+        <tr>
+
+            <td>
+                Course Fee Payment
+            </td>
+
+            <td>
+                {{ payment.get_payment_mode_display }}
+            </td>
+
+            <td>
+                {{ payment.transaction_id|default:"-" }}
+            </td>
+
+            <td class="amount">
+                ₹{{ payment.amount }}
+            </td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+
+<!-- SUMMARY -->
+
+<div class="summary">
+
+    <div class="summary-box">
+
+        <div class="summary-row">
+
+            <span>
+                Previous Paid
+            </span>
+
+            <span>
+                ₹{{ payment.previous_paid }}
+            </span>
+
+        </div>
+
+
+        <div class="summary-row current">
+
+            <span>
+                Current Payment
+            </span>
+
+            <span>
+                ₹{{ payment.amount }}
+            </span>
+
+        </div>
+
+
+        <div class="summary-row total">
+
+            <span>
+                Total Paid
+            </span>
+
+            <span>
+                ₹{{ payment.previous_paid|add:payment.amount }}
+            </span>
+
+        </div>
+
+
+        <div class="summary-row balance">
+
+            <span>
+                Balance Fee
+            </span>
+
+            <span>
+                ₹{{ payment.balance_after_payment }}
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- STATUS -->
+
+<div class="status-box">
+
+    {% if payment.balance_after_payment <= 0 %}
+
+        <span class="status">
+            ✓ Fully Paid
+        </span>
+
+    {% else %}
+
+        <span class="status">
+            ✓ Payment Received
+        </span>
+
+    {% endif %}
+
+</div>
+
+
+</div>
+
+<!-- FOOTER -->
+
+<div class="footer">
+
+
+{% if payment.remarks %}
+
+    <div class="remarks">
+
+        <strong>
+            Remarks:
+        </strong>
+
+        {{ payment.remarks }}
+
+    </div>
+
+{% endif %}
+
+
+<div class="signatures">
+
+    <div class="signature">
+
+        <div class="signature-line"></div>
+
+        Student Signature
+
+    </div>
+
+
+    <div class="signature">
+
+        <div class="signature-line"></div>
+
+        Authorized Signature
+
+    </div>
+
+</div>
+
+
+<div class="thank-you">
+
+    Thank you for choosing
+    <strong>MCTI Technologies</strong>.
+
+</div>
+
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,166 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Contact Us | MCTI Technologies
+{% endblock %}
+
+{% block content %}
+
+<section class="mcti-contact-page">
+
+    <div class="mcti-contact-container">
+
+        <!-- LEFT -->
+
+        <div class="mcti-contact-left">
+
+            <span class="mcti-contact-label">
+                GET IN TOUCH
+            </span>
+
+            <h1>
+                Let's Build Something
+                <span>Great Together.</span>
+            </h1>
+
+            <p class="mcti-contact-description">
+                Have a question about our courses, IT solutions,
+                AI services or SaaS products? Send us an enquiry
+                and our team will get back to you.
+            </p>
+
+            <div class="mcti-contact-details">
+
+                <div class="mcti-contact-detail">
+                    <div class="mcti-contact-icon">📞</div>
+
+                    <div>
+                        <small>CALL US</small>
+                        <strong>+91 XXXXX XXXXX</strong>
+                    </div>
+                </div>
+
+                <div class="mcti-contact-detail">
+                    <div class="mcti-contact-icon">✉️</div>
+
+                    <div>
+                        <small>EMAIL US</small>
+                        <strong>info@mctitechnologies.com</strong>
+                    </div>
+                </div>
+
+                <div class="mcti-contact-detail">
+                    <div class="mcti-contact-icon">📍</div>
+
+                    <div>
+                        <small>HEAD OFFICE</small>
+                        <strong>Kharghar, Navi Mumbai</strong>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- RIGHT -->
+
+        <div class="mcti-contact-card">
+
+            <div class="mcti-contact-card-heading">
+
+                <span>ENQUIRY FORM</span>
+
+                <h2>
+                    Tell Us How We Can Help
+                </h2>
+
+                <p>
+                    Fill in your details and our team will contact you.
+                </p>
+
+            </div>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <div class="mcti-form-row">
+
+                    <div class="mcti-form-group">
+
+                        <label>Name</label>
+
+                        {{ form.name }}
+
+                    </div>
+
+                    <div class="mcti-form-group">
+
+                        <label>Mobile Number</label>
+
+                        {{ form.mobile }}
+
+                    </div>
+
+                </div>
+
+
+                <div class="mcti-form-group">
+
+                    <label>Email</label>
+
+                    {{ form.email }}
+
+                </div>
+
+
+                <div class="mcti-form-row">
+
+                    <div class="mcti-form-group">
+
+                        <label>Interested Course</label>
+
+                        {{ form.course }}
+
+                    </div>
+
+                    <div class="mcti-form-group">
+
+                        <label>Preferred Branch</label>
+
+                        {{ form.branch }}
+
+                    </div>
+
+                </div>
+
+
+                <div class="mcti-form-group">
+
+                    <label>Message</label>
+
+                    {{ form.message }}
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="mcti-contact-submit">
+
+                    Send Enquiry →
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}
+

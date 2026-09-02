@@ -1,0 +1,940 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Students | MCTI Management</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --primary:#ff6b00;
+    --primary-dark:#e85d00;
+    --primary-light:#fff2e8;
+
+    --dark:#111827;
+    --bg:#f5f7fb;
+    --white:#ffffff;
+
+    --border:#e5e7eb;
+    --muted:#6b7280;
+
+    --green:#16a34a;
+    --blue:#2563eb;
+    --red:#dc2626;
+    --yellow:#d97706;
+}
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--bg);
+    color:var(--dark);
+}
+
+.dashboard{
+    display:flex;
+    min-height:100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:250px;
+    background:var(--dark);
+    color:white;
+    padding:24px 18px;
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+}
+
+.logo{
+    margin-bottom:35px;
+}
+
+.logo h2{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.logo h2 span{
+    color:var(--primary);
+}
+
+.logo p{
+    font-size:11px;
+    color:#9ca3af;
+}
+
+.menu-title{
+    font-size:10px;
+    color:#6b7280;
+    letter-spacing:1px;
+    margin:22px 10px 10px;
+}
+
+.menu a{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    text-decoration:none;
+    color:#d1d5db;
+    padding:12px 13px;
+    border-radius:9px;
+    margin-bottom:6px;
+    font-size:13px;
+    font-weight:700;
+    transition:0.2s;
+}
+
+.menu a:hover{
+    background:#2b3545;
+    color:white;
+}
+
+.menu a.active{
+    background:var(--primary);
+    color:white;
+}
+
+.admin-link{
+    margin-top:25px;
+    border-top:1px solid #374151;
+    padding-top:20px;
+}
+
+/* MAIN */
+
+.main{
+    margin-left:250px;
+    width:calc(100% - 250px);
+}
+
+/* TOPBAR */
+
+.topbar{
+    min-height:76px;
+    background:white;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:15px 30px;
+    position:sticky;
+    top:0;
+    z-index:10;
+}
+
+.topbar-left h1{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.topbar-left p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.topbar-right{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.user-box{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.user-avatar{
+    width:39px;
+    height:39px;
+    border-radius:50%;
+    background:var(--primary);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+}
+
+.user-info strong{
+    display:block;
+    font-size:12px;
+}
+
+.user-info span{
+    font-size:10px;
+    color:var(--muted);
+}
+
+.logout-btn{
+    text-decoration:none;
+    background:#fee2e2;
+    color:var(--red);
+    padding:9px 13px;
+    border-radius:8px;
+    font-size:11px;
+    font-weight:700;
+}
+
+.logout-btn:hover{
+    background:var(--red);
+    color:white;
+}
+
+/* CONTENT */
+
+.content{
+    padding:28px;
+}
+
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:22px;
+}
+
+.page-header h2{
+    font-size:22px;
+    margin-bottom:5px;
+}
+
+.page-header p{
+    font-size:12px;
+    color:var(--muted);
+}
+
+.dashboard-btn{
+    text-decoration:none;
+    background:var(--dark);
+    color:white;
+    padding:11px 15px;
+    border-radius:9px;
+    font-size:11px;
+    font-weight:700;
+}
+
+.dashboard-btn:hover{
+    background:var(--primary);
+}
+
+/* SEARCH */
+
+.search-panel{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px;
+    margin-bottom:20px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.04);
+}
+
+.search-form{
+    display:flex;
+    gap:10px;
+}
+
+.search-form input{
+    flex:1;
+    padding:12px 14px;
+    border:1px solid var(--border);
+    border-radius:9px;
+    outline:none;
+    font-size:13px;
+}
+
+.search-form input:focus{
+    border-color:var(--primary);
+}
+
+.search-btn{
+    border:none;
+    background:var(--primary);
+    color:white;
+    padding:12px 20px;
+    border-radius:9px;
+    cursor:pointer;
+    font-weight:700;
+}
+
+.search-btn:hover{
+    background:var(--primary-dark);
+}
+
+.clear-btn{
+    text-decoration:none;
+    background:#f3f4f6;
+    color:var(--dark);
+    padding:12px 17px;
+    border-radius:9px;
+    font-size:12px;
+    font-weight:700;
+}
+
+/* TABLE */
+
+.table-panel{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:15px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.04);
+    overflow:hidden;
+}
+
+.table-header{
+    padding:19px 20px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.table-header h3{
+    font-size:15px;
+}
+
+.table-header span{
+    color:var(--muted);
+    font-size:11px;
+}
+
+.table-responsive{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1150px;
+}
+
+thead{
+    background:#f9fafb;
+}
+
+th{
+    padding:13px 15px;
+    text-align:left;
+    color:var(--muted);
+    font-size:10px;
+    border-bottom:1px solid var(--border);
+}
+
+td{
+    padding:15px;
+    border-bottom:1px solid #f0f1f3;
+    font-size:12px;
+    vertical-align:middle;
+}
+
+tbody tr:hover{
+    background:#fffaf6;
+}
+
+.student-id{
+    font-weight:800;
+    color:var(--primary);
+}
+
+.student-name{
+    font-weight:700;
+}
+
+.small-text{
+    display:block;
+    margin-top:4px;
+    color:var(--muted);
+    font-size:10px;
+}
+
+.status{
+    display:inline-block;
+    padding:6px 9px;
+    border-radius:20px;
+    font-size:10px;
+    font-weight:800;
+}
+
+.status-active{
+    background:#dcfce7;
+    color:var(--green);
+}
+
+.status-completed{
+    background:#dbeafe;
+    color:var(--blue);
+}
+
+.status-dropout{
+    background:#fee2e2;
+    color:var(--red);
+}
+
+.payment-paid{
+    color:var(--green);
+    font-weight:700;
+}
+
+.payment-partial{
+    color:var(--yellow);
+    font-weight:700;
+}
+
+.payment-pending{
+    color:var(--red);
+    font-weight:700;
+}
+
+.actions{
+    display:flex;
+    gap:7px;
+}
+
+.view-btn{
+    text-decoration:none;
+    background:var(--dark);
+    color:white;
+    padding:8px 11px;
+    border-radius:7px;
+    font-size:10px;
+    font-weight:700;
+}
+
+.view-btn:hover{
+    background:var(--primary);
+}
+
+.payment-btn{
+    text-decoration:none;
+    background:var(--primary-light);
+    color:var(--primary);
+    padding:8px 11px;
+    border-radius:7px;
+    font-size:10px;
+    font-weight:700;
+}
+
+.payment-btn:hover{
+    background:var(--primary);
+    color:white;
+}
+
+.history-btn{
+    text-decoration:none;
+    background:#eef2ff;
+    color:var(--blue);
+    padding:8px 11px;
+    border-radius:7px;
+    font-size:10px;
+    font-weight:700;
+}
+
+/* EMPTY */
+
+.empty{
+    padding:50px 20px;
+    text-align:center;
+}
+
+.empty-icon{
+    font-size:40px;
+    margin-bottom:12px;
+}
+
+.empty h3{
+    font-size:16px;
+    margin-bottom:6px;
+}
+
+.empty p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+/* MOBILE */
+
+@media(max-width:900px){
+
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+    }
+}
+
+@media(max-width:650px){
+
+    .content{
+        padding:15px;
+    }
+
+    .topbar{
+        padding:13px 15px;
+    }
+
+    .user-info{
+        display:none;
+    }
+
+    .page-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:12px;
+    }
+
+    .search-form{
+        flex-direction:column;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="dashboard">
+
+<aside class="sidebar">
+
+    <div class="logo">
+        <h2>
+            <span>MCTI</span> Technologies
+        </h2>
+        <p>Management System</p>
+    </div>
+
+    <div class="menu">
+
+        <div class="menu-title">MAIN</div>
+
+        <a href="{% url 'management_dashboard' %}">
+            🏠 Dashboard
+        </a>
+
+        <a href="{% url 'enquiry_dashboard' %}">
+            📞 Enquiries
+        </a>
+
+        <a href="{% url 'fee_payment_list' %}">
+            💳 Fee Payments
+        </a>
+
+        <div class="menu-title">MANAGEMENT</div>
+
+        <a href="{% url 'admission_list' %}">
+            🎓 Admissions
+        </a>
+
+        <a href="{% url 'student_list' %}" class="active">
+            👨‍🎓 Students
+        </a>
+
+        <a href="#">
+            👥 Staff
+        </a>
+
+        <a href="#">
+            📊 Reports
+        </a>
+
+        {% if request.user.is_superuser %}
+
+        <div class="admin-link">
+
+            <a href="/admin/">
+                ⚙️ Django Backend
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</aside>
+
+
+<main class="main">
+
+    <div class="topbar">
+
+        <div class="topbar-left">
+
+            <h1>
+                Students
+            </h1>
+
+            <p>
+                MCTI Student Management
+            </p>
+
+        </div>
+
+        <div class="topbar-right">
+
+            <div class="user-box">
+
+                <div class="user-avatar">
+                    {{ request.user.username|first|upper }}
+                </div>
+
+                <div class="user-info">
+
+                    <strong>
+                        {{ request.user.username }}
+                    </strong>
+
+                    <span>
+                        {% if request.user.is_superuser %}
+                            Administrator
+                        {% else %}
+                            Staff
+                        {% endif %}
+                    </span>
+
+                </div>
+
+            </div>
+
+            <a
+                href="{% url 'staff_logout' %}"
+                class="logout-btn"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="content">
+
+        <div class="page-header">
+
+            <div>
+
+                <h2>
+                    👨‍🎓 Students List
+                </h2>
+
+                <p>
+                    Search and manage enrolled MCTI students.
+                </p>
+
+            </div>
+
+            <a
+                href="{% url 'management_dashboard' %}"
+                class="dashboard-btn"
+            >
+                ← Dashboard
+            </a>
+
+        </div>
+
+
+        <div class="search-panel">
+
+            <form
+                method="GET"
+                class="search-form"
+            >
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search }}"
+                    placeholder="Search Student ID, Name, Mobile, Email, Course or Branch..."
+                >
+
+                <button
+                    type="submit"
+                    class="search-btn"
+                >
+                    🔍 Search
+                </button>
+
+                {% if search %}
+
+                <a
+                    href="{% url 'student_list' %}"
+                    class="clear-btn"
+                >
+                    Clear
+                </a>
+
+                {% endif %}
+
+            </form>
+
+        </div>
+
+
+        <div class="table-panel">
+
+            <div class="table-header">
+
+                <h3>
+                    Enrolled Students
+                </h3>
+
+                <span>
+                    {{ students|length }} record{{ students|length|pluralize }}
+                </span>
+
+            </div>
+
+
+            {% if students %}
+
+            <div class="table-responsive">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>STUDENT ID</th>
+                            <th>STUDENT</th>
+                            <th>COURSE</th>
+                            <th>BRANCH</th>
+                            <th>JOINING DATE</th>
+                            <th>STATUS</th>
+                            <th>TOTAL FEE</th>
+                            <th>PAID</th>
+                            <th>BALANCE</th>
+                            <th>PAYMENT</th>
+                            <th>ACTION</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for student in students %}
+
+                        <tr>
+
+                            <td>
+
+                                <span class="student-id">
+                                    {{ student.student_id }}
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="student-name">
+                                    {{ student.name }}
+                                </span>
+
+                                <span class="small-text">
+                                    {{ student.mobile }}
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                {% if student.course %}
+                                    {{ student.course.title }}
+                                {% else %}
+                                    Not Assigned
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+                                {{ student.branch|default:"-" }}
+                            </td>
+
+
+                            <td>
+                                {{ student.joining_date|date:"d M Y" }}
+                            </td>
+
+
+                            <td>
+
+                                {% if student.status == "active" %}
+
+                                    <span class="status status-active">
+                                        Active
+                                    </span>
+
+                                {% elif student.status == "completed" %}
+
+                                    <span class="status status-completed">
+                                        Completed
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="status status-dropout">
+                                        {{ student.status|title }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            {% if student.admission %}
+
+                                <td>
+                                    ₹{{ student.admission.total_fee|floatformat:0 }}
+                                </td>
+
+                                <td>
+                                    ₹{{ student.admission.paid_fee|floatformat:0 }}
+                                </td>
+
+                                <td>
+                                    <strong>
+                                        ₹{{ student.admission.balance_fee|floatformat:0 }}
+                                    </strong>
+                                </td>
+
+
+                                <td>
+
+                                    {% if student.admission.payment_status == "paid" %}
+
+                                        <span class="payment-paid">
+                                            Fully Paid
+                                        </span>
+
+                                    {% elif student.admission.payment_status == "partial" %}
+
+                                        <span class="payment-partial">
+                                            Partial
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="payment-pending">
+                                            Pending
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            {% else %}
+
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+
+                            {% endif %}
+
+
+                            <td>
+
+                                <div class="actions">
+
+                                    {% if student.admission %}
+
+                                    <a
+                                        href="{% url 'admission_detail' student.admission.id %}"
+                                        class="view-btn"
+                                    >
+                                        View
+                                    </a>
+
+                                    <a
+                                        href="{% url 'add_fee_payment' student.id %}"
+                                        class="payment-btn"
+                                    >
+                                        + Fee
+                                    </a>
+
+                                    <a
+                                        href="{% url 'fee_payment_list' %}?student={{ student.id }}"
+                                        class="history-btn"
+                                    >
+                                        History
+                                    </a>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div class="empty">
+
+                <div class="empty-icon">
+                    👨‍🎓
+                </div>
+
+                <h3>
+                    No Students Found
+                </h3>
+
+                <p>
+
+                    {% if search %}
+
+                        No student matched "{{ search }}".
+
+                    {% else %}
+
+                        Students will appear here after admission.
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</main>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,838 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Branch Dashboard | MCTI
+    </title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+        }
+
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: #111827;
+            color: white;
+            padding: 25px 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 35px;
+        }
+
+        .logo span {
+            color: #f97316;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #d1d5db;
+            text-decoration: none;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: #f97316;
+            color: white;
+        }
+
+        .main {
+            margin-left: 250px;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: white;
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .topbar h2 {
+            color: #111827;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logout {
+            background: #ef4444;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .page-title {
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .page-subtitle {
+            color: #6b7280;
+            margin-bottom: 25px;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        thead {
+            background: #111827;
+            color: white;
+        }
+
+        th {
+            padding: 16px;
+            text-align: left;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+        }
+
+        tbody tr:hover {
+            background: #fff7ed;
+        }
+
+        .branch-name {
+            font-weight: bold;
+            color: #111827;
+        }
+
+        .number {
+            font-weight: bold;
+        }
+
+        .collection {
+            font-weight: bold;
+            color: #15803d;
+        }
+
+        .conversion {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .good {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .average {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .low {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.summary-card {
+    background: white;
+    padding: 22px;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    border-left: 4px solid #f97316;
+}
+
+.summary-card .label {
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.summary-card .value {
+    color: #111827;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.summary-card .subtext {
+    color: #9ca3af;
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+@media (max-width: 1000px) {
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 650px) {
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.performance-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.performance-card {
+    background: white;
+    padding: 22px;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+}
+
+.performance-card.best {
+    border-left: 5px solid #22c55e;
+}
+
+.performance-card.attention {
+    border-left: 5px solid #ef4444;
+}
+
+.performance-title {
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.performance-branch {
+    font-size: 25px;
+    font-weight: bold;
+    color: #111827;
+    margin-bottom: 14px;
+}
+
+.performance-details {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.performance-details strong {
+    color: #111827;
+}
+
+@media (max-width: 800px) {
+
+    .performance-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+.filter-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.filter-bar a {
+    text-decoration: none;
+    padding: 9px 14px;
+    border-radius: 8px;
+    background: white;
+    color: #374151;
+    font-size: 13px;
+    font-weight: bold;
+    border: 1px solid #e5e7eb;
+}
+
+.filter-bar a:hover {
+    border-color: #f97316;
+    color: #f97316;
+}
+
+.filter-bar a.active {
+    background: #f97316;
+    color: white;
+    border-color: #f97316;
+}
+.custom-date-form {
+    display: flex;
+    align-items: end;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+.custom-date-form div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.custom-date-form label {
+    font-size: 12px;
+    font-weight: bold;
+    color: #6b7280;
+}
+
+.custom-date-form input {
+    padding: 9px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+}
+
+.custom-date-form button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background: #f97316;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.custom-date-form button:hover {
+    background: #ea580c;
+}
+    </style>
+
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            MCTI <span>Technologies</span>
+        </div>
+
+        <a href="{% url 'management_dashboard' %}">
+            Dashboard
+        </a>
+
+        <a
+            href="{% url 'branch_dashboard' %}"
+            class="active"
+        >
+            Branch Performance
+        </a>
+
+        <a href="{% url 'enquiry_dashboard' %}">
+            Enquiries
+        </a>
+
+        <a href="{% url 'admission_list' %}">
+            Admissions
+        </a>
+
+        <a href="{% url 'student_list' %}">
+            Students
+        </a>
+
+        <a href="{% url 'fee_payment_list' %}">
+            Fee Payments
+        </a>
+
+        <a href="{% url 'staff_list' %}">
+            Staff
+        </a>
+
+        <a href="{% url 'reports_dashboard' %}">
+            Reports
+        </a>
+
+        {% if request.user.is_superuser %}
+        <a href="/admin/">
+            Django Backend
+        </a>
+        {% endif %}
+
+    </aside>
+
+
+    <main class="main">
+
+        <div class="topbar">
+
+            <h2>
+                Branch Performance Dashboard
+            </h2>
+
+            <div class="topbar-right">
+
+                <span>
+                    {{ request.user.username }}
+                </span>
+
+                <a
+                    href="{% url 'staff_logout' %}"
+                    class="logout"
+                >
+                    Logout
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="content">
+
+            <h1 class="page-title">
+                Branch-wise Performance
+            </h1>
+
+            <p class="page-subtitle">
+                Compare enquiries, admissions,
+                collection and conversion across branches.
+            </p>
+            <div class="summary-grid">
+              <div class="filter-bar">
+
+    <a
+        href="?date_filter=all"
+        class="{% if date_filter == 'all' %}active{% endif %}"
+    >
+        All Time
+    </a>
+
+    <a
+        href="?date_filter=today"
+        class="{% if date_filter == 'today' %}active{% endif %}"
+    >
+        Today
+    </a>
+    
+
+    <a
+        href="?date_filter=this_month"
+        class="{% if date_filter == 'this_month' %}active{% endif %}"
+    >
+        This Month
+    </a>
+
+    <a
+        href="?date_filter=last_month"
+        class="{% if date_filter == 'last_month' %}active{% endif %}"
+    >
+        Last Month
+    </a>
+    <form method="get" class="custom-date-form">
+
+    <input
+        type="hidden"
+        name="date_filter"
+        value="custom"
+    >
+
+    <div>
+        <label>
+            From Date
+        </label>
+
+        <input
+            type="date"
+            name="start_date"
+            value="{{ custom_start }}"
+            required
+        >
+    </div>
+
+    <div>
+        <label>
+            To Date
+        </label>
+
+        <input
+            type="date"
+            name="end_date"
+            value="{{ custom_end }}"
+            required
+        >
+    </div>
+
+    <button type="submit">
+        Apply
+    </button>
+
+</form>
+   
+</div>
+    <div class="summary-card">
+        <div class="label">
+            Total Enquiries
+        </div>
+
+        <div class="value">
+            {{ overall_enquiries }}
+        </div>
+
+        <div class="subtext">
+            All branches combined
+        </div>
+    </div>
+
+
+    <div class="summary-card">
+        <div class="label">
+            Converted Leads
+        </div>
+
+        <div class="value">
+            {{ overall_converted }}
+        </div>
+
+        <div class="subtext">
+            Successfully converted enquiries
+        </div>
+    </div>
+
+
+    <div class="summary-card">
+        <div class="label">
+            Total Admissions
+        </div>
+
+        <div class="value">
+            {{ overall_admissions }}
+        </div>
+
+        <div class="subtext">
+            All branch admissions
+        </div>
+    </div>
+
+
+    <div class="summary-card">
+        <div class="label">
+            Total Collection
+        </div>
+
+        <div class="value">
+            ₹{{ overall_collection|floatformat:0 }}
+        </div>
+
+        <div class="subtext">
+            Actual fee collection
+        </div>
+    </div>
+
+
+    <div class="summary-card">
+        <div class="label">
+            Active Students
+        </div>
+
+        <div class="value">
+            {{ overall_active_students }}
+        </div>
+
+        <div class="subtext">
+            Currently active students
+        </div>
+    </div>
+
+
+    <div class="summary-card">
+        <div class="label">
+            Overall Conversion
+        </div>
+
+        <div class="value">
+            {{ overall_conversion_rate }}%
+        </div>
+
+        <div class="subtext">
+            Converted leads / total enquiries
+        </div>
+    </div>
+
+</div>
+<div class="performance-grid">
+
+    <!-- BEST PERFORMING BRANCH -->
+
+    <div class="performance-card best">
+
+        <div class="performance-title">
+            🏆 Best Performing Branch
+        </div>
+
+        {% if best_branch %}
+
+            <div class="performance-branch">
+                {{ best_branch.branch }}
+            </div>
+
+            <div class="performance-details">
+
+                <span>
+                    Admissions:
+                    <strong>{{ best_branch.admissions }}</strong>
+                </span>
+
+                <span>
+                    Collection:
+                    <strong>
+                        ₹{{ best_branch.collection|floatformat:0 }}
+                    </strong>
+                </span>
+
+                <span>
+                    Conversion:
+                    <strong>
+                        {{ best_branch.conversion_rate }}%
+                    </strong>
+                </span>
+
+            </div>
+
+        {% else %}
+
+            <div class="performance-branch">
+                No Data
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- NEEDS ATTENTION -->
+
+    <div class="performance-card attention">
+
+        <div class="performance-title">
+            ⚠️ Needs Attention
+        </div>
+
+        {% if attention_branch %}
+
+            <div class="performance-branch">
+                {{ attention_branch.branch }}
+            </div>
+
+            <div class="performance-details">
+
+                <span>
+                    Admissions:
+                    <strong>{{ attention_branch.admissions }}</strong>
+                </span>
+
+                <span>
+                    Collection:
+                    <strong>
+                        ₹{{ attention_branch.collection|floatformat:0 }}
+                    </strong>
+                </span>
+
+                <span>
+                    Conversion:
+                    <strong>
+                        {{ attention_branch.conversion_rate }}%
+                    </strong>
+                </span>
+
+            </div>
+
+        {% else %}
+
+            <div class="performance-branch">
+                No Data
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+            <div class="table-card">
+
+                <div class="table-responsive">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Branch
+                                </th>
+
+                                <th>
+                                    Enquiries
+                                </th>
+
+                                <th>
+                                    Converted
+                                </th>
+
+                                <th>
+                                    Admissions
+                                </th>
+
+                                <th>
+                                    Collection
+                                </th>
+
+                                <th>
+                                    Conversion
+                                </th>
+
+                                <th>
+                                    Active Students
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for item in branch_data %}
+
+                            <tr>
+
+                                <td class="branch-name">
+                                    {{ item.branch }}
+                                </td>
+
+                                <td class="number">
+                                    {{ item.total_enquiries }}
+                                </td>
+
+                                <td class="number">
+                                    {{ item.converted }}
+                                </td>
+
+                                <td class="number">
+                                    {{ item.admissions }}
+                                </td>
+
+                                <td class="collection">
+                                    ₹{{ item.collection|floatformat:0 }}
+                                </td>
+
+                                <td>
+
+                                    {% if item.conversion_rate >= 50 %}
+
+                                        <span class="conversion good">
+                                            {{ item.conversion_rate }}%
+                                        </span>
+
+                                    {% elif item.conversion_rate > 0 %}
+
+                                        <span class="conversion average">
+                                            {{ item.conversion_rate }}%
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="conversion low">
+                                            {{ item.conversion_rate }}%
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td class="number">
+                                    {{ item.active_students }}
+                                </td>
+
+                            </tr>
+
+                            {% empty %}
+
+                            <tr>
+
+                                <td colspan="7">
+                                    No branch data found.
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</body>
+
+</html>

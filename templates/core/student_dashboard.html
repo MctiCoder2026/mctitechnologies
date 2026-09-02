@@ -1,0 +1,721 @@
+{% extends "base.html" %}
+
+{% block title %}
+Student Dashboard | MCTI Technologies
+{% endblock %}
+
+{% block content %}
+
+<div style="
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 20px;
+">
+
+
+<!-- =====================================================
+     HEADER
+====================================================== -->
+
+<div style="
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+">
+
+    <div>
+
+        <h1 style="
+            margin: 0;
+            color: #111;
+        ">
+            Welcome, {{ student.name }} 👋
+        </h1>
+
+        <p style="
+            color: #777;
+            margin-top: 8px;
+        ">
+            Welcome to your MCTI Student Dashboard.
+        </p>
+
+    </div>
+
+    <a href="{% url 'student_logout' %}"
+       style="
+           background: #dc3545;
+           color: white;
+           text-decoration: none;
+           padding: 11px 18px;
+           border-radius: 6px;
+           font-weight: 600;
+       ">
+        Logout
+    </a>
+
+</div>
+
+
+<!-- =====================================================
+     STUDENT INFORMATION
+====================================================== -->
+
+<div style="
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 5px 25px rgba(0,0,0,.08);
+    margin-bottom: 25px;
+">
+
+    <h2 style="
+        margin-top: 0;
+        color: #111;
+    ">
+        Student Information
+    </h2>
+
+
+    <div style="
+        display: grid;
+        grid-template-columns:
+            repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+    ">
+
+        <!-- STUDENT ID -->
+
+        <div>
+
+            <small style="color:#777;">
+                Student ID
+            </small>
+
+            <div style="
+                font-size: 18px;
+                font-weight: 700;
+                margin-top: 5px;
+            ">
+                {{ student.student_id }}
+            </div>
+
+        </div>
+
+
+        <!-- NAME -->
+
+        <div>
+
+            <small style="color:#777;">
+                Student Name
+            </small>
+
+            <div style="
+                font-size: 18px;
+                font-weight: 700;
+                margin-top: 5px;
+            ">
+                {{ student.name }}
+            </div>
+
+        </div>
+
+
+        <!-- MOBILE -->
+
+        <div>
+
+            <small style="color:#777;">
+                Mobile
+            </small>
+
+            <div style="
+                font-size: 18px;
+                font-weight: 700;
+                margin-top: 5px;
+            ">
+                {{ student.mobile }}
+            </div>
+
+        </div>
+
+
+        <!-- EMAIL -->
+
+        <div>
+
+            <small style="color:#777;">
+                Email
+            </small>
+
+            <div style="
+                font-size: 18px;
+                font-weight: 700;
+                margin-top: 5px;
+                word-break: break-word;
+            ">
+                {% if student.email %}
+                    {{ student.email }}
+                {% else %}
+                    Not provided
+                {% endif %}
+            </div>
+
+        </div>
+
+
+        <!-- COURSE -->
+
+        <div>
+
+            <small style="color:#777;">
+                Course
+            </small>
+
+            <div style="
+                font-size: 18px;
+                font-weight: 700;
+                margin-top: 5px;
+            ">
+                {% if student.course %}
+                    {{ student.course.title }}
+                {% else %}
+                    Not assigned
+                {% endif %}
+            </div>
+
+        </div>
+
+
+        <!-- BRANCH -->
+
+        <div>
+
+            <small style="color:#777;">
+                Branch
+            </small>
+
+            <div style="
+                font-size: 18px;
+                font-weight: 700;
+                margin-top: 5px;
+            ">
+                {% if student.branch %}
+                    {{ student.branch }}
+                {% else %}
+                    Not assigned
+                {% endif %}
+            </div>
+
+        </div>
+
+
+        <!-- JOINING DATE -->
+
+        <div>
+
+            <small style="color:#777;">
+                Joining Date
+            </small>
+
+            <div style="
+                font-size: 18px;
+                font-weight: 700;
+                margin-top: 5px;
+            ">
+                {{ student.joining_date|date:"d M Y" }}
+            </div>
+
+        </div>
+
+
+        <!-- STATUS -->
+
+        <div>
+
+            <small style="color:#777;">
+                Status
+            </small>
+
+            <div style="
+                margin-top: 7px;
+            ">
+
+                {% if student.status == "active" %}
+
+                    <span style="
+                        background:#e8f7ee;
+                        color:#198754;
+                        padding:6px 12px;
+                        border-radius:20px;
+                        font-size:13px;
+                        font-weight:600;
+                    ">
+                        Active
+                    </span>
+
+                {% elif student.status == "completed" %}
+
+                    <span style="
+                        background:#e7f1ff;
+                        color:#0d6efd;
+                        padding:6px 12px;
+                        border-radius:20px;
+                        font-size:13px;
+                        font-weight:600;
+                    ">
+                        Completed
+                    </span>
+
+                {% elif student.status == "dropout" %}
+
+                    <span style="
+                        background:#fff0f0;
+                        color:#dc3545;
+                        padding:6px 12px;
+                        border-radius:20px;
+                        font-size:13px;
+                        font-weight:600;
+                    ">
+                        Dropout
+                    </span>
+
+                {% else %}
+
+                    <span style="
+                        background:#f1f1f1;
+                        color:#666;
+                        padding:6px 12px;
+                        border-radius:20px;
+                        font-size:13px;
+                        font-weight:600;
+                    ">
+                        Inactive
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     FEE SUMMARY
+====================================================== -->
+
+<div style="
+    display: grid;
+    grid-template-columns:
+        repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+">
+
+
+    <!-- TOTAL FEE -->
+
+    <div style="
+        background:white;
+        padding:25px;
+        border-radius:12px;
+        box-shadow:0 5px 25px rgba(0,0,0,.08);
+    ">
+
+        <small style="color:#777;">
+            Total Course Fee
+        </small>
+
+        <h2 style="
+            margin:8px 0 0;
+            color:#111;
+        ">
+            ₹{{ total_fee }}
+        </h2>
+
+    </div>
+
+
+    <!-- PAID FEE -->
+
+    <div style="
+        background:white;
+        padding:25px;
+        border-radius:12px;
+        box-shadow:0 5px 25px rgba(0,0,0,.08);
+    ">
+
+        <small style="color:#777;">
+            Paid Fee
+        </small>
+
+        <h2 style="
+            margin:8px 0 0;
+            color:#198754;
+        ">
+            ₹{{ paid_fee }}
+        </h2>
+
+    </div>
+
+
+    <!-- BALANCE -->
+
+    <div style="
+        background:white;
+        padding:25px;
+        border-radius:12px;
+        box-shadow:0 5px 25px rgba(0,0,0,.08);
+    ">
+
+        <small style="color:#777;">
+            Balance Fee
+        </small>
+
+        <h2 style="
+            margin:8px 0 0;
+            color:#dc3545;
+        ">
+            ₹{{ balance_fee }}
+        </h2>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     PAYMENT STATUS
+====================================================== -->
+
+{% if admission %}
+
+    <div style="
+        background:white;
+        padding:25px;
+        border-radius:12px;
+        box-shadow:0 5px 25px rgba(0,0,0,.08);
+        margin-bottom:25px;
+    ">
+
+        <h2 style="
+            margin-top:0;
+        ">
+            Payment Status
+        </h2>
+
+
+        {% if admission.payment_status == "paid" %}
+
+            <div style="
+                background:#e8f7ee;
+                color:#198754;
+                padding:14px;
+                border-radius:8px;
+                font-weight:600;
+            ">
+                ✅ Course fee fully paid.
+            </div>
+
+        {% elif admission.payment_status == "partial" %}
+
+            <div style="
+                background:#fff8e6;
+                color:#996c00;
+                padding:14px;
+                border-radius:8px;
+                font-weight:600;
+            ">
+                ⚠️ Partially paid.
+                Balance: ₹{{ balance_fee }}
+            </div>
+
+        {% else %}
+
+            <div style="
+                background:#fff0f0;
+                color:#dc3545;
+                padding:14px;
+                border-radius:8px;
+                font-weight:600;
+            ">
+                ⚠️ Payment pending.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+{% endif %}
+
+
+<!-- =====================================================
+     PAYMENT HISTORY
+====================================================== -->
+
+<div style="
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 5px 25px rgba(0,0,0,.08);
+    margin-bottom:25px;
+">
+
+    <h2 style="
+        margin-top:0;
+        margin-bottom:20px;
+    ">
+        Payment History
+    </h2>
+
+
+    {% if payments %}
+
+        <div style="
+            overflow-x:auto;
+        ">
+
+            <table style="
+                width:100%;
+                border-collapse:collapse;
+                min-width:700px;
+            ">
+
+                <thead>
+
+                    <tr style="
+                        background:#f7f7f7;
+                    ">
+
+                        <th style="
+                            padding:12px;
+                            text-align:left;
+                        ">
+                            Receipt No.
+                        </th>
+
+                        <th style="
+                            padding:12px;
+                            text-align:left;
+                        ">
+                            Date
+                        </th>
+
+                        <th style="
+                            padding:12px;
+                            text-align:left;
+                        ">
+                            Amount
+                        </th>
+
+                        <th style="
+                            padding:12px;
+                            text-align:left;
+                        ">
+                            Payment Mode
+                        </th>
+
+                        <th style="
+                            padding:12px;
+                            text-align:left;
+                        ">
+                            Balance
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for payment in payments %}
+
+                        <tr style="
+                            border-bottom:
+                            1px solid #eee;
+                        ">
+
+                            <td style="
+                                padding:12px;
+                                font-weight:600;
+                            ">
+
+                                <a
+                                    href="{% url 'fee_receipt' payment.receipt_number %}"
+                                    style="
+                                        color:#ff6b00;
+                                        text-decoration:none;
+                                    "
+                                >
+                                    {{ payment.receipt_number }}
+                                </a>
+
+                            </td>
+
+
+                            <td style="
+                                padding:12px;
+                            ">
+                                {{ payment.payment_date|date:"d M Y" }}
+                            </td>
+
+
+                            <td style="
+                                padding:12px;
+                                font-weight:600;
+                                color:#198754;
+                            ">
+                                ₹{{ payment.amount }}
+                            </td>
+
+
+                            <td style="
+                                padding:12px;
+                            ">
+                                {{ payment.get_payment_mode_display }}
+                            </td>
+
+
+                            <td style="
+                                padding:12px;
+                                font-weight:600;
+                            ">
+                                ₹{{ payment.balance_after_payment }}
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div style="
+            text-align:center;
+            padding:30px;
+            color:#777;
+        ">
+            No payment records available.
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =====================================================
+     ADMISSION INFORMATION
+====================================================== -->
+
+{% if admission %}
+
+    <div style="
+        background:white;
+        padding:25px;
+        border-radius:12px;
+        box-shadow:0 5px 25px rgba(0,0,0,.08);
+    ">
+
+        <h2 style="
+            margin-top:0;
+        ">
+            Admission Information
+        </h2>
+
+
+        <div style="
+            display:grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(220px, 1fr));
+            gap:20px;
+        ">
+
+
+            <div>
+
+                <small style="color:#777;">
+                    Admission Number
+                </small>
+
+                <div style="
+                    font-weight:700;
+                    margin-top:5px;
+                ">
+                    {{ admission.admission_number }}
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <small style="color:#777;">
+                    Admission Date
+                </small>
+
+                <div style="
+                    font-weight:700;
+                    margin-top:5px;
+                ">
+                    {{ admission.admission_date|date:"d M Y" }}
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <small style="color:#777;">
+                    Course Fee
+                </small>
+
+                <div style="
+                    font-weight:700;
+                    margin-top:5px;
+                ">
+                    ₹{{ admission.total_fee }}
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <small style="color:#777;">
+                    Payment Status
+                </small>
+
+                <div style="
+                    font-weight:700;
+                    margin-top:5px;
+                ">
+
+                    {{ admission.get_payment_status_display }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endif %}
+
+
+</div>
+
+{% endblock %}

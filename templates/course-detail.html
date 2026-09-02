@@ -1,0 +1,45 @@
+{% if course.modules.all %}
+
+<div class="course-learning">
+
+    <span class="course-section-label">
+        COURSE SYLLABUS
+    </span>
+
+    <h2>
+        What You Will Learn
+    </h2>
+
+    <div class="course-modules">
+
+        {% for module in course.modules.all %}
+
+        <div class="module-card">
+
+            <div class="module-number">
+                {{ module.module_number|stringformat:"02d" }}
+            </div>
+
+            <div class="module-content">
+
+                <h3>
+                    {{ module.title }}
+                </h3>
+
+                {% if module.description %}
+                <p>
+                    {{ module.description }}
+                </p>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endif %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}
+Student Login | MCTI Technologies
+{% endblock %}
+
+{% block content %}
+
+<div style="
+    max-width: 450px;
+    margin: 70px auto;
+    padding: 35px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 5px 25px rgba(0,0,0,.08);
+">
+
+
+<h2 style="
+    margin-top: 0;
+    color: #111;
+">
+    Student Login
+</h2>
+
+<p style="
+    color: #777;
+    font-size: 14px;
+">
+    Login to access your MCTI student account.
+</p>
+
+{% if error %}
+    <div style="
+        background: #fff0f1;
+        color: #dc3545;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+    ">
+        {{ error }}
+    </div>
+{% endif %}
+
+<form method="POST" action="{% url 'student_login' %}">
+
+    {% csrf_token %}
+
+    <div style="margin-bottom: 15px;">
+
+        <label>
+            Username
+        </label>
+
+        <input
+            type="text"
+            name="username"
+            autocomplete="username"
+            required
+            style="
+                width: 100%;
+                padding: 12px;
+                margin-top: 6px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                box-sizing: border-box;
+            "
+        >
+
+    </div>
+
+    <div style="margin-bottom: 20px;">
+
+        <label>
+            Password
+        </label>
+
+        <input
+            type="password"
+            name="password"
+            autocomplete="current-password"
+            required
+            style="
+                width: 100%;
+                padding: 12px;
+                margin-top: 6px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                box-sizing: border-box;
+            "
+        >
+
+    </div>
+
+    <button
+        type="submit"
+        style="
+            width: 100%;
+            padding: 13px;
+            background: #ff6b00;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        "
+    >
+        Student Login
+    </button>
+
+</form>
+
+
+</div>
+
+{% endblock %}

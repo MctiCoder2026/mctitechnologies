@@ -1,0 +1,1057 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MCTI Management Dashboard</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --primary:#ff6b00;
+    --primary-dark:#e85d00;
+    --primary-light:#fff2e8;
+
+    --dark:#111827;
+    --dark2:#1f2937;
+
+    --bg:#f5f7fb;
+    --white:#ffffff;
+
+    --border:#e5e7eb;
+    --muted:#6b7280;
+
+    --green:#16a34a;
+    --blue:#2563eb;
+    --purple:#7c3aed;
+    --red:#dc2626;
+}
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--bg);
+    color:var(--dark);
+}
+
+/* ==============================
+   LAYOUT
+============================== */
+
+.dashboard{
+    display:flex;
+    min-height:100vh;
+}
+
+/* ==============================
+   SIDEBAR
+============================== */
+
+.sidebar{
+    width:250px;
+    background:var(--dark);
+    color:white;
+    padding:24px 18px;
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+}
+
+.logo{
+    margin-bottom:35px;
+}
+
+.logo h2{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.logo h2 span{
+    color:var(--primary);
+}
+
+.logo p{
+    font-size:11px;
+    color:#9ca3af;
+}
+
+.menu-title{
+    font-size:10px;
+    color:#6b7280;
+    letter-spacing:1px;
+    margin:22px 10px 10px;
+}
+
+.menu a{
+    display:flex;
+    align-items:center;
+    gap:11px;
+
+    text-decoration:none;
+    color:#d1d5db;
+
+    padding:12px 13px;
+    border-radius:9px;
+
+    margin-bottom:6px;
+
+    font-size:13px;
+    font-weight:700;
+
+    transition:0.2s;
+}
+
+.menu a:hover{
+    background:#2b3545;
+    color:white;
+}
+
+.menu a.active{
+    background:var(--primary);
+    color:white;
+}
+
+.admin-link{
+    margin-top:25px;
+    border-top:1px solid #374151;
+    padding-top:20px;
+}
+
+/* ==============================
+   MAIN
+============================== */
+
+.main{
+    margin-left:250px;
+    width:calc(100% - 250px);
+}
+
+/* ==============================
+   TOPBAR
+============================== */
+
+.topbar{
+    height:76px;
+    background:white;
+    border-bottom:1px solid var(--border);
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 30px;
+
+    position:sticky;
+    top:0;
+    z-index:10;
+}
+
+.topbar-left h1{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.topbar-left p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.user-box{
+    display:flex;
+    align-items:center;
+    gap:11px;
+}
+
+.user-avatar{
+    width:39px;
+    height:39px;
+    border-radius:50%;
+
+    background:var(--primary);
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-weight:800;
+}
+
+.user-info strong{
+    display:block;
+    font-size:12px;
+}
+
+.user-info span{
+    font-size:10px;
+    color:var(--muted);
+}
+.logout-btn{
+    text-decoration:none;
+    background:#fee2e2;
+    color:var(--red);
+
+    padding:9px 13px;
+    border-radius:8px;
+
+    font-size:11px;
+    font-weight:700;
+
+    transition:0.2s;
+}
+
+.logout-btn:hover{
+    background:var(--red);
+    color:white;
+}
+
+/* ==============================
+   CONTENT
+============================== */
+
+.content{
+    padding:28px;
+}
+
+/* ==============================
+   WELCOME
+============================== */
+
+.welcome{
+    background:linear-gradient(135deg, var(--dark), #273449);
+    color:white;
+
+    border-radius:17px;
+    padding:25px 28px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    margin-bottom:24px;
+}
+
+.welcome h2{
+    font-size:23px;
+    margin-bottom:7px;
+}
+
+.welcome p{
+    color:#d1d5db;
+    font-size:12px;
+}
+
+.welcome-badge{
+    background:var(--primary);
+    padding:10px 15px;
+    border-radius:9px;
+
+    font-size:11px;
+    font-weight:800;
+}
+
+/* ==============================
+   STAT CARDS
+============================== */
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin-bottom:25px;
+}
+
+.stat-card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    box-shadow:0 4px 14px rgba(0,0,0,0.04);
+}
+
+.stat-info span{
+    color:var(--muted);
+    font-size:11px;
+    display:block;
+    margin-bottom:8px;
+}
+
+.stat-info strong{
+    font-size:26px;
+}
+
+.stat-icon{
+    width:48px;
+    height:48px;
+    border-radius:12px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:22px;
+}
+
+.orange{
+    background:#fff2e8;
+    color:var(--primary);
+}
+
+.green{
+    background:#dcfce7;
+    color:var(--green);
+}
+
+.blue{
+    background:#dbeafe;
+    color:var(--blue);
+}
+
+.purple{
+    background:#ede9fe;
+    color:var(--purple);
+}
+
+/* ==============================
+   MAIN GRID
+============================== */
+
+.main-grid{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:20px;
+}
+
+/* ==============================
+   PANEL
+============================== */
+
+.panel{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:22px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,0.04);
+}
+
+.panel-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.panel-header h3{
+    font-size:16px;
+}
+
+.panel-header span{
+    font-size:10px;
+    color:var(--muted);
+}
+
+/* ==============================
+   QUICK ACTIONS
+============================== */
+
+.quick-actions{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+}
+
+.action-card{
+    text-decoration:none;
+
+    border:1px solid var(--border);
+    border-radius:12px;
+
+    padding:17px;
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    color:var(--dark);
+
+    transition:0.2s;
+}
+
+.action-card:hover{
+    border-color:var(--primary);
+    background:var(--primary-light);
+    transform:translateY(-2px);
+}
+
+.action-icon{
+    width:42px;
+    height:42px;
+
+    border-radius:10px;
+
+    background:var(--primary-light);
+    color:var(--primary);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:20px;
+}
+
+.action-card strong{
+    display:block;
+    font-size:12px;
+    margin-bottom:4px;
+}
+
+.action-card span{
+    font-size:10px;
+    color:var(--muted);
+}
+
+/* ==============================
+   SYSTEM BOX
+============================== */
+
+.system-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:14px 0;
+    border-bottom:1px solid var(--border);
+}
+
+.system-item:last-child{
+    border-bottom:none;
+}
+
+.system-item span{
+    font-size:12px;
+}
+
+.system-item strong{
+    font-size:12px;
+}
+
+.status-good{
+    color:var(--green);
+}
+
+/* ==============================
+   FEE
+============================== */
+
+.fee-box{
+    margin-top:20px;
+    background:var(--dark);
+    color:white;
+
+    padding:19px;
+    border-radius:13px;
+}
+
+.fee-box span{
+    color:#9ca3af;
+    font-size:10px;
+}
+
+.fee-box h2{
+    margin-top:8px;
+    color:var(--primary);
+    font-size:25px;
+}
+
+/* ==============================
+   MOBILE
+============================== */
+
+@media(max-width:900px){
+
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+    }
+
+    .stats-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .main-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:600px){
+
+    .content{
+        padding:15px;
+    }
+
+    .topbar{
+        padding:0 15px;
+    }
+
+    .stats-grid{
+        grid-template-columns:1fr;
+    }
+
+    .quick-actions{
+        grid-template-columns:1fr;
+    }
+
+    .welcome{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="dashboard">
+
+<!-- ============================
+     SIDEBAR
+============================ -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+        <h2>
+            <span>MCTI</span> Technologies
+        </h2>
+
+        <p>
+            Management System
+        </p>
+    </div>
+
+
+    <div class="menu">
+
+        <div class="menu-title">
+            MAIN
+        </div>
+
+        <a href="{% url 'management_dashboard' %}" class="active">
+            🏠 Dashboard
+        </a>
+        <a href="{% url 'branch_dashboard' %}">
+         Branch Performance
+        </a>
+        <a href="{% url 'enquiry_dashboard' %}">
+            📞 Enquiries
+        </a>
+
+        <a href="{% url 'fee_payment_list' %}">
+            💳 Fee Payments
+        </a>
+
+
+        <div class="menu-title">
+            MANAGEMENT
+        </div>
+
+        <a href="{% url 'admission_list' %}">
+        🎓 Admissions
+        </a>
+
+        <a href="{% url 'student_list' %}">
+        👨‍🎓 Students
+        </a>
+        <a href="{% url 'staff_list' %}">
+        👥 Staff
+        </a>
+
+        <a href="#">
+            📊 Reports
+        </a>
+
+
+        {% if request.user.is_superuser %}
+
+        <div class="admin-link">
+
+            <a href="/admin/">
+                ⚙️ Django Backend
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</aside>
+
+
+<!-- ============================
+     MAIN
+============================ -->
+
+<main class="main">
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+        <div class="topbar-left">
+
+            <h1>
+                Management Dashboard
+            </h1>
+
+            <p>
+                MCTI Technologies Administration
+            </p>
+
+        </div>
+
+
+        <div class="user-box">
+
+            <div class="user-avatar">
+
+                {{ request.user.username|first|upper }}
+
+            </div>
+
+            <div class="user-info">
+
+                <strong>
+                    {{ request.user.username }}
+                </strong>
+
+                <span>
+
+                    {% if request.user.is_superuser %}
+                        Administrator
+                    {% else %}
+                        Staff
+                    {% endif %}
+
+                </span>
+
+            </div>
+            <a href="{% url 'staff_logout' %}" class="logout-btn">
+            Logout
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- CONTENT -->
+
+    <div class="content">
+
+
+        <!-- WELCOME -->
+
+        <div class="welcome">
+
+            <div>
+
+                <h2>
+                    Welcome, {{ request.user.username }}
+                </h2>
+
+                <p>
+                    Manage enquiries, admissions, students and fee collections from one place.
+                </p>
+
+            </div>
+
+            <div class="welcome-badge">
+
+                MCTI MANAGEMENT
+
+            </div>
+
+        </div>
+
+
+        <!-- STATS -->
+
+        <div class="stats-grid">
+
+
+            <div class="stat-card">
+
+                <div class="stat-info">
+
+                    <span>
+                        TOTAL ENQUIRIES
+                    </span>
+
+                    <strong>
+                        {{ total_enquiries }}
+                    </strong>
+
+                </div>
+
+                <div class="stat-icon orange">
+                    📞
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-info">
+
+                    <span>
+                        NEW ENQUIRIES
+                    </span>
+
+                    <strong>
+                        {{ new_enquiries }}
+                    </strong>
+
+                </div>
+
+                <div class="stat-icon blue">
+                    🔔
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-info">
+
+                    <span>
+                        CONVERTED
+                    </span>
+
+                    <strong>
+                        {{ converted_enquiries }}
+                    </strong>
+
+                </div>
+
+                <div class="stat-icon green">
+                    ✅
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-info">
+
+                    <span>
+                        TOTAL ADMISSIONS
+                    </span>
+
+                    <strong>
+                        {{ total_admissions }}
+                    </strong>
+
+                </div>
+
+                <div class="stat-icon purple">
+                    🎓
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-info">
+
+                    <span>
+                        ACTIVE STUDENTS
+                    </span>
+
+                    <strong>
+                        {{ total_students }}
+                    </strong>
+
+                </div>
+
+                <div class="stat-icon blue">
+                    👨‍🎓
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-info">
+
+                    <span>
+                        TOTAL FEE COLLECTED
+                    </span>
+
+                    <strong>
+                        ₹{{ total_collected|floatformat:0 }}
+                    </strong>
+
+                </div>
+
+                <div class="stat-icon green">
+                    💰
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- MAIN GRID -->
+
+        <div class="main-grid">
+
+
+            <!-- QUICK ACTION -->
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <h3>
+                        Quick Actions
+                    </h3>
+
+                    <span>
+                        Daily Operations
+                    </span>
+
+                </div>
+
+
+                <div class="quick-actions">
+
+
+                    <a
+                        href="{% url 'enquiry_dashboard' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            📞
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                View Enquiries
+                            </strong>
+
+                            <span>
+                                Manage leads & follow-ups
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    <a
+                        href="/contact/"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            ➕
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Add Enquiry
+                            </strong>
+
+                            <span>
+                                Create a new lead
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    <a
+                        href="{% url 'fee_payment_list' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            💳
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Payment History
+                            </strong>
+
+                            <span>
+                                View student payments
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    {% if request.user.is_superuser %}
+
+                    <a
+                        href="/admin/"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            ⚙️
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Backend Admin
+                            </strong>
+
+                            <span>
+                                Django administration
+                            </span>
+
+                        </div>
+
+                    </a>
+
+                    {% endif %}
+
+
+                </div>
+
+            </div>
+
+
+            <!-- SYSTEM -->
+
+            <div>
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <h3>
+                            System Overview
+                        </h3>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Enquiry System
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Admission System
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Fee Collection
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Student Portal
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="fee-box">
+
+                        <span>
+                            TOTAL COLLECTION
+                        </span>
+
+                        <h2>
+                            ₹{{ total_collected|floatformat:2 }}
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</main>
+
+</div>
+
+</body>
+</html>

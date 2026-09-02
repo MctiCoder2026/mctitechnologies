@@ -1,0 +1,1161 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>
+    Admission {{ admission.admission_number }} | MCTI Technologies
+</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --orange: #ff6b00;
+    --orange-dark: #e85d00;
+    --orange-light: #fff3e8;
+
+    --black: #111111;
+    --dark: #222222;
+
+    --white: #ffffff;
+    --bg: #f4f4f4;
+
+    --border: #e5e5e5;
+    --muted: #777777;
+
+    --green: #198754;
+    --green-light: #eaf7ef;
+
+    --red: #dc3545;
+    --red-light: #fff0f1;
+}
+
+
+/* =========================
+   BODY
+========================= */
+
+body {
+    margin: 0;
+    padding: 30px;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--black);
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.page-header {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 6px solid var(--orange);
+    border-radius: 12px;
+    padding: 22px 25px;
+    margin-bottom: 20px;
+
+    box-shadow: 0 5px 20px rgba(0,0,0,.06);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: .3px;
+}
+
+.brand h1 span {
+    color: var(--orange);
+}
+
+.brand p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 17px;
+    border-radius: 7px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-back {
+    background: var(--black);
+    color: var(--white);
+}
+
+.btn-back:hover {
+    background: var(--orange);
+}
+
+.btn-print {
+    background: var(--orange);
+    color: var(--white);
+}
+
+.btn-print:hover {
+    background: var(--orange-dark);
+}
+
+
+/* =========================
+   ADMISSION BANNER
+========================= */
+
+.admission-banner {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 25px;
+    margin-bottom: 20px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+
+    box-shadow: 0 5px 20px rgba(0,0,0,.05);
+}
+
+.admission-label {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.admission-number {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--black);
+}
+
+.admission-number span {
+    color: var(--orange);
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+.status {
+    display: inline-block;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.status-paid {
+    background: var(--green-light);
+    color: var(--green);
+    border: 1px solid #c9ead6;
+}
+
+.status-partial {
+    background: var(--orange-light);
+    color: var(--orange);
+    border: 1px solid #ffd8bd;
+}
+
+.status-pending {
+    background: var(--red-light);
+    color: var(--red);
+    border: 1px solid #f5c6cb;
+}
+
+
+/* =========================
+   MAIN GRID
+========================= */
+
+.main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+
+/* =========================
+   CARD
+========================= */
+
+.card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 23px;
+    margin-bottom: 20px;
+
+    box-shadow: 0 5px 20px rgba(0,0,0,.05);
+}
+
+.card-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    padding-bottom: 12px;
+    margin-bottom: 18px;
+
+    border-bottom: 1px solid var(--border);
+
+    font-size: 15px;
+    font-weight: 900;
+
+    text-transform: uppercase;
+    letter-spacing: .7px;
+}
+
+.card-title::before {
+    content: "";
+
+    width: 4px;
+    height: 17px;
+
+    background: var(--orange);
+
+    border-radius: 2px;
+}
+
+
+/* =========================
+   STUDENT PROFILE
+========================= */
+
+.student-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    padding: 15px;
+
+    background: var(--orange-light);
+
+    border-left: 4px solid var(--orange);
+
+    border-radius: 8px;
+
+    margin-bottom: 18px;
+}
+
+.avatar {
+    width: 58px;
+    height: 58px;
+
+    border-radius: 50%;
+
+    background: var(--orange);
+    color: var(--white);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 23px;
+    font-weight: 900;
+}
+
+.student-profile h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.student-profile p {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+
+/* =========================
+   INFORMATION GRID
+========================= */
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.info-item {
+    background: #fafafa;
+
+    border: 1px solid var(--border);
+
+    border-radius: 7px;
+
+    padding: 13px;
+}
+
+.label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    font-size: 9px;
+
+    color: var(--muted);
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: .8px;
+}
+
+.value {
+    display: block;
+
+    font-size: 13px;
+
+    color: var(--black);
+
+    font-weight: 700;
+}
+
+
+/* =========================
+   COURSE
+========================= */
+
+.course-box {
+    background: var(--black);
+
+    color: var(--white);
+
+    border-radius: 8px;
+
+    padding: 18px;
+
+    border-left: 5px solid var(--orange);
+}
+
+.course-title {
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.course-meta {
+    color: #cccccc;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+
+/* =========================
+   FEE SUMMARY
+========================= */
+
+.fee-row {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 14px 0;
+
+    border-bottom: 1px solid var(--border);
+
+    font-size: 13px;
+}
+
+.fee-row:last-child {
+    border-bottom: none;
+}
+
+.fee-label {
+    color: var(--muted);
+}
+
+.fee-value {
+    font-weight: 900;
+    color: var(--black);
+}
+
+.fee-paid .fee-value {
+    color: var(--green);
+}
+
+
+/* =========================
+   BALANCE
+========================= */
+
+.balance-box {
+    margin-top: 14px;
+
+    background: var(--orange);
+
+    color: var(--white);
+
+    border-radius: 8px;
+
+    padding: 16px;
+}
+
+.balance-box .fee-row {
+    border-bottom: none;
+    padding: 0;
+}
+
+.balance-box .fee-label {
+    color: rgba(255,255,255,.85);
+}
+
+.balance-box .fee-value {
+    color: var(--white);
+    font-size: 20px;
+}
+
+
+/* =========================
+   COLLECT FEE BUTTON
+========================= */
+
+.payment-btn {
+    display: block;
+
+    width: 100%;
+
+    text-align: center;
+
+    text-decoration: none;
+
+    background: var(--orange);
+
+    color: var(--white);
+
+    padding: 13px;
+
+    border-radius: 7px;
+
+    font-size: 14px;
+
+    font-weight: 800;
+
+    margin-top: 17px;
+
+    transition: .2s ease;
+}
+
+.payment-btn:hover {
+    background: var(--orange-dark);
+
+    transform: translateY(-1px);
+
+    box-shadow: 0 5px 12px rgba(255,107,0,.25);
+}
+/* =========================
+   PAYMENT HISTORY BUTTON
+========================= */
+
+.payment-history-btn {
+
+    display: block;
+    width: 100%;
+
+    text-align: center;
+    text-decoration: none;
+
+    background: var(--black);
+    color: var(--white);
+
+    padding: 12px;
+
+    border-radius: 7px;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    margin-top: 10px;
+}
+
+.payment-history-btn:hover {
+
+    background: var(--orange);
+}
+
+
+/* =========================
+   PAYMENT HISTORY BUTTON
+========================= */
+
+.history-btn {
+    display: block;
+
+    width: 100%;
+
+    text-align: center;
+
+    text-decoration: none;
+
+    background: var(--black);
+
+    color: var(--white);
+
+    padding: 11px;
+
+    border-radius: 7px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    margin-top: 10px;
+}
+
+.history-btn:hover {
+    background: #333333;
+}
+
+
+/* =========================
+   ADMISSION INFO
+========================= */
+
+.meta-list {
+    display: grid;
+    gap: 10px;
+}
+
+.meta-item {
+    padding: 12px;
+
+    background: #fafafa;
+
+    border: 1px solid var(--border);
+
+    border-radius: 7px;
+}
+
+
+/* =========================
+   NOTES
+========================= */
+
+.notes {
+    background: var(--orange-light);
+
+    border-left: 4px solid var(--orange);
+
+    padding: 14px;
+
+    border-radius: 6px;
+
+    color: #555;
+
+    font-size: 12px;
+
+    line-height: 1.7;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer {
+    text-align: center;
+
+    margin-top: 5px;
+
+    padding: 20px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+.footer strong {
+    color: var(--orange);
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 800px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .actions {
+        width: 100%;
+    }
+
+    .actions .btn {
+        flex: 1;
+        text-align: center;
+    }
+
+    .admission-banner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+/* =========================
+   PRINT
+========================= */
+
+@media print {
+
+    body {
+        background: white;
+        padding: 0;
+    }
+
+    .container {
+        max-width: none;
+    }
+
+    .actions {
+        display: none;
+    }
+
+    .page-header,
+    .admission-banner,
+    .card {
+        box-shadow: none;
+    }
+
+    .btn,
+    .payment-btn,
+    .history-btn {
+        display: none;
+    }
+
+    .course-box,
+    .balance-box,
+    .student-profile {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- =========================
+     HEADER
+========================= -->
+
+<div class="page-header">
+
+
+<div class="brand">
+
+    <h1>
+        <span>MCTI</span> TECHNOLOGIES
+    </h1>
+
+    <p>
+        Student Admission Management
+    </p>
+
+</div>
+
+
+<div class="actions">
+
+    <a
+        href="{% url 'enquiry_dashboard' %}"
+        class="btn btn-back"
+    >
+        ← Dashboard
+    </a>
+
+    <button
+        onclick="window.print()"
+        class="btn btn-print"
+    >
+        🖨 Print
+    </button>
+
+</div>
+
+
+</div>
+
+<!-- =========================
+     ADMISSION HEADER
+========================= -->
+
+<div class="admission-banner">
+
+
+<div>
+
+    <div class="admission-label">
+        Admission Number
+    </div>
+
+    <div class="admission-number">
+
+        <span>#</span>
+        {{ admission.admission_number }}
+
+    </div>
+
+</div>
+
+
+<div>
+
+    {% if admission.payment_status == "paid" %}
+
+        <span class="status status-paid">
+            ✓ Fully Paid
+        </span>
+
+    {% elif admission.payment_status == "partial" %}
+
+        <span class="status status-partial">
+            ◐ Partially Paid
+        </span>
+
+    {% else %}
+
+        <span class="status status-pending">
+            ! Payment Pending
+        </span>
+
+    {% endif %}
+
+</div>
+
+
+</div>
+
+<!-- =========================
+     MAIN CONTENT
+========================= -->
+
+<div class="main-grid">
+
+<!-- =========================
+     LEFT COLUMN
+========================= -->
+
+<div>
+
+<!-- STUDENT -->
+
+<div class="card">
+
+
+<div class="card-title">
+    Student Information
+</div>
+
+
+<div class="student-profile">
+
+    <div class="avatar">
+        {{ admission.student_name|first|upper }}
+    </div>
+
+    <div>
+
+        <h2>
+            {{ admission.student_name }}
+        </h2>
+
+        <p>
+            MCTI Student
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="info-grid">
+
+
+    <div class="info-item">
+
+        <span class="label">
+            Mobile Number
+        </span>
+
+        <span class="value">
+            {{ admission.mobile }}
+        </span>
+
+    </div>
+
+
+    <div class="info-item">
+
+        <span class="label">
+            Email
+        </span>
+
+        <span class="value">
+
+            {% if admission.email %}
+                {{ admission.email }}
+            {% else %}
+                Not Provided
+            {% endif %}
+
+        </span>
+
+    </div>
+
+
+    <div class="info-item">
+
+        <span class="label">
+            Branch
+        </span>
+
+        <span class="value">
+
+            {% if admission.branch %}
+                {{ admission.branch }}
+            {% else %}
+                Not Assigned
+            {% endif %}
+
+        </span>
+
+    </div>
+
+
+    <div class="info-item">
+
+        <span class="label">
+            Admission Date
+        </span>
+
+        <span class="value">
+            {{ admission.admission_date|date:"d M Y" }}
+        </span>
+
+    </div>
+
+
+</div>
+
+
+</div>
+
+<!-- COURSE -->
+
+<div class="card">
+
+
+<div class="card-title">
+    Course Information
+</div>
+
+
+<div class="course-box">
+
+    <div class="course-title">
+
+        {% if admission.course %}
+
+            {{ admission.course.title }}
+
+        {% else %}
+
+            Course Not Assigned
+
+        {% endif %}
+
+    </div>
+
+
+    {% if admission.course %}
+
+    <div class="course-meta">
+
+        Duration:
+        {{ admission.course.duration }}
+
+        {% if admission.course.category %}
+
+            &nbsp; • &nbsp;
+
+            Category:
+            {{ admission.course.category }}
+
+        {% endif %}
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+</div>
+
+<!-- NOTES -->
+
+{% if admission.notes %}
+
+<div class="card">
+
+
+<div class="card-title">
+    Admission Notes
+</div>
+
+<div class="notes">
+
+    {{ admission.notes|linebreaksbr }}
+
+</div>
+
+
+</div>
+
+{% endif %}
+
+</div>
+
+<!-- =========================
+     RIGHT COLUMN
+========================= -->
+
+<div>
+
+<!-- FEE SUMMARY -->
+
+<div class="card">
+
+<div class="card-title">
+    Fee Summary
+</div>
+
+
+<div class="fee-row">
+
+    <span class="fee-label">
+        Total Fee
+    </span>
+
+    <span class="fee-value">
+        ₹{{ admission.total_fee|floatformat:2 }}
+    </span>
+
+</div>
+
+
+<div class="fee-row fee-paid">
+
+    <span class="fee-label">
+        Paid Fee
+    </span>
+
+    <span class="fee-value">
+        ₹{{ admission.paid_fee|floatformat:2 }}
+    </span>
+
+</div>
+
+
+<div class="balance-box">
+
+    <div class="fee-row">
+
+        <span class="fee-label">
+            Balance Fee
+        </span>
+
+        <span class="fee-value">
+            ₹{{ admission.balance_fee|floatformat:2 }}
+        </span>
+
+    </div>
+
+</div>
+
+
+{% if admission.balance_fee > 0 %}
+
+<a 
+    href="{% url 'add_fee_payment' admission.student.id %}" 
+    class="payment-btn"
+>
+    💰 Collect Fee
+</a>
+
+{% endif %}
+
+
+<a
+    href="{% url 'fee_payment_list' %}?student={{ admission.student.id }}"
+    class="payment-history-btn"
+>
+    📋 Payment History
+</a>
+
+
+<a
+    href="{% url 'fee_payment_list' %}"
+    class="history-btn"
+>
+    📋 All Fee Payment History
+</a>
+
+
+</div>
+
+<!-- ADMISSION INFORMATION -->
+
+<div class="card">
+
+
+<div class="card-title">
+    Admission Information
+</div>
+
+
+<div class="meta-list">
+
+
+    <div class="meta-item">
+
+        <span class="label">
+            Admission Number
+        </span>
+
+        <span class="value">
+            {{ admission.admission_number }}
+        </span>
+
+    </div>
+
+
+    <div class="meta-item">
+
+        <span class="label">
+            Created By
+        </span>
+
+        <span class="value">
+
+            {% if admission.created_by %}
+
+                {{ admission.created_by.get_full_name|default:admission.created_by.username }}
+
+            {% else %}
+
+                System
+
+            {% endif %}
+
+        </span>
+
+    </div>
+
+
+    <div class="meta-item">
+
+        <span class="label">
+            Created On
+        </span>
+
+        <span class="value">
+            {{ admission.created_at|date:"d M Y, h:i A" }}
+        </span>
+
+    </div>
+
+
+</div>
+
+
+</div>
+
+</div>
+
+</div>
+
+<!-- FOOTER -->
+
+<div class="footer">
+
+
+© {% now "Y" %}
+<strong>MCTI Technologies</strong>
+— Student Management System
+
+
+</div>
+
+</div>
+
+</body>
+
+</html>

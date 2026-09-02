@@ -1,0 +1,932 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Collect Fee | MCTI Technologies</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #ff6b00;
+    --primary-dark: #e85d00;
+    --primary-light: #fff4eb;
+
+    --dark: #111827;
+    --dark-2: #1f2937;
+
+    --white: #ffffff;
+    --bg: #f5f7fa;
+
+    --border: #e5e7eb;
+    --muted: #6b7280;
+
+    --green: #15803d;
+    --green-bg: #dcfce7;
+
+    --red: #dc2626;
+    --red-bg: #fee2e2;
+}
+
+/* =========================================================
+   BODY
+========================================================= */
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--dark);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: auto;
+    padding: 28px;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.page-header {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+
+    padding: 22px 26px;
+    margin-bottom: 22px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+
+    box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand-icon {
+    width: 48px;
+    height: 48px;
+
+    background: var(--primary);
+    color: white;
+
+    border-radius: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 23px;
+}
+
+.brand h1 {
+    margin: 0;
+
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.brand h1 span {
+    color: var(--primary);
+}
+
+.brand p {
+    margin: 4px 0 0;
+
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 11px 18px;
+
+    border-radius: 9px;
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    transition: 0.2s;
+}
+
+.btn-back {
+    background: var(--dark);
+    color: white;
+}
+
+.btn-back:hover {
+    background: var(--primary);
+}
+
+/* =========================================================
+   MAIN GRID
+========================================================= */
+
+.main-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1.15fr;
+
+    gap: 20px;
+}
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.card {
+    background: white;
+
+    border: 1px solid var(--border);
+    border-radius: 16px;
+
+    padding: 24px;
+
+    margin-bottom: 20px;
+
+    box-shadow: 0 4px 18px rgba(0,0,0,0.04);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    margin-bottom: 22px;
+
+    padding-bottom: 15px;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.card-icon {
+    width: 36px;
+    height: 36px;
+
+    border-radius: 9px;
+
+    background: var(--primary-light);
+    color: var(--primary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 17px;
+}
+
+.card h2 {
+    margin: 0;
+
+    font-size: 16px;
+    font-weight: 800;
+}
+
+/* =========================================================
+   STUDENT PROFILE
+========================================================= */
+
+.student-profile {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 16px;
+
+    background: var(--primary-light);
+
+    border-radius: 12px;
+
+    margin-bottom: 18px;
+}
+
+.avatar {
+    width: 54px;
+    height: 54px;
+
+    border-radius: 12px;
+
+    background: var(--primary);
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 21px;
+    font-weight: 800;
+
+    flex-shrink: 0;
+}
+
+.student-profile h3 {
+    margin: 0;
+
+    font-size: 18px;
+}
+
+.student-profile p {
+    margin: 5px 0 0;
+
+    color: var(--muted);
+
+    font-size: 12px;
+}
+
+/* =========================================================
+   STUDENT INFORMATION
+========================================================= */
+
+.info-item {
+    padding: 14px;
+
+    background: #f9fafb;
+
+    border: 1px solid #f0f1f3;
+
+    border-radius: 9px;
+
+    margin-bottom: 10px;
+}
+
+.label {
+    display: block;
+
+    font-size: 10px;
+
+    color: var(--muted);
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.4px;
+
+    margin-bottom: 5px;
+}
+
+.value {
+    font-size: 14px;
+
+    font-weight: 700;
+
+    color: var(--dark);
+}
+
+/* =========================================================
+   FEE SUMMARY
+========================================================= */
+
+.fee-row {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 14px 0;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.fee-row:last-child {
+    border-bottom: none;
+}
+
+.fee-label {
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+.fee-value {
+    font-size: 15px;
+
+    font-weight: 800;
+}
+
+.balance {
+    margin-top: 12px;
+
+    padding: 17px;
+
+    background: var(--primary-light);
+
+    border: 1px solid #ffd9bd;
+
+    border-radius: 10px;
+}
+
+.balance .fee-label {
+    color: var(--primary);
+
+    font-weight: 700;
+}
+
+.balance .fee-value {
+    color: var(--primary);
+
+    font-size: 22px;
+}
+
+/* =========================================================
+   PAYMENT FORM
+========================================================= */
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: var(--dark-2);
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+
+    padding: 12px 13px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 9px;
+
+    background: white;
+
+    color: var(--dark);
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    outline: none;
+
+    transition: 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 3px rgba(255,107,0,0.10);
+}
+
+.form-group textarea {
+    min-height: 95px;
+
+    resize: vertical;
+}
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.errorlist {
+    margin: 6px 0 0;
+
+    padding: 0;
+
+    list-style: none;
+
+    color: var(--red);
+
+    font-size: 11px;
+}
+
+/* =========================================================
+   PAYMENT BUTTON
+========================================================= */
+
+.payment-button {
+    width: 100%;
+
+    border: none;
+
+    padding: 14px;
+
+    border-radius: 9px;
+
+    background: var(--primary);
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+    margin-top: 5px;
+
+    transition: 0.2s;
+}
+
+.payment-button:hover {
+    background: var(--primary-dark);
+}
+
+/* =========================================================
+   CANCEL
+========================================================= */
+
+.cancel-button {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+
+    margin-top: 10px;
+
+    padding: 12px;
+
+    border-radius: 9px;
+
+    text-decoration: none;
+
+    background: #f3f4f6;
+
+    color: var(--dark-2);
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+.cancel-button:hover {
+    background: #e5e7eb;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer {
+    text-align: center;
+
+    margin-top: 5px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+.footer strong {
+    color: var(--primary);
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 850px) {
+
+    .container {
+        padding: 12px;
+    }
+
+    .page-header {
+        padding: 18px;
+
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .header-actions .btn {
+        width: 100%;
+    }
+
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<div class="page-header">
+
+
+<div class="brand">
+
+    <div class="brand-icon">
+        💳
+    </div>
+
+    <div>
+
+        <h1>
+            <span>MCTI</span> Technologies
+        </h1>
+
+        <p>
+            Fee Payment Management System
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="header-actions">
+
+    {% if student.admission %}
+
+    <a
+        href="{% url 'admission_detail' student.admission.id %}"
+        class="btn btn-back"
+    >
+        ← Admission
+    </a>
+
+    {% endif %}
+
+</div>
+
+
+</div>
+
+<!-- =====================================================
+     MAIN GRID
+===================================================== -->
+
+<div class="main-grid">
+
+<!-- =====================================================
+     LEFT SIDE
+===================================================== -->
+
+<div>
+
+
+<!-- STUDENT INFORMATION -->
+
+<div class="card">
+
+    <div class="card-header">
+
+        <div class="card-icon">
+            👨‍🎓
+        </div>
+
+        <h2>
+            Student Information
+        </h2>
+
+    </div>
+
+
+    <div class="student-profile">
+
+        <div class="avatar">
+
+            {{ student.name|first|upper }}
+
+        </div>
+
+        <div>
+
+            <h3>
+                {{ student.name }}
+            </h3>
+
+            <p>
+                {{ student.student_id }}
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="info-item">
+
+        <span class="label">
+            Mobile Number
+        </span>
+
+        <span class="value">
+            {{ student.mobile }}
+        </span>
+
+    </div>
+
+
+    <div class="info-item">
+
+        <span class="label">
+            Course
+        </span>
+
+        <span class="value">
+
+            {% if student.course %}
+
+                {{ student.course.title }}
+
+            {% else %}
+
+                Not Assigned
+
+            {% endif %}
+
+        </span>
+
+    </div>
+
+
+    <div class="info-item">
+
+        <span class="label">
+            Branch
+        </span>
+
+        <span class="value">
+
+            {% if student.branch %}
+
+                {{ student.branch }}
+
+            {% else %}
+
+                Not Assigned
+
+            {% endif %}
+
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- FEE SUMMARY -->
+
+<div class="card">
+
+    <div class="card-header">
+
+        <div class="card-icon">
+            💰
+        </div>
+
+        <h2>
+            Fee Summary
+        </h2>
+
+    </div>
+
+
+    {% if student.admission %}
+
+
+    <div class="fee-row">
+
+        <span class="fee-label">
+            Total Course Fee
+        </span>
+
+        <span class="fee-value">
+            ₹{{ student.admission.total_fee|floatformat:2 }}
+        </span>
+
+    </div>
+
+
+    <div class="fee-row">
+
+        <span class="fee-label">
+            Already Paid
+        </span>
+
+        <span class="fee-value">
+            ₹{{ student.admission.paid_fee|floatformat:2 }}
+        </span>
+
+    </div>
+
+
+    <div class="fee-row balance">
+
+        <span class="fee-label">
+            Outstanding Balance
+        </span>
+
+        <span class="fee-value">
+            ₹{{ student.admission.balance_fee|floatformat:2 }}
+        </span>
+
+    </div>
+
+
+    {% else %}
+
+    <div class="info-item">
+
+        <span class="value">
+            Admission information not available.
+        </span>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+</div>
+
+<!-- =====================================================
+     RIGHT SIDE — PAYMENT
+===================================================== -->
+
+<div>
+
+
+<div class="card">
+
+    <div class="card-header">
+
+        <div class="card-icon">
+            💳
+        </div>
+
+        <h2>
+            Collect Fee Payment
+        </h2>
+
+    </div>
+
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+
+        <!-- PAYMENT AMOUNT -->
+
+        <div class="form-group">
+
+            <label for="{{ form.amount.id_for_label }}">
+                Payment Amount
+            </label>
+
+            {{ form.amount }}
+
+            {{ form.amount.errors }}
+
+        </div>
+
+
+        <!-- PAYMENT MODE -->
+
+        <div class="form-group">
+
+            <label for="{{ form.payment_mode.id_for_label }}">
+                Payment Mode
+            </label>
+
+            {{ form.payment_mode }}
+
+            {{ form.payment_mode.errors }}
+
+        </div>
+
+
+        <!-- TRANSACTION -->
+
+        <div class="form-group">
+
+            <label for="{{ form.transaction_id.id_for_label }}">
+                Transaction / UTR Number
+            </label>
+
+            {{ form.transaction_id }}
+
+            {{ form.transaction_id.errors }}
+
+        </div>
+
+
+        <!-- REMARKS -->
+
+        <div class="form-group">
+
+            <label for="{{ form.remarks.id_for_label }}">
+                Remarks
+            </label>
+
+            {{ form.remarks }}
+
+            {{ form.remarks.errors }}
+
+        </div>
+
+
+        <!-- SAVE -->
+
+        <button
+            type="submit"
+            class="payment-button"
+        >
+            💰 Save Payment
+        </button>
+
+
+        {% if student.admission %}
+
+        <a
+            href="{% url 'admission_detail' student.admission.id %}"
+            class="cancel-button"
+        >
+            Cancel
+        </a>
+
+        {% endif %}
+
+    </form>
+
+</div>
+
+
+</div>
+
+</div>
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<div class="footer">
+
+© {% now "Y" %}
+
+<strong>
+    MCTI Technologies
+</strong>
+
+— Fee Management System
+
+
+</div>
+
+</div>
+
+</body>
+
+</html>

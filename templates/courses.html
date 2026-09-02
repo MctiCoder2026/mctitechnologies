@@ -1,0 +1,170 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Courses | MCTI Academy
+{% endblock %}
+
+{% block content %}
+
+<!-- ================================
+     COURSES HERO
+================================ -->
+
+<section class="courses-page-hero">
+
+    <div class="courses-page-hero-content">
+
+        <span>MCTI ACADEMY</span>
+
+        <h1>
+            Courses That
+            <span>Build Careers.</span>
+        </h1>
+
+        <p>
+            Explore practical, career-focused courses designed to help
+            students, professionals and job seekers build valuable skills.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- ================================
+     COURSE CATALOGUE
+================================ -->
+
+<section class="course-catalogue">
+
+    <div class="section-heading">
+
+        <span>OUR COURSES</span>
+
+        <h2>Explore Our Learning Programs</h2>
+
+        <p>
+            Choose a course based on your education, career goals
+            and interests.
+        </p>
+
+    </div>
+
+
+    <!-- DYNAMIC COURSE CATALOGUE -->
+
+    <div class="course-catalogue-grid">
+
+        {% for course in courses %}
+
+        <div class="catalogue-card">
+
+            <!-- Course Icon -->
+
+            <div class="catalogue-icon">
+                {{ course.icon }}
+            </div>
+
+
+            <!-- Category -->
+
+            <span class="course-category">
+                {{ course.category }}
+            </span>
+
+
+            <!-- Course Title -->
+
+            <h3>
+                {{ course.title }}
+            </h3>
+
+
+            <!-- Description -->
+
+            <p>
+                {{ course.short_description }}
+            </p>
+
+
+            <!-- Course Meta -->
+
+            <div class="course-meta">
+
+                <span>
+                    {{ course.duration }}
+                </span>
+
+                <strong>
+
+                    {% if course.fee %}
+                        ₹{{ course.fee|floatformat:0 }}
+                    {% else %}
+                        Contact Us
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+
+            <!-- Details -->
+
+           <a href="{% url 'course_detail' course.slug %}"
+            class="course-details-btn">
+            View Details →
+            </a>
+
+        </div>
+
+
+        {% empty %}
+
+        <!-- No Courses -->
+
+        <div class="no-courses">
+
+            <h3>No Courses Available</h3>
+
+            <p>
+                Courses will be updated soon.
+            </p>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+
+<!-- ================================
+     COURSE CTA
+================================ -->
+
+<section class="courses-page-cta">
+
+    <div>
+
+        <span>NOT SURE WHAT TO CHOOSE?</span>
+
+        <h2>We'll Help You Find the Right Course.</h2>
+
+        <p>
+            Tell us your education level, interests and career goals.
+            Our team can help you choose the right learning program.
+        </p>
+
+        <a href="#" class="courses-cta-btn">
+            Talk to MCTI →
+        </a>
+
+    </div>
+
+</section>
+
+
+{% endblock %}
+

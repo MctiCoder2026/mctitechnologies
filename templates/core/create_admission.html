@@ -1,0 +1,1136 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Create Admission | MCTI Technologies</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f7fb;
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+            color: #172033;
+        }
+
+        /* ========================================
+           PAGE
+        ======================================== */
+
+        .page {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 30px 20px 50px;
+        }
+
+        /* ========================================
+           TOP BAR
+        ======================================== */
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+
+        .breadcrumb {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .breadcrumb strong {
+            color: #172033;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: #334155;
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 9px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .back-btn:hover {
+            background: #f8fafc;
+        }
+
+        /* ========================================
+           TITLE
+        ======================================== */
+
+        .page-title {
+            margin-bottom: 24px;
+        }
+
+        .page-title h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .page-title p {
+            margin: 7px 0 0;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        /* ========================================
+           CONVERSION STEPS
+        ======================================== */
+
+        .steps {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 18px 24px;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e2e8f0;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .step.active {
+            color: #2563eb;
+        }
+
+        .step.active .step-number {
+            background: #2563eb;
+            color: white;
+        }
+
+        .step.completed {
+            color: #16a34a;
+        }
+
+        .step.completed .step-number {
+            background: #16a34a;
+            color: white;
+        }
+
+        .step-line {
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        /* ========================================
+           LEAD CARD
+        ======================================== */
+
+        .lead-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 22px;
+        }
+
+        .lead-header {
+            padding: 18px 22px;
+            border-bottom: 1px solid #edf1f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .lead-header h2 {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .lead-badge {
+            background: #fff7ed;
+            color: #c2410c;
+            padding: 6px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .lead-body {
+            padding: 22px;
+            display: grid;
+            grid-template-columns:
+                1.3fr
+                1fr
+                1fr
+                1fr;
+            gap: 18px;
+        }
+
+        .lead-item label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            color: #94a3b8;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .lead-item div {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        /* ========================================
+           FORM CARD
+        ======================================== */
+
+        .form-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #edf1f5;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .section-header p {
+            margin: 5px 0 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .form-body {
+            padding: 26px 24px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 7px;
+            color: #334155;
+        }
+
+        .required {
+            color: #dc2626;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            border: 1px solid #d8dee8;
+            border-radius: 8px;
+            padding: 11px 12px;
+            font-size: 14px;
+            background: white;
+            color: #172033;
+            outline: none;
+            transition: .2s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #2563eb;
+            box-shadow:
+                0 0 0 3px rgba(37, 99, 235, .08);
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        /* ========================================
+           FEE SECTION
+        ======================================== */
+
+        .fee-section {
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 1px solid #edf1f5;
+        }
+
+        .fee-title {
+            margin-bottom: 18px;
+        }
+
+        .fee-title h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .fee-title p {
+            margin: 4px 0 0;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+            .fee-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+        }
+
+        .fee-box {
+            padding: 17px;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .fee-box label {
+            display: block;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 7px;
+        }
+
+        .fee-box input {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .balance-box {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+        }
+
+        .balance-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        /* ========================================
+           PAYMENT STATUS
+        ======================================== */
+
+        .payment-status {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-radius: 9px;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .payment-status span:first-child {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        #paymentStatus {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* ========================================
+           ERRORS
+        ======================================== */
+
+        .error {
+            margin-top: 5px;
+            color: #dc2626;
+            font-size: 12px;
+        }
+
+        .form-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        /* ========================================
+           ACTIONS
+        ======================================== */
+
+        .actions {
+            margin-top: 28px;
+            padding-top: 22px;
+            border-top: 1px solid #edf1f5;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-cancel {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .btn-save {
+            background: #16a34a;
+            color: white;
+            min-width: 180px;
+        }
+
+        .btn-save:hover {
+            background: #15803d;
+        }
+
+        /* ========================================
+           MOBILE
+        ======================================== */
+
+        @media (max-width: 800px) {
+
+            .page {
+                padding: 20px 12px 40px;
+            }
+
+            .topbar {
+                gap: 12px;
+            }
+
+            .page-title h1 {
+                font-size: 23px;
+            }
+
+            .steps {
+                padding: 15px;
+                overflow-x: auto;
+            }
+
+            .step-line {
+                min-width: 25px;
+            }
+
+            .lead-body {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .form-grid,
+            .fee-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+        }
+
+        @media (max-width: 500px) {
+
+            .lead-body {
+                grid-template-columns: 1fr;
+            }
+
+            .lead-header {
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .actions {
+                flex-direction: column-reverse;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="page">
+
+
+    <!-- ========================================
+         TOP BAR
+    ========================================= -->
+
+    <div class="topbar">
+
+        <div class="breadcrumb">
+
+            Enquiry Dashboard
+            /
+            <strong>Convert to Admission</strong>
+
+        </div>
+
+        <a
+            href="{% url 'enquiry_detail' enquiry.id %}"
+            class="back-btn">
+
+            ← Back to Lead
+
+        </a>
+
+    </div>
+
+
+    <!-- ========================================
+         TITLE
+    ========================================= -->
+
+    <div class="page-title">
+
+        <h1>Convert Lead to Admission</h1>
+
+        <p>
+            Create a student admission from this enquiry.
+        </p>
+
+    </div>
+
+
+    <!-- ========================================
+         CONVERSION STEPS
+    ========================================= -->
+
+    <div class="steps">
+
+        <div class="step completed">
+
+            <div class="step-number">
+                ✓
+            </div>
+
+            Lead
+
+        </div>
+
+        <div class="step-line"></div>
+
+        <div class="step active">
+
+            <div class="step-number">
+                2
+            </div>
+
+            Admission
+
+        </div>
+
+        <div class="step-line"></div>
+
+        <div class="step">
+
+            <div class="step-number">
+                3
+            </div>
+
+            Student
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================
+         LEAD SUMMARY
+    ========================================= -->
+
+    <div class="lead-card">
+
+        <div class="lead-header">
+
+            <h2>Lead Information</h2>
+
+            <span class="lead-badge">
+                {{ enquiry.get_status_display }}
+            </span>
+
+        </div>
+
+        <div class="lead-body">
+
+            <div class="lead-item">
+
+                <label>Student Name</label>
+
+                <div>
+                    {{ enquiry.name }}
+                </div>
+
+            </div>
+
+            <div class="lead-item">
+
+                <label>Mobile</label>
+
+                <div>
+                    {{ enquiry.mobile }}
+                </div>
+
+            </div>
+
+            <div class="lead-item">
+
+                <label>Course</label>
+
+                <div>
+                    {{ enquiry.course|default:"Not Selected" }}
+                </div>
+
+            </div>
+
+            <div class="lead-item">
+
+                <label>Branch</label>
+
+                <div>
+                    {{ enquiry.branch|default:"Not Selected" }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================
+         ADMISSION FORM
+    ========================================= -->
+
+    <div class="form-card">
+
+        <div class="section-header">
+
+            <h2>Admission Details</h2>
+
+            <p>
+                Verify student information and enter admission fee details.
+            </p>
+
+        </div>
+
+
+        <div class="form-body">
+
+      <form method="POST">
+
+    {% csrf_token %}
+
+    {% if form.errors %}
+
+        <div class="form-error">
+
+            <strong>
+                Please correct the following errors:
+            </strong>
+
+            {% for field in form %}
+
+                {% for error in field.errors %}
+
+                    <div style="margin-top:6px;">
+                        <strong>{{ field.label }}:</strong>
+                        {{ error }}
+                    </div>
+
+                {% endfor %}
+
+            {% endfor %}
+
+            {% for error in form.non_field_errors %}
+
+                <div style="margin-top:6px;">
+                    {{ error }}
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+
+                {% if form.non_field_errors %}
+
+                    <div class="form-error">
+
+                        {{ form.non_field_errors }}
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- ========================================
+                     STUDENT DETAILS
+                ========================================= -->
+
+                <div class="form-grid">
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Student Name
+                            <span class="required">*</span>
+                        </label>
+
+                        {{ form.student_name }}
+
+                        {% for error in form.student_name.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Mobile Number
+                            <span class="required">*</span>
+                        </label>
+
+                        {{ form.mobile }}
+
+                        {% for error in form.mobile.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Email
+                        </label>
+
+                        {{ form.email }}
+
+                        {% for error in form.email.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Course
+                            <span class="required">*</span>
+                        </label>
+
+                        {{ form.course }}
+
+                        {% for error in form.course.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Branch
+                        </label>
+
+                        {{ form.branch }}
+
+                        {% for error in form.branch.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Admission Date
+                            <span class="required">*</span>
+                        </label>
+
+                        {{ form.admission_date }}
+
+                        {% for error in form.admission_date.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- ========================================
+                     FEES
+                ========================================= -->
+
+                <div class="fee-section">
+
+                    <div class="fee-title">
+
+                        <h3>Fee Details</h3>
+
+                        <p>
+                            Enter the agreed course fee and amount collected today.
+                        </p>
+
+                    </div>
+
+
+                    <div class="fee-grid">
+
+
+                        <div class="fee-box">
+
+                            <label>
+                                Total Course Fee
+                            </label>
+
+                            {{ form.total_fee }}
+
+                            {% for error in form.total_fee.errors %}
+
+                                <div class="error">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="fee-box">
+
+                            <label>
+                                Paid Fee
+                            </label>
+
+                            {{ form.paid_fee }}
+
+                            {% for error in form.paid_fee.errors %}
+
+                                <div class="error">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+                        <div class="fee-box">
+
+    <label>
+        Initial Payment Mode
+        <span class="required">*</span>
+    </label>
+
+    {{ form.initial_payment_mode }}
+
+    {% for error in form.initial_payment_mode.errors %}
+
+        <div class="error">
+            {{ error }}
+        </div>
+
+    {% endfor %}
+
+</div>
+
+
+                        <div class="fee-box balance-box">
+
+                            <label>
+                                Balance Fee
+                            </label>
+
+                            <div
+                                class="balance-value"
+                                id="balanceFee">
+
+                                ₹0
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="payment-status">
+
+                        <span>
+                            Payment Status
+                        </span>
+
+                        <span id="paymentStatus">
+                            Pending
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ========================================
+                     NOTES
+                ========================================= -->
+
+                <div
+                    class="form-group"
+                    style="margin-top: 25px;">
+
+                    <label>
+                        Admission Notes
+                    </label>
+
+                    {{ form.notes }}
+
+                    {% for error in form.notes.errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- ========================================
+                     ACTIONS
+                ========================================= -->
+
+                <div class="actions">
+
+                    <a
+                        href="{% url 'enquiry_detail' enquiry.id %}"
+                        class="btn btn-cancel">
+
+                        Cancel
+
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="btn btn-save">
+
+                        ✓ Create Admission
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================
+     FEE CALCULATOR
+======================================== -->
+
+<script>
+
+    const totalFee =
+        document.getElementById(
+            "id_total_fee"
+        );
+
+    const paidFee =
+        document.getElementById(
+            "id_paid_fee"
+        );
+
+    const balanceFee =
+        document.getElementById(
+            "balanceFee"
+        );
+
+    const paymentStatus =
+        document.getElementById(
+            "paymentStatus"
+        );
+
+
+    function updateFee() {
+
+        let total =
+            parseFloat(totalFee.value)
+            || 0;
+
+        let paid =
+            parseFloat(paidFee.value)
+            || 0;
+
+        let balance =
+            total - paid;
+
+
+        if (balance < 0) {
+            balance = 0;
+        }
+
+
+        balanceFee.innerText =
+            "₹" +
+            balance.toLocaleString(
+                "en-IN"
+            );
+
+
+        if (paid <= 0) {
+
+            paymentStatus.innerText =
+                "Pending";
+
+        }
+
+        else if (paid < total) {
+
+            paymentStatus.innerText =
+                "Partially Paid";
+
+        }
+
+        else {
+
+            paymentStatus.innerText =
+                "Fully Paid";
+
+        }
+
+    }
+
+
+    if (totalFee) {
+
+        totalFee.addEventListener(
+            "input",
+            updateFee
+        );
+
+    }
+
+
+    if (paidFee) {
+
+        paidFee.addEventListener(
+            "input",
+            updateFee
+        );
+
+    }
+
+
+    updateFee();
+
+</script>
+
+
+</body>
+
+</html>
+

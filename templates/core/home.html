@@ -1,12 +1,866 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>MCTI Technologies</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-    <h1>Welcome to MCTI Technologies</h1>
-    <p>Django website is working!</p>
+{% block title %}
+MCTI Technologies | Education, IT Solutions & AI
+{% endblock %}
 
-</body>
-</html>
+{% block content %}
+
+<!-- ================================
+     HERO
+================================ -->
+
+<section class="hero">
+
+
+<div class="hero-content">
+
+    <h1>
+        Empowering People & Businesses
+        <span>Through Technology</span>
+    </h1>
+
+    <p>
+        Education, IT Solutions, AI & SaaS —
+        everything you need to learn, build and grow.
+    </p>
+
+    <div class="hero-buttons">
+
+        <a
+            href="{% url 'business_solutions' %}"
+            class="btn-primary"
+        >
+            Explore Solutions
+        </a>
+
+        <a
+            href="{% url 'contact' %}"
+            class="btn-secondary"
+        >
+            Contact Us
+        </a>
+
+    </div>
+
+</div>
+
+
+</section>
+
+<!-- ================================
+     WELCOME
+================================ -->
+
+<section class="welcome">
+
+
+<h2>Welcome to MCTI Technologies</h2>
+
+<p>
+    We combine education, technology and innovation to help
+    students, professionals and businesses grow in the digital era.
+</p>
+
+
+</section>
+
+<!-- ================================
+     DIVISIONS
+================================ -->
+
+<section class="divisions">
+
+
+<div class="section-heading">
+
+    <span>WHAT WE DO</span>
+
+    <h2>One Technology Partner. Multiple Solutions.</h2>
+
+    <p>
+        MCTI Technologies brings together education, business technology,
+        artificial intelligence and SaaS solutions under one ecosystem.
+    </p>
+
+</div>
+
+
+<div class="division-grid">
+
+    <!-- Academy -->
+
+    <div class="division-card">
+
+        <div class="division-icon">🎓</div>
+
+        <h3>MCTI Academy</h3>
+
+        <p>
+            Practical computer education, professional courses and
+            career-focused technology training for students and professionals.
+        </p>
+
+        <a href="{% url 'academy' %}">
+            Explore Academy →
+        </a>
+
+    </div>
+
+
+    <!-- Business Solutions -->
+
+    <div class="division-card">
+
+        <div class="division-icon">💼</div>
+
+        <h3>MCTI Business Solutions</h3>
+
+        <p>
+            Websites, software, digital transformation and technology
+            solutions designed to help businesses grow.
+        </p>
+
+        <a href="{% url 'business_solutions' %}">
+            Explore Solutions →
+        </a>
+
+    </div>
+
+
+    <!-- AI -->
+
+    <div class="division-card">
+
+        <div class="division-icon">🤖</div>
+
+        <h3>MCTI AI</h3>
+
+        <p>
+            AI training, automation and intelligent solutions that help
+            people and businesses work smarter.
+        </p>
+
+        <a href="{% url 'ai' %}">
+            Explore AI →
+        </a>
+
+    </div>
+
+
+    <!-- SaaS -->
+
+    <div class="division-card">
+
+        <div class="division-icon">☁️</div>
+
+        <h3>MCTI SaaS</h3>
+
+        <p>
+            Cloud-based software platforms designed to simplify operations
+            and create scalable digital businesses.
+        </p>
+
+        <a href="{% url 'saas' %}">
+            Explore SaaS →
+        </a>
+
+    </div>
+
+</div>
+
+
+</section>
+
+<!-- ================================
+     MCTI ACADEMY - COURSES
+================================ -->
+
+<section class="courses">
+
+
+<div class="section-heading">
+
+    <span>MCTI ACADEMY</span>
+
+    <h2>Learn Skills. Build Your Career.</h2>
+
+    <p>
+        Industry-focused courses designed for students, professionals
+        and job seekers to build practical technology skills.
+    </p>
+
+</div>
+
+
+<div class="course-grid">
+
+    <!-- Office & Accounting -->
+
+    <div class="course-card">
+
+        <div class="course-icon">💼</div>
+
+        <h3>Office & Accounting</h3>
+
+        <p>
+            Master MS Office, Advanced Excel, Tally Prime,
+            GST and professional accounting skills.
+        </p>
+
+        <a href="{% url 'courses' %}">
+            View Courses →
+        </a>
+
+    </div>
+
+
+    <!-- Data & Analytics -->
+
+    <div class="course-card">
+
+        <div class="course-icon">📊</div>
+
+        <h3>Data & Analytics</h3>
+
+        <p>
+            Learn Excel, SQL, Python and Power BI to
+            build practical data analysis skills.
+        </p>
+
+        <a href="{% url 'courses' %}">
+            View Courses →
+        </a>
+
+    </div>
+
+
+    <!-- Development -->
+
+    <div class="course-card">
+
+        <div class="course-icon">👨‍💻</div>
+
+        <h3>Programming & Development</h3>
+
+        <p>
+            Learn Python, Java, Web Development and
+            Full Stack Development with practical projects.
+        </p>
+
+        <a href="{% url 'courses' %}">
+            View Courses →
+        </a>
+
+    </div>
+
+
+    <!-- Design & Marketing -->
+
+    <div class="course-card">
+
+        <div class="course-icon">🎨</div>
+
+        <h3>Design & Digital Marketing</h3>
+
+        <p>
+            Build creative and marketing skills with
+            Photoshop, Graphic Design and Digital Marketing.
+        </p>
+
+        <a href="{% url 'courses' %}">
+            View Courses →
+        </a>
+
+    </div>
+
+
+    <!-- AI -->
+
+    <div class="course-card">
+
+        <div class="course-icon">🤖</div>
+
+        <h3>AI & Emerging Technology</h3>
+
+        <p>
+            Learn Artificial Intelligence, AI tools,
+            automation and modern technology.
+        </p>
+
+        <a href="{% url 'courses' %}">
+            View Courses →
+        </a>
+
+    </div>
+
+
+    <!-- Professional -->
+
+    <div class="course-card">
+
+        <div class="course-icon">🚀</div>
+
+        <h3>Professional IT Courses</h3>
+
+        <p>
+            Upgrade your career with Cyber Security,
+            DevOps, SAP, UI/UX and other professional skills.
+        </p>
+
+        <a href="{% url 'courses' %}">
+            View Courses →
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="courses-button">
+
+    <a
+        href="{% url 'courses' %}"
+        class="btn-primary"
+    >
+        Explore All Courses →
+    </a>
+
+</div>
+```
+
+</section>
+
+<!-- ================================
+     WHY CHOOSE MCTI
+================================ -->
+
+<section class="why-mcti">
+
+```
+<div class="section-heading">
+
+    <span>WHY MCTI</span>
+
+    <h2>Why Choose MCTI Technologies?</h2>
+
+    <p>
+        We focus on practical skills, modern technology and
+        career-oriented learning to help you achieve real results.
+    </p>
+
+</div>
+
+
+<div class="why-grid">
+
+    <div class="why-card">
+
+        <div class="why-icon">🎯</div>
+
+        <h3>Practical Learning</h3>
+
+        <p>
+            Learn through hands-on training, practical assignments
+            and real-world projects.
+        </p>
+
+    </div>
+
+
+    <div class="why-card">
+
+        <div class="why-icon">👨‍🏫</div>
+
+        <h3>Experienced Trainers</h3>
+
+        <p>
+            Learn from trainers who focus on practical knowledge,
+            guidance and industry requirements.
+        </p>
+
+    </div>
+
+
+    <div class="why-card">
+
+        <div class="why-icon">💻</div>
+
+        <h3>Industry-Relevant Skills</h3>
+
+        <p>
+            Develop skills that are useful for jobs, business
+            and today's digital workplace.
+        </p>
+
+    </div>
+
+
+    <div class="why-card">
+
+        <div class="why-icon">🏢</div>
+
+        <h3>Multiple Learning Centers</h3>
+
+        <p>
+            Access MCTI training through our growing network
+            of learning centers.
+        </p>
+
+    </div>
+
+
+    <div class="why-card">
+
+        <div class="why-icon">🚀</div>
+
+        <h3>Career Focused</h3>
+
+        <p>
+            Our courses are designed to help students build
+            confidence and prepare for career opportunities.
+        </p>
+
+    </div>
+
+
+    <div class="why-card">
+
+        <div class="why-icon">🤖</div>
+
+        <h3>AI & Modern Technology</h3>
+
+        <p>
+            Stay ahead with AI tools, automation and
+            modern technology-based learning.
+        </p>
+
+    </div>
+
+</div>
+```
+
+</section>
+
+<!-- ================================
+     MCTI NUMBERS
+================================ -->
+
+<section class="mcti-stats">
+
+```
+<div class="stats-container">
+
+    <div class="stat-box">
+
+        <h2>10,000+</h2>
+
+        <p>
+            Students Trained
+        </p>
+
+    </div>
+
+
+    <div class="stat-box">
+
+        <h2>5+</h2>
+
+        <p>
+            Learning Centers
+        </p>
+
+    </div>
+
+
+    <div class="stat-box">
+
+        <h2>50+</h2>
+
+        <p>
+            Professional Courses
+        </p>
+
+    </div>
+
+
+    <div class="stat-box">
+
+        <h2>10+</h2>
+
+        <p>
+            Years of Experience
+        </p>
+
+    </div>
+
+</div>
+```
+
+</section>
+
+<!-- ================================
+     OUR BRANCHES
+================================ -->
+
+<section class="branches">
+
+```
+<div class="section-heading">
+
+    <span>OUR CENTERS</span>
+
+    <h2>Find MCTI Near You</h2>
+
+    <p>
+        Visit your nearest MCTI learning center and start
+        building practical technology skills.
+    </p>
+
+</div>
+
+
+<div class="branch-grid">
+
+    <!-- Kharghar -->
+
+    <div class="branch-card">
+
+        <div class="branch-icon">📍</div>
+
+        <h3>Kharghar</h3>
+
+        <span class="branch-label">
+            Head Office
+        </span>
+
+        <p>
+            Our main MCTI learning center offering
+            professional computer and technology courses.
+        </p>
+
+        <a href="#">
+            View Center →
+        </a>
+
+    </div>
+
+
+    <!-- Panvel -->
+
+    <div class="branch-card">
+
+        <div class="branch-icon">📍</div>
+
+        <h3>Panvel</h3>
+
+        <span class="branch-label">
+            Learning Center
+        </span>
+
+        <p>
+            Professional computer education and
+            career-focused training.
+        </p>
+
+        <a href="#">
+            View Center →
+        </a>
+
+    </div>
+
+
+    <!-- Koperkhairane -->
+
+    <div class="branch-card">
+
+        <div class="branch-icon">📍</div>
+
+        <h3>Koperkhairane</h3>
+
+        <span class="branch-label">
+            Learning Center
+        </span>
+
+        <p>
+            Practical computer training for students,
+            professionals and job seekers.
+        </p>
+
+        <a href="#">
+            View Center →
+        </a>
+
+    </div>
+
+
+    <!-- Kamothe -->
+
+    <div class="branch-card">
+
+        <div class="branch-icon">📍</div>
+
+        <h3>Kamothe</h3>
+
+        <span class="branch-label">
+            Learning Center
+        </span>
+
+        <p>
+            Learn professional computer and
+            technology skills near you.
+        </p>
+
+        <a href="#">
+            View Center →
+        </a>
+
+    </div>
+
+
+    <!-- Ghansoli -->
+
+    <div class="branch-card">
+
+        <div class="branch-icon">📍</div>
+
+        <h3>Ghansoli</h3>
+
+        <span class="branch-label">
+            Learning Center
+        </span>
+
+        <p>
+            Career-oriented technology education
+            with practical training.
+        </p>
+
+        <a href="#">
+            View Center →
+        </a>
+
+    </div>
+
+
+    <!-- Nerul -->
+
+    <div class="branch-card">
+
+        <div class="branch-icon">📍</div>
+
+        <h3>Nerul</h3>
+
+        <span class="branch-label">
+            Learning Center
+        </span>
+
+        <p>
+            Practical computer education and
+            career-focused technology training.
+        </p>
+
+        <a href="#">
+            View Center →
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="branches-button">
+
+    <a
+        href="#"
+        class="btn-primary"
+    >
+        View All Centers →
+    </a>
+
+</div>
+
+
+</section>
+
+<!-- ================================
+     STUDENT TESTIMONIALS
+================================ -->
+
+<section class="testimonials">
+
+```
+<div class="section-heading">
+
+    <span>STUDENT STORIES</span>
+
+    <h2>What Our Students Say</h2>
+
+    <p>
+        Our students learn practical skills, gain confidence
+        and prepare themselves for their next career opportunity.
+    </p>
+
+</div>
+
+
+<div class="testimonial-grid">
+
+    <!-- Testimonial 1 -->
+
+    <div class="testimonial-card">
+
+        <div class="testimonial-stars">
+            ★★★★★
+        </div>
+
+        <p class="testimonial-text">
+            "The training was very practical and easy to understand.
+            The trainers explained every topic with real examples."
+        </p>
+
+        <div class="student-info">
+
+            <div class="student-avatar">
+                S
+            </div>
+
+            <div>
+
+                <h3>
+                    Student Name
+                </h3>
+
+                <span>
+                    MCTI Academy
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Testimonial 2 -->
+
+    <div class="testimonial-card">
+
+        <div class="testimonial-stars">
+            ★★★★★
+        </div>
+
+        <p class="testimonial-text">
+            "I improved my Excel and computer skills significantly.
+            The practical assignments helped me understand the concepts."
+        </p>
+
+        <div class="student-info">
+
+            <div class="student-avatar">
+                R
+            </div>
+
+            <div>
+
+                <h3>
+                    Student Name
+                </h3>
+
+                <span>
+                    MCTI Academy
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Testimonial 3 -->
+
+    <div class="testimonial-card">
+
+        <div class="testimonial-stars">
+            ★★★★★
+        </div>
+
+        <p class="testimonial-text">
+            "The learning environment is supportive and the trainers
+            are always ready to help. I would recommend MCTI to others."
+        </p>
+
+        <div class="student-info">
+
+            <div class="student-avatar">
+                A
+            </div>
+
+            <div>
+
+                <h3>
+                    Student Name
+                </h3>
+
+                <span>
+                    MCTI Academy
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+</section>
+
+<!-- ================================
+     FINAL CTA
+================================ -->
+
+<section class="final-cta">
+
+
+<div class="cta-content">
+
+    <span>
+        START YOUR JOURNEY
+    </span>
+
+    <h2>
+        Ready to Learn, Build & Grow?
+    </h2>
+
+    <p>
+        Whether you are a student looking to build your career,
+        a professional upgrading your skills, or a business
+        looking for technology solutions — MCTI is here to help.
+    </p>
+
+    <div class="cta-buttons">
+
+        <a
+            href="{% url 'courses' %}"
+            class="cta-primary"
+        >
+            Explore Courses →
+        </a>
+
+        <a
+            href="{% url 'contact' %}"
+            class="cta-secondary"
+        >
+            Enquire Now
+        </a>
+
+    </div>
+
+</div>
+
+
+</section>
+
+{% endblock %}

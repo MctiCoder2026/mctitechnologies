@@ -1,0 +1,1225 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Fee Payments | MCTI Technologies</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #ff6b00;
+    --primary-dark: #e85d00;
+    --primary-light: #fff4eb;
+
+    --dark: #111827;
+    --dark-2: #1f2937;
+
+    --white: #ffffff;
+    --bg: #f5f7fa;
+
+    --border: #e5e7eb;
+    --muted: #6b7280;
+
+    --green: #15803d;
+    --green-bg: #dcfce7;
+
+    --blue: #2563eb;
+    --blue-bg: #dbeafe;
+}
+
+/* =========================================================
+   BODY
+========================================================= */
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--dark);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.container {
+    width: 100%;
+    max-width: 1400px;
+    margin: auto;
+    padding: 28px;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.page-header {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 26px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 22px;
+
+    box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand-icon {
+    width: 48px;
+    height: 48px;
+
+    background: var(--primary);
+    color: white;
+
+    border-radius: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 23px;
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.brand h1 span {
+    color: var(--primary);
+}
+
+.brand p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.back-btn {
+    text-decoration: none;
+    background: var(--dark);
+    color: white;
+
+    padding: 11px 18px;
+    border-radius: 9px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    transition: 0.2s;
+}
+
+.back-btn:hover {
+    background: var(--primary);
+}
+
+/* =========================================================
+   SUMMARY
+========================================================= */
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.summary-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    padding: 20px;
+
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+}
+
+.summary-icon {
+    width: 46px;
+    height: 46px;
+
+    border-radius: 11px;
+
+    background: var(--primary-light);
+    color: var(--primary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 21px;
+}
+
+.summary-info small {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    margin-bottom: 5px;
+}
+
+.summary-info strong {
+    font-size: 21px;
+}
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.search-box {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    padding: 18px;
+
+    margin-bottom: 22px;
+
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+}
+
+.search-form {
+    display: flex;
+    gap: 10px;
+}
+
+.search-input {
+    flex: 1;
+
+    height: 44px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+
+    padding: 0 14px;
+
+    font-size: 13px;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 3px rgba(255,107,0,0.10);
+}
+
+.search-btn {
+    border: none;
+
+    background: var(--primary);
+    color: white;
+
+    padding: 0 22px;
+
+    border-radius: 8px;
+
+    font-weight: 700;
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.search-btn:hover {
+    background: var(--primary-dark);
+}
+
+.clear-btn {
+    display: flex;
+    align-items: center;
+
+    text-decoration: none;
+
+    background: #f3f4f6;
+    color: var(--dark);
+
+    padding: 0 18px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* =========================================================
+   TABLE CARD
+========================================================= */
+
+.table-card {
+    background: white;
+
+    border: 1px solid var(--border);
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+/* =========================================================
+   STUDENT SUMMARY
+========================================================= */
+
+.student-summary {
+
+    padding: 20px 22px;
+
+    background: var(--primary-light);
+
+    border-bottom: 1px solid var(--border);
+    border-left: 5px solid var(--primary);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+}
+
+.student-summary-left {
+
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+}
+
+.student-summary-avatar {
+
+    width: 52px;
+    height: 52px;
+
+    border-radius: 50%;
+
+    background: var(--primary);
+    color: var(--white);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+    font-weight: 900;
+
+    flex-shrink: 0;
+}
+
+.student-summary-label {
+
+    color: var(--primary);
+
+    font-size: 9px;
+    font-weight: 900;
+
+    letter-spacing: 1px;
+
+    margin-bottom: 4px;
+}
+
+.student-summary-name {
+
+    color: var(--dark);
+
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.student-summary-id {
+
+    margin-top: 4px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+.student-course {
+
+    background: var(--dark);
+    color: var(--white);
+
+    padding: 10px 15px;
+
+    border-radius: 7px;
+
+    min-width: 180px;
+}
+
+.student-course span {
+
+    display: block;
+
+    color: #aaaaaa;
+
+    font-size: 8px;
+    font-weight: 800;
+
+    letter-spacing: 1px;
+
+    margin-bottom: 4px;
+}
+
+.student-course strong {
+
+    color: var(--white);
+
+    font-size: 12px;
+}
+
+/* =========================================================
+   TABLE HEADER
+========================================================= */
+
+.table-header {
+    padding: 19px 22px;
+
+    border-bottom: 1px solid var(--border);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-header h2 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.payment-count {
+    background: var(--dark);
+    color: white;
+
+    padding: 6px 11px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 950px;
+}
+
+thead th {
+    background: var(--dark);
+    color: white;
+
+    padding: 13px 15px;
+
+    text-align: left;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    white-space: nowrap;
+}
+
+tbody td {
+    padding: 15px;
+
+    border-bottom: 1px solid var(--border);
+
+    font-size: 12px;
+
+    vertical-align: middle;
+}
+
+tbody tr:hover {
+    background: #fffaf5;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* =========================================================
+   RECEIPT
+========================================================= */
+
+.receipt-number {
+    color: var(--primary);
+    font-weight: 800;
+    font-size: 12px;
+}
+
+/* =========================================================
+   STUDENT
+========================================================= */
+
+.student-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.student-avatar {
+    width: 35px;
+    height: 35px;
+
+    border-radius: 9px;
+
+    background: var(--primary-light);
+    color: var(--primary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    flex-shrink: 0;
+}
+
+.student-name {
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.student-id {
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 3px;
+}
+
+/* =========================================================
+   COURSE
+========================================================= */
+
+.course {
+    font-weight: 600;
+    color: var(--dark-2);
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+.mobile {
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+/* =========================================================
+   AMOUNT
+========================================================= */
+
+.amount {
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   PAYMENT MODE
+========================================================= */
+
+.payment-mode {
+    display: inline-block;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    background: var(--blue-bg);
+    color: var(--blue);
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* =========================================================
+   DATE
+========================================================= */
+
+.date {
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+/* =========================================================
+   RECEIPT BUTTON
+========================================================= */
+
+.receipt-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    text-decoration: none;
+
+    background: var(--dark);
+    color: white;
+
+    padding: 8px 12px;
+
+    border-radius: 7px;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    transition: 0.2s;
+}
+
+.receipt-btn:hover {
+    background: var(--primary);
+}
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.empty {
+    text-align: center;
+    padding: 70px 20px;
+}
+
+.empty-icon {
+    font-size: 45px;
+    margin-bottom: 12px;
+}
+
+.empty h3 {
+    margin: 0 0 6px;
+    font-size: 18px;
+}
+
+.empty p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer {
+    text-align: center;
+
+    margin-top: 22px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+.footer strong {
+    color: var(--primary);
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 800px) {
+
+    .container {
+        padding: 12px;
+    }
+
+    .page-header {
+        padding: 18px;
+
+        flex-direction: column;
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+    .back-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .search-form {
+        flex-direction: column;
+    }
+
+    .search-btn,
+    .clear-btn {
+        height: 44px;
+        justify-content: center;
+    }
+
+    .student-summary {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .student-course {
+        width: 100%;
+    }
+
+    .table-header {
+        padding: 16px;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<div class="page-header">
+
+    <div class="brand">
+
+        <div class="brand-icon">
+            💳
+        </div>
+
+        <div>
+
+            <h1>
+                <span>MCTI</span> Technologies
+            </h1>
+
+            <p>
+                Fee Payment Management System
+            </p>
+
+        </div>
+
+    </div>
+
+    <a href="{% url 'enquiry_dashboard' %}" class="back-btn">
+        ← Dashboard
+    </a>
+
+</div>
+
+
+<!-- =====================================================
+     SUMMARY
+===================================================== -->
+
+<div class="summary-grid">
+
+    <div class="summary-card">
+
+        <div class="summary-icon">
+            🧾
+        </div>
+
+        <div class="summary-info">
+
+            <small>Total Payment Records</small>
+
+            <strong>
+                {{ payments|length }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-icon">
+            💰
+        </div>
+
+        <div class="summary-info">
+
+            <small>Payment Management</small>
+
+            <strong>
+                MCTI
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-icon">
+            📊
+        </div>
+
+        <div class="summary-info">
+
+            <small>Current View</small>
+
+            <strong>
+
+                {% if selected_student %}
+                    Student
+                {% else %}
+                    All
+                {% endif %}
+
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     SEARCH
+===================================================== -->
+
+<div class="search-box">
+
+    <form method="GET" class="search-form">
+
+        <input
+            type="text"
+            name="search"
+            value="{{ search }}"
+            class="search-input"
+            placeholder="Search student name, student ID, mobile or receipt number..."
+        >
+
+        <button type="submit" class="search-btn">
+            🔎 Search
+        </button>
+
+        {% if search %}
+
+            <a
+                href="{% url 'fee_payment_list' %}"
+                class="clear-btn"
+            >
+                Clear
+            </a>
+
+        {% endif %}
+
+    </form>
+
+</div>
+
+
+<!-- =====================================================
+     PAYMENT TABLE
+===================================================== -->
+
+<div class="table-card">
+
+
+    <!-- =================================================
+         STUDENT SUMMARY
+    ================================================= -->
+
+    {% if selected_student %}
+
+        <div class="student-summary">
+
+            <div class="student-summary-left">
+
+                <div class="student-summary-avatar">
+
+                    {{ selected_student.name|first|upper }}
+
+                </div>
+
+
+                <div>
+
+                    <div class="student-summary-label">
+                        STUDENT PAYMENT HISTORY
+                    </div>
+
+                    <div class="student-summary-name">
+                        {{ selected_student.name }}
+                    </div>
+
+                    <div class="student-summary-id">
+
+                        {{ selected_student.student_id }}
+
+                        &nbsp; • &nbsp;
+
+                        {{ selected_student.mobile }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="student-course">
+
+                <span>COURSE</span>
+
+                <strong>
+
+                    {% if selected_student.course %}
+
+                        {{ selected_student.course.title }}
+
+                    {% else %}
+
+                        Not Assigned
+
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- =================================================
+         TABLE HEADER
+    ================================================= -->
+
+    <div class="table-header">
+
+        <h2>
+
+            {% if selected_student %}
+
+                Payment History — {{ selected_student.name }}
+
+            {% else %}
+
+                Fee Payment History
+
+            {% endif %}
+
+        </h2>
+
+
+        <span class="payment-count">
+
+            {{ payments|length }} Records
+
+        </span>
+
+    </div>
+
+
+    <!-- =================================================
+         PAYMENT RECORDS
+    ================================================= -->
+
+    {% if payments %}
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Receipt
+                        </th>
+
+                        <th>
+                            Student
+                        </th>
+
+                        <th>
+                            Mobile
+                        </th>
+
+                        <th>
+                            Course
+                        </th>
+
+                        <th>
+                            Amount
+                        </th>
+
+                        <th>
+                            Mode
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                {% for payment in payments %}
+
+                    <tr>
+
+
+                        <!-- RECEIPT -->
+
+                        <td>
+
+                            <div class="receipt-number">
+
+                                {{ payment.receipt_number }}
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- STUDENT -->
+
+                        <td>
+
+                            <div class="student-cell">
+
+                                <div class="student-avatar">
+
+                                    {{ payment.student.name|first|upper }}
+
+                                </div>
+
+
+                                <div>
+
+                                    <div class="student-name">
+
+                                        {{ payment.student.name }}
+
+                                    </div>
+
+                                    <div class="student-id">
+
+                                        {{ payment.student.student_id }}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- MOBILE -->
+
+                        <td>
+
+                            <span class="mobile">
+
+                                {{ payment.student.mobile }}
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- COURSE -->
+
+                        <td>
+
+                            {% if payment.student.course %}
+
+                                <span class="course">
+
+                                    {{ payment.student.course.title }}
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="mobile">
+
+                                    Not Assigned
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- AMOUNT -->
+
+                        <td>
+
+                            <span class="amount">
+
+                                ₹{{ payment.amount|floatformat:2 }}
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- PAYMENT MODE -->
+
+                        <td>
+
+                            <span class="payment-mode">
+
+                                {{ payment.get_payment_mode_display }}
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- DATE -->
+
+                        <td>
+
+                            <span class="date">
+
+                                {{ payment.payment_date|date:"d M Y" }}
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- RECEIPT -->
+
+                        <td>
+
+                            <a
+                                href="{% url 'fee_receipt' payment.receipt_number %}"
+                                target="_blank"
+                                class="receipt-btn"
+                            >
+
+                                🧾 Receipt
+
+                            </a>
+
+                        </td>
+
+
+                    </tr>
+
+                {% endfor %}
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    {% else %}
+
+
+        <div class="empty">
+
+            <div class="empty-icon">
+                💳
+            </div>
+
+            <h3>
+                No Payments Found
+            </h3>
+
+            <p>
+
+                {% if selected_student %}
+
+                    No payment history found for
+                    <strong>{{ selected_student.name }}</strong>.
+
+                {% elif search %}
+
+                    No payment records matched your search.
+
+                {% else %}
+
+                    No fee payments have been recorded yet.
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<div class="footer">
+
+    © {% now "Y" %}
+
+    <strong>
+        MCTI Technologies
+    </strong>
+
+    — Fee Management System
+
+</div>
+
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,1330 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Staff Management | MCTI</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --primary:#ff6b00;
+    --primary-dark:#e85d00;
+    --primary-light:#fff2e8;
+
+    --dark:#111827;
+    --bg:#f5f7fb;
+    --white:#ffffff;
+
+    --border:#e5e7eb;
+    --muted:#6b7280;
+
+    --green:#16a34a;
+    --blue:#2563eb;
+    --red:#dc2626;
+    --purple:#7c3aed;
+}
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--bg);
+    color:var(--dark);
+}
+
+.dashboard{
+    display:flex;
+    min-height:100vh;
+}
+
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar{
+    width:250px;
+    background:var(--dark);
+    color:white;
+    padding:24px 18px;
+
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+}
+
+.logo{
+    margin-bottom:35px;
+}
+
+.logo h2{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.logo h2 span{
+    color:var(--primary);
+}
+
+.logo p{
+    font-size:11px;
+    color:#9ca3af;
+}
+
+.menu-title{
+    font-size:10px;
+    color:#6b7280;
+    letter-spacing:1px;
+    margin:22px 10px 10px;
+}
+
+.menu a{
+    display:flex;
+    align-items:center;
+    gap:11px;
+
+    text-decoration:none;
+    color:#d1d5db;
+
+    padding:12px 13px;
+    border-radius:9px;
+
+    margin-bottom:6px;
+
+    font-size:13px;
+    font-weight:700;
+
+    transition:0.2s;
+}
+
+.menu a:hover{
+    background:#2b3545;
+    color:white;
+}
+
+.menu a.active{
+    background:var(--primary);
+    color:white;
+}
+
+.admin-link{
+    margin-top:25px;
+    border-top:1px solid #374151;
+    padding-top:20px;
+}
+
+
+/* =========================
+   MAIN
+========================= */
+
+.main{
+    margin-left:250px;
+    width:calc(100% - 250px);
+}
+
+
+/* =========================
+   TOPBAR
+========================= */
+
+.topbar{
+    min-height:76px;
+    background:white;
+    border-bottom:1px solid var(--border);
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:15px 30px;
+
+    position:sticky;
+    top:0;
+    z-index:10;
+}
+
+.topbar-left h1{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.topbar-left p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.topbar-right{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.user-box{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.user-avatar{
+    width:39px;
+    height:39px;
+
+    border-radius:50%;
+
+    background:var(--primary);
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-weight:800;
+}
+
+.user-info strong{
+    display:block;
+    font-size:12px;
+}
+
+.user-info span{
+    font-size:10px;
+    color:var(--muted);
+}
+
+.logout-btn{
+    text-decoration:none;
+
+    background:#fee2e2;
+    color:var(--red);
+
+    padding:9px 13px;
+    border-radius:8px;
+
+    font-size:11px;
+    font-weight:700;
+}
+
+.logout-btn:hover{
+    background:var(--red);
+    color:white;
+}
+
+
+/* =========================
+   CONTENT
+========================= */
+
+.content{
+    padding:28px;
+}
+
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin-bottom:22px;
+}
+
+.page-header h2{
+    font-size:22px;
+    margin-bottom:5px;
+}
+
+.page-header p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.header-actions{
+    display:flex;
+    gap:10px;
+}
+
+.dashboard-btn{
+    text-decoration:none;
+
+    background:var(--dark);
+    color:white;
+
+    padding:11px 15px;
+    border-radius:9px;
+
+    font-size:11px;
+    font-weight:700;
+}
+
+.dashboard-btn:hover{
+    background:var(--primary);
+}
+
+
+/* =========================
+   SUMMARY CARDS
+========================= */
+
+.summary-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.summary-card{
+    background:white;
+
+    border:1px solid var(--border);
+    border-radius:14px;
+
+    padding:18px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,0.04);
+}
+
+.summary-icon{
+    width:42px;
+    height:42px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:10px;
+
+    background:var(--primary-light);
+
+    font-size:19px;
+
+    margin-bottom:14px;
+}
+
+.summary-card p{
+    color:var(--muted);
+    font-size:11px;
+    font-weight:700;
+
+    margin-bottom:5px;
+}
+
+.summary-card h3{
+    font-size:25px;
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+.search-panel{
+    background:white;
+
+    border:1px solid var(--border);
+    border-radius:14px;
+
+    padding:18px;
+
+    margin-bottom:20px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,0.04);
+}
+
+.search-form{
+    display:flex;
+    gap:10px;
+}
+
+.search-form input{
+    flex:1;
+
+    padding:12px 14px;
+
+    border:1px solid var(--border);
+    border-radius:9px;
+
+    outline:none;
+
+    font-size:13px;
+}
+
+.search-form input:focus{
+    border-color:var(--primary);
+}
+
+.search-btn{
+    border:none;
+
+    background:var(--primary);
+    color:white;
+
+    padding:12px 20px;
+    border-radius:9px;
+
+    cursor:pointer;
+
+    font-weight:700;
+}
+
+.search-btn:hover{
+    background:var(--primary-dark);
+}
+
+.clear-btn{
+    text-decoration:none;
+
+    background:#f3f4f6;
+    color:var(--dark);
+
+    padding:12px 17px;
+    border-radius:9px;
+
+    font-size:12px;
+    font-weight:700;
+}
+
+
+/* =========================
+   TABLE
+========================= */
+
+.table-panel{
+    background:white;
+
+    border:1px solid var(--border);
+    border-radius:15px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,0.04);
+
+    overflow:hidden;
+}
+
+.table-header{
+    padding:19px 20px;
+
+    border-bottom:1px solid var(--border);
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.table-header h3{
+    font-size:15px;
+}
+
+.table-header span{
+    color:var(--muted);
+    font-size:11px;
+}
+
+.table-responsive{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1500px;
+}
+
+thead{
+    background:#f9fafb;
+}
+
+th{
+    padding:13px 15px;
+
+    text-align:left;
+
+    color:var(--muted);
+
+    font-size:10px;
+
+    border-bottom:1px solid var(--border);
+}
+
+td{
+    padding:15px;
+
+    border-bottom:1px solid #f0f1f3;
+
+    font-size:12px;
+    vertical-align:middle;
+}
+
+tbody tr:hover{
+    background:#fffaf6;
+}
+
+
+/* =========================
+   STAFF
+========================= */
+
+.staff-profile{
+    display:flex;
+    align-items:center;
+    gap:11px;
+}
+
+.staff-avatar{
+    width:39px;
+    height:39px;
+
+    flex-shrink:0;
+
+    border-radius:50%;
+
+    background:var(--primary-light);
+    color:var(--primary);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:14px;
+    font-weight:800;
+}
+
+.staff-name{
+    display:block;
+    font-weight:800;
+}
+
+.small-text{
+    display:block;
+
+    margin-top:4px;
+
+    color:var(--muted);
+
+    font-size:10px;
+}
+
+
+/* =========================
+   BADGES
+========================= */
+
+.badge{
+    display:inline-block;
+
+    padding:6px 9px;
+
+    border-radius:20px;
+
+    font-size:10px;
+    font-weight:800;
+}
+
+.role-admin{
+    background:#ede9fe;
+    color:var(--purple);
+}
+
+.role-staff{
+    background:#dbeafe;
+    color:var(--blue);
+}
+
+.status-active{
+    background:#dcfce7;
+    color:var(--green);
+}
+
+.status-inactive{
+    background:#fee2e2;
+    color:var(--red);
+}
+
+
+/* =========================
+   ACTION
+========================= */
+
+.backend-btn{
+    display:inline-block;
+
+    text-decoration:none;
+
+    background:var(--dark);
+    color:white;
+
+    padding:8px 11px;
+    border-radius:7px;
+
+    font-size:10px;
+    font-weight:700;
+}
+
+.backend-btn:hover{
+    background:var(--primary);
+}
+
+
+/* =========================
+   EMPTY
+========================= */
+
+.empty{
+    padding:50px 20px;
+    text-align:center;
+}
+
+.empty-icon{
+    font-size:40px;
+    margin-bottom:12px;
+}
+
+.empty h3{
+    font-size:16px;
+    margin-bottom:6px;
+}
+
+.empty p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:900px){
+
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+    }
+
+    .summary-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:650px){
+
+    .content{
+        padding:15px;
+    }
+
+    .topbar{
+        padding:13px 15px;
+    }
+
+    .user-info{
+        display:none;
+    }
+
+    .page-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:12px;
+    }
+
+    .search-form{
+        flex-direction:column;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="dashboard">
+
+
+<!-- SIDEBAR -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+
+        <h2>
+            <span>MCTI</span> Technologies
+        </h2>
+
+        <p>
+            Management System
+        </p>
+
+    </div>
+
+
+    <div class="menu">
+
+        <div class="menu-title">
+            MAIN
+        </div>
+
+        <a href="{% url 'management_dashboard' %}">
+            🏠 Dashboard
+        </a>
+
+        <a href="{% url 'enquiry_dashboard' %}">
+            📞 Enquiries
+        </a>
+
+        <a href="{% url 'fee_payment_list' %}">
+            💳 Fee Payments
+        </a>
+
+
+        <div class="menu-title">
+            MANAGEMENT
+        </div>
+
+        <a href="{% url 'admission_list' %}">
+            🎓 Admissions
+        </a>
+
+        <a href="{% url 'student_list' %}">
+            👨‍🎓 Students
+        </a>
+
+        <a href="{% url 'staff_list' %}" class="active">
+            👥 Staff
+        </a>
+
+        <a href="#">
+            📊 Reports
+        </a>
+
+
+        {% if request.user.is_superuser %}
+
+        <div class="admin-link">
+
+            <a href="/admin/">
+                ⚙️ Django Backend
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</aside>
+
+
+<!-- MAIN -->
+
+<main class="main">
+
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+        <div class="topbar-left">
+
+            <h1>
+                Staff Management
+            </h1>
+
+            <p>
+                MCTI Team & User Management
+            </p>
+
+        </div>
+
+
+        <div class="topbar-right">
+
+            <div class="user-box">
+
+                <div class="user-avatar">
+                    {{ request.user.username|first|upper }}
+                </div>
+
+                <div class="user-info">
+
+                    <strong>
+                        {{ request.user.username }}
+                    </strong>
+
+                    <span>
+
+                        {% if request.user.is_superuser %}
+                            Administrator
+                        {% else %}
+                            Staff
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <a
+                href="{% url 'staff_logout' %}"
+                class="logout-btn"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- CONTENT -->
+
+    <div class="content">
+
+
+        <!-- PAGE HEADER -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h2>
+                    👥 Staff Management
+                </h2>
+
+                <p>
+                    View staff profiles, assignments and conversion performance.
+                </p>
+
+            </div>
+
+
+            <div class="header-actions">
+
+                <a
+                    href="{% url 'management_dashboard' %}"
+                    class="dashboard-btn"
+                >
+                    ← Dashboard
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- SUMMARY -->
+
+        <div class="summary-grid">
+
+            <div class="summary-card">
+
+                <div class="summary-icon">
+                    👥
+                </div>
+
+                <p>
+                    TOTAL STAFF
+                </p>
+
+                <h3>
+                    {{ staff_members|length }}
+                </h3>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-icon">
+                    📈
+                </div>
+
+                <p>
+                    STAFF PERFORMANCE
+                </p>
+
+                <h3 style="font-size:18px;">
+                    Live
+                </h3>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-icon">
+                    🏢
+                </div>
+
+                <p>
+                    SYSTEM
+                </p>
+
+                <h3 style="font-size:18px;">
+                    MCTI
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <!-- SEARCH -->
+
+        <div class="search-panel">
+
+            <form
+                method="GET"
+                class="search-form"
+            >
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search }}"
+                    placeholder="Search Name, Username, Email, Branch, Department or Designation..."
+                >
+
+                <button
+                    type="submit"
+                    class="search-btn"
+                >
+                    🔍 Search
+                </button>
+
+
+                {% if search %}
+
+                <a
+                    href="{% url 'staff_list' %}"
+                    class="clear-btn"
+                >
+                    Clear
+                </a>
+
+                {% endif %}
+
+            </form>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div class="table-panel">
+
+
+            <div class="table-header">
+
+                <h3>
+                    Staff Accounts & Performance
+                </h3>
+
+                <span>
+                    {{ staff_members|length }}
+                    record{{ staff_members|length|pluralize }}
+                </span>
+
+            </div>
+
+
+            {% if staff_members %}
+
+
+            <div class="table-responsive">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                STAFF
+                            </th>
+
+                            <th>
+                                DESIGNATION
+                            </th>
+
+                            <th>
+                                BRANCH
+                            </th>
+
+                            <th>
+                                DEPARTMENT
+                            </th>
+
+                            <th>
+                                ASSIGNED
+                            </th>
+
+                            <th>
+                                CONVERTED
+                            </th>
+
+                            <th>
+                                ADMISSIONS
+                            </th>
+                            <th>
+                                COLLECTION
+                            </th>
+                            <th>
+                                CONVERSION
+                            </th>
+
+                            <th>
+                                ROLE
+                            </th>
+
+                            <th>
+                                STATUS
+                            </th>
+
+                            <th>
+                                LAST LOGIN
+                            </th>
+
+                            {% if request.user.is_superuser %}
+
+                            <th>
+                                ACTION
+                            </th>
+
+                            {% endif %}
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                    {% for staff in staff_members %}
+
+
+                        <tr>
+
+
+                            <!-- STAFF -->
+
+                            <td>
+
+                                <div class="staff-profile">
+
+                                    <div class="staff-avatar">
+                                        {{ staff.username|first|upper }}
+                                    </div>
+
+                                    <div>
+
+                                        <span class="staff-name">
+
+                                            {% if staff.get_full_name %}
+
+                                                {{ staff.get_full_name }}
+
+                                            {% else %}
+
+                                                {{ staff.username }}
+
+                                            {% endif %}
+
+                                        </span>
+
+                                        <span class="small-text">
+                                            @{{ staff.username }}
+                                        </span>
+
+                                        {% if staff.email %}
+
+                                            <span class="small-text">
+                                                {{ staff.email }}
+                                            </span>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- DESIGNATION -->
+
+                            <td>
+
+                                {% if staff.staff_profile %}
+
+                                    <strong>
+                                        {{ staff.staff_profile.designation }}
+                                    </strong>
+
+                                    <span class="small-text">
+                                        Joined:
+                                        {{ staff.staff_profile.joining_date|date:"d M Y" }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="small-text">
+                                        Profile Not Created
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- BRANCH -->
+
+                            <td>
+
+                                {% if staff.staff_profile %}
+
+                                    {{ staff.staff_profile.get_branch_display }}
+
+                                {% else %}
+
+                                    -
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- DEPARTMENT -->
+
+                            <td>
+
+                                {% if staff.staff_profile %}
+
+                                    {{ staff.staff_profile.get_department_display }}
+
+                                {% else %}
+
+                                    -
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- ASSIGNED -->
+
+                            <td>
+
+                                <strong>
+                                    {{ staff.total_assigned }}
+                                </strong>
+
+                            </td>
+
+
+                            <!-- CONVERTED -->
+
+                            <td>
+
+                                <strong>
+                                    {{ staff.total_converted }}
+                                </strong>
+
+                            </td>
+
+
+                            <!-- ADMISSIONS -->
+
+                            <td>
+
+                                <strong>
+                                    {{ staff.total_admissions }}
+                                </strong>
+
+                            </td>
+
+                            <td>
+                              <strong>
+                                  ₹{{ staff.total_collection|floatformat:0 }}
+                              </strong>
+                            </td>
+
+                            <!-- CONVERSION -->
+
+                            <td>
+
+                                {% if staff.conversion_rate >= 50 %}
+
+                                    <span class="badge status-active">
+                                        {{ staff.conversion_rate }}%
+                                    </span>
+
+                                {% elif staff.conversion_rate > 0 %}
+
+                                    <span class="badge role-staff">
+                                        {{ staff.conversion_rate }}%
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge status-inactive">
+                                        0%
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- ROLE -->
+
+                            <td>
+
+                                {% if staff.is_superuser %}
+
+                                    <span class="badge role-admin">
+                                        Administrator
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge role-staff">
+                                        Staff
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- STATUS -->
+
+                            <td>
+
+                                {% if staff.is_active %}
+
+                                    <span class="badge status-active">
+                                        Active
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge status-inactive">
+                                        Inactive
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- LAST LOGIN -->
+
+                            <td>
+
+                                {% if staff.last_login %}
+
+                                    {{ staff.last_login|date:"d M Y" }}
+
+                                    <span class="small-text">
+                                        {{ staff.last_login|date:"h:i A" }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="small-text">
+                                        Never Logged In
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- ACTION -->
+
+                            {% if request.user.is_superuser %}
+
+                            <td>
+
+                                <a
+                                    href="/admin/auth/user/{{ staff.id }}/change/"
+                                    class="backend-btn"
+                                >
+                                    Manage
+                                </a>
+
+                            </td>
+
+                            {% endif %}
+
+
+                        </tr>
+
+
+                    {% endfor %}
+
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            {% else %}
+
+
+            <div class="empty">
+
+                <div class="empty-icon">
+                    👥
+                </div>
+
+                <h3>
+                    No Staff Found
+                </h3>
+
+                <p>
+
+                    {% if search %}
+
+                        No staff member matched "{{ search }}".
+
+                    {% else %}
+
+                        No staff accounts are currently available.
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+
+            {% endif %}
+
+
+        </div>
+
+    </div>
+
+</main>
+
+</div>
+
+</body>
+</html>

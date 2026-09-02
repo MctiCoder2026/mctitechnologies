@@ -1,0 +1,844 @@
+{% extends "base.html" %}
+
+{% block title %}
+Lead Details | MCTI Technologies
+{% endblock %}
+
+{% block content %}
+
+<section class="mcti-dashboard">
+
+```
+<div class="mcti-dashboard-container">
+
+    <!-- ========================================
+         HEADER
+    ======================================== -->
+
+    <div class="mcti-dashboard-header">
+
+        <div>
+
+            <span>LEAD MANAGEMENT</span>
+
+            <h1>
+                Lead Details
+            </h1>
+
+            <p>
+                View lead information and manage follow-ups.
+            </p>
+
+        </div>
+
+        <a href="{% url 'enquiry_dashboard' %}"
+           class="mcti-admin-btn">
+
+            ← Back to Dashboard
+
+        </a>
+
+    </div>
+
+
+    <!-- ========================================
+         LEAD INFORMATION + FOLLOW-UP
+    ======================================== -->
+
+    <div class="mcti-detail-grid">
+
+
+        <!-- ========================================
+             LEAD PROFILE
+        ======================================== -->
+
+        <div class="mcti-detail-card">
+
+            <div class="mcti-detail-card-header">
+
+                <span>
+                    LEAD INFORMATION
+                </span>
+
+                <h2>
+                    {{ enquiry.name }}
+                </h2>
+
+            </div>
+
+
+            <div class="mcti-detail-info">
+
+                <!-- MOBILE -->
+
+                <div>
+
+                    <span>
+                        Mobile
+                    </span>
+
+                    <strong>
+                        {{ enquiry.mobile }}
+                    </strong>
+
+                </div>
+
+
+                <!-- EMAIL -->
+
+                <div>
+
+                    <span>
+                        Email
+                    </span>
+
+                    <strong>
+                        {{ enquiry.email|default:"—" }}
+                    </strong>
+
+                </div>
+
+
+                <!-- COURSE -->
+
+                <div>
+
+                    <span>
+                        Course
+                    </span>
+
+                    <strong>
+
+                        {% if enquiry.course %}
+                            {{ enquiry.course.title }}
+                        {% else %}
+                            —
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+                <!-- BRANCH -->
+
+                <div>
+
+                    <span>
+                        Branch
+                    </span>
+
+                    <strong>
+                        {{ enquiry.branch|default:"—" }}
+                    </strong>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div>
+
+                    <span>
+                        Status
+                    </span>
+
+                    <strong>
+                        {{ enquiry.get_status_display }}
+                    </strong>
+
+                </div>
+
+
+                <!-- CREATED -->
+
+                <div>
+
+                    <span>
+                        Created
+                    </span>
+
+                    <strong>
+                        {{ enquiry.created_at|date:"d M Y, h:i A" }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================================
+                 STAFF ASSIGNMENT
+            ======================================== -->
+
+            <div class="mcti-assignment-box">
+
+                <div class="mcti-detail-card-header">
+
+                    <span>
+                        STAFF ASSIGNMENT
+                    </span>
+
+                    <h2>
+                        Assign Lead
+                    </h2>
+
+                </div>
+
+
+                <form method="POST">
+
+                    {% csrf_token %}
+
+                    <div class="mcti-message-field">
+
+                        <label>
+                            Assigned Staff
+                        </label>
+
+                        {{ assignment_form.assigned_user }}
+
+                    </div>
+
+
+                    <button type="submit"
+                            class="mcti-save-btn">
+
+                        Assign Staff
+
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <!-- ========================================
+                 CURRENT ASSIGNED STAFF
+            ======================================== -->
+
+            <div class="mcti-current-assignment">
+
+                <span>
+                    CURRENTLY ASSIGNED TO
+                </span>
+
+                <strong>
+
+                    {% if enquiry.assigned_user %}
+
+                        👤
+                        {{ enquiry.assigned_user.get_full_name|default:enquiry.assigned_user.username }}
+
+                    {% else %}
+
+                        Not Assigned
+
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+
+            <!-- ========================================
+                 CONTACT ACTIONS
+            ======================================== -->
+
+            <div class="mcti-detail-actions">
+
+
+                <!-- CALL -->
+
+                <form method="POST"
+                      action="{% url 'log_enquiry_call' enquiry.id %}"
+                      style="display:inline;">
+
+                    {% csrf_token %}
+
+                    <button type="submit"
+                            class="mcti-call-btn"
+                            title="Call"
+                            onclick="setTimeout(function(){ window.location.href='tel:{{ enquiry.mobile }}'; }, 150);">
+
+                        📞
+
+                    </button>
+
+                </form>
+
+
+                <!-- QUICK WHATSAPP -->
+
+                <button type="button"
+                        id="quickWhatsApp"
+                        class="mcti-whatsapp-btn"
+                        title="WhatsApp">
+
+                    <i class="fa-brands fa-whatsapp"></i>
+
+                </button>
+                {% if enquiry.status != "converted" %}
+
+    <a href="{% url 'create_admission' enquiry.id %}"
+       class="mcti-save-btn"
+       style="
+           display:inline-flex;
+           align-items:center;
+           justify-content:center;
+           text-decoration:none;
+           margin-left:10px;
+           padding:12px 18px;
+       ">
+
+        🎓 Convert to Admission
+
+    </a>
+
+{% else %}
+
+    <span style="
+        display:inline-block;
+        margin-left:10px;
+        font-weight:700;
+    ">
+        ✅ Admission Converted
+    </span>
+
+{% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================
+             FOLLOW-UP
+        ======================================== -->
+
+        <div class="mcti-detail-card">
+
+            <div class="mcti-detail-card-header">
+
+                <span>
+                    FOLLOW-UP
+                </span>
+
+                <h2>
+                    Update Lead
+                </h2>
+
+            </div>
+
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                {{ form.as_p }}
+
+
+                <button type="submit"
+                        class="mcti-save-btn">
+
+                    Save Follow-up
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================
+         WHATSAPP COMPOSER
+    ======================================== -->
+
+    <div class="mcti-detail-card mcti-whatsapp-composer">
+
+        <div class="mcti-detail-card-header">
+
+            <span>
+                WHATSAPP
+            </span>
+
+            <h2>
+                Message Composer
+            </h2>
+
+            <p>
+                Select a template, edit the message and open WhatsApp.
+            </p>
+
+        </div>
+
+
+        <!-- MESSAGE TEMPLATE -->
+
+        <div class="mcti-message-field">
+
+            <label for="whatsappTemplate">
+                Message Template
+            </label>
+
+            <select id="whatsappTemplate">
+
+                <option value="new">
+                    🆕 New Enquiry
+                </option>
+
+                <option value="followup">
+                    📞 Follow-up
+                </option>
+
+                <option value="course">
+                    📚 Course Information
+                </option>
+
+                <option value="admission">
+                    🎓 Admission
+                </option>
+
+                <option value="fees">
+                    💰 Fees Reminder
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- MESSAGE -->
+
+        <div class="mcti-message-field">
+
+            <label for="whatsappMessage">
+                Message
+            </label>
+
+            <textarea id="whatsappMessage"
+                      rows="7"></textarea>
+
+        </div>
+
+
+        <!-- OPEN WHATSAPP -->
+
+        <button type="button"
+                id="openWhatsApp"
+                class="mcti-whatsapp-send-btn">
+
+            <i class="fa-brands fa-whatsapp"></i>
+
+            Open WhatsApp
+
+        </button>
+
+    </div>
+
+
+    <!-- ========================================
+         ACTIVITY TIMELINE
+    ======================================== -->
+
+    <div class="mcti-detail-card mcti-activity-card">
+
+        <div class="mcti-detail-card-header">
+
+            <span>
+                LEAD ACTIVITY
+            </span>
+
+            <h2>
+                Activity Timeline
+            </h2>
+
+            <p>
+                Track all interactions and follow-ups with this lead.
+            </p>
+
+        </div>
+
+
+        {% if activities %}
+
+            <div class="mcti-activity-timeline">
+
+                {% for activity in activities %}
+
+                    <div class="mcti-activity-item">
+
+
+                        <!-- ACTIVITY ICON -->
+
+                        <div class="mcti-activity-icon">
+
+                            {% if activity.activity_type == "call" %}
+
+                                📞
+
+                            {% elif activity.activity_type == "whatsapp" %}
+
+                                <i class="fa-brands fa-whatsapp"></i>
+
+                            {% elif activity.activity_type == "followup" %}
+
+                                📅
+
+                            {% elif activity.activity_type == "status" %}
+
+                                🔄
+
+                            {% elif activity.activity_type == "converted" %}
+
+                                🎓
+
+                            {% else %}
+
+                                📝
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- ACTIVITY CONTENT -->
+
+                        <div class="mcti-activity-content">
+
+
+                            <div class="mcti-activity-top">
+
+                                <strong>
+                                    {{ activity.get_activity_type_display }}
+                                </strong>
+
+                                <span>
+                                    {{ activity.created_at|date:"d M Y, h:i A" }}
+                                </span>
+
+                            </div>
+
+
+                            <!-- CREATED BY -->
+
+                            <div class="mcti-activity-user">
+
+                                {% if activity.created_by %}
+
+                                    👤
+                                    {{ activity.created_by.get_full_name|default:activity.created_by.username }}
+
+                                {% else %}
+
+                                    👤 System
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <!-- MESSAGE -->
+
+                            {% if activity.message %}
+
+                                <p>
+                                    {{ activity.message }}
+                                </p>
+
+                            {% endif %}
+
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+        {% else %}
+
+            <div class="mcti-no-activity">
+
+                <div>
+                    📝
+                </div>
+
+                <h3>
+                    No activity yet
+                </h3>
+
+                <p>
+                    Lead interactions will appear here.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+</div>
+```
+
+</section>
+
+<!-- ========================================
+     WHATSAPP JAVASCRIPT
+======================================== -->
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        const templateSelect =
+            document.getElementById(
+                "whatsappTemplate"
+            );
+
+
+        const messageBox =
+            document.getElementById(
+                "whatsappMessage"
+            );
+
+
+        const whatsappButton =
+            document.getElementById(
+                "openWhatsApp"
+            );
+
+
+        const quickWhatsApp =
+            document.getElementById(
+                "quickWhatsApp"
+            );
+
+
+        const name =
+            "{{ enquiry.name|escapejs }}";
+
+
+        const course =
+            "{% if enquiry.course %}{{ enquiry.course.title|escapejs }}{% else %}our courses{% endif %}";
+
+
+        const mobile =
+            "{{ enquiry.mobile|escapejs }}";
+
+
+        /* ========================================
+           MESSAGE TEMPLATES
+        ======================================== */
+
+        const templates = {
+
+
+            new:
+            `Hello ${name},
+
+Thank you for contacting MCTI Technologies.
+
+We have received your enquiry regarding ${course}.
+
+How can we help you today?`,
+
+
+            followup:
+            `Hello ${name},
+
+This is MCTI Technologies.
+
+We are following up regarding your enquiry for ${course}.
+
+Please let us know a convenient time to connect with you.`,
+
+
+            course:
+            `Hello ${name},
+
+Thank you for your interest in ${course} at MCTI Technologies.
+
+We would be happy to share the course details, fees and batch information with you.
+
+Please let us know when we can connect.`,
+
+
+            admission:
+            `Hello ${name},
+
+Thank you for choosing MCTI Technologies.
+
+We are happy to assist you with your admission for ${course}.
+
+Please contact us to complete the admission process.`,
+
+
+            fees:
+            `Hello ${name},
+
+Greetings from MCTI Technologies.
+
+This is a gentle reminder regarding the pending fees for your course.
+
+Please contact us if you need any assistance.
+
+Thank you.`
+
+        };
+
+
+        /* ========================================
+           LOAD TEMPLATE
+        ======================================== */
+
+        function updateMessage() {
+
+            const selected =
+                templateSelect.value;
+
+            messageBox.value =
+                templates[selected] || "";
+
+        }
+
+
+        /* ========================================
+           LOG WHATSAPP ACTIVITY
+        ======================================== */
+
+        function logWhatsAppActivity() {
+
+            fetch(
+                "{% url 'log_enquiry_whatsapp' enquiry.id %}",
+                {
+                    method: "POST",
+
+                    headers: {
+
+                        "X-CSRFToken":
+                            "{{ csrf_token }}",
+
+                        "X-Requested-With":
+                            "XMLHttpRequest"
+
+                    }
+
+                }
+            )
+            .catch(function(error) {
+
+                console.error(
+                    "WhatsApp activity error:",
+                    error
+                );
+
+            });
+
+        }
+
+
+        /* ========================================
+           OPEN WHATSAPP
+        ======================================== */
+
+        function openWhatsApp() {
+
+            const message =
+                messageBox.value.trim();
+
+
+            if (!message) {
+
+                alert(
+                    "Please enter a message."
+                );
+
+                return;
+
+            }
+
+
+            const encodedMessage =
+                encodeURIComponent(
+                    message
+                );
+
+
+            const whatsappUrl =
+                "https://wa.me/91"
+                + mobile.replace(/\D/g, "")
+                + "?text="
+                + encodedMessage;
+
+
+            /*
+             * LOG ACTIVITY
+             */
+
+            logWhatsAppActivity();
+
+
+            /*
+             * OPEN WHATSAPP
+             */
+
+            window.open(
+                whatsappUrl,
+                "_blank"
+            );
+
+        }
+
+
+        /* ========================================
+           TEMPLATE CHANGE
+        ======================================== */
+
+        templateSelect.addEventListener(
+            "change",
+            updateMessage
+        );
+
+
+        /* ========================================
+           COMPOSER WHATSAPP BUTTON
+        ======================================== */
+
+        whatsappButton.addEventListener(
+            "click",
+            openWhatsApp
+        );
+
+
+        /* ========================================
+           QUICK WHATSAPP BUTTON
+        ======================================== */
+
+        quickWhatsApp.addEventListener(
+            "click",
+            openWhatsApp
+        );
+
+
+        /* ========================================
+           INITIAL MESSAGE
+        ======================================== */
+
+        updateMessage();
+
+    }
+
+);
+
+</script>
+
+{% endblock %}

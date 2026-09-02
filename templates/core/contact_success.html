@@ -1,0 +1,50 @@
+```html
+{% extends "base.html" %}
+
+{% block title %}
+Thank You | MCTI Technologies
+{% endblock %}
+
+{% block content %}
+
+<section class="mcti-success-page">
+
+    <div class="mcti-success-card">
+
+        <div class="mcti-success-icon">
+            ✓
+        </div>
+
+        <span class="mcti-success-label">
+            ENQUIRY RECEIVED
+        </span>
+
+        <h1>
+            Thank You!
+        </h1>
+
+        <p>
+            Your enquiry has been successfully submitted.
+            Our MCTI Technologies team will contact you shortly.
+        </p>
+
+        <div class="mcti-success-actions">
+
+            <a href="{% url 'courses' %}"
+               class="mcti-success-btn">
+                Explore Courses →
+            </a>
+
+            <a href="{% url 'home' %}"
+               class="mcti-success-home">
+                ← Back to Home
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}
+

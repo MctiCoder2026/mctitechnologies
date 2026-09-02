@@ -1,0 +1,984 @@
+{% extends "base.html" %}
+
+{% block title %}
+Enquiry Dashboard | MCTI Technologies
+{% endblock %}
+
+{% block content %}
+
+<section class="mcti-dashboard">
+
+```
+<div class="mcti-dashboard-container">
+
+
+    <!-- ========================================
+         HEADER
+    ======================================== -->
+
+    <div class="mcti-dashboard-header">
+
+        <div>
+
+            <span>LEAD MANAGEMENT</span>
+
+            <h1>
+                Enquiry Dashboard
+            </h1>
+
+            <p>
+                Manage and track enquiries received from your website.
+            </p>
+
+        </div>
+
+
+        <a href="{% url 'admin:index' %}"
+           class="mcti-admin-btn">
+
+            Open Admin →
+
+        </a>
+
+    </div>
+
+
+    <!-- ========================================
+         STAT CARDS
+    ======================================== -->
+
+    <div class="mcti-stat-grid">
+
+        <div class="mcti-stat-card">
+            <span>Total Enquiries</span>
+            <strong>{{ total }}</strong>
+        </div>
+
+        <div class="mcti-stat-card">
+            <span>New</span>
+            <strong>{{ new }}</strong>
+        </div>
+
+        <div class="mcti-stat-card">
+            <span>Contacted</span>
+            <strong>{{ contacted }}</strong>
+        </div>
+
+        <div class="mcti-stat-card">
+            <span>Follow Up</span>
+            <strong>{{ followup }}</strong>
+        </div>
+
+        <div class="mcti-stat-card">
+            <span>Converted</span>
+            <strong>{{ converted }}</strong>
+        </div>
+
+        <div class="mcti-stat-card">
+            <span>Closed</span>
+            <strong>{{ closed }}</strong>
+        </div>
+
+    </div>
+
+
+    <!-- ========================================
+         FOLLOW-UP CENTER
+    ======================================== -->
+
+    <div class="mcti-followup-section">
+
+        <div class="mcti-followup-header">
+
+            <div>
+
+                <span>
+                    FOLLOW-UP CENTER
+                </span>
+
+                <h2>
+                    Lead Follow-ups
+                </h2>
+
+            </div>
+
+            <p>
+                Stay on top of your upcoming conversations.
+            </p>
+
+        </div>
+
+
+        <div class="mcti-followup-grid">
+
+
+            <!-- OVERDUE -->
+
+            <div class="mcti-followup-card overdue">
+
+                <div class="mcti-followup-icon">
+                    🔴
+                </div>
+
+                <div class="mcti-followup-content">
+
+                    <span>
+                        OVERDUE
+                    </span>
+
+                    <strong>
+                        {{ overdue_followups|length }}
+                    </strong>
+
+                    <p>
+                        Follow-ups need attention
+                    </p>
+
+                </div>
+
+                <a href="?followup=overdue">
+                    View Leads →
+                </a>
+
+            </div>
+
+
+            <!-- TODAY -->
+
+            <div class="mcti-followup-card today">
+
+                <div class="mcti-followup-icon">
+                    🟠
+                </div>
+
+                <div class="mcti-followup-content">
+
+                    <span>
+                        TODAY
+                    </span>
+
+                    <strong>
+                        {{ todays_followups|length }}
+                    </strong>
+
+                    <p>
+                        Follow-ups scheduled today
+                    </p>
+
+                </div>
+
+                <a href="?followup=today">
+                    View Leads →
+                </a>
+
+            </div>
+
+
+            <!-- UPCOMING -->
+
+            <div class="mcti-followup-card upcoming">
+
+                <div class="mcti-followup-icon">
+                    🟢
+                </div>
+
+                <div class="mcti-followup-content">
+
+                    <span>
+                        UPCOMING
+                    </span>
+
+                    <strong>
+                        {{ upcoming_followups }}
+                    </strong>
+
+                    <p>
+                        Future follow-ups scheduled
+                    </p>
+
+                </div>
+
+                <a href="?followup=upcoming">
+                    View Leads →
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================
+         SEARCH & FILTER
+    ======================================== -->
+
+    <div class="mcti-filter-card">
+
+        <form method="GET"
+              class="mcti-filter-form">
+
+
+            <div class="mcti-filter-field">
+
+                <label>
+                    Search
+                </label>
+
+                <input type="text"
+                       name="search"
+                       value="{{ search }}"
+                       placeholder="Name, mobile or email">
+
+            </div>
+
+
+            <div class="mcti-filter-field">
+
+                <label>
+                    Status
+                </label>
+
+                <select name="status">
+
+                    <option value="">
+                        All Status
+                    </option>
+
+                    <option value="new"
+                        {% if status_filter == "new" %}selected{% endif %}>
+                        New
+                    </option>
+
+                    <option value="contacted"
+                        {% if status_filter == "contacted" %}selected{% endif %}>
+                        Contacted
+                    </option>
+
+                    <option value="followup"
+                        {% if status_filter == "followup" %}selected{% endif %}>
+                        Follow Up
+                    </option>
+
+                    <option value="converted"
+                        {% if status_filter == "converted" %}selected{% endif %}>
+                        Converted
+                    </option>
+
+                    <option value="closed"
+                        {% if status_filter == "closed" %}selected{% endif %}>
+                        Closed
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="mcti-filter-field">
+
+                <label>
+                    Assigned To
+                </label>
+
+                <select name="assigned_to">
+
+                    <option value="">
+                        All Staff
+                    </option>
+
+                    {% for staff in assigned_staff %}
+
+                        <option value="{{ staff }}"
+                            {% if assigned_filter == staff %}selected{% endif %}>
+
+                            {{ staff }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="mcti-filter-field">
+
+                <label>
+                    Follow-up
+                </label>
+
+                <select name="followup">
+
+                    <option value="">
+                        All Leads
+                    </option>
+
+                    <option value="today"
+                        {% if followup_filter == "today" %}selected{% endif %}>
+                        Today's Follow-ups
+                    </option>
+
+                    <option value="overdue"
+                        {% if followup_filter == "overdue" %}selected{% endif %}>
+                        Overdue
+                    </option>
+
+                    <option value="upcoming"
+                        {% if followup_filter == "upcoming" %}selected{% endif %}>
+                        Upcoming
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <button type="submit"
+                    class="mcti-filter-btn">
+
+                Search
+
+            </button>
+
+
+            <a href="{% url 'enquiry_dashboard' %}"
+               class="mcti-clear-btn">
+
+                Clear
+
+            </a>
+
+        </form>
+
+    </div>
+
+
+    <!-- ========================================
+         TODAY'S FOLLOW-UPS
+    ======================================== -->
+
+    <div class="mcti-followup-list-card">
+
+        <div class="mcti-list-header">
+
+            <div>
+
+                <span>
+                    TODAY
+                </span>
+
+                <h2>
+                    Today's Follow-ups
+                </h2>
+
+            </div>
+
+            <strong>
+                {{ todays_followups|length }}
+            </strong>
+
+        </div>
+
+
+        {% if todays_followups %}
+
+            <div class="mcti-followup-list">
+
+                {% for enquiry in todays_followups %}
+
+                    <div class="mcti-followup-row">
+
+                        <div class="mcti-followup-lead">
+
+                            <strong>
+                                {{ enquiry.name }}
+                            </strong>
+
+                            <span>
+
+                                {% if enquiry.course %}
+                                    {{ enquiry.course.title }}
+                                {% else %}
+                                    Course not selected
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="mcti-followup-assigned">
+
+                            <span>
+                                Assigned To
+                            </span>
+
+                            <strong>
+                                {{ enquiry.assigned_to|default:"Not Assigned" }}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="mcti-lead-actions">
+
+
+                            <!-- VIEW -->
+
+                            <a href="{% url 'enquiry_detail' enquiry.id %}"
+                               class="mcti-view-btn"
+                               title="View Lead">
+
+                                👁️
+
+                            </a>
+
+
+                            <!-- CALL -->
+
+                            <button type="button"
+                                    class="mcti-call-btn"
+                                    title="Call"
+                                    onclick="logCallAndOpen('{{ enquiry.id }}', '{{ enquiry.mobile }}')">
+
+                                📞
+
+                            </button>
+
+
+                            <!-- WHATSAPP -->
+
+                            <button type="button"
+                                    class="mcti-whatsapp-btn"
+                                    title="WhatsApp"
+                                    onclick="logWhatsAppAndOpen('{{ enquiry.id }}', '{{ enquiry.mobile }}', '{{ enquiry.name|escapejs }}')">
+
+                                <i class="fa-brands fa-whatsapp"></i>
+
+                            </button>
+
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="mcti-empty-followup">
+
+                <strong>
+                    No follow-ups scheduled for today.
+                </strong>
+
+                <span>
+                    Your team is all caught up.
+                </span>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- ========================================
+         OVERDUE FOLLOW-UPS
+    ======================================== -->
+
+    <div class="mcti-followup-list-card mcti-overdue-card">
+
+        <div class="mcti-list-header">
+
+            <div>
+
+                <span>
+                    ATTENTION REQUIRED
+                </span>
+
+                <h2>
+                    Overdue Follow-ups
+                </h2>
+
+            </div>
+
+            <strong>
+                {{ overdue_followups|length }}
+            </strong>
+
+        </div>
+
+
+        {% if overdue_followups %}
+
+            <div class="mcti-followup-list">
+
+                {% for enquiry in overdue_followups %}
+
+                    <div class="mcti-followup-row">
+
+
+                        <div class="mcti-followup-lead">
+
+                            <strong>
+                                {{ enquiry.name }}
+                            </strong>
+
+                            <span>
+
+                                {% if enquiry.course %}
+                                    {{ enquiry.course.title }}
+                                {% else %}
+                                    Course not selected
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="mcti-overdue-date">
+
+                            <span>
+                                Follow-up Date
+                            </span>
+
+                            <strong>
+                                {{ enquiry.followup_date|date:"d M Y" }}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="mcti-followup-assigned">
+
+                            <span>
+                                Assigned To
+                            </span>
+
+                            <strong>
+                                {{ enquiry.assigned_to|default:"Not Assigned" }}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="mcti-lead-actions">
+
+
+                            <!-- VIEW -->
+
+                            <a href="{% url 'enquiry_detail' enquiry.id %}"
+                               class="mcti-view-btn"
+                               title="View Lead">
+
+                                👁️
+
+                            </a>
+
+
+                            <!-- CALL -->
+
+                            <button type="button"
+                                    class="mcti-call-btn"
+                                    title="Call"
+                                    onclick="logCallAndOpen('{{ enquiry.id }}', '{{ enquiry.mobile }}')">
+
+                                📞
+
+                            </button>
+
+
+                            <!-- WHATSAPP -->
+
+                            <button type="button"
+                                    class="mcti-whatsapp-btn"
+                                    title="WhatsApp"
+                                    onclick="logWhatsAppAndOpen('{{ enquiry.id }}', '{{ enquiry.mobile }}', '{{ enquiry.name|escapejs }}')">
+
+                                <i class="fa-brands fa-whatsapp"></i>
+
+                            </button>
+
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="mcti-empty-followup">
+
+                <strong>
+                    No overdue follow-ups.
+                </strong>
+
+                <span>
+                    Great! Nothing is pending.
+                </span>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- ========================================
+         RECENT ENQUIRIES
+    ======================================== -->
+
+    <div class="mcti-enquiry-table-card">
+
+        <div class="mcti-table-heading">
+
+            <div>
+
+                <span>
+                    RECENT LEADS
+                </span>
+
+                <h2>
+                    Latest Enquiries
+                </h2>
+
+            </div>
+
+
+            <a href="{% url 'admin:core_enquiry_changelist' %}">
+                View All →
+            </a>
+
+        </div>
+
+
+        {% if enquiries %}
+
+            <div class="mcti-table-wrapper">
+
+                <table class="mcti-enquiry-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Name</th>
+                            <th>Mobile</th>
+                            <th>Course</th>
+                            <th>Branch</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for enquiry in enquiries %}
+
+                            <tr>
+
+
+                                <!-- NAME -->
+
+                                <td>
+
+                                    <strong>
+                                        {{ enquiry.name }}
+                                    </strong>
+
+                                </td>
+
+
+                                <!-- MOBILE -->
+
+                                <td>
+                                    {{ enquiry.mobile }}
+                                </td>
+
+
+                                <!-- COURSE -->
+
+                                <td>
+
+                                    {% if enquiry.course %}
+
+                                        {{ enquiry.course.title }}
+
+                                    {% else %}
+
+                                        —
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- BRANCH -->
+
+                                <td>
+                                    {{ enquiry.branch|default:"—" }}
+                                </td>
+
+
+                                <!-- STATUS -->
+
+                                <td>
+
+                                    <form method="POST"
+                                          action="{% url 'update_enquiry_status' enquiry.id %}">
+
+                                        {% csrf_token %}
+
+                                        <select name="status"
+                                                class="mcti-status-select"
+                                                onchange="this.form.submit()">
+
+                                            <option value="new"
+                                                {% if enquiry.status == "new" %}selected{% endif %}>
+                                                New
+                                            </option>
+
+                                            <option value="contacted"
+                                                {% if enquiry.status == "contacted" %}selected{% endif %}>
+                                                Contacted
+                                            </option>
+
+                                            <option value="followup"
+                                                {% if enquiry.status == "followup" %}selected{% endif %}>
+                                                Follow Up
+                                            </option>
+
+                                            <option value="converted"
+                                                {% if enquiry.status == "converted" %}selected{% endif %}>
+                                                Converted
+                                            </option>
+
+                                            <option value="closed"
+                                                {% if enquiry.status == "closed" %}selected{% endif %}>
+                                                Closed
+                                            </option>
+
+                                        </select>
+
+                                    </form>
+
+                                </td>
+
+
+                                <!-- DATE -->
+
+                                <td>
+
+                                    {{ enquiry.created_at|date:"d M Y" }}
+
+                                </td>
+
+
+                                <!-- ACTION -->
+
+                                <td class="mcti-lead-actions">
+
+
+                                    <!-- VIEW -->
+
+                                    <a href="{% url 'enquiry_detail' enquiry.id %}"
+                                       class="mcti-view-btn"
+                                       title="View Details">
+
+                                        👁️
+
+                                    </a>
+
+
+                                    <!-- CALL -->
+
+                                    <button type="button"
+                                            class="mcti-call-btn"
+                                            title="Call"
+                                            onclick="logCallAndOpen('{{ enquiry.id }}', '{{ enquiry.mobile }}')">
+
+                                        📞
+
+                                    </button>
+
+
+                                    <!-- WHATSAPP -->
+
+                                    <button type="button"
+                                            class="mcti-whatsapp-btn"
+                                            title="WhatsApp"
+                                            onclick="logWhatsAppAndOpen('{{ enquiry.id }}', '{{ enquiry.mobile }}', '{{ enquiry.name|escapejs }}')">
+
+                                        <i class="fa-brands fa-whatsapp"></i>
+
+                                    </button>
+
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="mcti-no-enquiries">
+
+                <h3>
+                    No enquiries yet
+                </h3>
+
+                <p>
+                    Website enquiries will appear here.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+</div>
+```
+
+</section>
+
+<!-- ========================================
+     CALL + WHATSAPP ACTIVITY JAVASCRIPT
+======================================== -->
+
+<script>
+
+function getCSRFToken() {
+
+    const cookieValue =
+        document.cookie
+            .split("; ")
+            .find(row => row.startsWith("csrftoken="));
+
+    if (!cookieValue) {
+        return "";
+    }
+
+    return decodeURIComponent(
+        cookieValue.split("=")[1]
+    );
+}
+
+
+/* ========================================
+   CALL
+======================================== */
+
+function logCallAndOpen(enquiryId, mobile) {
+
+    const callUrl =
+        "{% url 'log_enquiry_call' 0 %}"
+            .replace(
+                "/0/",
+                "/" + enquiryId + "/"
+            );
+
+
+    fetch(
+        callUrl,
+        {
+            method: "POST",
+
+            headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        }
+    )
+    .finally(function () {
+
+        window.location.href =
+            "tel:" + mobile;
+
+    });
+
+}
+
+
+/* ========================================
+   WHATSAPP
+======================================== */
+
+function logWhatsAppAndOpen(
+    enquiryId,
+    mobile,
+    name
+) {
+
+    const whatsappUrl =
+        "{% url 'log_enquiry_whatsapp' 0 %}"
+            .replace(
+                "/0/",
+                "/" + enquiryId + "/"
+            );
+
+
+    const message =
+        "Hello " +
+        name +
+        ", this is MCTI Technologies. " +
+        "We are following up regarding your enquiry.";
+
+
+    const encodedMessage =
+        encodeURIComponent(message);
+
+
+    const waUrl =
+        "https://wa.me/91" +
+        mobile +
+        "?text=" +
+        encodedMessage;
+
+
+    fetch(
+        whatsappUrl,
+        {
+            method: "POST",
+
+            headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        }
+    )
+    .finally(function () {
+
+        window.open(
+            waUrl,
+            "_blank"
+        );
+
+    });
+
+}
+
+</script>
+
+{% endblock %}

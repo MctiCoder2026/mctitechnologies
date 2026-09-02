@@ -1,0 +1,243 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+
+>
+
+<title>
+    {% block title %}
+        MCTI Technologies
+    {% endblock %}
+</title>
+
+<link
+    rel="stylesheet"
+    href="{% static 'css/style.css' %}"
+>
+
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+>
+
+</head>
+
+<body>
+
+<!-- =====================================================
+     HEADER / NAVBAR
+===================================================== -->
+
+<header>
+
+<nav class="navbar">
+
+```
+<!-- =================================================
+     LOGO
+================================================== -->
+
+<div class="logo">
+
+    <a href="{% url 'home' %}">
+
+        <strong>MCTI</strong>
+
+        <span>Technologies</span>
+
+    </a>
+
+</div>
+
+
+<!-- =================================================
+     NAVIGATION
+================================================== -->
+
+<ul class="nav-links">
+
+
+    <!-- HOME -->
+
+    <li>
+
+        <a href="{% url 'home' %}">
+            Home
+        </a>
+
+    </li>
+
+
+    <!-- COURSES -->
+
+    <li>
+
+        <a href="{% url 'courses' %}">
+            Courses
+        </a>
+
+    </li>
+
+
+    <!-- ACADEMY -->
+
+    <li>
+
+        <a href="{% url 'academy' %}">
+            Academy
+        </a>
+
+    </li>
+
+
+    <!-- IT SOLUTIONS -->
+
+    <li>
+
+        <a href="{% url 'business_solutions' %}">
+            IT Solutions
+        </a>
+
+    </li>
+
+
+    <!-- AI -->
+
+    <li>
+
+        <a href="{% url 'ai' %}">
+            AI
+        </a>
+
+    </li>
+
+
+    <!-- SAAS -->
+
+    <li>
+
+        <a href="{% url 'saas' %}">
+            SaaS
+        </a>
+
+    </li>
+
+
+    <!-- ABOUT -->
+
+    <li>
+
+        <a href="{% url 'about' %}">
+            About
+        </a>
+
+    </li>
+
+
+    <!-- CONTACT -->
+
+    <li>
+
+        <a href="{% url 'contact' %}">
+            Contact
+        </a>
+
+    </li>
+
+
+    <!-- =================================================
+         STUDENT LOGIN
+    ================================================== -->
+
+    <li>
+
+        <a href="{% url 'student_login' %}">
+
+            <i class="fa-solid fa-user-graduate"></i>
+
+            Student Login
+
+        </a>
+
+    </li>
+
+
+    <!-- =================================================
+         ADMIN LOGIN
+    ================================================== -->
+
+    <li>
+
+        <a href="/admin/">
+
+            <i class="fa-solid fa-user-shield"></i>
+
+            Admin Login
+
+        </a>
+
+    </li>
+
+
+</ul>
+
+
+<!-- =================================================
+     ENQUIRE NOW
+================================================== -->
+
+<a
+    href="{% url 'contact' %}"
+    class="nav-btn"
+>
+
+    Enquire Now
+
+</a>
+```
+
+</nav>
+
+</header>
+
+<!-- =====================================================
+     MAIN CONTENT
+===================================================== -->
+
+<main>
+
+{% block content %}
+
+{% endblock %}
+
+</main>
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+
+<p>
+
+© {% now "Y" %} MCTI Technologies.
+All Rights Reserved.
+```
+
+</p>
+
+</footer>
+
+</body>
+
+</html>
