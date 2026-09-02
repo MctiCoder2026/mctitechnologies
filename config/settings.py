@@ -59,7 +59,13 @@ MIDDLEWARE = [
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:8000",
+    "https://mctitechnologies.com",
+    "https://www.mctitechnologies.com",
 ]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 ROOT_URLCONF = 'config.urls'
 
