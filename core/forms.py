@@ -54,9 +54,17 @@ class EnquiryForm(forms.ModelForm):
                 }
             ),
 
-            "branch": forms.TextInput(
+            "branch": forms.Select(
+                choices=[
+                    ("", "Select Preferred Branch"),
+                    ("kharghar", "Kharghar"),
+                    ("panvel", "Panvel"),
+                    ("koperkhairane", "Koperkhairane"),
+                    ("kamothe", "Kamothe"),
+                    ("ghansoli", "Ghansoli"),
+                    ("nerul", "Nerul"),
+                ],
                 attrs={
-                    "placeholder": "Preferred Branch",
                     "class": "form-control",
                 }
             ),
