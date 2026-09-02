@@ -167,10 +167,22 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
 MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+    "default": {
+        "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
+        "OPTIONS": {
+            "host": os.environ.get("EMAIL_HOST", "smtp.hostinger.com"),
+            "port": int(os.environ.get("EMAIL_PORT", "465")),
+            "username": os.environ.get("EMAIL_HOST_USER"),
+            "password": os.environ.get("EMAIL_HOST_PASSWORD"),
+            "use_ssl": True,
+        },
     },
 }
+
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DEFAULT_FROM_EMAIL",
+    "info@maharashtracomputer.com"
+)
 LOGIN_URL = "/admin/login/"
 
 LOGIN_REDIRECT_URL = "/management-dashboard/"
