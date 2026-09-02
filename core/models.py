@@ -975,6 +975,9 @@ def create_student_from_admission(
     **kwargs
 ):
 
+    if kwargs.get("raw"):
+        return
+
     if created:
 
         Student.objects.create(
@@ -1001,6 +1004,9 @@ def create_initial_fee_payment(
     created,
     **kwargs
 ):
+
+    if kwargs.get("raw"):
+        return
 
     if created and instance.paid_fee > 0:
 
@@ -1093,6 +1099,9 @@ def update_admission_fees(
     created,
     **kwargs
 ):
+
+    if kwargs.get("raw"):
+        return
 
     admission = (
         instance.student.admission
