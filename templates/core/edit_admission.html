@@ -1,0 +1,536 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>
+    Edit Admission {{ admission.admission_number }} | MCTI Technologies
+</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --orange: #ff6b00;
+    --orange-dark: #e85d00;
+    --orange-light: #fff3e8;
+
+    --black: #111111;
+    --dark: #222222;
+
+    --white: #ffffff;
+    --bg: #f4f4f4;
+
+    --border: #e5e5e5;
+    --muted: #777777;
+
+    --green: #198754;
+    --red: #dc3545;
+}
+
+body {
+    margin: 0;
+    padding: 30px;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--black);
+}
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+}
+
+.page-header {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 6px solid var(--orange);
+    border-radius: 12px;
+    padding: 22px 25px;
+    margin-bottom: 20px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+
+    box-shadow: 0 5px 20px rgba(0,0,0,.06);
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 25px;
+    font-weight: 900;
+}
+
+.brand h1 span {
+    color: var(--orange);
+}
+
+.brand p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 17px;
+    border-radius: 7px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.btn-back {
+    background: var(--black);
+    color: var(--white);
+}
+
+.btn-back:hover {
+    background: var(--orange);
+}
+
+.admission-banner {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.05);
+}
+
+.admission-label {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.admission-number {
+    margin-top: 5px;
+    font-size: 22px;
+    font-weight: 900;
+}
+
+.admission-number span {
+    color: var(--orange);
+}
+
+.card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.05);
+}
+
+.card-title {
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+
+    font-size: 15px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    margin-bottom: 7px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--dark);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #d6d6d6;
+    border-radius: 7px;
+    background: #ffffff;
+    font-size: 14px;
+    outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px rgba(255,107,0,.10);
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.error {
+    margin-top: 5px;
+    color: var(--red);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.current-photo {
+    margin-top: 10px;
+}
+
+.current-photo img {
+    width: 110px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid var(--orange-light);
+}
+
+.fee-warning {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-left: 4px solid var(--orange);
+    background: var(--orange-light);
+    border-radius: 7px;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.cancel-btn {
+    padding: 12px 20px;
+    background: var(--black);
+    color: var(--white);
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.save-btn {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 8px;
+    background: var(--orange);
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.save-btn:hover {
+    background: var(--orange-dark);
+}
+
+.non-field-errors {
+    margin-bottom: 15px;
+    padding: 12px;
+    background: #fff0f1;
+    border: 1px solid #f5c6cb;
+    border-radius: 7px;
+    color: var(--red);
+    font-size: 13px;
+}
+
+@media (max-width: 750px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full-width {
+        grid-column: auto;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+
+    .actions a,
+    .actions button {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="page-header">
+
+        <div class="brand">
+            <h1>
+                <span>MCTI</span> TECHNOLOGIES
+            </h1>
+
+            <p>
+                HO / Admin Admission Editing
+            </p>
+        </div>
+
+        <a
+            href="{% url 'admission_detail' admission.id %}"
+            class="btn btn-back"
+        >
+            ← Back to Admission
+        </a>
+
+    </div>
+
+
+    <div class="admission-banner">
+
+        <div class="admission-label">
+            Editing Admission
+        </div>
+
+        <div class="admission-number">
+            <span>#</span>{{ admission.admission_number }}
+        </div>
+
+    </div>
+
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="non-field-errors">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Student Information
+            </div>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>Student Name</label>
+                    {{ form.student_name }}
+
+                    {% for error in form.student_name.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="form-group">
+                    <label>Mother Name</label>
+                    {{ form.mother_name }}
+
+                    {% for error in form.mother_name.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="form-group">
+                    <label>Primary Mobile Number</label>
+                    {{ form.mobile }}
+
+                    {% for error in form.mobile.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="form-group">
+                    <label>Secondary Mobile Number</label>
+                    {{ form.secondary_mobile }}
+
+                    {% for error in form.secondary_mobile.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="form-group full-width">
+                    <label>Email Address</label>
+                    {{ form.email }}
+
+                    {% for error in form.email.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="form-group full-width">
+                    <label>Full Address</label>
+                    {{ form.address }}
+
+                    {% for error in form.address.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="form-group full-width">
+                    <label>Student Photo</label>
+
+                    {% if admission.photo %}
+                    <div class="current-photo">
+                        <img
+                            src="{{ admission.photo.url }}"
+                            alt="{{ admission.student_name }}"
+                        >
+                    </div>
+                    {% endif %}
+
+                    {{ form.photo }}
+
+                    {% for error in form.photo.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Admission Information
+            </div>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>Course</label>
+                    {{ form.course }}
+
+                    {% for error in form.course.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="form-group">
+                    <label>Branch</label>
+                    {{ form.branch }}
+
+                    {% for error in form.branch.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="form-group">
+                    <label>Admission Date</label>
+                    {{ form.admission_date }}
+
+                    {% for error in form.admission_date.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="form-group">
+                    <label>Total Fee</label>
+                    {{ form.total_fee }}
+
+                    {% for error in form.total_fee.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="form-group full-width">
+                    <label>Admission Notes</label>
+                    {{ form.notes }}
+
+                    {% for error in form.notes.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+            <div class="fee-warning">
+                <strong>Important:</strong>
+                Paid Fee should be managed through Fee Payment / Receipt entries.
+                Existing receipt history should not be changed directly from admission editing.
+            </div>
+
+        </div>
+
+
+        <div class="actions">
+
+            <a
+                href="{% url 'admission_detail' admission.id %}"
+                class="cancel-btn"
+            >
+                Cancel
+            </a>
+
+            <button
+                type="submit"
+                class="save-btn"
+            >
+                Save Changes
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+
+</html>

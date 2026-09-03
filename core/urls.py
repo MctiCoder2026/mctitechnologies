@@ -216,4 +216,14 @@ urlpatterns = [
     name="staff_list"
 ),
 
+path(
+    "admissions/<int:admission_id>/edit/",
+    views.edit_admission,
+    name="edit_admission"
+),
+path(
+    "student-quick-view/",
+    views.student_quick_view,
+    name="student_quick_view"
+),
 ]

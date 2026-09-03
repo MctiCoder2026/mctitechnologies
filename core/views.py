@@ -14,6 +14,7 @@ from .forms import (
     EnquiryFollowupForm,
     EnquiryAssignmentForm,
     AdmissionForm,
+    AdmissionEditForm,
     FeePaymentForm,
 )
 
@@ -33,10 +34,28 @@ from .models import (
 # ============================================================
 
 def is_admin_user(user):
-    return (
-        user.is_authenticated
-        and user.is_superuser
-    )
+
+    if not user.is_authenticated:
+        return False
+
+    # Django superuser = full admin
+    if user.is_superuser:
+        return True
+
+    # HO user must also be a Django staff user
+    if not user.is_staff:
+        return False
+
+    try:
+        profile = user.staff_profile
+    except StaffProfile.DoesNotExist:
+        return False
+
+    if not profile.is_active:
+        return False
+
+    # Head Office staff gets HO/Admin level access
+    return profile.branch == "head_office"
 
 
 def get_user_branch(user):
@@ -161,7 +180,7 @@ def get_logged_in_student(user):
 @login_required
 def management_dashboard(request):
 
-    if not request.user.is_superuser:
+    if not is_admin_user(request.user):
         return redirect(
             "branch_dashboard"
         )
@@ -352,7 +371,7 @@ def branch_dashboard(request):
         request.user
     )
 
-    if not request.user.is_superuser:
+    if not is_admin_user(request.user):
 
         if not user_branch:
             auth_logout(request)
@@ -550,6 +569,9 @@ def branch_dashboard(request):
             "end_date": end_date,
             "custom_start": custom_start,
             "custom_end": custom_end,
+            "is_admin": is_admin_user(
+                request.user
+            ),
         }
     )
 
@@ -1186,7 +1208,7 @@ def staff_login(request):
 
     if request.user.is_authenticated:
 
-        if request.user.is_superuser:
+        if is_admin_user(request.user):
             return redirect(
                 "management_dashboard"
             )
@@ -1297,7 +1319,7 @@ def staff_login(request):
             user
         )
 
-        if user.is_superuser:
+        if is_admin_user(user):
             return redirect(
                 "management_dashboard"
             )
@@ -2784,6 +2806,7 @@ def create_admission(
 
         form = AdmissionForm(
             request.POST,
+            request.FILES,
             enquiry=enquiry
         )
 
@@ -3137,7 +3160,55 @@ def admission_detail(
             ),
         }
     )
+@login_required
+def edit_admission(
+    request,
+    admission_id
+):
 
+    admission = get_object_or_404(
+        Admission,
+        id=admission_id
+    )
+
+    # HO / Admin only
+    if not is_admin_user(request.user):
+        return redirect(
+            "admission_detail",
+            admission_id=admission.id
+        )
+
+    if request.method == "POST":
+
+        form = AdmissionEditForm(
+            request.POST,
+            request.FILES,
+            instance=admission
+        )
+
+        if form.is_valid():
+
+            admission = form.save()
+
+            return redirect(
+                "admission_detail",
+                admission_id=admission.id
+            )
+
+    else:
+
+        form = AdmissionEditForm(
+            instance=admission
+        )
+
+    return render(
+        request,
+        "core/edit_admission.html",
+        {
+            "form": form,
+            "admission": admission,
+        }
+    )
 
 
 # ============================================================
@@ -3369,3 +3440,57 @@ def add_fee_payment(
         }
     )
 
+@login_required
+def student_quick_view(request):
+        # Student Quick View is only for HO / Admin
+    if not is_admin_user(request.user):
+        return redirect("branch_dashboard")
+
+    form_no = request.GET.get("form_no", "").strip()
+
+    if not form_no:
+        return render(
+            request,
+            "core/student_quick_view.html",
+            {
+                "error": None,
+                "is_admin": is_admin_user(request.user),
+                
+            }
+        )
+
+    admission = Admission.objects.filter(
+        admission_number__iexact=form_no
+    ).first()
+
+    if not admission:
+        return render(
+            request,
+            "core/student_quick_view.html",
+            {
+                "error": "Student / Form Number not found.",
+                "form_no": form_no,
+                "is_admin": is_admin_user(request.user),
+            }
+        )
+
+    # HO / Admin can view every branch
+    if not is_admin_user(request.user):
+
+        user_branch = get_user_branch(request.user)
+
+        if not user_branch or admission.branch != user_branch:
+            return render(
+                request,
+                "core/student_quick_view.html",
+                {
+                    "error": "You do not have permission to view this student.",
+                    "form_no": form_no,
+                    "is_admin": is_admin_user(request.user),
+                }
+            )
+
+    return redirect(
+        "admission_detail",
+        admission_id=admission.id
+    )

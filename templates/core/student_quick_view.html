@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Student Quick View | MCTI Technologies
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f4f4;
+            color: #111;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .search-card {
+            width: 100%;
+            max-width: 650px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 10px 35px rgba(0,0,0,.08);
+            border-top: 5px solid #ff6b00;
+        }
+
+        .logo {
+            font-size: 27px;
+            font-weight: 900;
+            margin-bottom: 5px;
+        }
+
+        .logo span {
+            color: #ff6b00;
+        }
+
+        .subtitle {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 21px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .help {
+            color: #777;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: #ff6b00;
+        }
+
+        .search-box button {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            background: #ff6b00;
+            color: white;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .search-box button:hover {
+            background: #e85d00;
+        }
+
+        .error {
+            background: #fff0f1;
+            color: #dc3545;
+            border: 1px solid #f5c6cb;
+            padding: 12px;
+            border-radius: 7px;
+            margin-top: 18px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            text-decoration: none;
+            color: #111;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .back:hover {
+            color: #ff6b00;
+        }
+
+        @media(max-width:600px) {
+
+            .search-card {
+                padding: 25px 20px;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="search-card">
+
+        <div class="logo">
+            <span>MCTI</span> TECHNOLOGIES
+        </div>
+
+        <div class="subtitle">
+            Student Management System
+        </div>
+
+        <div class="title">
+            🔎 Student Quick View
+        </div>
+
+        <div class="help">
+            Enter Admission / Form Number to view complete student details.
+        </div>
+
+        <form method="GET">
+
+            <div class="search-box">
+
+                <input
+                    type="text"
+                    name="form_no"
+                    value="{{ form_no|default:'' }}"
+                    placeholder="Example: MCTI00008"
+                    required
+                    autofocus
+                >
+
+                <button type="submit">
+                    View Student
+                </button>
+
+            </div>
+
+        </form>
+
+
+        {% if error %}
+
+            <div class="error">
+                {{ error }}
+            </div>
+
+        {% endif %}
+
+
+        {% if is_admin %}
+
+            <a
+                href="{% url 'management_dashboard' %}"
+                class="back"
+            >
+                ← Back to Dashboard
+            </a>
+
+        {% else %}
+
+            <a
+                href="{% url 'branch_dashboard' %}"
+                class="back"
+            >
+                ← Back to Dashboard
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

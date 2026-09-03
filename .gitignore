@@ -8,3 +8,8 @@ media/
 staticfiles/
 *.log
 .vscode/
+
+courses_live.json
+data_backup.json
+data_backup_utf8.json
+students/

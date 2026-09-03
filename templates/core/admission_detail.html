@@ -131,6 +131,16 @@ body {
 }
 
 
+.btn-edit {
+    background: var(--orange);
+    color: var(--white);
+}
+
+.btn-edit:hover {
+    background: var(--orange-dark);
+}
+
+
 /* =========================
    ADMISSION BANNER
 ========================= */
@@ -278,8 +288,8 @@ body {
 }
 
 .avatar {
-    width: 58px;
-    height: 58px;
+    width: 70px;
+    height: 70px;
 
     border-radius: 50%;
 
@@ -292,6 +302,18 @@ body {
 
     font-size: 23px;
     font-weight: 900;
+
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 3px solid var(--white);
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .student-profile h2 {
@@ -730,6 +752,16 @@ body {
         ← Dashboard
     </a>
 
+
+    {% if is_admin %}
+    <a
+        href="{% url 'edit_admission' admission.id %}"
+        class="btn btn-edit"
+    >
+        ✏ Edit Admission
+    </a>
+    {% endif %}
+
     <button
         onclick="window.print()"
         class="btn btn-print"
@@ -817,7 +849,14 @@ body {
 <div class="student-profile">
 
     <div class="avatar">
-        {{ admission.student_name|first|upper }}
+        {% if admission.photo %}
+            <img
+                src="{{ admission.photo.url }}"
+                alt="{{ admission.student_name }}"
+            >
+        {% else %}
+            {{ admission.student_name|first|upper }}
+        {% endif %}
     </div>
 
     <div>
@@ -865,6 +904,57 @@ body {
                 Not Provided
             {% endif %}
 
+        </span>
+
+    </div>
+
+
+    <div class="info-item">
+
+        <span class="label">
+            Mother Name
+        </span>
+
+        <span class="value">
+            {% if admission.mother_name %}
+                {{ admission.mother_name }}
+            {% else %}
+                Not Provided
+            {% endif %}
+        </span>
+
+    </div>
+
+
+    <div class="info-item">
+
+        <span class="label">
+            Secondary Mobile
+        </span>
+
+        <span class="value">
+            {% if admission.secondary_mobile %}
+                {{ admission.secondary_mobile }}
+            {% else %}
+                Not Provided
+            {% endif %}
+        </span>
+
+    </div>
+
+
+    <div class="info-item" style="grid-column: 1 / -1;">
+
+        <span class="label">
+            Full Address
+        </span>
+
+        <span class="value">
+            {% if admission.address %}
+                {{ admission.address|linebreaksbr }}
+            {% else %}
+                Not Provided
+            {% endif %}
         </span>
 
     </div>

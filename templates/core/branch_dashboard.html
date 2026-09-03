@@ -405,9 +405,9 @@
             Reports
         </a>
 
-        {% if request.user.is_superuser %}
+        {% if is_admin %}
         <a href="/admin/">
-            Django Backend
+            Administrator
         </a>
         {% endif %}
 

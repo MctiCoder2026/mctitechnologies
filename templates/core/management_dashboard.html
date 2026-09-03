@@ -585,15 +585,18 @@ body{
         <a href="{% url 'student_list' %}">
         👨‍🎓 Students
         </a>
+        <a href="{% url 'student_quick_view' %}">
+        🔎 Student Quick View
+        </a>
         <a href="{% url 'staff_list' %}">
         👥 Staff
         </a>
-
+        
         <a href="#">
             📊 Reports
         </a>
 
-
+        
         {% if request.user.is_superuser %}
 
         <div class="admin-link">

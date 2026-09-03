@@ -684,7 +684,7 @@
 
         <div class="form-body">
 
-      <form method="POST">
+      <form method="POST" enctype="multipart/form-data">
 
     {% csrf_token %}
 
@@ -759,6 +759,19 @@
 
                     </div>
 
+                    <div class="form-group">
+
+                        <label>Mother Name</label>
+
+                        {{ form.mother_name }}
+
+                        {% for error in form.mother_name.errors %}
+                            <div class="error">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
 
                     <div class="form-group">
 
@@ -779,6 +792,19 @@
 
                     </div>
 
+                    <div class="form-group">
+
+                        <label>Secondary Mobile Number</label>
+
+                        {{ form.secondary_mobile }}
+
+                        {% for error in form.secondary_mobile.errors %}
+                            <div class="error">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
 
                     <div class="form-group">
 
@@ -797,7 +823,34 @@
                         {% endfor %}
 
                     </div>
+                    <div class="form-group">
 
+                        <label>Full Address</label>
+
+                        {{ form.address }}
+
+                        {% for error in form.address.errors %}
+                            <div class="error">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Student Photo</label>
+
+                        {{ form.photo }}
+
+                        {% for error in form.photo.errors %}
+                            <div class="error">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
 
                     <div class="form-group">
 

@@ -183,8 +183,12 @@ class AdmissionForm(forms.ModelForm):
 
         fields = [
             "student_name",
+            "mother_name",
             "mobile",
+            "secondary_mobile",
             "email",
+            "address",
+            "photo",
             "course",
             "branch",
             "admission_date",
@@ -203,10 +207,24 @@ class AdmissionForm(forms.ModelForm):
                 }
             ),
 
+            "mother_name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Mother Name",
+                }
+            ),
+
             "mobile": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Mobile Number",
+                    "placeholder": "Primary Mobile Number",
+                }
+            ),
+
+            "secondary_mobile": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Secondary Mobile Number",
                 }
             ),
 
@@ -214,6 +232,21 @@ class AdmissionForm(forms.ModelForm):
                 attrs={
                     "class": "form-control",
                     "placeholder": "Email Address",
+                }
+            ),
+
+            "address": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Full Address",
+                    "rows": 3,
+                }
+            ),
+
+            "photo": forms.ClearableFileInput(
+                attrs={
+                    "class": "form-control",
+                    "accept": "image/*",
                 }
             ),
 
@@ -277,15 +310,10 @@ class AdmissionForm(forms.ModelForm):
         if enquiry and not self.instance.pk:
 
             self.fields["student_name"].initial = enquiry.name
-
             self.fields["mobile"].initial = enquiry.mobile
-
             self.fields["email"].initial = enquiry.email
-
             self.fields["course"].initial = enquiry.course
-
             self.fields["branch"].initial = enquiry.branch
-
 
 # ============================================================
 # FEE PAYMENT FORM
@@ -331,6 +359,116 @@ class FeePaymentForm(forms.ModelForm):
                 attrs={
                     "class": "form-control",
                     "placeholder": "Payment remarks...",
+                    "rows": 3,
+                }
+            ),
+        }
+
+# ============================================================
+# ADMISSION EDIT FORM
+# ============================================================
+
+class AdmissionEditForm(forms.ModelForm):
+
+    class Meta:
+        model = Admission
+
+        fields = [
+            "student_name",
+            "mother_name",
+            "mobile",
+            "secondary_mobile",
+            "email",
+            "address",
+            "photo",
+            "course",
+            "branch",
+            "admission_date",
+            "total_fee",
+            "notes",
+        ]
+
+        widgets = {
+            "student_name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Student Name",
+                }
+            ),
+
+            "mother_name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Mother Name",
+                }
+            ),
+
+            "mobile": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Mobile Number",
+                }
+            ),
+
+            "secondary_mobile": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Secondary Mobile Number",
+                }
+            ),
+
+            "email": forms.EmailInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Email Address",
+                }
+            ),
+
+            "address": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": "Full Address",
+                }
+            ),
+
+            "photo": forms.ClearableFileInput(
+                attrs={
+                    "class": "form-control",
+                    "accept": "image/*",
+                }
+            ),
+
+            "course": forms.Select(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+
+            "branch": forms.Select(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+
+            "admission_date": forms.DateInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "date",
+                }
+            ),
+
+            "total_fee": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "0",
+                    "step": "0.01",
+                }
+            ),
+
+            "notes": forms.Textarea(
+                attrs={
+                    "class": "form-control",
                     "rows": 3,
                 }
             ),

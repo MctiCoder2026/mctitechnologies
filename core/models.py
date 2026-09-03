@@ -361,6 +361,31 @@ class Admission(models.Model):
         null=True
     )
 
+
+
+    mother_name = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    secondary_mobile = models.CharField(
+        max_length=15,
+        blank=True,
+        null=True
+    )
+
+    address = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    photo = models.ImageField(
+        upload_to="students/photos/",
+        blank=True,
+        null=True
+    )
+
     # --------------------------------------------------------
     # COURSE
     # --------------------------------------------------------
@@ -604,6 +629,31 @@ class Student(models.Model):
     )
 
     email = models.EmailField(
+        blank=True,
+        null=True
+    )
+
+
+
+    mother_name = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    secondary_mobile = models.CharField(
+        max_length=15,
+        blank=True,
+        null=True
+    )
+
+    address = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    photo = models.ImageField(
+        upload_to="students/photos/",
         blank=True,
         null=True
     )
@@ -968,7 +1018,7 @@ class FeePayment(models.Model):
 # ============================================================
 
 @receiver(post_save, sender=Admission)
-def create_student_from_admission(
+def sync_student_from_admission(
     sender,
     instance,
     created,
@@ -978,19 +1028,26 @@ def create_student_from_admission(
     if kwargs.get("raw"):
         return
 
-    if created:
+    student, student_created = Student.objects.update_or_create(
+        admission=instance,
+        defaults={
+            "name": instance.student_name,
+            "mobile": instance.mobile,
+            "email": instance.email,
+            "mother_name": instance.mother_name,
+            "secondary_mobile": instance.secondary_mobile,
+            "address": instance.address,
+            "photo": instance.photo,
+            "course": instance.course,
+            "branch": instance.branch,
+            "joining_date": instance.admission_date,
+            "created_by": instance.created_by,
+        }
+    )
 
-        Student.objects.create(
-            admission=instance,
-            name=instance.student_name,
-            mobile=instance.mobile,
-            email=instance.email,
-            course=instance.course,
-            branch=instance.branch,
-            joining_date=instance.admission_date,
-            status="active",
-            created_by=instance.created_by,
-        )
+    if student_created:
+        student.status = "active"
+        student.save(update_fields=["status"])
 
 
 # ============================================================
