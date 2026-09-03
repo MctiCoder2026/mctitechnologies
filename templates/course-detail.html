@@ -1,45 +1,231 @@
-{% if course.modules.all %}
+{% extends "base.html" %}
 
-<div class="course-learning">
+{% block title %}
+{{ course.title }} | MCTI Academy
+{% endblock %}
 
-    <span class="course-section-label">
-        COURSE SYLLABUS
-    </span>
+{% block content %}
 
-    <h2>
-        What You Will Learn
-    </h2>
+<section class="course-premium-hero">
 
-    <div class="course-modules">
+    <div class="course-detail-container">
 
-        {% for module in course.modules.all %}
+        <span class="course-premium-category">
+            {{ course.category }}
+        </span>
 
-        <div class="module-card">
+        <h1>{{ course.title }}</h1>
 
-            <div class="module-number">
-                {{ module.module_number|stringformat:"02d" }}
+        {% if course.short_description %}
+        <p class="course-premium-description">
+            {{ course.short_description }}
+        </p>
+        {% endif %}
+
+        <div class="course-premium-meta">
+
+            <div class="premium-meta-card">
+                <span>Duration</span>
+                <strong>{{ course.duration }}</strong>
             </div>
 
-            <div class="module-content">
-
-                <h3>
-                    {{ module.title }}
-                </h3>
-
-                {% if module.description %}
-                <p>
-                    {{ module.description }}
-                </p>
-                {% endif %}
-
+            <div class="premium-meta-card">
+                <span>Learning Mode</span>
+                <strong>Offline / Online / Hybrid</strong>
             </div>
 
         </div>
 
-        {% endfor %}
+        <a href="{% url 'contact' %}" class="premium-primary-btn">
+            Enquire Now →
+        </a>
 
     </div>
 
-</div>
+</section>
 
-{% endif %}
+
+<section class="course-premium-content">
+
+    <div class="course-detail-container">
+
+        <div class="course-premium-grid">
+
+            <div class="course-premium-main">
+
+                {% if course.eligibility %}
+                <div class="premium-content-card">
+
+                    <span class="premium-label">
+                        WHO CAN JOIN
+                    </span>
+
+                    <h2>Eligibility</h2>
+
+                    <div class="premium-text">
+                        {{ course.eligibility|linebreaks }}
+                    </div>
+
+                </div>
+                {% endif %}
+
+
+                {% if course.benefits %}
+                <div class="premium-content-card">
+
+                    <span class="premium-label">
+                        CAREER VALUE
+                    </span>
+
+                    <h2>Course Benefits</h2>
+
+                    <div class="premium-text">
+                        {{ course.benefits|linebreaks }}
+                    </div>
+
+                </div>
+                {% endif %}
+
+
+                {% if course.syllabus %}
+                <div class="premium-content-card">
+
+                    <span class="premium-label">
+                        WHAT YOU WILL LEARN
+                    </span>
+
+                    <h2>Course Syllabus</h2>
+
+                    <div class="premium-text premium-syllabus">
+                        {{ course.syllabus|linebreaks }}
+                    </div>
+
+                </div>
+                {% endif %}
+
+
+                {% if course.modules.all %}
+
+                <div class="course-learning">
+
+                    <span class="premium-label">
+                        COURSE STRUCTURE
+                    </span>
+
+                    <h2>Course Modules</h2>
+
+                    <div class="course-modules">
+
+                        {% for module in course.modules.all %}
+
+                        <div class="module-card">
+
+                            <div class="module-number">
+                                {{ module.module_number|stringformat:"02d" }}
+                            </div>
+
+                            <div class="module-content">
+
+                                <h3>{{ module.title }}</h3>
+
+                                {% if module.description %}
+                                <p>{{ module.description }}</p>
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <aside class="course-premium-sidebar">
+
+                <div class="premium-sidebar-card">
+
+                    <span class="premium-sidebar-label">
+                        MCTI ACADEMY
+                    </span>
+
+                    <h3>Need Course Guidance?</h3>
+
+                    <p>
+                        Talk to our counsellor for course selection,
+                        latest fees, offers and batch availability.
+                    </p>
+
+                    <div class="sidebar-info">
+
+                        <div>
+                            <span>Course</span>
+                            <strong>{{ course.title }}</strong>
+                        </div>
+
+                        <div>
+                            <span>Duration</span>
+                            <strong>{{ course.duration }}</strong>
+                        </div>
+
+                        <div>
+                            <span>Fees</span>
+                            <strong>Contact for Fees & Current Offers</strong>
+                        </div>
+
+                    </div>
+
+                    <a href="{% url 'contact' %}" class="premium-sidebar-btn">
+                        Enquire Now →
+                    </a>
+
+                    <p class="premium-small-text">
+                        Our team will help you choose the right learning path.
+                    </p>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="premium-bottom-cta">
+
+    <div class="course-detail-container">
+
+        <div class="premium-bottom-box">
+
+            <div>
+                <span>START YOUR LEARNING JOURNEY</span>
+
+                <h2>
+                    Ready to learn {{ course.title }}?
+                </h2>
+
+                <p>
+                    Enquire today for latest batch details, fees and available offers.
+                </p>
+            </div>
+
+            <a href="{% url 'contact' %}">
+                Talk to MCTI →
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}
