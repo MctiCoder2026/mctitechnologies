@@ -8,7 +8,6 @@ Enquiry Dashboard | MCTI Technologies
 
 <section class="mcti-dashboard">
 
-```
 <div class="mcti-dashboard-container">
 
 
@@ -33,12 +32,30 @@ Enquiry Dashboard | MCTI Technologies
         </div>
 
 
+        <div class="dashboard-header-actions">
+
+    {% if request.user.is_superuser %}
+
+        <a href="{% url 'management_dashboard' %}"
+           class="mcti-dashboard-back-btn">
+            ← Back to Dashboard
+        </a>
+
         <a href="{% url 'admin:index' %}"
            class="mcti-admin-btn">
-
             Open Admin →
-
         </a>
+
+    {% else %}
+
+        <a href="{% url 'branch_dashboard' %}"
+           class="mcti-dashboard-back-btn">
+            ← Back to Dashboard
+        </a>
+
+    {% endif %}
+
+</div>
 
     </div>
 
@@ -859,7 +876,7 @@ Enquiry Dashboard | MCTI Technologies
 
 
 </div>
-```
+
 
 </section>
 

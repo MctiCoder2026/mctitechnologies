@@ -577,7 +577,22 @@ body {
 >
     🖨 Print Receipt
 </button>
-
+<a
+    href="https://wa.me/91{{ payment.student.mobile }}?text=Hello%20{{ payment.student.name|urlencode }}%2C%0A%0AThank%20you%20for%20your%20payment%20to%20MCTI%20Technologies.%0A%0AReceipt%20No%3A%20{{ payment.receipt_number|urlencode }}%0AAmount%20Paid%3A%20Rs.%20{{ payment.amount|urlencode }}%0A%0AView%20Receipt%3A%20{{ request.build_absolute_uri|urlencode }}%0A%0AThank%20you%2C%0AMCTI%20Technologies"
+    target="_blank"
+    style="
+        display:inline-block;
+        padding:12px 20px;
+        background:#25D366;
+        color:#ffffff;
+        border-radius:8px;
+        text-decoration:none;
+        font-weight:700;
+        font-size:14px;
+    "
+>
+    WhatsApp Receipt
+</a>
 
 </div>
 
