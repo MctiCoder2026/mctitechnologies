@@ -1028,27 +1028,33 @@ def sync_student_from_admission(
     if kwargs.get("raw"):
         return
 
+    defaults = {
+        "name": instance.student_name,
+        "mobile": instance.mobile,
+        "email": instance.email,
+        "mother_name": instance.mother_name,
+        "secondary_mobile": instance.secondary_mobile,
+        "address": instance.address,
+        "photo": instance.photo,
+        "course": instance.course,
+        "branch": instance.branch,
+        "joining_date": instance.admission_date,
+    }
+
     student, student_created = Student.objects.update_or_create(
         admission=instance,
-        defaults={
-            "name": instance.student_name,
-            "mobile": instance.mobile,
-            "email": instance.email,
-            "mother_name": instance.mother_name,
-            "secondary_mobile": instance.secondary_mobile,
-            "address": instance.address,
-            "photo": instance.photo,
-            "course": instance.course,
-            "branch": instance.branch,
-            "joining_date": instance.admission_date,
-            "created_by": instance.created_by,
-        }
+        defaults=defaults,
     )
 
     if student_created:
+        student.created_by = instance.created_by
         student.status = "active"
-        student.save(update_fields=["status"])
-
+        student.save(
+            update_fields=[
+                "created_by",
+                "status",
+            ]
+        )
 
 # ============================================================
 # AUTO CREATE INITIAL RECEIPT FROM ADMISSION
