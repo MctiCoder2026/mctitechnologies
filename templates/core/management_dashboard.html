@@ -591,9 +591,21 @@ body{
         <a href="{% url 'staff_list' %}">
         👥 Staff
         </a>
+
+        <a href="{% url 'attendance_dashboard' %}">
+            📋 Attendance
+        </a>
+
+        <a href="{% url 'attendance_report' %}">
+            📊 Attendance Report
+        </a>
         
-        <a href="#">
+        <a href="{% url 'reports_dashboard' %}">
             📊 Reports
+        </a>
+
+        <a href="{% url 'fee_due_report' %}">
+            📅 Fee Due Report
         </a>
 
         
@@ -931,6 +943,78 @@ body{
                     </a>
 
 
+                    <a
+                        href="{% url 'fee_due_report' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            📅
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Fee Due Report
+                            </strong>
+
+                            <span>
+                                Track overdue & upcoming fees
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    <a
+                        href="{% url 'attendance_dashboard' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            📋
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Attendance
+                            </strong>
+
+                            <span>
+                                Mark and review student attendance
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    <a
+                        href="{% url 'job_list' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            💼
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Placement / Jobs
+                            </strong>
+
+                            <span>
+                                Post and manage job opportunities
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
                     {% if request.user.is_superuser %}
 
                     <a
@@ -1009,6 +1093,45 @@ body{
 
                         <span>
                             Fee Collection
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Attendance System
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Placement & Jobs
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Fee Due Tracking
                         </span>
 
                         <strong class="status-good">

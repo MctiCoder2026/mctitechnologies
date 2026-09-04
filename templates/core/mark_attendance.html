@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mark Attendance | MCTI Technologies</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#f97316;--dark:#111827;--dark2:#1f2937;--bg:#f5f7fb;--white:#fff;
+  --border:#e5e7eb;--muted:#6b7280;--green:#16a34a;--red:#dc2626;--yellow:#ca8a04;
+  --blue:#2563eb;
+}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--dark)}
+.sidebar{width:250px;background:var(--dark);color:white;padding:24px 18px;position:fixed;top:0;left:0;bottom:0;overflow-y:auto}
+.logo{margin-bottom:28px} .logo h2{font-size:21px;margin-bottom:4px} .logo h2 span{color:var(--primary)} .logo p{font-size:11px;color:#9ca3af}
+.menu a{display:flex;align-items:center;gap:11px;text-decoration:none;color:#d1d5db;padding:12px 13px;border-radius:9px;margin-bottom:6px;font-size:13px;font-weight:700}
+.menu a:hover{background:#2b3545;color:white} .menu a.active{background:var(--primary);color:white}
+.main{margin-left:250px;min-height:100vh}
+.topbar{min-height:72px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:14px 28px}
+.topbar h1{font-size:21px;margin-bottom:4px} .topbar p{font-size:12px;color:var(--muted)}
+.content{padding:28px}
+.panel{background:white;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px}
+.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:13px;margin-bottom:20px}
+.card{background:white;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid var(--dark)}
+.card.orange{border-top-color:var(--primary)} .card.green{border-top-color:var(--green)} .card.red{border-top-color:var(--red)} .card.yellow{border-top-color:var(--yellow)} .card.blue{border-top-color:var(--blue)}
+.card small{display:block;color:var(--muted);font-size:10px;margin-bottom:6px} .card strong{font-size:20px}
+.btn{height:40px;border:none;border-radius:8px;padding:0 17px;background:var(--primary);color:white;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.btn-dark{background:var(--dark)} .btn-light{background:#f3f4f6;color:#374151}
+.filters{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:12px;align-items:end}
+label{display:block;font-size:10px;font-weight:800;color:#4b5563;margin-bottom:6px}
+input,select{width:100%;height:40px;border:1px solid #d1d5db;border-radius:8px;padding:0 11px;background:white}
+.table-wrap{overflow-x:auto} table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;background:#f9fafb;color:#4b5563;padding:11px 9px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
+.badge{display:inline-block;padding:5px 8px;border-radius:20px;font-size:9px;font-weight:800;white-space:nowrap}
+.present{background:#dcfce7;color:#166534} .absent{background:#fee2e2;color:#991b1b} .leave{background:#fef3c7;color:#854d0e} .pending{background:#e5e7eb;color:#374151}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.msg{padding:11px 13px;border-radius:8px;margin-bottom:14px;background:#dcfce7;color:#166534;font-size:12px;font-weight:700}
+@media(max-width:1200px){.cards{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.filters{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.content{padding:14px}.cards{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="logo">
+    <h2><span>MCTI</span> Technologies</h2>
+    <p>Management System</p>
+  </div>
+  <nav class="menu">
+    <a href="{% url 'management_dashboard' %}">🏠 Dashboard</a>
+    <a href="{% url 'branch_dashboard' %}">📈 Branch Performance</a>
+    <a href="{% url 'enquiry_dashboard' %}">📞 Enquiries</a>
+    <a href="{% url 'fee_payment_list' %}">💳 Fee Payments</a>
+    <a href="{% url 'admission_list' %}">📝 Admissions</a>
+    <a href="{% url 'student_list' %}">🎓 Students</a>
+    <a href="{% url 'student_quick_view' %}">🔎 Student Quick View</a>
+    <a href="{% url 'staff_list' %}">👥 Staff</a>
+    <a href="{% url 'attendance_dashboard' %}" class="active">📋 Attendance</a>
+    <a href="{% url 'attendance_report' %}" class="">📊 Attendance Report</a>
+    <a href="{% url 'job_list' %}">💼 Placement / Jobs</a>
+    <a href="{% url 'reports_dashboard' %}">📊 Reports</a>
+    <a href="{% url 'fee_due_report' %}">📅 Fee Due Report</a>
+    {% if request.user.is_superuser %}<a href="/admin/">⚙️ Django Backend</a>{% endif %}
+    <a href="{% url 'staff_logout' %}">🚪 Logout</a>
+  </nav>
+</aside>
+<main class="main">
+<header class="topbar">
+  <div><h1>Mark Attendance</h1><p>Mark Present, Absent or Leave for active students</p></div>
+  <div style="text-align:right">
+    <strong style="font-size:12px">{{ request.user.get_full_name|default:request.user.username }}</strong>
+    <div style="font-size:10px;color:#6b7280">{% if is_admin %}HO / Admin{% else %}Branch Staff{% endif %}</div>
+  </div>
+</header>
+<div class="content">
+
+{% if messages %}
+  {% for message in messages %}<div class="msg">{{ message }}</div>{% endfor %}
+{% endif %}
+
+<section class="panel">
+  <form method="get" class="filters" style="grid-template-columns:1fr 1fr 1fr auto">
+    <div>
+      <label>DATE</label>
+      <input type="date" name="date" value="{{ attendance_date|date:'Y-m-d' }}">
+    </div>
+    {% if is_admin %}
+    <div>
+      <label>BRANCH</label>
+      <select name="branch">
+        {% for value,label in branches %}
+          <option value="{{ value }}" {% if branch_filter == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% else %}
+      <input type="hidden" name="branch" value="{{ branch_filter }}">
+    {% endif %}
+    <div>
+      <label>COURSE</label>
+      <select name="course">
+        <option value="">All Courses</option>
+        {% for course in courses %}
+          <option value="{{ course.id }}" {% if course_filter == course.id|stringformat:"s" %}selected{% endif %}>{{ course.title }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="btn" type="submit">Load Students</button>
+  </form>
+</section>
+
+<section class="panel">
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="attendance_date" value="{{ attendance_date|date:'Y-m-d' }}">
+    <input type="hidden" name="branch" value="{{ branch_filter }}">
+    <input type="hidden" name="course" value="{{ course_filter }}">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div>
+        <h2 style="font-size:17px">Mark Attendance</h2>
+        <p style="font-size:10px;color:#6b7280;margin-top:4px">{{ student_rows|length }} active student(s)</p>
+      </div>
+      <button class="btn" type="submit">Save Attendance</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Student</th><th>Mobile</th><th>Course</th><th>Branch</th><th>Status</th><th>Remarks</th></tr>
+        </thead>
+        <tbody>
+          {% for row in student_rows %}
+          <tr>
+            <td><strong>{{ row.student.name }}</strong><br><span style="color:#6b7280">{{ row.student.student_id }}</span></td>
+            <td>{{ row.student.mobile }}</td>
+            <td>{% if row.student.course %}{{ row.student.course.title }}{% else %}-{% endif %}</td>
+            <td>{{ row.student.branch|title }}</td>
+            <td>
+              <select name="status_{{ row.student.id }}" required>
+                <option value="">Select</option>
+                <option value="present" {% if row.record and row.record.status == "present" %}selected{% endif %}>Present</option>
+                <option value="absent" {% if row.record and row.record.status == "absent" %}selected{% endif %}>Absent</option>
+                <option value="leave" {% if row.record and row.record.status == "leave" %}selected{% endif %}>Leave</option>
+              </select>
+            </td>
+            <td><input type="text" name="remarks_{{ row.student.id }}" value="{% if row.record %}{{ row.record.remarks|default:'' }}{% endif %}" placeholder="Optional"></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" style="text-align:center;padding:30px;color:#6b7280">No active students found for this filter.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </form>
+</section>
+
+</div>
+</main>
+</body>
+</html>

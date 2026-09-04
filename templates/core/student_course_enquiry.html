@@ -1,0 +1,569 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Skill Upgrade Enquiry | MCTI One</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --primary:#ff6b00;
+    --primary-dark:#e85d00;
+    --primary-light:#fff2e8;
+    --dark:#111827;
+    --bg:#f5f7fb;
+    --white:#ffffff;
+    --border:#e5e7eb;
+    --muted:#6b7280;
+    --green:#16a34a;
+}
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--bg);
+    color:var(--dark);
+}
+
+.portal{
+    display:flex;
+    min-height:100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:250px;
+    background:var(--dark);
+    color:white;
+    padding:24px 18px;
+
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+}
+
+.logo{
+    margin-bottom:32px;
+}
+
+.logo h2{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.logo h2 span{
+    color:var(--primary);
+}
+
+.logo p{
+    font-size:11px;
+    color:#9ca3af;
+}
+
+.student-box{
+    background:#1f2937;
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:25px;
+}
+
+.student-box small{
+    display:block;
+    color:#9ca3af;
+    font-size:10px;
+    margin-bottom:5px;
+}
+
+.student-box strong{
+    display:block;
+    font-size:13px;
+    margin-bottom:4px;
+}
+
+.student-box span{
+    color:var(--primary);
+    font-size:11px;
+}
+
+.menu-title{
+    font-size:10px;
+    color:#6b7280;
+    letter-spacing:1px;
+    margin:20px 10px 10px;
+}
+
+.menu a{
+    display:flex;
+    align-items:center;
+    gap:11px;
+
+    text-decoration:none;
+    color:#d1d5db;
+
+    padding:12px 13px;
+    border-radius:9px;
+    margin-bottom:6px;
+
+    font-size:13px;
+    font-weight:700;
+}
+
+.menu a:hover{
+    background:#2b3545;
+    color:white;
+}
+
+.menu a.active{
+    background:var(--primary);
+    color:white;
+}
+
+/* MAIN */
+
+.main{
+    margin-left:250px;
+    width:calc(100% - 250px);
+}
+
+.topbar{
+    min-height:76px;
+    background:white;
+    border-bottom:1px solid var(--border);
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:15px 30px;
+}
+
+.topbar h1{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.topbar p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.back-btn{
+    text-decoration:none;
+    background:#f3f4f6;
+    color:var(--dark);
+    padding:9px 13px;
+    border-radius:8px;
+    font-size:11px;
+    font-weight:800;
+}
+
+/* CONTENT */
+
+.content{
+    padding:30px;
+}
+
+.enquiry-card{
+    max-width:750px;
+    margin:auto;
+
+    background:white;
+    border:1px solid var(--border);
+    border-radius:16px;
+
+    padding:28px;
+
+    box-shadow:0 5px 20px rgba(0,0,0,0.05);
+}
+
+.enquiry-card h2{
+    font-size:22px;
+    margin-bottom:7px;
+}
+
+.subtitle{
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.6;
+    margin-bottom:25px;
+}
+
+/* JOB */
+
+.job-box{
+    background:var(--dark);
+    color:white;
+
+    border-radius:12px;
+    padding:18px;
+
+    margin-bottom:22px;
+}
+
+.job-box small{
+    color:#9ca3af;
+    font-size:10px;
+}
+
+.job-box h3{
+    font-size:18px;
+    margin:6px 0;
+}
+
+.company{
+    color:var(--primary);
+    font-size:13px;
+    font-weight:800;
+}
+
+/* DETAILS */
+
+.details{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-bottom:22px;
+}
+
+.detail{
+    background:#f9fafb;
+    padding:13px;
+    border-radius:9px;
+}
+
+.detail small{
+    display:block;
+    color:var(--muted);
+    font-size:10px;
+    margin-bottom:5px;
+}
+
+.detail strong{
+    font-size:13px;
+}
+
+.interested{
+    background:var(--primary-light);
+    border-left:4px solid var(--primary);
+
+    padding:17px;
+    border-radius:9px;
+
+    margin-bottom:20px;
+}
+
+.interested small{
+    display:block;
+    color:#9a3412;
+    font-size:10px;
+    font-weight:700;
+    margin-bottom:5px;
+}
+
+.interested strong{
+    color:var(--primary-dark);
+    font-size:17px;
+}
+
+.info{
+    background:#ecfdf5;
+    color:#166534;
+
+    padding:14px;
+    border-radius:9px;
+
+    font-size:11px;
+    line-height:1.6;
+
+    margin-bottom:22px;
+}
+
+/* BUTTONS */
+
+.actions{
+    display:flex;
+    gap:10px;
+    padding-top:18px;
+    border-top:1px solid var(--border);
+}
+
+.submit-btn{
+    border:none;
+    background:var(--primary);
+    color:white;
+
+    padding:12px 18px;
+    border-radius:8px;
+
+    cursor:pointer;
+    font-size:12px;
+    font-weight:800;
+}
+
+.submit-btn:hover{
+    background:var(--primary-dark);
+}
+
+.cancel-btn{
+    text-decoration:none;
+    background:#f3f4f6;
+    color:var(--dark);
+
+    padding:12px 18px;
+    border-radius:8px;
+
+    font-size:12px;
+    font-weight:800;
+}
+
+@media(max-width:900px){
+
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+    }
+}
+
+@media(max-width:600px){
+
+    .content{
+        padding:15px;
+    }
+
+    .details{
+        grid-template-columns:1fr;
+    }
+
+    .topbar{
+        padding:15px;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="portal">
+
+<!-- SIDEBAR -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+        <h2><span>MCTI</span> One</h2>
+        <p>Student Portal</p>
+    </div>
+
+    <div class="student-box">
+
+        <small>STUDENT</small>
+
+        <strong>
+            {{ student.full_name|default:student }}
+        </strong>
+
+        <span>
+            {{ admission.admission_number }}
+        </span>
+
+    </div>
+
+    <div class="menu">
+
+        <div class="menu-title">
+            STUDENT
+        </div>
+
+        <a href="{% url 'student_dashboard' %}">
+            🏠 Dashboard
+        </a>
+
+        <a href="#">
+            📚 My Learning
+        </a>
+
+        <a href="https://exam.maharashtracomputer.com"
+           target="_blank"
+           rel="noopener noreferrer">
+            📝 Exam Portal
+        </a>
+
+        <a href="{% url 'student_jobs' %}"
+           class="active">
+            💼 Placement Support
+        </a>
+
+        <a href="#">
+            🔔 Notifications
+        </a>
+
+        <a href="{% url 'student_dashboard' %}">
+            💳 Fee & Payments
+        </a>
+
+        <a href="#">
+            👤 My Profile
+        </a>
+
+        <a href="{% url 'student_logout' %}">
+            🚪 Logout
+        </a>
+
+    </div>
+
+</aside>
+
+
+<!-- MAIN -->
+
+<main class="main">
+
+<div class="topbar">
+
+    <div>
+        <h1>Skill Upgrade Enquiry</h1>
+        <p>Take the next step toward this career opportunity.</p>
+    </div>
+
+    <a href="{% url 'student_jobs' %}"
+       class="back-btn">
+        ← Back to Jobs
+    </a>
+
+</div>
+
+
+<div class="content">
+
+<div class="enquiry-card">
+
+    <h2>
+        Interested in this career path?
+    </h2>
+
+    <p class="subtitle">
+        Submit your interest and our MCTI team can contact you
+        regarding the skills and course required for this opportunity.
+    </p>
+
+
+    <div class="job-box">
+
+        <small>JOB OPPORTUNITY</small>
+
+        <h3>
+            {{ job.title }}
+        </h3>
+
+        <div class="company">
+            {{ job.company_name }}
+        </div>
+
+    </div>
+
+
+    <div class="details">
+
+        <div class="detail">
+
+            <small>
+                YOUR CURRENT COURSE
+            </small>
+
+            <strong>
+                {{ admission.course.title }}
+            </strong>
+
+        </div>
+
+
+        <div class="detail">
+
+            <small>
+                JOB LOCATION
+            </small>
+
+            <strong>
+                {{ job.location|default:"Not Mentioned" }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <div class="interested">
+
+        <small>
+            COURSE YOU ARE INTERESTED IN
+        </small>
+
+        <strong>
+            {{ interested_course.title }}
+        </strong>
+
+    </div>
+
+
+    <div class="info">
+
+        ✓ After submitting, your request will be added to the
+        MCTI Enquiry Management System so our team can follow up
+        with you regarding this course and career opportunity.
+
+    </div>
+
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <div class="actions">
+
+            <button type="submit"
+                    class="submit-btn">
+
+                ✓ Submit My Enquiry
+
+            </button>
+
+
+            <a href="{% url 'student_jobs' %}"
+               class="cancel-btn">
+
+                Cancel
+
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+</div>
+
+</main>
+
+</div>
+
+</body>
+</html>

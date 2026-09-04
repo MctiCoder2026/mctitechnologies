@@ -1,0 +1,924 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>
+    {% if is_edit %}
+        Edit Job
+    {% else %}
+        Post New Job
+    {% endif %}
+    | MCTI Technologies
+</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --primary:#ff6b00;
+    --primary-dark:#e85d00;
+    --primary-light:#fff2e8;
+
+    --dark:#111827;
+    --dark2:#1f2937;
+
+    --bg:#f5f7fb;
+    --white:#ffffff;
+
+    --border:#e5e7eb;
+    --muted:#6b7280;
+
+    --green:#16a34a;
+    --red:#dc2626;
+}
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--bg);
+    color:var(--dark);
+}
+
+.dashboard{
+    display:flex;
+    min-height:100vh;
+}
+
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.sidebar{
+    width:250px;
+    background:var(--dark);
+    color:white;
+    padding:24px 18px;
+
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+
+    overflow-y:auto;
+}
+
+.logo{
+    margin-bottom:35px;
+}
+
+.logo h2{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.logo h2 span{
+    color:var(--primary);
+}
+
+.logo p{
+    font-size:11px;
+    color:#9ca3af;
+}
+
+.menu-title{
+    font-size:10px;
+    color:#6b7280;
+    letter-spacing:1px;
+
+    margin:22px 10px 10px;
+}
+
+.menu a{
+    display:flex;
+    align-items:center;
+    gap:11px;
+
+    text-decoration:none;
+    color:#d1d5db;
+
+    padding:12px 13px;
+
+    border-radius:9px;
+
+    margin-bottom:6px;
+
+    font-size:13px;
+    font-weight:700;
+
+    transition:0.2s;
+}
+
+.menu a:hover{
+    background:#2b3545;
+    color:white;
+}
+
+.menu a.active{
+    background:var(--primary);
+    color:white;
+}
+
+
+/* =========================================
+   MAIN
+========================================= */
+
+.main{
+    margin-left:250px;
+    width:calc(100% - 250px);
+}
+
+.topbar{
+    height:76px;
+
+    background:white;
+
+    border-bottom:1px solid var(--border);
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 30px;
+
+    position:sticky;
+    top:0;
+    z-index:10;
+}
+
+.topbar h1{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.topbar p{
+    font-size:12px;
+    color:var(--muted);
+}
+
+.back-btn{
+    text-decoration:none;
+
+    background:#f3f4f6;
+    color:var(--dark);
+
+    padding:9px 13px;
+
+    border-radius:8px;
+
+    font-size:11px;
+    font-weight:700;
+}
+
+.back-btn:hover{
+    background:var(--dark);
+    color:white;
+}
+
+
+/* =========================================
+   CONTENT
+========================================= */
+
+.content{
+    padding:28px;
+}
+
+.form-card{
+    max-width:950px;
+
+    background:white;
+
+    border:1px solid var(--border);
+    border-radius:15px;
+
+    padding:26px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,0.04);
+}
+
+.form-header{
+    margin-bottom:25px;
+}
+
+.form-header h2{
+    font-size:22px;
+    margin-bottom:6px;
+}
+
+.form-header p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+
+/* =========================================
+   FORM
+========================================= */
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.form-group{
+    margin-bottom:18px;
+}
+
+.form-group.full{
+    grid-column:1/-1;
+}
+
+.form-group label{
+    display:block;
+
+    margin-bottom:7px;
+
+    font-size:12px;
+    font-weight:700;
+
+    color:var(--dark);
+}
+
+.form-control,
+.form-group input,
+.form-group textarea,
+.form-group select{
+    width:100%;
+
+    border:1px solid #d1d5db;
+
+    border-radius:8px;
+
+    padding:11px 12px;
+
+    background:white;
+
+    font-family:Arial, Helvetica, sans-serif;
+    font-size:13px;
+
+    outline:none;
+
+    transition:0.2s;
+}
+
+.form-group textarea{
+    resize:vertical;
+}
+
+.form-control:focus,
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus{
+    border-color:var(--primary);
+
+    box-shadow:0 0 0 3px rgba(255,107,0,0.08);
+}
+
+.form-group select[multiple]{
+    min-height:150px;
+}
+
+.help-text{
+    margin-top:6px;
+
+    color:var(--muted);
+
+    font-size:10px;
+    line-height:1.5;
+}
+
+.error-box{
+    margin-top:7px;
+
+    padding:8px 10px;
+
+    background:#fee2e2;
+    color:#991b1b;
+
+    border-radius:7px;
+
+    font-size:11px;
+}
+
+
+/* =========================================
+   INFO BOX
+========================================= */
+
+.info-alert{
+    background:var(--primary-light);
+
+    border-left:4px solid var(--primary);
+
+    padding:13px 15px;
+
+    border-radius:8px;
+
+    margin-bottom:22px;
+
+    font-size:12px;
+    line-height:1.6;
+}
+
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.form-actions{
+    display:flex;
+    gap:10px;
+
+    margin-top:10px;
+
+    padding-top:20px;
+
+    border-top:1px solid var(--border);
+}
+
+.save-btn{
+    border:none;
+
+    background:var(--primary);
+    color:white;
+
+    padding:11px 18px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-size:12px;
+    font-weight:800;
+}
+
+.save-btn:hover{
+    background:var(--primary-dark);
+}
+
+.cancel-btn{
+    text-decoration:none;
+
+    background:#f3f4f6;
+    color:var(--dark);
+
+    padding:11px 18px;
+
+    border-radius:8px;
+
+    font-size:12px;
+    font-weight:800;
+}
+
+.cancel-btn:hover{
+    background:#e5e7eb;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media(max-width:900px){
+
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+    }
+}
+
+@media(max-width:700px){
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .form-group.full{
+        grid-column:auto;
+    }
+
+    .content{
+        padding:15px;
+    }
+
+    .topbar{
+        padding:0 15px;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="dashboard">
+
+
+<!-- =========================================
+     SIDEBAR
+========================================= -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+
+        <h2>
+            <span>MCTI</span> Technologies
+        </h2>
+
+        <p>
+            Management System
+        </p>
+
+    </div>
+
+
+    <div class="menu">
+
+        <div class="menu-title">
+            MAIN
+        </div>
+
+        <a href="{% url 'management_dashboard' %}">
+            🏠 Dashboard
+        </a>
+
+        <a href="{% url 'branch_dashboard' %}">
+            📊 Branch Performance
+        </a>
+
+        <a href="{% url 'enquiry_dashboard' %}">
+            📞 Enquiries
+        </a>
+
+        <a href="{% url 'fee_payment_list' %}">
+            💳 Fee Payments
+        </a>
+
+
+        <div class="menu-title">
+            MANAGEMENT
+        </div>
+
+        <a href="{% url 'admission_list' %}">
+            🎓 Admissions
+        </a>
+
+        <a href="{% url 'student_list' %}">
+            👨‍🎓 Students
+        </a>
+
+        <a href="{% url 'staff_list' %}">
+            👥 Staff
+        </a>
+
+        <a href="{% url 'job_list' %}" class="active">
+            💼 Placement / Jobs
+        </a>
+
+    </div>
+
+</aside>
+
+
+<!-- =========================================
+     MAIN
+========================================= -->
+
+<main class="main">
+
+
+<!-- TOPBAR -->
+
+<div class="topbar">
+
+    <div>
+
+        <h1>
+
+            {% if is_edit %}
+                Edit Job
+            {% else %}
+                Post New Job
+            {% endif %}
+
+        </h1>
+
+        <p>
+            MCTI Placement Management
+        </p>
+
+    </div>
+
+
+    <a href="{% url 'job_list' %}"
+       class="back-btn">
+
+        ← Back to Jobs
+
+    </a>
+
+</div>
+
+
+<!-- =========================================
+     CONTENT
+========================================= -->
+
+<div class="content">
+
+
+<div class="form-card">
+
+
+    <div class="form-header">
+
+        <h2>
+
+            {% if is_edit %}
+                Update Job Opportunity
+            {% else %}
+                Add Job Opportunity
+            {% endif %}
+
+        </h2>
+
+        <p>
+            Add recruiter or company vacancy details for MCTI students.
+        </p>
+
+    </div>
+
+
+    <div class="info-alert">
+
+        <strong>Posted Branch and Posted By are automatic.</strong>
+
+        The system will record the currently logged-in staff member
+        and their branch when the job is posted.
+
+    </div>
+
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+
+        {% if form.non_field_errors %}
+
+            <div class="error-box"
+                 style="margin-bottom:20px;">
+
+                {{ form.non_field_errors }}
+
+            </div>
+
+        {% endif %}
+
+
+        <div class="form-grid">
+
+
+            <!-- JOB TITLE -->
+
+            <div class="form-group">
+
+                <label for="{{ form.title.id_for_label }}">
+                    Job Title *
+                </label>
+
+                {{ form.title }}
+
+                {% for error in form.title.errors %}
+                    <div class="error-box">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- COMPANY -->
+
+            <div class="form-group">
+
+                <label for="{{ form.company_name.id_for_label }}">
+                    Company Name *
+                </label>
+
+                {{ form.company_name }}
+
+                {% for error in form.company_name.errors %}
+                    <div class="error-box">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- LOCATION -->
+
+            <div class="form-group">
+
+                <label for="{{ form.location.id_for_label }}">
+                    Job Location
+                </label>
+
+                {{ form.location }}
+
+                {% for error in form.location.errors %}
+                    <div class="error-box">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- SALARY -->
+
+            <div class="form-group">
+
+                <label for="{{ form.salary.id_for_label }}">
+                    Salary
+                </label>
+
+                {{ form.salary }}
+
+                <div class="help-text">
+                    Example: ₹18,000 - ₹25,000 per month
+                </div>
+
+                {% for error in form.salary.errors %}
+                    <div class="error-box">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- EXPERIENCE -->
+
+            <div class="form-group">
+
+                <label for="{{ form.experience.id_for_label }}">
+                    Experience
+                </label>
+
+                {{ form.experience }}
+
+                <div class="help-text">
+                    Example: Fresher / 0-1 Year / 1-2 Years
+                </div>
+
+                {% for error in form.experience.errors %}
+                    <div class="error-box">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- LAST DATE -->
+
+            <div class="form-group">
+
+                <label for="{{ form.last_date.id_for_label }}">
+                    Last Date to Apply
+                </label>
+
+                {{ form.last_date }}
+
+                {% for error in form.last_date.errors %}
+                    <div class="error-box">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- COURSES -->
+
+            <div class="form-group full">
+
+                <label for="{{ form.eligible_courses.id_for_label }}">
+                    Eligible Courses
+                </label>
+
+                {{ form.eligible_courses }}
+
+                <div class="help-text">
+                    Hold Ctrl and select multiple courses.
+                    If no course is selected, we can later treat the job as available for all students.
+                </div>
+
+                {% for error in form.eligible_courses.errors %}
+                    <div class="error-box">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- SKILLS -->
+
+            <div class="form-group full">
+
+                <label for="{{ form.required_skills.id_for_label }}">
+                    Required Skills
+                </label>
+
+                {{ form.required_skills }}
+
+                {% for error in form.required_skills.errors %}
+                    <div class="error-box">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- ELIGIBILITY -->
+
+            <div class="form-group full">
+
+                <label for="{{ form.eligibility.id_for_label }}">
+                    Eligibility
+                </label>
+
+                {{ form.eligibility }}
+
+                {% for error in form.eligibility.errors %}
+                    <div class="error-box">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- DESCRIPTION -->
+
+            <div class="form-group full">
+
+                <label for="{{ form.description.id_for_label }}">
+                    Job Description
+                </label>
+
+                {{ form.description }}
+
+                {% for error in form.description.errors %}
+                    <div class="error-box">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- APPLY LINK -->
+
+            <div class="form-group">
+
+                <label for="{{ form.apply_link.id_for_label }}">
+                    Apply Link
+                </label>
+
+                {{ form.apply_link }}
+
+                <div class="help-text">
+                    Company website, Google Form or recruitment link.
+                </div>
+
+                {% for error in form.apply_link.errors %}
+                    <div class="error-box">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- EMAIL -->
+
+            <div class="form-group">
+
+                <label for="{{ form.contact_email.id_for_label }}">
+                    HR / Recruiter Email
+                </label>
+
+                {{ form.contact_email }}
+
+                {% for error in form.contact_email.errors %}
+                    <div class="error-box">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- MOBILE -->
+
+            <div class="form-group">
+
+                <label for="{{ form.contact_mobile.id_for_label }}">
+                    HR / Recruiter Mobile
+                </label>
+
+                {{ form.contact_mobile }}
+
+                {% for error in form.contact_mobile.errors %}
+                    <div class="error-box">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- STATUS -->
+
+            <div class="form-group">
+
+                <label for="{{ form.status.id_for_label }}">
+                    Status
+                </label>
+
+                {{ form.status }}
+
+                {% for error in form.status.errors %}
+                    <div class="error-box">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <button type="submit"
+                    class="save-btn">
+
+                {% if is_edit %}
+                    💾 Update Job
+                {% else %}
+                    ＋ Post Job
+                {% endif %}
+
+            </button>
+
+
+            <a href="{% url 'job_list' %}"
+               class="cancel-btn">
+
+                Cancel
+
+            </a>
+
+        </div>
+
+
+    </form>
+
+
+</div>
+
+</div>
+
+</main>
+
+</div>
+
+</body>
+</html>

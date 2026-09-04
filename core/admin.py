@@ -1,4 +1,3 @@
-
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
@@ -12,6 +11,8 @@ from .models import (
     Student,
     FeePayment,
     StaffProfile,
+    JobPost,
+    Attendance,
 )
 
 
@@ -180,7 +181,6 @@ class AdmissionAdmin(admin.ModelAdmin):
 
     @admin.display(description="Balance Fee")
     def balance_fee_display(self, obj):
-
         return obj.balance_fee
 
 
@@ -320,6 +320,12 @@ class FeePaymentAdmin(admin.ModelAdmin):
             '</a>',
             url
         )
+
+
+# ============================================================
+# STAFF PROFILE
+# ============================================================
+
 @admin.register(StaffProfile)
 class StaffProfileAdmin(admin.ModelAdmin):
 
@@ -343,4 +349,92 @@ class StaffProfileAdmin(admin.ModelAdmin):
         "user__first_name",
         "user__last_name",
         "designation",
+    )
+
+
+# ============================================================
+# JOB POST
+# ============================================================
+
+@admin.register(JobPost)
+class JobPostAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "title",
+        "company_name",
+        "location",
+        "posted_branch",
+        "posted_by",
+        "last_date",
+        "status",
+        "created_at",
+    )
+
+    list_filter = (
+        "status",
+        "posted_branch",
+        "eligible_courses",
+        "last_date",
+    )
+
+    search_fields = (
+        "title",
+        "company_name",
+        "location",
+        "required_skills",
+        "posted_branch",
+        "posted_by__username",
+    )
+
+    filter_horizontal = (
+        "eligible_courses",
+    )
+
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
+
+
+# ============================================================
+# ATTENDANCE
+# ============================================================
+
+@admin.register(Attendance)
+class AttendanceAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "student",
+        "attendance_date",
+        "status",
+        "branch",
+        "course",
+        "marked_by",
+        "updated_at",
+    )
+
+    list_filter = (
+        "status",
+        "branch",
+        "course",
+        "attendance_date",
+    )
+
+    search_fields = (
+        "student__student_id",
+        "student__name",
+        "student__mobile",
+        "remarks",
+    )
+
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
+
+    date_hierarchy = "attendance_date"
+
+    ordering = (
+        "-attendance_date",
+        "student__name",
     )

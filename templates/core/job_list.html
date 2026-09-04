@@ -1,0 +1,1134 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Placement & Jobs | MCTI Technologies</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --primary:#ff6b00;
+    --primary-dark:#e85d00;
+    --primary-light:#fff2e8;
+
+    --dark:#111827;
+    --dark2:#1f2937;
+
+    --bg:#f5f7fb;
+    --white:#ffffff;
+
+    --border:#e5e7eb;
+    --muted:#6b7280;
+
+    --green:#16a34a;
+    --blue:#2563eb;
+    --red:#dc2626;
+    --yellow:#d97706;
+}
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--bg);
+    color:var(--dark);
+}
+
+
+/* =========================================
+   LAYOUT
+========================================= */
+
+.dashboard{
+    display:flex;
+    min-height:100vh;
+}
+
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.sidebar{
+    width:250px;
+    background:var(--dark);
+    color:white;
+
+    padding:24px 18px;
+
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+
+    overflow-y:auto;
+}
+
+.logo{
+    margin-bottom:35px;
+}
+
+.logo h2{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.logo h2 span{
+    color:var(--primary);
+}
+
+.logo p{
+    font-size:11px;
+    color:#9ca3af;
+}
+
+.menu-title{
+    font-size:10px;
+    color:#6b7280;
+    letter-spacing:1px;
+
+    margin:22px 10px 10px;
+}
+
+.menu a{
+    display:flex;
+    align-items:center;
+    gap:11px;
+
+    text-decoration:none;
+
+    color:#d1d5db;
+
+    padding:12px 13px;
+
+    border-radius:9px;
+
+    margin-bottom:6px;
+
+    font-size:13px;
+    font-weight:700;
+
+    transition:0.2s;
+}
+
+.menu a:hover{
+    background:#2b3545;
+    color:white;
+}
+
+.menu a.active{
+    background:var(--primary);
+    color:white;
+}
+
+.admin-link{
+    margin-top:25px;
+    border-top:1px solid #374151;
+    padding-top:20px;
+}
+
+
+/* =========================================
+   MAIN
+========================================= */
+
+.main{
+    margin-left:250px;
+    width:calc(100% - 250px);
+}
+
+
+/* =========================================
+   TOPBAR
+========================================= */
+
+.topbar{
+    height:76px;
+
+    background:white;
+
+    border-bottom:1px solid var(--border);
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 30px;
+
+    position:sticky;
+    top:0;
+
+    z-index:10;
+}
+
+.topbar-left h1{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.topbar-left p{
+    font-size:12px;
+    color:var(--muted);
+}
+
+.topbar-right{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.user-info{
+    text-align:right;
+}
+
+.user-info strong{
+    display:block;
+    font-size:12px;
+}
+
+.user-info span{
+    font-size:10px;
+    color:var(--muted);
+}
+
+.user-avatar{
+    width:39px;
+    height:39px;
+
+    border-radius:50%;
+
+    background:var(--primary);
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-weight:800;
+}
+
+
+/* =========================================
+   CONTENT
+========================================= */
+
+.content{
+    padding:28px;
+}
+
+
+/* =========================================
+   PAGE HEADER
+========================================= */
+
+.page-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    gap:15px;
+
+    margin-bottom:24px;
+}
+
+.page-header h2{
+    font-size:23px;
+    margin-bottom:5px;
+}
+
+.page-header p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.add-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+
+    text-decoration:none;
+
+    background:var(--primary);
+    color:white;
+
+    padding:11px 17px;
+
+    border-radius:9px;
+
+    font-size:12px;
+    font-weight:800;
+
+    transition:0.2s;
+}
+
+.add-btn:hover{
+    background:var(--primary-dark);
+}
+
+
+/* =========================================
+   SUMMARY
+========================================= */
+
+.summary-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+
+    margin-bottom:24px;
+}
+
+.summary-card{
+    background:white;
+    border:1px solid var(--border);
+
+    border-radius:14px;
+
+    padding:18px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,0.04);
+}
+
+.summary-card span{
+    display:block;
+
+    font-size:11px;
+    color:var(--muted);
+
+    margin-bottom:8px;
+}
+
+.summary-card strong{
+    font-size:24px;
+}
+
+
+/* =========================================
+   JOB LIST
+========================================= */
+
+.jobs-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.job-card{
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:15px;
+
+    padding:21px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,0.04);
+
+    transition:0.2s;
+}
+
+.job-card:hover{
+    transform:translateY(-2px);
+    border-color:#fdba74;
+}
+
+.job-top{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+
+    margin-bottom:16px;
+}
+
+.job-title h3{
+    font-size:17px;
+    margin-bottom:5px;
+}
+
+.job-title p{
+    color:var(--primary);
+    font-size:13px;
+    font-weight:700;
+}
+
+.status{
+    height:max-content;
+
+    padding:6px 10px;
+    border-radius:20px;
+
+    font-size:10px;
+    font-weight:800;
+
+    text-transform:uppercase;
+}
+
+.status-active{
+    background:#dcfce7;
+    color:var(--green);
+}
+
+.status-draft{
+    background:#fef3c7;
+    color:var(--yellow);
+}
+
+.status-closed{
+    background:#fee2e2;
+    color:var(--red);
+}
+
+
+/* =========================================
+   JOB DETAILS GRID
+========================================= */
+
+.job-info{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+
+    margin-bottom:18px;
+}
+
+.info-box{
+    background:#f9fafb;
+
+    border-radius:9px;
+
+    padding:10px 11px;
+}
+
+.info-box small{
+    display:block;
+
+    color:var(--muted);
+    font-size:10px;
+
+    margin-bottom:4px;
+}
+
+.info-box strong{
+    font-size:12px;
+}
+
+
+/* =========================================
+   COURSE TAGS
+========================================= */
+
+.course-label{
+    font-size:11px;
+    color:var(--muted);
+
+    margin-bottom:8px;
+}
+
+.course-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+
+    margin-bottom:18px;
+}
+
+.course-tag{
+    display:inline-block;
+
+    background:var(--primary-light);
+    color:var(--primary-dark);
+
+    border-radius:20px;
+
+    padding:5px 9px;
+
+    font-size:10px;
+    font-weight:700;
+}
+
+
+/* =========================================
+   POSTED INFO
+========================================= */
+
+.posted-info{
+    border-top:1px solid var(--border);
+
+    padding-top:13px;
+
+    display:flex;
+    justify-content:space-between;
+
+    gap:10px;
+
+    font-size:10px;
+    color:var(--muted);
+}
+
+
+/* =========================================
+   ACTIONS
+========================================= */
+
+.job-actions{
+    display:flex;
+    gap:8px;
+
+    margin-top:15px;
+}
+
+.view-btn,
+.edit-btn{
+    display:inline-block;
+
+    padding:8px 12px;
+
+    border-radius:8px;
+
+    font-size:11px;
+    font-weight:700;
+
+    text-decoration:none;
+}
+
+.view-btn{
+    background:var(--dark);
+    color:white;
+}
+
+.view-btn:hover{
+    background:var(--dark2);
+}
+
+.edit-btn{
+    background:var(--primary-light);
+    color:var(--primary);
+}
+
+.edit-btn:hover{
+    background:var(--primary);
+    color:white;
+}
+
+
+/* =========================================
+   EMPTY
+========================================= */
+
+.empty-box{
+    background:white;
+
+    padding:50px 20px;
+
+    border:1px solid var(--border);
+    border-radius:15px;
+
+    text-align:center;
+
+    grid-column:1/-1;
+}
+
+.empty-box h3{
+    font-size:18px;
+    margin-bottom:8px;
+}
+
+.empty-box p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+
+/* =========================================
+   MESSAGES
+========================================= */
+
+.message{
+    padding:12px 15px;
+
+    margin-bottom:18px;
+
+    border-radius:9px;
+
+    background:#dcfce7;
+    color:#166534;
+
+    font-size:12px;
+    font-weight:700;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media(max-width:1000px){
+
+    .summary-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .jobs-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:900px){
+
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+    }
+}
+
+@media(max-width:600px){
+
+    .content{
+        padding:15px;
+    }
+
+    .topbar{
+        padding:0 15px;
+    }
+
+    .page-header{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .summary-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .job-info{
+        grid-template-columns:1fr;
+    }
+
+    .posted-info{
+        flex-direction:column;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="dashboard">
+
+
+<!-- =========================================
+     SIDEBAR
+========================================= -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+
+        <h2>
+            <span>MCTI</span> Technologies
+        </h2>
+
+        <p>
+            Management System
+        </p>
+
+    </div>
+
+
+    <div class="menu">
+
+        <div class="menu-title">
+            MAIN
+        </div>
+
+
+        <a href="{% url 'management_dashboard' %}">
+            🏠 Dashboard
+        </a>
+
+        <a href="{% url 'branch_dashboard' %}">
+            📊 Branch Performance
+        </a>
+
+        <a href="{% url 'enquiry_dashboard' %}">
+            📞 Enquiries
+        </a>
+
+        <a href="{% url 'fee_payment_list' %}">
+            💳 Fee Payments
+        </a>
+
+
+        <div class="menu-title">
+            MANAGEMENT
+        </div>
+
+
+        <a href="{% url 'admission_list' %}">
+            🎓 Admissions
+        </a>
+
+        <a href="{% url 'student_list' %}">
+            👨‍🎓 Students
+        </a>
+
+        <a href="{% url 'student_quick_view' %}">
+            🔎 Student Quick View
+        </a>
+
+        <a href="{% url 'staff_list' %}">
+            👥 Staff
+        </a>
+
+        <a href="{% url 'job_list' %}" class="active">
+            💼 Placement / Jobs
+        </a>
+
+        <a href="#">
+            📊 Reports
+        </a>
+
+
+        {% if request.user.is_superuser %}
+
+        <div class="admin-link">
+
+            <a href="/admin/">
+                ⚙️ Django Backend
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</aside>
+
+
+<!-- =========================================
+     MAIN
+========================================= -->
+
+<main class="main">
+
+
+<!-- TOPBAR -->
+
+<div class="topbar">
+
+    <div class="topbar-left">
+
+        <h1>
+            Placement & Jobs
+        </h1>
+
+        <p>
+            Central job opportunities for all MCTI branches
+        </p>
+
+    </div>
+
+
+    <div class="topbar-right">
+
+        <div class="user-info">
+
+            <strong>
+                {{ request.user.username }}
+            </strong>
+
+            <span>
+
+                {% if request.user.is_superuser %}
+
+                    Administrator
+
+                {% else %}
+
+                    Staff
+
+                {% endif %}
+
+            </span>
+
+        </div>
+
+
+        <div class="user-avatar">
+            {{ request.user.username|first|upper }}
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- CONTENT -->
+
+<div class="content">
+
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div class="message">
+                {{ message }}
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+
+    <!-- PAGE HEADER -->
+
+    <div class="page-header">
+
+        <div>
+
+            <h2>
+                Job Opportunities
+            </h2>
+
+            <p>
+                Jobs posted by Head Office and all MCTI branches appear here.
+            </p>
+
+        </div>
+
+
+        <a href="{% url 'job_create' %}"
+           class="add-btn">
+
+            ＋ Post New Job
+
+        </a>
+
+    </div>
+
+
+    <!-- SUMMARY -->
+
+    <div class="summary-grid">
+
+        <div class="summary-card">
+
+            <span>
+                TOTAL JOBS
+            </span>
+
+            <strong>
+                {{ jobs|length }}
+            </strong>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <span>
+                CENTRAL DATABASE
+            </span>
+
+            <strong>
+                MCTI
+            </strong>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <span>
+                ACCESS
+            </span>
+
+            <strong>
+                All Branches
+            </strong>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <span>
+                STUDENT SUPPORT
+            </span>
+
+            <strong>
+                Placement
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- JOBS -->
+
+    <div class="jobs-grid">
+
+
+        {% for job in jobs %}
+
+
+        <div class="job-card">
+
+
+            <div class="job-top">
+
+                <div class="job-title">
+
+                    <h3>
+                        {{ job.title }}
+                    </h3>
+
+                    <p>
+                        {{ job.company_name }}
+                    </p>
+
+                </div>
+
+
+                {% if job.status == "active" %}
+
+                    <span class="status status-active">
+                        Active
+                    </span>
+
+                {% elif job.status == "draft" %}
+
+                    <span class="status status-draft">
+                        Draft
+                    </span>
+
+                {% else %}
+
+                    <span class="status status-closed">
+                        Closed
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="job-info">
+
+
+                <div class="info-box">
+
+                    <small>
+                        📍 Location
+                    </small>
+
+                    <strong>
+
+                        {% if job.location %}
+                            {{ job.location }}
+                        {% else %}
+                            Not Mentioned
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <small>
+                        💰 Salary
+                    </small>
+
+                    <strong>
+
+                        {% if job.salary %}
+                            {{ job.salary }}
+                        {% else %}
+                            Not Mentioned
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <small>
+                        💼 Experience
+                    </small>
+
+                    <strong>
+
+                        {% if job.experience %}
+                            {{ job.experience }}
+                        {% else %}
+                            Not Mentioned
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <small>
+                        📅 Last Date
+                    </small>
+
+                    <strong>
+
+                        {% if job.last_date %}
+                            {{ job.last_date|date:"d M Y" }}
+                        {% else %}
+                            Open
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="course-label">
+                Eligible Courses
+            </div>
+
+
+            <div class="course-tags">
+
+
+                {% for course in job.eligible_courses.all %}
+
+                    <span class="course-tag">
+                        {{ course.title }}
+                    </span>
+
+                {% empty %}
+
+                    <span class="course-tag">
+                        All Courses
+                    </span>
+
+                {% endfor %}
+
+
+            </div>
+
+
+            <div class="posted-info">
+
+                <span>
+                    🏢 Posted Branch:
+                    <strong>
+                        {% if job.posted_branch %}
+                            {{ job.posted_branch }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </strong>
+                </span>
+
+
+                <span>
+                    👤 Posted By:
+                    <strong>
+                        {% if job.posted_by %}
+                            {{ job.posted_by.username }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </strong>
+                </span>
+
+
+                <span>
+                    {{ job.created_at|date:"d M Y" }}
+                </span>
+
+            </div>
+
+
+            <div class="job-actions">
+
+                <a href="{% url 'job_detail' job.id %}"
+                   class="view-btn">
+
+                    View Details
+
+                </a>
+
+
+                {% if request.user.is_superuser or job.posted_by == request.user %}
+
+                    <a href="{% url 'job_edit' job.id %}"
+                       class="edit-btn">
+
+                        Edit
+
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+
+        </div>
+
+
+        {% empty %}
+
+
+        <div class="empty-box">
+
+            <h3>
+                No Job Opportunities Yet
+            </h3>
+
+            <p>
+                Click “Post New Job” to add the first placement opportunity.
+            </p>
+
+        </div>
+
+
+        {% endfor %}
+
+
+    </div>
+
+
+</div>
+
+</main>
+
+</div>
+
+</body>
+
+</html>

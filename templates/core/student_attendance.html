@@ -1,0 +1,632 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Attendance | MCTI One</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --primary:#ff6b00;
+    --dark:#111827;
+    --dark2:#1f2937;
+    --bg:#f5f7fb;
+    --white:#ffffff;
+    --border:#e5e7eb;
+    --muted:#6b7280;
+    --green:#16a34a;
+    --green-bg:#dcfce7;
+    --red:#dc2626;
+    --red-bg:#fee2e2;
+    --yellow:#ca8a04;
+    --yellow-bg:#fef3c7;
+    --blue:#2563eb;
+    --blue-bg:#dbeafe;
+}
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--bg);
+    color:var(--dark);
+}
+
+/* SIDEBAR */
+.sidebar{
+    width:250px;
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+    background:var(--dark);
+    color:white;
+    padding:24px 18px;
+    overflow-y:auto;
+}
+
+.logo{
+    margin-bottom:26px;
+}
+
+.logo h2{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.logo h2 span{
+    color:var(--primary);
+}
+
+.logo p{
+    font-size:11px;
+    color:#9ca3af;
+}
+
+.student-mini{
+    background:var(--dark2);
+    border-radius:10px;
+    padding:13px;
+    margin-bottom:25px;
+}
+
+.student-mini strong{
+    display:block;
+    font-size:12px;
+    margin-bottom:5px;
+}
+
+.student-mini span{
+    display:block;
+    font-size:10px;
+    color:#cbd5e1;
+    margin-top:3px;
+}
+
+.menu-title{
+    color:#6b7280;
+    font-size:10px;
+    letter-spacing:1px;
+    margin:18px 10px 9px;
+}
+
+.menu a{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+    color:#d1d5db;
+    padding:12px 13px;
+    border-radius:9px;
+    margin-bottom:6px;
+    font-size:13px;
+    font-weight:700;
+}
+
+.menu a:hover{
+    background:#2b3545;
+    color:white;
+}
+
+.menu a.active{
+    background:var(--primary);
+    color:white;
+}
+
+.menu a.logout{
+    color:#fecaca;
+}
+
+/* MAIN */
+.main{
+    margin-left:250px;
+    min-height:100vh;
+}
+
+.topbar{
+    min-height:76px;
+    background:white;
+    border-bottom:1px solid var(--border);
+    padding:14px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky;
+    top:0;
+    z-index:10;
+}
+
+.topbar h1{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.topbar p{
+    font-size:11px;
+    color:var(--muted);
+}
+
+.user-info{
+    text-align:right;
+}
+
+.user-info strong{
+    display:block;
+    font-size:12px;
+}
+
+.user-info span{
+    color:var(--muted);
+    font-size:10px;
+}
+
+.content{
+    padding:28px;
+}
+
+.welcome{
+    background:linear-gradient(135deg,var(--dark),#273449);
+    color:white;
+    border-radius:16px;
+    padding:23px 26px;
+    margin-bottom:22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+}
+
+.welcome h2{
+    font-size:22px;
+    margin-bottom:6px;
+}
+
+.welcome p{
+    font-size:11px;
+    color:#d1d5db;
+}
+
+.month-form{
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+
+.month-form input{
+    height:39px;
+    border:none;
+    border-radius:8px;
+    padding:0 10px;
+}
+
+.btn{
+    height:39px;
+    border:none;
+    border-radius:8px;
+    padding:0 14px;
+    background:var(--primary);
+    color:white;
+    font-weight:800;
+    cursor:pointer;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:15px;
+    margin-bottom:22px;
+}
+
+.card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:13px;
+    padding:18px;
+    border-top:4px solid var(--dark);
+}
+
+.card.green{border-top-color:var(--green)}
+.card.red{border-top-color:var(--red)}
+.card.yellow{border-top-color:var(--yellow)}
+.card.blue{border-top-color:var(--blue)}
+
+.card small{
+    display:block;
+    color:var(--muted);
+    font-size:10px;
+    font-weight:700;
+    margin-bottom:7px;
+}
+
+.card strong{
+    font-size:21px;
+}
+
+.panel{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:21px;
+}
+
+.panel-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:17px;
+}
+
+.panel-header h3{
+    font-size:17px;
+}
+
+.panel-header span{
+    font-size:10px;
+    color:var(--muted);
+}
+
+.badge{
+    display:inline-block;
+    border-radius:20px;
+    padding:5px 9px;
+    font-size:10px;
+    font-weight:800;
+}
+
+.badge-present{
+    background:var(--green-bg);
+    color:#166534;
+}
+
+.badge-absent{
+    background:var(--red-bg);
+    color:#991b1b;
+}
+
+.badge-leave{
+    background:var(--yellow-bg);
+    color:#854d0e;
+}
+
+.badge-good{
+    background:var(--green-bg);
+    color:#166534;
+}
+
+.badge-low{
+    background:var(--red-bg);
+    color:#991b1b;
+}
+
+.badge-none{
+    background:#e5e7eb;
+    color:#374151;
+}
+
+.table-wrap{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:11px;
+}
+
+th{
+    text-align:left;
+    background:#f9fafb;
+    color:#4b5563;
+    padding:12px 10px;
+    border-bottom:1px solid var(--border);
+}
+
+td{
+    padding:12px 10px;
+    border-bottom:1px solid #f0f1f3;
+}
+
+.note{
+    margin-top:15px;
+    padding:12px 13px;
+    background:#fff7ed;
+    border:1px solid #fed7aa;
+    border-radius:9px;
+    color:#9a3412;
+    font-size:11px;
+}
+
+@media(max-width:1100px){
+    .cards{
+        grid-template-columns:repeat(3,1fr);
+    }
+}
+
+@media(max-width:850px){
+    .sidebar{
+        display:none;
+    }
+    .main{
+        margin-left:0;
+    }
+}
+
+@media(max-width:600px){
+    .content{
+        padding:15px;
+    }
+    .cards{
+        grid-template-columns:1fr 1fr;
+    }
+    .welcome{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="logo">
+        <h2><span>MCTI</span> One</h2>
+        <p>Student Portal</p>
+    </div>
+
+    <div class="student-mini">
+        <strong>{{ student.name }}</strong>
+        <span>{{ admission.admission_number }}</span>
+        <span>
+            {% if admission.course %}
+                {{ admission.course.title }}
+            {% else %}
+                Course Not Assigned
+            {% endif %}
+        </span>
+    </div>
+
+    <nav class="menu">
+
+        <div class="menu-title">MAIN</div>
+
+        <a href="{% url 'student_dashboard' %}">
+            🏠 Dashboard
+        </a>
+
+        <a href="#">
+            📚 My Learning
+        </a>
+
+        <a href="https://exam.maharashtracomputer.com"
+           target="_blank"
+           rel="noopener noreferrer">
+            📝 Exam Portal
+        </a>
+
+        <a href="{% url 'student_jobs' %}">
+            💼 Placement Support
+        </a>
+
+        <a href="{% url 'student_attendance' %}" class="active">
+            📋 My Attendance
+        </a>
+
+        <a href="#">
+            🔔 Notifications
+        </a>
+
+        <div class="menu-title">ACCOUNT</div>
+
+        <a href="{% url 'student_dashboard' %}#fee-section">
+            💳 Fee & Payments
+        </a>
+
+        <a href="{% url 'student_dashboard' %}#profile-section">
+            👤 My Profile
+        </a>
+
+        <a href="{% url 'student_logout' %}" class="logout">
+            🚪 Logout
+        </a>
+
+    </nav>
+
+</aside>
+
+
+<main class="main">
+
+    <header class="topbar">
+
+        <div>
+            <h1>My Attendance</h1>
+            <p>View your monthly attendance history</p>
+        </div>
+
+        <div class="user-info">
+            <strong>{{ student.name }}</strong>
+            <span>Student</span>
+        </div>
+
+    </header>
+
+
+    <div class="content">
+
+        <section class="welcome">
+
+            <div>
+                <h2>Attendance Overview</h2>
+                <p>
+                    {{ selected_month|date:"F Y" }} attendance summary for
+                    {% if admission.course %}{{ admission.course.title }}{% else %}your course{% endif %}.
+                </p>
+            </div>
+
+            <form method="get" class="month-form">
+                <input
+                    type="month"
+                    name="month"
+                    value="{{ month_value }}"
+                >
+                <button type="submit" class="btn">
+                    View
+                </button>
+            </form>
+
+        </section>
+
+
+        <section class="cards">
+
+            <div class="card">
+                <small>TOTAL MARKED DAYS</small>
+                <strong>{{ total_days }}</strong>
+            </div>
+
+            <div class="card green">
+                <small>PRESENT</small>
+                <strong>{{ present_count }}</strong>
+            </div>
+
+            <div class="card red">
+                <small>ABSENT</small>
+                <strong>{{ absent_count }}</strong>
+            </div>
+
+            <div class="card yellow">
+                <small>LEAVE</small>
+                <strong>{{ leave_count }}</strong>
+            </div>
+
+            <div class="card blue">
+                <small>ATTENDANCE %</small>
+                <strong>{{ attendance_percentage }}%</strong>
+                <div style="margin-top:7px">
+                    {% if attendance_status == "Good" %}
+                        <span class="badge badge-good">Good</span>
+                    {% elif attendance_status == "Low Attendance" %}
+                        <span class="badge badge-low">Low Attendance</span>
+                    {% else %}
+                        <span class="badge badge-none">No Data</span>
+                    {% endif %}
+                </div>
+            </div>
+
+        </section>
+
+
+        <section class="panel">
+
+            <div class="panel-header">
+                <div>
+                    <h3>Attendance History</h3>
+                    <span>{{ selected_month|date:"F Y" }}</span>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Day</th>
+                            <th>Course</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for record in records %}
+
+                        <tr>
+
+                            <td>
+                                {{ record.attendance_date|date:"d M Y" }}
+                            </td>
+
+                            <td>
+                                {{ record.attendance_date|date:"l" }}
+                            </td>
+
+                            <td>
+                                {% if record.course %}
+                                    {{ record.course.title }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+
+                                {% if record.status == "present" %}
+
+                                    <span class="badge badge-present">
+                                        Present
+                                    </span>
+
+                                {% elif record.status == "absent" %}
+
+                                    <span class="badge badge-absent">
+                                        Absent
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-leave">
+                                        Leave
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+                                {{ record.remarks|default:"-" }}
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td
+                                colspan="5"
+                                style="text-align:center;padding:32px;color:#6b7280;"
+                            >
+                                No attendance has been marked for this month.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="note">
+                Attendance percentage = Present days ÷ Total marked attendance days × 100.
+                Attendance below 75% is shown as Low Attendance.
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+</body>
+</html>

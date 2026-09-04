@@ -1,0 +1,1213 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Placement Support | MCTI One</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --primary:#ff6b00;
+    --primary-dark:#e85d00;
+    --primary-light:#fff2e8;
+
+    --dark:#111827;
+    --dark2:#1f2937;
+
+    --bg:#f5f7fb;
+    --white:#ffffff;
+
+    --border:#e5e7eb;
+    --muted:#6b7280;
+
+    --green:#16a34a;
+    --green-bg:#dcfce7;
+
+    --red:#dc2626;
+    --red-bg:#fee2e2;
+
+    --blue:#2563eb;
+    --blue-bg:#dbeafe;
+}
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--bg);
+    color:var(--dark);
+}
+
+
+/* =========================================
+   MAIN LAYOUT
+========================================= */
+
+.portal{
+    display:flex;
+    min-height:100vh;
+}
+
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.sidebar{
+    width:250px;
+    background:var(--dark);
+    color:white;
+    padding:24px 18px;
+
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+
+    overflow-y:auto;
+}
+
+.logo{
+    margin-bottom:32px;
+}
+
+.logo h2{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.logo h2 span{
+    color:var(--primary);
+}
+
+.logo p{
+    font-size:11px;
+    color:#9ca3af;
+}
+
+.student-box{
+    background:#1f2937;
+    border-radius:12px;
+
+    padding:14px;
+
+    margin-bottom:25px;
+}
+
+.student-box small{
+    display:block;
+
+    font-size:10px;
+    color:#9ca3af;
+
+    margin-bottom:4px;
+}
+
+.student-box strong{
+    display:block;
+
+    font-size:13px;
+
+    margin-bottom:4px;
+}
+
+.student-box span{
+    color:var(--primary);
+    font-size:11px;
+}
+
+.menu-title{
+    font-size:10px;
+    color:#6b7280;
+
+    letter-spacing:1px;
+
+    margin:20px 10px 10px;
+}
+
+.menu a{
+    display:flex;
+    align-items:center;
+    gap:11px;
+
+    text-decoration:none;
+
+    color:#d1d5db;
+
+    padding:12px 13px;
+
+    border-radius:9px;
+
+    margin-bottom:6px;
+
+    font-size:13px;
+    font-weight:700;
+
+    transition:0.2s;
+}
+
+.menu a:hover{
+    background:#2b3545;
+    color:white;
+}
+
+.menu a.active{
+    background:var(--primary);
+    color:white;
+}
+
+
+/* =========================================
+   MAIN
+========================================= */
+
+.main{
+    margin-left:250px;
+
+    width:calc(100% - 250px);
+}
+
+
+/* =========================================
+   TOP BAR
+========================================= */
+
+.topbar{
+    min-height:76px;
+
+    background:white;
+
+    border-bottom:1px solid var(--border);
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:15px 30px;
+
+    position:sticky;
+    top:0;
+
+    z-index:10;
+}
+
+.topbar h1{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.topbar p{
+    font-size:12px;
+    color:var(--muted);
+}
+
+.course-chip{
+    background:var(--primary-light);
+    color:var(--primary-dark);
+
+    border-radius:20px;
+
+    padding:8px 13px;
+
+    font-size:11px;
+    font-weight:800;
+}
+
+
+/* =========================================
+   CONTENT
+========================================= */
+
+.content{
+    padding:28px;
+}
+
+
+/* =========================================
+   INTRO CARD
+========================================= */
+
+.intro-card{
+    background:white;
+
+    border:1px solid var(--border);
+    border-radius:15px;
+
+    padding:22px;
+
+    margin-bottom:22px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,0.04);
+}
+
+.intro-card h2{
+    font-size:20px;
+    margin-bottom:7px;
+}
+
+.intro-card p{
+    color:var(--muted);
+
+    font-size:12px;
+    line-height:1.7;
+}
+
+
+/* =========================================
+   STATUS GUIDE
+========================================= */
+
+.guide{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+
+    margin-top:15px;
+}
+
+.guide-item{
+    padding:8px 11px;
+
+    border-radius:8px;
+
+    font-size:11px;
+    font-weight:700;
+}
+
+.guide-green{
+    background:var(--green-bg);
+    color:var(--green);
+}
+
+.guide-red{
+    background:var(--red-bg);
+    color:var(--red);
+}
+
+
+/* =========================================
+   JOB GRID
+========================================= */
+
+.jobs-grid{
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:18px;
+}
+
+
+/* =========================================
+   JOB CARD
+========================================= */
+
+.job-card{
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:15px;
+
+    padding:21px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,0.04);
+
+    transition:0.2s;
+}
+
+.job-card:hover{
+    transform:translateY(-2px);
+    border-color:#fdba74;
+}
+
+.job-top{
+    display:flex;
+
+    align-items:flex-start;
+    justify-content:space-between;
+
+    gap:15px;
+
+    margin-bottom:17px;
+}
+
+.job-title h3{
+    font-size:17px;
+    margin-bottom:5px;
+}
+
+.company{
+    color:var(--primary);
+    font-size:13px;
+    font-weight:800;
+}
+
+
+/* =========================================
+   ELIGIBILITY BADGE
+========================================= */
+
+.eligibility{
+    padding:6px 10px;
+
+    border-radius:20px;
+
+    font-size:10px;
+    font-weight:800;
+
+    white-space:nowrap;
+}
+
+.eligible{
+    background:var(--green-bg);
+    color:var(--green);
+}
+
+.not-eligible{
+    background:var(--red-bg);
+    color:var(--red);
+}
+
+
+/* =========================================
+   JOB INFO
+========================================= */
+
+.job-info{
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:10px;
+
+    margin-bottom:16px;
+}
+
+.info-box{
+    background:#f9fafb;
+
+    padding:10px;
+
+    border-radius:8px;
+}
+
+.info-box small{
+    display:block;
+
+    color:var(--muted);
+
+    font-size:10px;
+
+    margin-bottom:4px;
+}
+
+.info-box strong{
+    font-size:12px;
+}
+
+
+/* =========================================
+   COURSE
+========================================= */
+
+.section-label{
+    font-size:10px;
+
+    color:var(--muted);
+
+    margin-bottom:7px;
+
+    font-weight:700;
+}
+
+.course-tags{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:6px;
+
+    margin-bottom:15px;
+}
+
+.course-tag{
+    background:var(--blue-bg);
+    color:var(--blue);
+
+    border-radius:20px;
+
+    padding:5px 9px;
+
+    font-size:10px;
+
+    font-weight:700;
+}
+
+.your-course{
+    background:var(--primary-light);
+    color:var(--primary-dark);
+}
+
+
+/* =========================================
+   ELIGIBILITY MESSAGE
+========================================= */
+
+.eligibility-message{
+    border-radius:10px;
+
+    padding:12px;
+
+    margin:15px 0;
+
+    font-size:11px;
+    line-height:1.6;
+}
+
+.eligible-message{
+    background:var(--green-bg);
+    color:#166534;
+}
+
+.upgrade-message{
+    background:#fff7ed;
+    color:#9a3412;
+
+    border-left:3px solid var(--primary);
+}
+
+
+/* =========================================
+   DESCRIPTION
+========================================= */
+
+.description{
+    margin-top:15px;
+
+    padding-top:15px;
+
+    border-top:1px solid var(--border);
+}
+
+.description p{
+    font-size:11px;
+
+    line-height:1.7;
+
+    color:#4b5563;
+}
+
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.actions{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:8px;
+
+    margin-top:17px;
+}
+
+.btn{
+    display:inline-block;
+
+    text-decoration:none;
+
+    padding:9px 13px;
+
+    border-radius:8px;
+
+    font-size:11px;
+
+    font-weight:800;
+}
+
+.btn-dark{
+    background:var(--dark);
+    color:white;
+}
+
+.btn-dark:hover{
+    background:var(--dark2);
+}
+
+.btn-primary{
+    background:var(--primary);
+    color:white;
+}
+
+.btn-primary:hover{
+    background:var(--primary-dark);
+}
+
+.btn-outline{
+    border:1px solid var(--primary);
+    color:var(--primary);
+    background:white;
+}
+
+
+.upgrade-cta{
+    margin-top:12px;
+    padding:14px;
+    border-radius:10px;
+    background:#fff7ed;
+    border:1px solid #fed7aa;
+}
+
+.upgrade-cta-title{
+    font-size:12px;
+    font-weight:800;
+    color:#9a3412;
+    margin-bottom:7px;
+}
+
+.upgrade-cta p{
+    font-size:11px;
+    line-height:1.6;
+    color:#7c2d12;
+    margin-bottom:10px;
+}
+
+.upgrade-course-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    padding:10px 0;
+    border-top:1px dashed #fdba74;
+}
+
+.upgrade-course-row:first-of-type{
+    border-top:none;
+    padding-top:0;
+}
+
+.upgrade-course-name{
+    font-size:11px;
+    font-weight:800;
+    color:var(--dark);
+}
+
+.enquiry-submitted{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:9px 13px;
+    border-radius:8px;
+    background:var(--green-bg);
+    color:#166534;
+    border:1px solid #bbf7d0;
+    font-size:11px;
+    font-weight:800;
+    cursor:default;
+}
+
+
+/* =========================================
+   EMPTY
+========================================= */
+
+.empty-box{
+    grid-column:1/-1;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:15px;
+
+    padding:50px 20px;
+
+    text-align:center;
+}
+
+.empty-box h3{
+    margin-bottom:8px;
+}
+
+.empty-box p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media(max-width:950px){
+
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+    }
+}
+
+@media(max-width:750px){
+
+    .jobs-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:550px){
+
+    .content{
+        padding:15px;
+    }
+
+    .topbar{
+        padding:15px;
+    }
+
+    .job-info{
+        grid-template-columns:1fr;
+    }
+
+    .topbar{
+        align-items:flex-start;
+        gap:10px;
+        flex-direction:column;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="portal">
+
+
+<!-- =========================================
+     SIDEBAR
+========================================= -->
+
+<aside class="sidebar">
+
+
+<div class="logo">
+
+    <h2>
+        <span>MCTI</span> One
+    </h2>
+
+    <p>
+        Student Portal
+    </p>
+
+</div>
+
+
+<div class="student-box">
+
+    <small>
+        STUDENT
+    </small>
+
+    <strong>
+        {{ student.full_name|default:student }}
+    </strong>
+
+    <span>
+        {{ admission.admission_number }}
+    </span>
+
+</div>
+
+
+<div class="menu">
+
+    <div class="menu-title">
+        STUDENT
+    </div>
+
+    <a href="{% url 'student_dashboard' %}">
+        🏠 Dashboard
+    </a>
+
+    <a href="#">
+        📚 My Learning
+    </a>
+
+    <a href="https://exam.maharashtracomputer.com"
+       target="_blank"
+       rel="noopener noreferrer">
+        📝 Exam Portal
+    </a>
+
+    <a href="{% url 'student_jobs' %}"
+       class="active">
+        💼 Placement Support
+    </a>
+
+    <a href="#">
+        🔔 Notifications
+    </a>
+
+    <a href="{% url 'student_dashboard' %}">
+        💳 Fee & Payments
+    </a>
+
+    <a href="#">
+        👤 My Profile
+    </a>
+
+    <a href="{% url 'student_logout' %}">
+        🚪 Logout
+    </a>
+
+</div>
+
+</aside>
+
+
+<!-- =========================================
+     MAIN
+========================================= -->
+
+<main class="main">
+
+
+<div class="topbar">
+
+    <div>
+
+        <h1>
+            Placement Support
+        </h1>
+
+        <p>
+            Explore current job opportunities from MCTI placement network
+        </p>
+
+    </div>
+
+
+    <div class="course-chip">
+
+        Your Course:
+        {{ admission.course.title }}
+
+    </div>
+
+</div>
+
+
+<div class="content">
+
+
+<!-- INTRO -->
+
+<div class="intro-card">
+
+    <h2>
+        Career Opportunities
+    </h2>
+
+    <p>
+        All active job opportunities are visible to you.
+        Your current course is compared with the job's preferred course
+        to help you understand whether you are currently eligible or whether
+        an additional skill/course can improve your eligibility.
+    </p>
+
+
+    <div class="guide">
+
+        <div class="guide-item guide-green">
+            ✓ Eligible — Your current course matches
+        </div>
+
+        <div class="guide-item guide-red">
+            ⚠ Not Eligible Yet — Skill upgrade opportunity
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- JOBS -->
+
+<div class="jobs-grid">
+
+
+{% for job in jobs %}
+
+
+<div class="job-card">
+
+
+    <div class="job-top">
+
+
+        <div class="job-title">
+
+            <h3>
+                {{ job.title }}
+            </h3>
+
+            <div class="company">
+                {{ job.company_name }}
+            </div>
+
+        </div>
+
+
+        {% if job.student_is_eligible %}
+
+            <div class="eligibility eligible">
+                ✓ Eligible
+            </div>
+
+        {% else %}
+
+            <div class="eligibility not-eligible">
+                ⚠ Not Eligible Yet
+            </div>
+
+        {% endif %}
+
+
+    </div>
+
+
+    <!-- JOB INFORMATION -->
+
+    <div class="job-info">
+
+
+        <div class="info-box">
+
+            <small>
+                📍 Location
+            </small>
+
+            <strong>
+                {{ job.location|default:"Not Mentioned" }}
+            </strong>
+
+        </div>
+
+
+        <div class="info-box">
+
+            <small>
+                💰 Salary
+            </small>
+
+            <strong>
+                {{ job.salary|default:"Not Mentioned" }}
+            </strong>
+
+        </div>
+
+
+        <div class="info-box">
+
+            <small>
+                💼 Experience
+            </small>
+
+            <strong>
+                {{ job.experience|default:"Not Mentioned" }}
+            </strong>
+
+        </div>
+
+
+        <div class="info-box">
+
+            <small>
+                📅 Last Date
+            </small>
+
+            <strong>
+
+                {% if job.last_date %}
+
+                    {{ job.last_date|date:"d M Y" }}
+
+                {% else %}
+
+                    Open
+
+                {% endif %}
+
+            </strong>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- YOUR COURSE -->
+
+    <div class="section-label">
+        YOUR CURRENT COURSE
+    </div>
+
+    <div class="course-tags">
+
+        <span class="course-tag your-course">
+            {{ admission.course.title }}
+        </span>
+
+    </div>
+
+
+    <!-- ELIGIBLE COURSES -->
+
+    <div class="section-label">
+        PREFERRED / ELIGIBLE COURSES
+    </div>
+
+
+    <div class="course-tags">
+
+
+        {% for course in job.eligible_courses.all %}
+
+            <span class="course-tag">
+                {{ course.title }}
+            </span>
+
+        {% empty %}
+
+            <span class="course-tag">
+                Open to All Courses
+            </span>
+
+        {% endfor %}
+
+
+    </div>
+
+
+    <!-- STATUS MESSAGE -->
+
+    {% if job.student_is_eligible %}
+
+        <div class="eligibility-message eligible-message">
+
+            <strong>
+                ✓ You are eligible for this opportunity.
+            </strong>
+
+            Your current MCTI course matches the preferred course
+            for this job.
+
+        </div>
+
+    {% else %}
+
+        <div class="eligibility-message upgrade-message">
+
+            <strong>
+                ⚠ Skill Upgrade Opportunity
+            </strong>
+
+            Your current course does not match the preferred course
+            for this job. If you are interested in this career opportunity,
+            you can enquire about one of the recommended MCTI courses below.
+
+        </div>
+
+
+        <div class="upgrade-cta">
+
+            <div class="upgrade-cta-title">
+                🎯 Interested in becoming eligible for this job?
+            </div>
+
+            <p>
+                Choose a recommended course below. Your interest will be
+                sent to the MCTI Enquiry system so our counsellor can contact you.
+            </p>
+
+            {% for course in job.eligible_courses.all %}
+
+                <div class="upgrade-course-row">
+
+                    <span class="upgrade-course-name">
+                        {{ course.title }}
+                    </span>
+
+                    {% if course.enquiry_submitted %}
+
+                        <span class="enquiry-submitted">
+                            ✓ Enquiry Submitted
+                        </span>
+
+                    {% else %}
+
+                        <a
+                            href="{% url 'student_course_enquiry' job.id course.id %}"
+                            class="btn btn-primary"
+                        >
+                            I'm Interested — Enquire for {{ course.title }}
+                        </a>
+
+                    {% endif %}
+
+                </div>
+
+            {% empty %}
+
+                <div class="upgrade-course-row">
+                    <span class="upgrade-course-name">
+                        This job is open to all courses.
+                    </span>
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- SKILLS -->
+
+    {% if job.required_skills %}
+
+        <div class="description">
+
+            <div class="section-label">
+                REQUIRED SKILLS
+            </div>
+
+            <p>
+                {{ job.required_skills|linebreaksbr }}
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- JOB DESCRIPTION -->
+
+    {% if job.description %}
+
+        <div class="description">
+
+            <div class="section-label">
+                JOB DESCRIPTION
+            </div>
+
+            <p>
+                {{ job.description|linebreaksbr }}
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- ACTION BUTTONS -->
+
+    <div class="actions">
+
+
+        {% if job.apply_link %}
+
+            <a href="{{ job.apply_link }}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="btn btn-primary">
+
+                Apply Now
+
+            </a>
+
+        {% endif %}
+
+
+        {% if job.contact_email %}
+
+            <a href="mailto:{{ job.contact_email }}"
+               class="btn btn-dark">
+
+                Email Recruiter
+
+            </a>
+
+        {% endif %}
+
+
+        {% if job.contact_mobile %}
+
+            <a href="tel:{{ job.contact_mobile }}"
+               class="btn btn-outline">
+
+                Contact HR
+
+            </a>
+
+        {% endif %}
+
+
+    </div>
+
+
+</div>
+
+
+{% empty %}
+
+
+<div class="empty-box">
+
+    <h3>
+        No Active Jobs Available
+    </h3>
+
+    <p>
+        New placement opportunities will appear here when posted by MCTI.
+    </p>
+
+</div>
+
+
+{% endfor %}
+
+
+</div>
+
+</div>
+
+</main>
+
+</div>
+
+
+</body>
+
+</html>

@@ -68,11 +68,9 @@ urlpatterns = [
         views.contact_success,
         name="contact_success"
     ),
-    # Enquiry Dashboard
-    path("enquiries/", views.enquiry_dashboard, name="enquiry_dashboard"),
 
     # ============================================================
-    # STUDENT LOGIN
+    # STUDENT LOGIN / PORTAL
     # ============================================================
 
     path(
@@ -92,11 +90,22 @@ urlpatterns = [
         views.student_dashboard,
         name="student_dashboard"
     ),
-    
+
+    path(
+        "student/attendance/",
+        views.student_attendance,
+        name="student_attendance"
+    ),
 
     # ============================================================
     # ENQUIRY / CRM
     # ============================================================
+
+    path(
+        "enquiries/",
+        views.enquiry_dashboard,
+        name="enquiry_dashboard"
+    ),
 
     path(
         "dashboard/",
@@ -128,7 +137,6 @@ urlpatterns = [
         name="log_enquiry_whatsapp"
     ),
 
-
     # ============================================================
     # ADMISSION
     # ============================================================
@@ -144,12 +152,18 @@ urlpatterns = [
         views.admission_detail,
         name="admission_detail"
     ),
+
     path(
-    "admissions/",
-    views.admission_list,
-    name="admission_list"
+        "admissions/",
+        views.admission_list,
+        name="admission_list"
     ),
 
+    path(
+        "admissions/<int:admission_id>/edit/",
+        views.edit_admission,
+        name="edit_admission"
+    ),
 
     # ============================================================
     # FEE PAYMENT
@@ -172,58 +186,139 @@ urlpatterns = [
         views.fee_receipt,
         name="fee_receipt"
     ),
+
+    # ============================================================
+    # DASHBOARDS / REPORTS
+    # ============================================================
+
     path(
-    "management-dashboard/",
-    views.management_dashboard,
-    name="management_dashboard"
+        "management-dashboard/",
+        views.management_dashboard,
+        name="management_dashboard"
     ),
 
-
     path(
-    "branch-dashboard/",
-    views.branch_dashboard,
-    name="branch_dashboard"
-),
+        "branch-dashboard/",
+        views.branch_dashboard,
+        name="branch_dashboard"
+    ),
+
     path(
         "reports/",
         views.reports_dashboard,
         name="reports_dashboard"
     ),
+
     path(
-    "reports/export-excel/",
-    views.export_reports_excel,
-    name="export_reports_excel"
+        "fee-due-report/",
+        views.fee_due_report,
+        name="fee_due_report"
     ),
+
+    path(
+        "reports/export-excel/",
+        views.export_reports_excel,
+        name="export_reports_excel"
+    ),
+
+    # ============================================================
+    # STAFF
+    # ============================================================
 
     path(
         "staff-login/",
         views.staff_login,
         name="staff_login"
     ),
+
     path(
         "staff-logout/",
         views.staff_logout,
-        name="staff_logout",
-),
+        name="staff_logout"
+    ),
+
+    path(
+        "staff/",
+        views.staff_list,
+        name="staff_list"
+    ),
+
+    # ============================================================
+    # STUDENTS
+    # ============================================================
+
     path(
         "students/",
         views.student_list,
         name="student_list"
     ),
-    path(
-    "staff/",
-    views.staff_list,
-    name="staff_list"
-),
 
-path(
-    "admissions/<int:admission_id>/edit/",
-    views.edit_admission,
-    name="edit_admission"
-),
-path(
-    "student-quick-view/",
-    views.student_quick_view,
-    name="student_quick_view"
-),
+    path(
+        "student-quick-view/",
+        views.student_quick_view,
+        name="student_quick_view"
+    ),
+
+    # ============================================================
+    # ATTENDANCE
+    # ============================================================
+
+    path(
+        "attendance/",
+        views.attendance_dashboard,
+        name="attendance_dashboard"
+    ),
+
+    path(
+        "attendance/mark/",
+        views.mark_attendance,
+        name="mark_attendance"
+    ),
+
+    path(
+        "attendance/report/",
+        views.attendance_report,
+        name="attendance_report"
+    ),
+
+    # ============================================================
+    # PLACEMENT
+    # ============================================================
+
+    path(
+        "placement/",
+        views.job_list,
+        name="job_list"
+    ),
+
+    path(
+        "placement/add/",
+        views.job_create,
+        name="job_create"
+    ),
+
+    path(
+        "placement/<int:job_id>/",
+        views.job_detail,
+        name="job_detail"
+    ),
+
+    path(
+        "placement/<int:job_id>/edit/",
+        views.job_edit,
+        name="job_edit"
+    ),
+
+    path(
+        "student/placement/",
+        views.student_jobs,
+        name="student_jobs"
+    ),
+
+    path(
+        "student/placement/<int:job_id>/course/<int:course_id>/enquire/",
+        views.student_course_enquiry,
+        name="student_course_enquiry"
+    ),
+
 ]

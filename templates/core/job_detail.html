@@ -1,0 +1,137 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ job.title }} | Placement & Jobs</title>
+<style>
+:root{--primary:#ff6b00;--dark:#111827;--muted:#6b7280;--line:#e5e7eb;--bg:#f4f6f9;--card:#fff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--dark)}
+.sidebar{width:250px;background:var(--dark);color:#fff;padding:24px 18px;position:fixed;top:0;left:0;bottom:0}
+.brand{font-size:21px;font-weight:800;margin-bottom:4px}.brand span{color:var(--primary)}
+.brand-sub{font-size:11px;color:#9ca3af;margin-bottom:30px}
+.section-title{font-size:10px;color:#64748b;letter-spacing:1px;margin:18px 8px 10px}
+.menu a{display:flex;align-items:center;gap:11px;text-decoration:none;color:#d1d5db;padding:12px 13px;border-radius:9px;margin-bottom:6px;font-size:13px;font-weight:700}
+.menu a:hover{background:#2b3545;color:#fff}.menu a.active{background:var(--primary);color:#fff}
+.main{margin-left:250px;min-height:100vh}
+.topbar{height:76px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 30px}
+.topbar h1{font-size:22px;margin-bottom:4px}.topbar p{font-size:12px;color:var(--muted)}
+.user-box{text-align:right;font-size:12px}
+.content{padding:30px}
+.page-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:20px}
+.page-head h2{font-size:24px;margin-bottom:6px}.company{color:var(--primary);font-weight:800;font-size:14px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-block;text-decoration:none;border:none;cursor:pointer;border-radius:9px;padding:11px 16px;font-size:12px;font-weight:800}
+.btn-primary{background:var(--primary);color:#fff}.btn-dark{background:var(--dark);color:#fff}.btn-light{background:#fff;border:1px solid var(--line);color:var(--dark)}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 2px 8px rgba(0,0,0,.03);margin-bottom:20px}
+.card h3{font-size:16px;margin-bottom:14px}
+.info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.info-box{background:#f8fafc;border-radius:10px;padding:14px}
+.info-label{font-size:10px;color:var(--muted);margin-bottom:5px}.info-value{font-size:13px;font-weight:800}
+.section{margin-top:20px}.section h4{font-size:13px;margin-bottom:8px}.section p{font-size:13px;line-height:1.7;color:#374151;white-space:pre-line}
+.course-tags{display:flex;gap:8px;flex-wrap:wrap}.course-tag{background:#fff1e8;color:#c2410c;padding:7px 10px;border-radius:999px;font-size:11px;font-weight:800}
+.status{display:inline-block;padding:6px 10px;border-radius:999px;font-size:10px;font-weight:800;text-transform:uppercase}
+.status-active{background:#dcfce7;color:#15803d}.status-draft{background:#fef3c7;color:#92400e}.status-closed{background:#fee2e2;color:#b91c1c}
+.meta-row{display:flex;justify-content:space-between;gap:15px;padding:10px 0;border-bottom:1px solid #f0f1f3;font-size:12px}
+.meta-row:last-child{border-bottom:none}.meta-row span:first-child{color:var(--muted)}.meta-row span:last-child{font-weight:800;text-align:right}
+.contact-box a{color:var(--primary);text-decoration:none;font-weight:800}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.grid{grid-template-columns:1fr}.info-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+<div class="brand"><span>MCTI</span> Technologies</div>
+<div class="brand-sub">Management System</div>
+<div class="section-title">MAIN</div>
+<div class="menu">
+<a href="{% url 'branch_dashboard' %}">🏠 Dashboard</a>
+<a href="{% url 'branch_dashboard' %}">📊 Branch Performance</a>
+<a href="{% url 'enquiry_dashboard' %}">📞 Enquiries</a>
+<a href="{% url 'fee_payment_list' %}">💳 Fee Payments</a>
+<div class="section-title">MANAGEMENT</div>
+<a href="{% url 'admission_list' %}">🎓 Admissions</a>
+<a href="{% url 'student_list' %}">👨‍🎓 Students</a>
+<a href="{% url 'student_quick_view' %}">🔎 Student Quick View</a>
+<a href="{% url 'staff_list' %}">👥 Staff</a>
+<a href="{% url 'job_list' %}" class="active">💼 Placement / Jobs</a>
+<a href="{% url 'reports_dashboard' %}">📊 Reports</a>
+</div>
+</aside>
+
+<main class="main">
+<div class="topbar">
+<div><h1>Placement & Jobs</h1><p>Job Opportunity Details</p></div>
+<div class="user-box"><strong>{{ request.user.username }}</strong><br>Staff</div>
+</div>
+
+<div class="content">
+<div class="page-head">
+<div><h2>{{ job.title }}</h2><div class="company">{{ job.company_name }}</div></div>
+<div class="actions">
+<a href="{% url 'job_list' %}" class="btn btn-light">← Back to Jobs</a>
+{% if request.user.is_superuser or job.posted_by == request.user %}
+<a href="{% url 'job_edit' job.id %}" class="btn btn-primary">Edit Job</a>
+{% endif %}
+</div>
+</div>
+
+<div class="grid">
+<div>
+<div class="card">
+<h3>Job Information</h3>
+<div class="info-grid">
+<div class="info-box"><div class="info-label">📍 Location</div><div class="info-value">{{ job.location|default:"-" }}</div></div>
+<div class="info-box"><div class="info-label">💰 Salary</div><div class="info-value">{{ job.salary|default:"-" }}</div></div>
+<div class="info-box"><div class="info-label">💼 Experience</div><div class="info-value">{{ job.experience|default:"-" }}</div></div>
+<div class="info-box"><div class="info-label">📅 Last Date</div><div class="info-value">{% if job.last_date %}{{ job.last_date|date:"d M Y" }}{% else %}-{% endif %}</div></div>
+</div>
+
+<div class="section"><h4>Eligible Courses</h4><div class="course-tags">
+{% for course in job.eligible_courses.all %}
+<span class="course-tag">{{ course.title }}</span>
+{% empty %}
+<span class="course-tag">Open to All Courses</span>
+{% endfor %}
+</div></div>
+
+<div class="section"><h4>Required Skills</h4><p>{{ job.required_skills|default:"Not specified" }}</p></div>
+<div class="section"><h4>Eligibility</h4><p>{{ job.eligibility|default:"Not specified" }}</p></div>
+<div class="section"><h4>Job Description</h4><p>{{ job.description|default:"No description added." }}</p></div>
+</div>
+</div>
+
+<div>
+<div class="card">
+<h3>Job Status</h3>
+{% if job.status == "active" %}
+<span class="status status-active">Active</span>
+{% elif job.status == "draft" %}
+<span class="status status-draft">Draft</span>
+{% else %}
+<span class="status status-closed">Closed</span>
+{% endif %}
+<div style="margin-top:16px">
+<div class="meta-row"><span>Posted Branch</span><span>{{ job.posted_branch|default:"-" }}</span></div>
+<div class="meta-row"><span>Posted By</span><span>{% if job.posted_by %}{{ job.posted_by.username }}{% else %}-{% endif %}</span></div>
+<div class="meta-row"><span>Posted Date</span><span>{{ job.created_at|date:"d M Y" }}</span></div>
+<div class="meta-row"><span>Updated</span><span>{{ job.updated_at|date:"d M Y" }}</span></div>
+</div>
+</div>
+
+<div class="card contact-box">
+<h3>Application / Contact</h3>
+<div class="meta-row"><span>Email</span><span>{% if job.contact_email %}<a href="mailto:{{ job.contact_email }}">{{ job.contact_email }}</a>{% else %}-{% endif %}</span></div>
+<div class="meta-row"><span>Mobile</span><span>{% if job.contact_mobile %}{{ job.contact_mobile }}{% else %}-{% endif %}</span></div>
+{% if job.apply_link %}
+<div style="margin-top:16px"><a href="{{ job.apply_link }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark" style="width:100%;text-align:center">Open Apply Link</a></div>
+{% endif %}
+</div>
+</div>
+</div>
+</div>
+</main>
+</body>
+</html>

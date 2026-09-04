@@ -1189,3 +1189,217 @@ def update_admission_fees(
                 ]
             )
 
+class JobPost(models.Model):
+
+    STATUS_CHOICES = [
+        ("draft", "Draft"),
+        ("active", "Active"),
+        ("closed", "Closed"),
+    ]
+
+    title = models.CharField(
+        max_length=200
+    )
+
+    company_name = models.CharField(
+        max_length=200
+    )
+
+    location = models.CharField(
+        max_length=200,
+        blank=True
+    )
+
+    salary = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    experience = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    required_skills = models.TextField(
+        blank=True
+    )
+
+    description = models.TextField(
+        blank=True
+    )
+
+    eligibility = models.TextField(
+        blank=True
+    )
+
+    eligible_courses = models.ManyToManyField(
+        Course,
+        blank=True,
+        related_name="job_posts"
+    )
+    posted_by = models.ForeignKey(
+    User,
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True,
+    related_name="job_posts_created"
+    )
+
+    posted_branch = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    apply_link = models.URLField(
+        blank=True
+    )
+
+    contact_email = models.EmailField(
+        blank=True
+    )
+
+    contact_mobile = models.CharField(
+        max_length=20,
+        blank=True
+    )
+
+    last_date = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="active"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return f"{self.title} - {self.company_name}"
+
+# ============================================================
+# STUDENT ATTENDANCE
+# ============================================================
+
+class Attendance(models.Model):
+
+    STATUS_CHOICES = [
+        ("present", "Present"),
+        ("absent", "Absent"),
+        ("leave", "Leave"),
+    ]
+
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name="attendance_records"
+    )
+
+    attendance_date = models.DateField(
+        default=timezone.localdate
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="present"
+    )
+
+    branch = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="attendance_records"
+    )
+
+    remarks = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    marked_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="attendance_marked"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def save(self, *args, **kwargs):
+
+        # Keep branch/course snapshot aligned with the student
+        # unless explicitly supplied.
+        if self.student_id:
+
+            if not self.branch:
+                self.branch = self.student.branch or ""
+
+            if not self.course_id:
+                self.course = self.student.course
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+
+        return (
+            f"{self.student.name} - "
+            f"{self.attendance_date} - "
+            f"{self.get_status_display()}"
+        )
+
+    class Meta:
+
+        ordering = [
+            "-attendance_date",
+            "student__name",
+        ]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "student",
+                    "attendance_date",
+                ],
+                name="unique_student_attendance_per_day"
+            )
+        ]
+
+        indexes = [
+            models.Index(
+                fields=[
+                    "attendance_date",
+                    "branch",
+                ]
+            ),
+            models.Index(
+                fields=[
+                    "student",
+                    "attendance_date",
+                ]
+            ),
+        ]
+

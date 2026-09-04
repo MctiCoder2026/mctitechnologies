@@ -1,9 +1,14 @@
+from datetime import timedelta
+from django.utils import timezone
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import logout as auth_logout
-
+from django.contrib import messages
+from .models import JobPost, StaffProfile
+from .forms import JobPostForm
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.db.models import Q, Sum
 from django.utils import timezone
 from datetime import datetime, timedelta
@@ -26,6 +31,7 @@ from .models import (
     Student,
     FeePayment,
     StaffProfile,
+    Attendance,
 )
 
 
@@ -141,6 +147,27 @@ def user_can_access_admission(user, admission):
         (admission.branch or "").strip().lower()
         == user_branch.strip().lower()
     )
+
+
+# ============================================================
+# PLACEMENT MANAGEMENT ACCESS
+# ============================================================
+
+def staff_or_admin(user):
+
+    if not user.is_authenticated:
+        return False
+
+    if user.is_superuser:
+        return True
+
+    if not user.is_staff:
+        return False
+
+    return StaffProfile.objects.filter(
+        user=user,
+        is_active=True
+    ).exists()
 
 
 # ============================================================
@@ -1196,6 +1223,661 @@ def export_reports_excel(request):
     return response
 
 
+
+# ============================================================
+# FEE DUE DATE REPORT
+# ============================================================
+
+@login_required
+def fee_due_report(request):
+
+    today = timezone.localdate()
+
+    status_filter = request.GET.get(
+        "status",
+        ""
+    ).strip()
+
+    branch_filter = request.GET.get(
+        "branch",
+        ""
+    ).strip()
+
+    search = request.GET.get(
+        "search",
+        ""
+    ).strip()
+
+    branches = [
+        ("", "All Branches"),
+        ("kharghar", "Kharghar"),
+        ("panvel", "Panvel"),
+        ("koperkhairane", "Koperkhairane"),
+        ("kamothe", "Kamothe"),
+        ("ghansoli", "Ghansoli"),
+        ("nerul", "Nerul"),
+        ("head_office", "Head Office"),
+    ]
+
+    # --------------------------------------------------------
+    # ACCESS CONTROL
+    # HO/Admin can see all branches.
+    # Branch staff can see only their own branch.
+    # --------------------------------------------------------
+
+    if not is_admin_user(request.user):
+
+        user_branch = get_user_branch(
+            request.user
+        )
+
+        if not user_branch:
+            auth_logout(request)
+            return redirect(
+                "staff_login"
+            )
+
+        branch_filter = user_branch
+
+        branches = [
+            item
+            for item in branches
+            if item[0] == user_branch
+        ]
+
+    admissions = (
+        Admission.objects
+        .select_related(
+            "course",
+            "student",
+        )
+        .order_by(
+            "admission_date",
+            "id",
+        )
+    )
+
+    if branch_filter:
+        admissions = admissions.filter(
+            branch__iexact=branch_filter
+        )
+
+    if search:
+        admissions = admissions.filter(
+            Q(student_name__icontains=search)
+            |
+            Q(admission_number__icontains=search)
+            |
+            Q(student__name__icontains=search)
+            |
+            Q(student__mobile__icontains=search)
+            |
+            Q(course__title__icontains=search)
+        )
+
+    due_rows = []
+
+    counts = {
+        "overdue": 0,
+        "today": 0,
+        "upcoming": 0,
+        "future": 0,
+        "paid": 0,
+    }
+
+    total_outstanding = 0
+
+    for admission in admissions:
+
+        student = getattr(
+            admission,
+            "student",
+            None
+        )
+
+        total_fee = (
+            admission.total_fee
+            or 0
+        )
+
+        paid_fee = 0
+
+        if student:
+            paid_fee = (
+                FeePayment.objects
+                .filter(
+                    student=student
+                )
+                .aggregate(
+                    total=Sum("amount")
+                )["total"]
+                or 0
+            )
+
+        balance_fee = max(
+            total_fee - paid_fee,
+            0
+        )
+
+        next_due_date = None
+        due_key = "paid"
+        due_status = "Fully Paid"
+        days_remaining = None
+
+        if balance_fee > 0:
+
+            total_outstanding += balance_fee
+
+            if admission.admission_date:
+
+                admission_date = (
+                    admission.admission_date
+                )
+
+                if hasattr(
+                    admission_date,
+                    "date"
+                ):
+                    admission_date = (
+                        admission_date.date()
+                    )
+
+                next_due_date = (
+                    admission_date
+                    + timedelta(days=31)
+                )
+
+                days_remaining = (
+                    next_due_date - today
+                ).days
+
+                if next_due_date < today:
+                    due_key = "overdue"
+                    due_status = "Overdue"
+
+                elif next_due_date == today:
+                    due_key = "today"
+                    due_status = "Due Today"
+
+                elif days_remaining <= 7:
+                    due_key = "upcoming"
+                    due_status = "Upcoming 7 Days"
+
+                else:
+                    due_key = "future"
+                    due_status = "Future Due"
+
+            else:
+                due_key = "future"
+                due_status = "Due Date Not Available"
+
+        counts[due_key] += 1
+
+        if (
+            status_filter
+            and due_key != status_filter
+        ):
+            continue
+
+        due_rows.append(
+            {
+                "student": student,
+                "student_name": (
+                    getattr(
+                        student,
+                        "name",
+                        None
+                    )
+                    or admission.student_name
+                    or "-"
+                ),
+                "mobile": (
+                    getattr(
+                        student,
+                        "mobile",
+                        None
+                    )
+                    or "-"
+                ),
+                "admission": admission,
+                "admission_number": (
+                    admission.admission_number
+                    or "-"
+                ),
+                "course": (
+                    admission.course.title
+                    if admission.course
+                    else "-"
+                ),
+                "branch": (
+                    admission.branch
+                    or (
+                        getattr(
+                            student,
+                            "branch",
+                            None
+                        )
+                        if student
+                        else ""
+                    )
+                    or "-"
+                ),
+                "total_fee": total_fee,
+                "paid_fee": paid_fee,
+                "balance_fee": balance_fee,
+                "next_due_date": next_due_date,
+                "due_key": due_key,
+                "due_status": due_status,
+                "days_remaining": days_remaining,
+            }
+        )
+
+    # Most urgent records first.
+    due_rows.sort(
+        key=lambda row: (
+            row["balance_fee"] <= 0,
+            row["next_due_date"] is None,
+            row["next_due_date"] or today,
+            row["student_name"],
+        )
+    )
+
+    return render(
+        request,
+        "core/fee_due_report.html",
+        {
+            "due_rows": due_rows,
+            "counts": counts,
+            "total_outstanding": total_outstanding,
+            "today": today,
+            "branches": branches,
+            "branch_filter": branch_filter,
+            "status_filter": status_filter,
+            "search": search,
+            "is_admin": is_admin_user(
+                request.user
+            ),
+        }
+    )
+
+
+
+
+# ============================================================
+# ATTENDANCE MODULE
+# ============================================================
+
+def _attendance_branches():
+    return [
+        ("kharghar", "Kharghar"),
+        ("panvel", "Panvel"),
+        ("koperkhairane", "Koperkhairane"),
+        ("kamothe", "Kamothe"),
+        ("ghansoli", "Ghansoli"),
+        ("nerul", "Nerul"),
+        ("head_office", "Head Office"),
+    ]
+
+
+def _attendance_access(request):
+    """Return (is_admin, branch_filter, branches) for staff attendance pages."""
+    admin_access = is_admin_user(request.user)
+    branches = _attendance_branches()
+
+    if admin_access:
+        return True, "", [("", "All Branches")] + branches
+
+    user_branch = get_user_branch(request.user)
+
+    if not user_branch:
+        return False, None, []
+
+    return (
+        False,
+        user_branch,
+        [item for item in branches if item[0] == user_branch],
+    )
+
+
+@login_required
+def attendance_dashboard(request):
+
+    today = timezone.localdate()
+    admin_access, forced_branch, branches = _attendance_access(request)
+
+    if forced_branch is None:
+        auth_logout(request)
+        return redirect("staff_login")
+
+    branch_filter = request.GET.get("branch", "").strip()
+
+    if not admin_access:
+        branch_filter = forced_branch
+
+    students = Student.objects.filter(status="active")
+    records = Attendance.objects.filter(attendance_date=today)
+
+    if branch_filter:
+        students = students.filter(branch__iexact=branch_filter)
+        records = records.filter(branch__iexact=branch_filter)
+
+    total_students = students.count()
+    marked_count = records.count()
+    present_count = records.filter(status="present").count()
+    absent_count = records.filter(status="absent").count()
+    leave_count = records.filter(status="leave").count()
+    pending_count = max(total_students - marked_count, 0)
+
+    recent_records = (
+        records
+        .select_related("student", "course", "marked_by")
+        .order_by("-updated_at")[:20]
+    )
+
+    return render(
+        request,
+        "core/attendance_dashboard.html",
+        {
+            "today": today,
+            "branches": branches,
+            "branch_filter": branch_filter,
+            "is_admin": admin_access,
+            "total_students": total_students,
+            "marked_count": marked_count,
+            "present_count": present_count,
+            "absent_count": absent_count,
+            "leave_count": leave_count,
+            "pending_count": pending_count,
+            "recent_records": recent_records,
+        }
+    )
+
+
+@login_required
+def mark_attendance(request):
+
+    today = timezone.localdate()
+    admin_access, forced_branch, branches = _attendance_access(request)
+
+    if forced_branch is None:
+        auth_logout(request)
+        return redirect("staff_login")
+
+    date_value = request.GET.get(
+        "date",
+        request.POST.get("attendance_date", today.isoformat())
+    ).strip()
+
+    try:
+        attendance_date = datetime.strptime(
+            date_value,
+            "%Y-%m-%d"
+        ).date()
+    except (TypeError, ValueError):
+        attendance_date = today
+
+    branch_filter = request.GET.get(
+        "branch",
+        request.POST.get("branch", "")
+    ).strip()
+
+    course_filter = request.GET.get(
+        "course",
+        request.POST.get("course", "")
+    ).strip()
+
+    if not admin_access:
+        branch_filter = forced_branch
+
+    students = (
+        Student.objects
+        .filter(status="active")
+        .select_related("course")
+        .order_by("name")
+    )
+
+    if branch_filter:
+        students = students.filter(branch__iexact=branch_filter)
+
+    if course_filter:
+        students = students.filter(course_id=course_filter)
+
+    courses = Course.objects.filter(is_active=True).order_by("title")
+
+    if branch_filter:
+        active_course_ids = (
+            Student.objects
+            .filter(
+                status="active",
+                branch__iexact=branch_filter,
+                course__isnull=False,
+            )
+            .values_list("course_id", flat=True)
+            .distinct()
+        )
+        courses = courses.filter(id__in=active_course_ids)
+
+    if request.method == "POST":
+
+        saved_count = 0
+
+        for student in students:
+
+            status_value = request.POST.get(
+                f"status_{student.id}",
+                ""
+            ).strip()
+
+            if status_value not in {
+                "present",
+                "absent",
+                "leave",
+            }:
+                continue
+
+            remarks = request.POST.get(
+                f"remarks_{student.id}",
+                ""
+            ).strip()
+
+            Attendance.objects.update_or_create(
+                student=student,
+                attendance_date=attendance_date,
+                defaults={
+                    "status": status_value,
+                    "branch": student.branch or "",
+                    "course": student.course,
+                    "remarks": remarks,
+                    "marked_by": request.user,
+                }
+            )
+
+            saved_count += 1
+
+        messages.success(
+            request,
+            f"Attendance saved successfully for {saved_count} student(s)."
+        )
+
+        redirect_url = reverse(
+            "mark_attendance"
+        )
+
+        query_parts = [
+            f"date={attendance_date.isoformat()}"
+        ]
+
+        if branch_filter:
+            query_parts.append(
+                f"branch={branch_filter}"
+            )
+
+        if course_filter:
+            query_parts.append(
+                f"course={course_filter}"
+            )
+
+        return redirect(
+            f"{redirect_url}?{'&'.join(query_parts)}"
+        )
+
+    existing_records = {
+        record.student_id: record
+        for record in Attendance.objects.filter(
+            student__in=students,
+            attendance_date=attendance_date,
+        )
+    }
+
+    student_rows = []
+
+    for student in students:
+        student_rows.append(
+            {
+                "student": student,
+                "record": existing_records.get(student.id),
+            }
+        )
+
+    return render(
+        request,
+        "core/mark_attendance.html",
+        {
+            "attendance_date": attendance_date,
+            "branches": branches,
+            "branch_filter": branch_filter,
+            "courses": courses,
+            "course_filter": course_filter,
+            "student_rows": student_rows,
+            "is_admin": admin_access,
+        }
+    )
+
+
+@login_required
+def attendance_report(request):
+
+    today = timezone.localdate()
+    admin_access, forced_branch, branches = _attendance_access(request)
+
+    if forced_branch is None:
+        auth_logout(request)
+        return redirect("staff_login")
+
+    branch_filter = request.GET.get("branch", "").strip()
+    course_filter = request.GET.get("course", "").strip()
+    status_filter = request.GET.get("status", "").strip()
+    search = request.GET.get("search", "").strip()
+    start_date_value = request.GET.get("start_date", "").strip()
+    end_date_value = request.GET.get("end_date", "").strip()
+
+    if not admin_access:
+        branch_filter = forced_branch
+
+    start_date = today.replace(day=1)
+    end_date = today
+
+    if start_date_value:
+        try:
+            start_date = datetime.strptime(
+                start_date_value,
+                "%Y-%m-%d"
+            ).date()
+        except ValueError:
+            pass
+
+    if end_date_value:
+        try:
+            end_date = datetime.strptime(
+                end_date_value,
+                "%Y-%m-%d"
+            ).date()
+        except ValueError:
+            pass
+
+    records = (
+        Attendance.objects
+        .select_related(
+            "student",
+            "course",
+            "marked_by",
+        )
+        .filter(
+            attendance_date__range=[
+                start_date,
+                end_date,
+            ]
+        )
+    )
+
+    if branch_filter:
+        records = records.filter(
+            branch__iexact=branch_filter
+        )
+
+    if course_filter:
+        records = records.filter(
+            course_id=course_filter
+        )
+
+    if status_filter:
+        records = records.filter(
+            status=status_filter
+        )
+
+    if search:
+        records = records.filter(
+            Q(student__student_id__icontains=search)
+            | Q(student__name__icontains=search)
+            | Q(student__mobile__icontains=search)
+            | Q(course__title__icontains=search)
+        )
+
+    records = records.order_by(
+        "-attendance_date",
+        "student__name",
+    )
+
+    total_records = records.count()
+    present_count = records.filter(status="present").count()
+    absent_count = records.filter(status="absent").count()
+    leave_count = records.filter(status="leave").count()
+
+    attendance_percentage = 0
+
+    if total_records > 0:
+        attendance_percentage = round(
+            (present_count / total_records) * 100,
+            1
+        )
+
+    courses = Course.objects.filter(
+        is_active=True
+    ).order_by("title")
+
+    return render(
+        request,
+        "core/attendance_report.html",
+        {
+            "records": records,
+            "branches": branches,
+            "branch_filter": branch_filter,
+            "courses": courses,
+            "course_filter": course_filter,
+            "status_filter": status_filter,
+            "search": search,
+            "start_date": start_date,
+            "end_date": end_date,
+            "total_records": total_records,
+            "present_count": present_count,
+            "absent_count": absent_count,
+            "leave_count": leave_count,
+            "attendance_percentage": attendance_percentage,
+            "is_admin": admin_access,
+        }
+    )
+
+
 # ============================================================
 # STAFF LOGIN
 # ============================================================
@@ -1834,6 +2516,10 @@ def student_dashboard(request):
             "student_login"
         )
 
+    # ======================================================
+    # PAYMENT HISTORY
+    # ======================================================
+
     payments = (
         FeePayment.objects
         .filter(
@@ -1844,6 +2530,10 @@ def student_dashboard(request):
             "-id"
         )
     )
+
+    # ======================================================
+    # FEE CALCULATION
+    # ======================================================
 
     total_fee = (
         admission.total_fee
@@ -1860,6 +2550,10 @@ def student_dashboard(request):
         0
     )
 
+    # ======================================================
+    # PAYMENT STATUS
+    # ======================================================
+
     if paid_fee <= 0:
 
         payment_status = "Pending"
@@ -1870,9 +2564,68 @@ def student_dashboard(request):
 
     else:
 
-        payment_status = (
-            "Partially Paid"
+        payment_status = "Partially Paid"
+
+    # ======================================================
+    # NEXT FEE DUE DATE
+    # Admission Date + 31 Days
+    # ======================================================
+
+    next_due_date = None
+    due_status = None
+    days_remaining = None
+
+    if admission.admission_date and balance_fee > 0:
+
+        admission_date = admission.admission_date
+
+        # If admission_date is DateTimeField
+        if hasattr(
+            admission_date,
+            "date"
+        ):
+            admission_date = admission_date.date()
+
+        next_due_date = (
+            admission_date
+            + timedelta(days=31)
         )
+
+        today = timezone.localdate()
+
+        days_remaining = (
+            next_due_date - today
+        ).days
+
+        if next_due_date < today:
+
+            due_status = "Overdue"
+
+        elif next_due_date == today:
+
+            due_status = "Due Today"
+
+        elif days_remaining <= 7:
+
+            due_status = "Upcoming"
+
+        else:
+
+            due_status = "Future"
+
+    elif balance_fee <= 0:
+
+        due_status = "Paid"
+
+    # ======================================================
+    # LATEST PAYMENT
+    # ======================================================
+
+    latest_payment = payments.first()
+
+    # ======================================================
+    # DASHBOARD
+    # ======================================================
 
     return render(
         request,
@@ -1881,10 +2634,166 @@ def student_dashboard(request):
             "student": student,
             "admission": admission,
             "payments": payments,
+
             "total_fee": total_fee,
             "paid_fee": paid_fee,
             "balance_fee": balance_fee,
             "payment_status": payment_status,
+
+            "next_due_date": next_due_date,
+            "due_status": due_status,
+            "days_remaining": days_remaining,
+
+            "latest_payment": latest_payment,
+        }
+    )
+
+
+
+
+# ============================================================
+# STUDENT - MY ATTENDANCE
+# ============================================================
+
+@login_required
+def student_attendance(request):
+
+    admission = (
+        Admission.objects
+        .select_related(
+            "student",
+            "course",
+        )
+        .filter(
+            user=request.user
+        )
+        .first()
+    )
+
+    if not admission:
+
+        auth_logout(request)
+
+        return redirect(
+            "student_login"
+        )
+
+    student = getattr(
+        admission,
+        "student",
+        None
+    )
+
+    if not student:
+
+        auth_logout(request)
+
+        return redirect(
+            "student_login"
+        )
+
+    today = timezone.localdate()
+
+    month_value = request.GET.get(
+        "month",
+        today.strftime("%Y-%m")
+    ).strip()
+
+    try:
+        selected_month = datetime.strptime(
+            month_value,
+            "%Y-%m"
+        ).date().replace(day=1)
+
+    except ValueError:
+
+        selected_month = today.replace(day=1)
+        month_value = selected_month.strftime("%Y-%m")
+
+    if selected_month.month == 12:
+
+        next_month = selected_month.replace(
+            year=selected_month.year + 1,
+            month=1,
+            day=1
+        )
+
+    else:
+
+        next_month = selected_month.replace(
+            month=selected_month.month + 1,
+            day=1
+        )
+
+    records = (
+        Attendance.objects
+        .filter(
+            student=student,
+            attendance_date__gte=selected_month,
+            attendance_date__lt=next_month,
+        )
+        .select_related(
+            "course",
+            "marked_by",
+        )
+        .order_by(
+            "-attendance_date"
+        )
+    )
+
+    total_days = records.count()
+
+    present_count = records.filter(
+        status="present"
+    ).count()
+
+    absent_count = records.filter(
+        status="absent"
+    ).count()
+
+    leave_count = records.filter(
+        status="leave"
+    ).count()
+
+    attendance_percentage = 0
+
+    if total_days > 0:
+
+        attendance_percentage = round(
+            (
+                present_count
+                / total_days
+            ) * 100,
+            1
+        )
+
+    attendance_status = "No Attendance Yet"
+
+    if total_days > 0:
+
+        if attendance_percentage >= 75:
+
+            attendance_status = "Good"
+
+        else:
+
+            attendance_status = "Low Attendance"
+
+    return render(
+        request,
+        "core/student_attendance.html",
+        {
+            "student": student,
+            "admission": admission,
+            "records": records,
+            "month_value": month_value,
+            "selected_month": selected_month,
+            "total_days": total_days,
+            "present_count": present_count,
+            "absent_count": absent_count,
+            "leave_count": leave_count,
+            "attendance_percentage": attendance_percentage,
+            "attendance_status": attendance_status,
         }
     )
 
@@ -2820,6 +3729,15 @@ def create_admission(
                 commit=False
             )
 
+            # Branch must follow the branch selected in Enquiry.
+            if not admission.branch:
+                admission.branch = (
+                    enquiry.branch
+                    or get_user_branch(request.user)
+                    or ""
+                )
+
+
             admission.enquiry = enquiry
 
             admission.created_by = (
@@ -3171,6 +4089,31 @@ def edit_admission(
         id=admission_id
     )
 
+    # Old admissions may have blank branch even though the original
+    # enquiry already has one. Backfill it automatically.
+    if (
+        not admission.branch
+        and getattr(admission, "enquiry_id", None)
+        and admission.enquiry
+        and admission.enquiry.branch
+    ):
+        admission.branch = admission.enquiry.branch
+        admission.save(
+            update_fields=["branch"]
+        )
+
+        student = getattr(
+            admission,
+            "student",
+            None
+        )
+
+        if student and not student.branch:
+            student.branch = admission.branch
+            student.save(
+                update_fields=["branch"]
+            )
+
     # HO / Admin only
     if not is_admin_user(request.user):
         return redirect(
@@ -3189,6 +4132,35 @@ def edit_admission(
         if form.is_valid():
 
             admission = form.save()
+
+            # Keep linked Student record synchronized with Admission.
+            student = getattr(
+                admission,
+                "student",
+                None
+            )
+
+            if student:
+
+                student.name = admission.student_name
+                student.mobile = admission.mobile
+                student.email = admission.email
+                student.course = admission.course
+                student.branch = admission.branch
+                student.joining_date = admission.admission_date
+                student.status = "active"
+
+                student.save(
+                    update_fields=[
+                        "name",
+                        "mobile",
+                        "email",
+                        "course",
+                        "branch",
+                        "joining_date",
+                        "status",
+                    ]
+                )
 
             return redirect(
                 "admission_detail",
@@ -3493,4 +4465,519 @@ def student_quick_view(request):
     return redirect(
         "admission_detail",
         admission_id=admission.id
+    )
+# ============================================================
+# PLACEMENT / JOB MANAGEMENT
+# ============================================================
+
+@user_passes_test(
+    staff_or_admin,
+    login_url="staff_login"
+)
+def job_list(request):
+
+    jobs = (
+        JobPost.objects
+        .select_related("posted_by")
+        .prefetch_related("eligible_courses")
+        .order_by("-created_at")
+    )
+
+    return render(
+        request,
+        "core/job_list.html",
+        {
+            "jobs": jobs,
+        }
+    )
+
+
+@user_passes_test(
+    staff_or_admin,
+    login_url="staff_login"
+)
+def job_create(request):
+
+    if request.method == "POST":
+
+        form = JobPostForm(request.POST)
+
+        if form.is_valid():
+
+            job = form.save(commit=False)
+
+            # Logged-in user who posted the job
+            job.posted_by = request.user
+
+            # Automatically detect staff branch
+            try:
+                staff_profile = StaffProfile.objects.get(
+                    user=request.user
+                )
+
+                job.posted_branch = (
+                    staff_profile.branch
+                    or ""
+                )
+
+            except StaffProfile.DoesNotExist:
+
+                # HO / Superuser
+                if request.user.is_superuser:
+                    job.posted_branch = "Head Office"
+                else:
+                    job.posted_branch = ""
+
+            job.save()
+
+            # Save eligible courses ManyToMany
+            form.save_m2m()
+
+            messages.success(
+                request,
+                "Job posted successfully."
+            )
+
+            return redirect(
+                "job_list"
+            )
+
+    else:
+
+        form = JobPostForm()
+
+    return render(
+        request,
+        "core/job_form.html",
+        {
+            "form": form,
+        }
+    )
+
+
+@user_passes_test(
+    staff_or_admin,
+    login_url="staff_login"
+)
+def job_detail(request, job_id):
+
+    job = get_object_or_404(
+        JobPost.objects
+        .select_related("posted_by")
+        .prefetch_related("eligible_courses"),
+        id=job_id
+    )
+
+    return render(
+        request,
+        "core/job_detail.html",
+        {
+            "job": job,
+        }
+    )
+
+
+@user_passes_test(
+    staff_or_admin,
+    login_url="staff_login"
+)
+def job_edit(request, job_id):
+
+    job = get_object_or_404(
+        JobPost,
+        id=job_id
+    )
+
+    # Superuser can edit any job.
+    # Staff can edit only their own job.
+    if (
+        not request.user.is_superuser
+        and job.posted_by != request.user
+    ):
+
+        messages.error(
+            request,
+            "You can edit only jobs posted by you."
+        )
+
+        return redirect(
+            "job_list"
+        )
+
+    if request.method == "POST":
+
+        form = JobPostForm(
+            request.POST,
+            instance=job
+        )
+
+        if form.is_valid():
+
+            form.save()
+
+            messages.success(
+                request,
+                "Job updated successfully."
+            )
+
+            return redirect(
+                "job_detail",
+                job_id=job.id
+            )
+
+    else:
+
+        form = JobPostForm(
+            instance=job
+        )
+
+    return render(
+        request,
+        "core/job_form.html",
+        {
+            "form": form,
+            "job": job,
+            "is_edit": True,
+        }
+    )
+@login_required
+def student_jobs(request):
+
+    admission = (
+        Admission.objects
+        .select_related(
+            "course",
+            "student",
+            "enquiry",
+        )
+        .filter(
+            user=request.user
+        )
+        .first()
+    )
+
+    if not admission:
+
+        return redirect("student_login")
+
+    student = admission.student
+
+    jobs = (
+        JobPost.objects
+        .filter(
+            status="active"
+        )
+        .prefetch_related(
+            "eligible_courses"
+        )
+        .order_by(
+            "-created_at"
+        )
+    )
+
+    student_course = admission.course
+
+    # =========================================================
+    # STUDENT MOBILE
+    # Used to identify already submitted skill-upgrade enquiries
+    # =========================================================
+
+    student_mobile = (
+        getattr(student, "mobile", None)
+        or (
+            admission.enquiry.mobile
+            if admission.enquiry
+            else ""
+        )
+        or ""
+    )
+
+    # Only open/pending enquiries should block another submission.
+    open_skill_enquiries = []
+
+    if student_mobile:
+
+        open_skill_enquiries = list(
+            Enquiry.objects
+            .filter(
+                mobile=student_mobile,
+                status__in=[
+                    "new",
+                    "contacted",
+                    "followup",
+                ]
+            )
+            .only(
+                "id",
+                "course_id",
+                "message",
+                "status",
+            )
+        )
+
+    for job in jobs:
+
+        eligible_courses = list(
+            job.eligible_courses.all()
+        )
+
+        # No eligible course selected means open for everyone
+        if not eligible_courses:
+
+            job.student_is_eligible = True
+
+        elif student_course in eligible_courses:
+
+            job.student_is_eligible = True
+
+        else:
+
+            job.student_is_eligible = False
+
+        # -----------------------------------------------------
+        # Mark each recommended course if an enquiry for this
+        # same student + same course + same job is already open.
+        # Template can then show "Enquiry Submitted ✓".
+        # -----------------------------------------------------
+
+        job_marker = f"Job: {job.title}"
+
+        for course in eligible_courses:
+
+            course.enquiry_submitted = any(
+                enquiry.course_id == course.id
+                and job_marker in (enquiry.message or "")
+                for enquiry in open_skill_enquiries
+            )
+
+    return render(
+        request,
+        "core/student_jobs.html",
+        {
+            "admission": admission,
+            "student": student,
+            "jobs": jobs,
+        }
+    )
+@login_required
+def student_course_enquiry(
+    request,
+    job_id,
+    course_id
+):
+
+    # =========================================================
+    # FIND STUDENT ADMISSION
+    # =========================================================
+
+    admission = (
+        Admission.objects
+        .select_related(
+            "course",
+            "student",
+            "enquiry",
+        )
+        .filter(
+            user=request.user
+        )
+        .first()
+    )
+
+    if not admission:
+        return redirect(
+            "student_login"
+        )
+
+    # =========================================================
+    # FIND ACTIVE JOB
+    # =========================================================
+
+    job = get_object_or_404(
+        JobPost,
+        id=job_id,
+        status="active"
+    )
+
+    # =========================================================
+    # FIND INTERESTED COURSE
+    # =========================================================
+
+    interested_course = get_object_or_404(
+        Course,
+        id=course_id,
+        is_active=True
+    )
+
+    # Security check:
+    # Selected course must actually belong to this job.
+    if not job.eligible_courses.filter(
+        id=interested_course.id
+    ).exists():
+        messages.error(
+            request,
+            "This course is not linked to the selected job."
+        )
+        return redirect(
+            "student_jobs"
+        )
+
+    student = admission.student
+
+    # =========================================================
+    # POST - CREATE ENQUIRY
+    # =========================================================
+
+    if request.method == "POST":
+
+        # -----------------------------------------------------
+        # STUDENT DETAILS
+        # -----------------------------------------------------
+
+        student_name = (
+            getattr(student, "name", None)
+            or getattr(student, "full_name", None)
+            or (
+                admission.enquiry.name
+                if admission.enquiry
+                else request.user.username
+            )
+        )
+
+        student_mobile = (
+            getattr(student, "mobile", None)
+            or (
+                admission.enquiry.mobile
+                if admission.enquiry
+                else ""
+            )
+        )
+
+        student_email = (
+            getattr(student, "email", None)
+            or (
+                admission.enquiry.email
+                if admission.enquiry
+                else ""
+            )
+        )
+
+        student_branch = (
+            getattr(admission, "branch", None)
+            or (
+                admission.enquiry.branch
+                if admission.enquiry
+                else ""
+            )
+            or getattr(student, "branch", None)
+            or ""
+        )
+
+        # =====================================================
+        # DUPLICATE ENQUIRY CHECK
+        # Same student + same course + same job
+        # =====================================================
+
+        duplicate_enquiry = (
+            Enquiry.objects
+            .filter(
+                mobile=student_mobile,
+                course=interested_course,
+                message__icontains=(
+                    f"Job: {job.title}"
+                ),
+                status__in=[
+                    "new",
+                    "contacted",
+                    "followup",
+                ]
+            )
+            .first()
+        )
+
+        if duplicate_enquiry:
+            messages.info(
+                request,
+                (
+                    f"Your enquiry for "
+                    f"{interested_course.title} "
+                    f"is already submitted. "
+                    f"Our team will follow up with you."
+                )
+            )
+            return redirect(
+                "student_jobs"
+            )
+
+        # =====================================================
+        # CREATE NEW ENQUIRY
+        # =====================================================
+
+        enquiry = Enquiry.objects.create(
+            name=student_name,
+            mobile=student_mobile,
+            email=student_email,
+            course=interested_course,
+            branch=student_branch,
+            message=(
+                f"Student Placement Skill Upgrade Enquiry\n\n"
+                f"Student Admission No: "
+                f"{admission.admission_number}\n"
+                f"Current Course: "
+                f"{admission.course.title if admission.course else 'Not Assigned'}\n"
+                f"Interested Course: "
+                f"{interested_course.title}\n"
+                f"Job: "
+                f"{job.title}\n"
+                f"Company: "
+                f"{job.company_name}\n"
+                f"Job Location: "
+                f"{job.location or 'Not Mentioned'}\n"
+                f"Reason: Student wants to learn "
+                f"this course/skill to improve "
+                f"eligibility for this job."
+            ),
+            status="new",
+        )
+
+        # =====================================================
+        # CREATE ENQUIRY ACTIVITY
+        # =====================================================
+
+        EnquiryActivity.objects.create(
+            enquiry=enquiry,
+            activity_type="note",
+            message=(
+                "Skill upgrade enquiry generated "
+                "from Student Placement Support."
+            ),
+            created_by=None,
+        )
+
+        messages.success(
+            request,
+            (
+                f"Your enquiry for "
+                f"{interested_course.title} "
+                f"has been submitted successfully. "
+                f"MCTI team will contact you."
+            )
+        )
+
+        return redirect(
+            "student_jobs"
+        )
+
+    # =========================================================
+    # GET - CONFIRMATION PAGE
+    # =========================================================
+
+    return render(
+        request,
+        "core/student_course_enquiry.html",
+        {
+            "student": student,
+            "admission": admission,
+            "job": job,
+            "interested_course": interested_course,
+        }
     )

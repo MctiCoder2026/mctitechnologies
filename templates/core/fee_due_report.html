@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fee Due Date Report | MCTI Technologies</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+    --primary:#f97316;
+    --dark:#111827;
+    --dark2:#1f2937;
+    --bg:#f5f7fb;
+    --white:#fff;
+    --border:#e5e7eb;
+    --muted:#6b7280;
+    --green:#16a34a;
+    --red:#dc2626;
+    --yellow:#ca8a04;
+    --blue:#2563eb;
+}
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:var(--bg);
+    color:var(--dark);
+}
+.sidebar{
+    width:250px;background:var(--dark);color:white;padding:24px 18px;
+    position:fixed;top:0;left:0;bottom:0;overflow-y:auto
+}
+.logo{margin-bottom:28px}
+.logo h2{font-size:21px;margin-bottom:4px}
+.logo h2 span{color:var(--primary)}
+.logo p{font-size:11px;color:#9ca3af}
+.menu a{
+    display:flex;align-items:center;gap:11px;text-decoration:none;color:#d1d5db;
+    padding:12px 13px;border-radius:9px;margin-bottom:6px;font-size:13px;font-weight:700
+}
+.menu a:hover{background:#2b3545;color:white}
+.menu a.active{background:var(--primary);color:white}
+.main{margin-left:250px;min-height:100vh}
+.topbar{
+    min-height:72px;background:white;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;padding:14px 28px
+}
+.topbar h1{font-size:21px;margin-bottom:4px}
+.topbar p{font-size:12px;color:var(--muted)}
+.content{padding:28px}
+.cards{
+    display:grid;grid-template-columns:repeat(6,1fr);gap:13px;margin-bottom:20px
+}
+.card{
+    background:white;border:1px solid var(--border);border-radius:12px;padding:16px;
+    border-top:4px solid var(--dark)
+}
+.card.red{border-top-color:var(--red)}
+.card.orange{border-top-color:var(--primary)}
+.card.yellow{border-top-color:var(--yellow)}
+.card.blue{border-top-color:var(--blue)}
+.card.green{border-top-color:var(--green)}
+.card small{display:block;color:var(--muted);font-size:10px;margin-bottom:6px}
+.card strong{font-size:20px}
+.panel{
+    background:white;border:1px solid var(--border);border-radius:14px;padding:20px;
+    margin-bottom:20px
+}
+.filters{
+    display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:12px;align-items:end
+}
+label{display:block;font-size:10px;font-weight:800;color:#4b5563;margin-bottom:6px}
+input,select{
+    width:100%;height:40px;border:1px solid #d1d5db;border-radius:8px;padding:0 11px;
+    background:white
+}
+button,.btn{
+    height:40px;border:none;border-radius:8px;padding:0 17px;background:var(--primary);
+    color:white;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;
+    align-items:center;justify-content:center;font-size:12px
+}
+.btn-light{background:#f3f4f6;color:#374151}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{
+    text-align:left;background:#f9fafb;color:#4b5563;padding:11px 9px;
+    border-bottom:1px solid var(--border);white-space:nowrap
+}
+td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
+.name{font-weight:800}
+.balance{font-weight:800;color:var(--red)}
+.badge{
+    display:inline-block;padding:5px 8px;border-radius:20px;font-size:9px;font-weight:800;
+    white-space:nowrap
+}
+.overdue{background:#fee2e2;color:#991b1b}
+.today{background:#ffedd5;color:#9a3412}
+.upcoming{background:#fef3c7;color:#854d0e}
+.future{background:#dbeafe;color:#1e40af}
+.paid{background:#dcfce7;color:#166534}
+.action{
+    display:inline-flex;align-items:center;justify-content:center;background:var(--dark);
+    color:white;text-decoration:none;padding:7px 9px;border-radius:7px;
+    font-size:10px;font-weight:800;white-space:nowrap
+}
+.action-group{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.action-call{background:#2563eb}
+.action-whatsapp{background:#16a34a}
+.action-payment{background:var(--dark)}
+.empty{text-align:center;padding:30px;color:var(--muted)}
+.footer-note{font-size:10px;color:var(--muted);margin-top:12px}
+@media(max-width:1200px){.cards{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){
+    .sidebar{display:none}.main{margin-left:0}.filters{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+    .content{padding:14px}.cards{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+    <div class="logo">
+        <h2><span>MCTI</span> Technologies</h2>
+        <p>Management System</p>
+    </div>
+
+    <nav class="menu">
+        <a href="{% url 'management_dashboard' %}">🏠 Dashboard</a>
+        <a href="{% url 'branch_dashboard' %}">📈 Branch Performance</a>
+        <a href="{% url 'enquiry_dashboard' %}">📞 Enquiries</a>
+        <a href="{% url 'fee_payment_list' %}">💳 Fee Payments</a>
+        <a href="{% url 'admission_list' %}">📝 Admissions</a>
+        <a href="{% url 'student_list' %}">🎓 Students</a>
+        <a href="{% url 'student_quick_view' %}">🔎 Student Quick View</a>
+        <a href="{% url 'staff_list' %}">👥 Staff</a>
+        <a href="{% url 'job_list' %}">💼 Placement / Jobs</a>
+        <a href="{% url 'reports_dashboard' %}">📊 Reports</a>
+        <a href="{% url 'fee_due_report' %}" class="active">📅 Fee Due Report</a>
+        {% if request.user.is_superuser %}
+        <a href="/admin/">⚙️ Django Backend</a>
+        {% endif %}
+        <a href="{% url 'staff_logout' %}">🚪 Logout</a>
+    </nav>
+</aside>
+
+<main class="main">
+
+    <header class="topbar">
+        <div>
+            <h1>Fee Due Date Report</h1>
+            <p>Track outstanding fees and upcoming collection follow-ups</p>
+        </div>
+        <div style="text-align:right">
+            <strong style="font-size:12px">{{ request.user.get_full_name|default:request.user.username }}</strong>
+            <div style="font-size:10px;color:#6b7280">
+                {% if is_admin %}HO / Admin{% else %}Branch Staff{% endif %}
+            </div>
+        </div>
+    </header>
+
+    <div class="content">
+
+        <section class="cards">
+            <div class="card red">
+                <small>OVERDUE</small>
+                <strong>{{ counts.overdue }}</strong>
+            </div>
+            <div class="card orange">
+                <small>DUE TODAY</small>
+                <strong>{{ counts.today }}</strong>
+            </div>
+            <div class="card yellow">
+                <small>UPCOMING 7 DAYS</small>
+                <strong>{{ counts.upcoming }}</strong>
+            </div>
+            <div class="card blue">
+                <small>FUTURE DUE</small>
+                <strong>{{ counts.future }}</strong>
+            </div>
+            <div class="card green">
+                <small>FULLY PAID</small>
+                <strong>{{ counts.paid }}</strong>
+            </div>
+            <div class="card">
+                <small>TOTAL OUTSTANDING</small>
+                <strong>₹{{ total_outstanding|floatformat:2 }}</strong>
+            </div>
+        </section>
+
+        <section class="panel">
+            <form method="get" class="filters">
+
+                <div>
+                    <label>SEARCH STUDENT</label>
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ search }}"
+                        placeholder="Name, admission no., mobile or course"
+                    >
+                </div>
+
+                {% if is_admin %}
+                <div>
+                    <label>BRANCH</label>
+                    <select name="branch">
+                        {% for value, label in branches %}
+                        <option value="{{ value }}" {% if branch_filter == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% else %}
+                <input type="hidden" name="branch" value="{{ branch_filter }}">
+                {% endif %}
+
+                <div>
+                    <label>DUE STATUS</label>
+                    <select name="status">
+                        <option value="">All Status</option>
+                        <option value="overdue" {% if status_filter == "overdue" %}selected{% endif %}>Overdue</option>
+                        <option value="today" {% if status_filter == "today" %}selected{% endif %}>Due Today</option>
+                        <option value="upcoming" {% if status_filter == "upcoming" %}selected{% endif %}>Upcoming 7 Days</option>
+                        <option value="future" {% if status_filter == "future" %}selected{% endif %}>Future Due</option>
+                        <option value="paid" {% if status_filter == "paid" %}selected{% endif %}>Fully Paid</option>
+                    </select>
+                </div>
+
+                <div style="display:flex;gap:7px">
+                    <button type="submit">Apply</button>
+                    <a href="{% url 'fee_due_report' %}" class="btn btn-light">Reset</a>
+                </div>
+
+            </form>
+        </section>
+
+        <section class="panel">
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                <div>
+                    <h2 style="font-size:17px">Student Fee Tracking</h2>
+                    <p style="font-size:10px;color:#6b7280;margin-top:4px">
+                        Next due date = Admission Date + 31 Days
+                    </p>
+                </div>
+                <strong style="font-size:11px;color:#6b7280">
+                    {{ due_rows|length }} Records
+                </strong>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Admission No.</th>
+                            <th>Mobile</th>
+                            <th>Branch</th>
+                            <th>Course</th>
+                            <th>Total Fee</th>
+                            <th>Paid</th>
+                            <th>Balance</th>
+                            <th>Next Due</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for row in due_rows %}
+                        <tr>
+                            <td class="name">{{ row.student_name }}</td>
+                            <td>{{ row.admission_number }}</td>
+                            <td>{{ row.mobile }}</td>
+                            <td>{{ row.branch|title }}</td>
+                            <td>{{ row.course }}</td>
+                            <td>₹{{ row.total_fee|floatformat:2 }}</td>
+                            <td>₹{{ row.paid_fee|floatformat:2 }}</td>
+                            <td class="balance">₹{{ row.balance_fee|floatformat:2 }}</td>
+                            <td>
+                                {% if row.next_due_date %}
+                                    {{ row.next_due_date|date:"d M Y" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if row.due_key == "overdue" %}
+                                    <span class="badge overdue">Overdue</span>
+                                {% elif row.due_key == "today" %}
+                                    <span class="badge today">Due Today</span>
+                                {% elif row.due_key == "upcoming" %}
+                                    <span class="badge upcoming">Upcoming 7 Days</span>
+                                {% elif row.due_key == "future" %}
+                                    <span class="badge future">{{ row.due_status }}</span>
+                                {% else %}
+                                    <span class="badge paid">Fully Paid</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if row.student %}
+                                <div class="action-group">
+
+                                    <a
+                                        class="action action-payment"
+                                        href="{% url 'add_fee_payment' row.student.id %}"
+                                    >
+                                        Add Payment
+                                    </a>
+
+                                    {% if row.mobile and row.mobile != "-" %}
+                                    <a
+                                        class="action action-call"
+                                        href="tel:{{ row.mobile }}"
+                                        title="Call {{ row.student_name }}"
+                                    >
+                                        📞
+                                    </a>
+
+                                    {% if row.balance_fee > 0 %}
+                                    <a
+                                        class="action action-whatsapp"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        href="https://wa.me/91{{ row.mobile }}?text=Dear%20{{ row.student_name|urlencode }},%20your%20pending%20fee%20is%20₹{{ row.balance_fee|floatformat:0 }}.{% if row.next_due_date %}%20Next%20due%20date:%20{{ row.next_due_date|date:'d M Y'|urlencode }}.{% endif %}%20Kindly%20make%20the%20payment%20at%20the%20earliest.%20-%20MCTI%20Technologies"
+                                        title="Send fee reminder on WhatsApp"
+                                    >
+                                        💬
+                                    </a>
+                                    {% endif %}
+
+                                    {% endif %}
+
+                                </div>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="11" class="empty">
+                                No fee due records found for this filter.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="footer-note">
+                Branch staff can view only their assigned branch. HO/Admin can filter across all branches.
+            </div>
+
+        </section>
+
+    </div>
+</main>
+
+</body>
+</html>

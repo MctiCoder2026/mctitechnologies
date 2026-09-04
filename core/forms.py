@@ -5,7 +5,21 @@ from .models import (
     Enquiry,
     Admission,
     FeePayment,
+    JobPost,
 )
+
+
+
+BRANCH_CHOICES = [
+    ("", "Select Branch"),
+    ("kharghar", "Kharghar"),
+    ("panvel", "Panvel"),
+    ("koperkhairane", "Koperkhairane"),
+    ("kamothe", "Kamothe"),
+    ("ghansoli", "Ghansoli"),
+    ("nerul", "Nerul"),
+]
+
 
 
 # ============================================================
@@ -256,10 +270,10 @@ class AdmissionForm(forms.ModelForm):
                 }
             ),
 
-            "branch": forms.TextInput(
+            "branch": forms.Select(
+                choices=BRANCH_CHOICES,
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Branch",
                 }
             ),
 
@@ -306,6 +320,9 @@ class AdmissionForm(forms.ModelForm):
     def __init__(self, *args, enquiry=None, **kwargs):
 
         super().__init__(*args, **kwargs)
+
+        self.fields["branch"].required = True
+        self.fields["branch"].choices = BRANCH_CHOICES
 
         if enquiry and not self.instance.pk:
 
@@ -446,6 +463,7 @@ class AdmissionEditForm(forms.ModelForm):
             ),
 
             "branch": forms.Select(
+                choices=BRANCH_CHOICES,
                 attrs={
                     "class": "form-control",
                 }
@@ -470,6 +488,155 @@ class AdmissionEditForm(forms.ModelForm):
                 attrs={
                     "class": "form-control",
                     "rows": 3,
+                }
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        self.fields["branch"].required = True
+        self.fields["branch"].choices = BRANCH_CHOICES
+
+        # If old Admission.branch is blank, automatically use the
+        # branch selected earlier in the original Enquiry.
+        if (
+            self.instance
+            and self.instance.pk
+            and not self.instance.branch
+            and getattr(self.instance, "enquiry_id", None)
+            and self.instance.enquiry
+            and self.instance.enquiry.branch
+        ):
+            self.fields["branch"].initial = self.instance.enquiry.branch
+
+
+# ============================================================
+# JOB POST FORM
+# ============================================================
+
+class JobPostForm(forms.ModelForm):
+
+    class Meta:
+
+        model = JobPost
+
+        fields = [
+            "title",
+            "company_name",
+            "location",
+            "salary",
+            "experience",
+            "required_skills",
+            "description",
+            "eligibility",
+            "eligible_courses",
+            "apply_link",
+            "contact_email",
+            "contact_mobile",
+            "last_date",
+            "status",
+        ]
+
+        widgets = {
+
+            "title": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Job Title",
+                }
+            ),
+
+            "company_name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Company Name",
+                }
+            ),
+
+            "location": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Job Location",
+                }
+            ),
+
+            "salary": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Example: ₹18,000 - ₹25,000",
+                }
+            ),
+
+            "experience": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Example: Fresher / 1-2 Years",
+                }
+            ),
+
+            "required_skills": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": "Required Skills",
+                }
+            ),
+
+            "description": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                    "placeholder": "Job Description",
+                }
+            ),
+
+            "eligibility": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": "Eligibility",
+                }
+            ),
+
+            "eligible_courses": forms.SelectMultiple(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+
+            "apply_link": forms.URLInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "https://...",
+                }
+            ),
+
+            "contact_email": forms.EmailInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "HR Email",
+                }
+            ),
+
+            "contact_mobile": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "HR Contact Number",
+                }
+            ),
+
+            "last_date": forms.DateInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "date",
+                }
+            ),
+
+            "status": forms.Select(
+                attrs={
+                    "class": "form-control",
                 }
             ),
         }
