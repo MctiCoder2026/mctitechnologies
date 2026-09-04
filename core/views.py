@@ -21,6 +21,9 @@ from .forms import (
     AdmissionForm,
     AdmissionEditForm,
     FeePaymentForm,
+    BusinessLeadForm,
+    BusinessLeadAssignmentForm,
+    BusinessLeadUpdateForm,
 )
 
 from .models import (
@@ -32,7 +35,318 @@ from .models import (
     FeePayment,
     StaffProfile,
     Attendance,
+    BusinessLead,
+    BusinessLeadActivity,
 )
+
+
+
+
+
+# ============================================================
+# BUSINESS LEAD DETAIL
+# ============================================================
+
+@login_required
+def business_lead_detail(request, lead_id):
+
+    lead = get_object_or_404(
+        BusinessLead.objects.select_related("assigned_to"),
+        id=lead_id
+    )
+
+    admin_access = is_admin_user(request.user)
+    user_branch = get_user_branch(request.user)
+
+    # HO/Admin can see every lead.
+    # Branch staff can see only leads assigned to their branch.
+    if not admin_access:
+
+        if (
+            not user_branch
+            or not lead.assigned_branch
+            or lead.assigned_branch.strip().lower()
+            != user_branch.strip().lower()
+        ):
+            return redirect("business_lead_list")
+
+    assignment_form = None
+    update_form = BusinessLeadUpdateForm(
+        instance=lead
+    )
+
+    if request.method == "POST":
+
+        form_action = request.POST.get(
+            "form_action",
+            ""
+        ).strip()
+
+        # ----------------------------------------------------
+        # HO ASSIGNMENT / REASSIGNMENT
+        # ----------------------------------------------------
+        if form_action == "assignment":
+
+            if not admin_access:
+                messages.error(
+                    request,
+                    "Only HO/Admin can assign or reassign business leads."
+                )
+                return redirect(
+                    "business_lead_detail",
+                    lead_id=lead.id
+                )
+
+            assignment_form = BusinessLeadAssignmentForm(
+                request.POST,
+                instance=lead
+            )
+
+            if assignment_form.is_valid():
+
+                old_branch = (
+                    lead.assigned_branch
+                    or ""
+                ).strip()
+
+                old_staff = lead.assigned_to
+
+                updated_lead = assignment_form.save()
+
+                branch_display = (
+                    updated_lead.assigned_branch
+                    or "Unassigned"
+                ).replace("_", " ").title()
+
+                if updated_lead.assigned_to:
+                    staff_display = (
+                        updated_lead.assigned_to.get_full_name()
+                        or updated_lead.assigned_to.username
+                    )
+                else:
+                    staff_display = "Unassigned"
+
+                changed = (
+                    old_branch.lower()
+                    != (
+                        updated_lead.assigned_branch
+                        or ""
+                    ).strip().lower()
+                    or old_staff != updated_lead.assigned_to
+                )
+
+                if changed:
+
+                    BusinessLeadActivity.objects.create(
+                        lead=updated_lead,
+                        activity_type="assigned",
+                        message=(
+                            f"Lead assigned to {branch_display}"
+                            f" / {staff_display}."
+                        ),
+                        created_by=request.user,
+                    )
+
+                    messages.success(
+                        request,
+                        "Business lead assignment updated successfully."
+                    )
+
+                else:
+
+                    messages.info(
+                        request,
+                        "No assignment changes were made."
+                    )
+
+                return redirect(
+                    "business_lead_detail",
+                    lead_id=updated_lead.id
+                )
+
+        # ----------------------------------------------------
+        # STATUS / FOLLOW-UP / VALUE UPDATE
+        # ----------------------------------------------------
+        elif form_action == "lead_update":
+
+            update_form = BusinessLeadUpdateForm(
+                request.POST,
+                instance=lead
+            )
+
+            if update_form.is_valid():
+
+                old_status = lead.status
+                old_followup_date = lead.followup_date
+                old_followup_notes = lead.followup_notes or ""
+                old_estimated_value = lead.estimated_value
+                old_final_value = lead.final_value
+
+                updated_lead = update_form.save()
+
+                activity_messages = []
+
+                if old_status != updated_lead.status:
+                    activity_messages.append(
+                        f"Status changed from "
+                        f"{dict(BusinessLead.STATUS_CHOICES).get(old_status, old_status)} "
+                        f"to {updated_lead.get_status_display()}."
+                    )
+
+                if old_followup_date != updated_lead.followup_date:
+                    activity_messages.append(
+                        f"Follow-up date updated to "
+                        f"{updated_lead.followup_date or 'Not Set'}."
+                    )
+
+                if old_followup_notes != (updated_lead.followup_notes or ""):
+                    activity_messages.append(
+                        "Follow-up notes updated."
+                    )
+
+                if old_estimated_value != updated_lead.estimated_value:
+                    activity_messages.append(
+                        f"Estimated value updated to "
+                        f"₹{updated_lead.estimated_value or 0}."
+                    )
+
+                if old_final_value != updated_lead.final_value:
+                    activity_messages.append(
+                        f"Final value updated to "
+                        f"₹{updated_lead.final_value or 0}."
+                    )
+
+                if activity_messages:
+
+                    if updated_lead.status == "converted":
+                        activity_type = "converted"
+                    elif updated_lead.status == "proposal":
+                        activity_type = "proposal"
+                    elif (
+                        old_followup_date != updated_lead.followup_date
+                        or old_followup_notes
+                        != (updated_lead.followup_notes or "")
+                    ):
+                        activity_type = "followup"
+                    elif old_status != updated_lead.status:
+                        activity_type = "status"
+                    else:
+                        activity_type = "note"
+
+                    BusinessLeadActivity.objects.create(
+                        lead=updated_lead,
+                        activity_type=activity_type,
+                        message=" ".join(activity_messages),
+                        created_by=request.user,
+                    )
+
+                    messages.success(
+                        request,
+                        "Business lead updated successfully."
+                    )
+
+                else:
+
+                    messages.info(
+                        request,
+                        "No lead changes were made."
+                    )
+
+                return redirect(
+                    "business_lead_detail",
+                    lead_id=updated_lead.id
+                )
+
+        else:
+
+            messages.error(
+                request,
+                "Invalid business lead form submission."
+            )
+
+    if admin_access and assignment_form is None:
+        assignment_form = BusinessLeadAssignmentForm(
+            instance=lead
+        )
+
+    activities = (
+        lead.activities
+        .select_related("created_by")
+        .all()
+    )
+
+    return render(
+        request,
+        "core/business_lead_detail.html",
+        {
+            "lead": lead,
+            "activities": activities,
+            "is_admin": admin_access,
+            "assignment_form": assignment_form,
+            "update_form": update_form,
+        }
+    )
+
+
+# ============================================================
+# PUBLIC BUSINESS CONTACT / SERVICE REQUIREMENT
+# ============================================================
+
+def business_contact(request):
+
+    service = request.GET.get("service", "").strip().lower()
+
+    valid_services = {
+        "ai",
+        "saas",
+        "it",
+        "corporate_training",
+    }
+
+    initial = {}
+
+    if service in valid_services:
+        initial["service"] = service
+
+    if request.method == "POST":
+
+        form = BusinessLeadForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            lead = form.save()
+
+            BusinessLeadActivity.objects.create(
+                lead=lead,
+                activity_type="created",
+                message="Business enquiry submitted from website.",
+                created_by=None,
+            )
+
+            return render(
+                request,
+                "core/business_contact_success.html",
+                {
+                    "lead": lead,
+                }
+            )
+
+    else:
+
+        form = BusinessLeadForm(
+            initial=initial
+        )
+
+    return render(
+        request,
+        "core/business_contact.html",
+        {
+            "form": form,
+            "selected_service": service,
+        }
+    )
 
 
 # ============================================================
@@ -522,6 +836,36 @@ def branch_dashboard(request):
         )
 
     # --------------------------------------------------------
+    # BUSINESS LEADS FOR BRANCH DASHBOARD
+    # --------------------------------------------------------
+
+    business_leads = BusinessLead.objects.all()
+
+    if not is_admin_user(request.user):
+        business_leads = business_leads.filter(
+            assigned_branch__iexact=user_branch
+        )
+
+    total_business_leads = business_leads.count()
+
+    new_business_leads = business_leads.filter(
+        status="new"
+    ).count()
+
+    followup_business_leads = business_leads.filter(
+        status="followup"
+    ).count()
+
+    proposal_business_leads = business_leads.filter(
+        status="proposal"
+    ).count()
+
+    converted_business_leads = business_leads.filter(
+        status="converted"
+    ).count()
+
+
+    # --------------------------------------------------------
     # BEST & LOW PERFORMING BRANCH
     # --------------------------------------------------------
 
@@ -589,6 +933,13 @@ def branch_dashboard(request):
             "overall_collection": overall_collection,
             "overall_active_students": overall_active_students,
             "overall_conversion_rate": overall_conversion_rate,
+
+            "total_business_leads": total_business_leads,
+            "new_business_leads": new_business_leads,
+            "followup_business_leads": followup_business_leads,
+            "proposal_business_leads": proposal_business_leads,
+            "converted_business_leads": converted_business_leads,
+
             "best_branch": best_branch,
             "attention_branch": attention_branch,
             "date_filter": date_filter,
@@ -4979,5 +5330,104 @@ def student_course_enquiry(
             "admission": admission,
             "job": job,
             "interested_course": interested_course,
+        }
+    )
+@login_required
+def business_lead_list(request):
+
+    is_admin = is_admin_user(request.user)
+    user_branch = get_user_branch(request.user)
+
+    leads = (
+        BusinessLead.objects
+        .select_related("assigned_to")
+        .order_by("-created_at")
+    )
+
+    if not is_admin:
+
+        if not user_branch:
+            auth_logout(request)
+            return redirect("staff_login")
+
+        leads = leads.filter(
+            assigned_branch__iexact=user_branch
+        )
+
+    status_filter = request.GET.get(
+        "status",
+        ""
+    ).strip()
+
+    service_filter = request.GET.get(
+        "service",
+        ""
+    ).strip()
+
+    search = request.GET.get(
+        "search",
+        ""
+    ).strip()
+
+    if status_filter:
+        leads = leads.filter(
+            status=status_filter
+        )
+
+    if service_filter:
+        leads = leads.filter(
+            service=service_filter
+        )
+
+    if search:
+        leads = leads.filter(
+            Q(name__icontains=search)
+            |
+            Q(company_name__icontains=search)
+            |
+            Q(mobile__icontains=search)
+            |
+            Q(email__icontains=search)
+            |
+            Q(project_requirement__icontains=search)
+        )
+
+    total_leads = leads.count()
+
+    new_leads = leads.filter(
+        status="new"
+    ).count()
+
+    contacted_leads = leads.filter(
+        status="contacted"
+    ).count()
+
+    followup_leads = leads.filter(
+        status="followup"
+    ).count()
+
+    proposal_leads = leads.filter(
+        status="proposal"
+    ).count()
+
+    converted_leads = leads.filter(
+        status="converted"
+    ).count()
+
+    return render(
+        request,
+        "core/business_lead_list.html",
+        {
+            "leads": leads,
+            "total_leads": total_leads,
+            "new_leads": new_leads,
+            "contacted_leads": contacted_leads,
+            "followup_leads": followup_leads,
+            "proposal_leads": proposal_leads,
+            "converted_leads": converted_leads,
+            "status_filter": status_filter,
+            "service_filter": service_filter,
+            "search": search,
+            "is_admin": is_admin,
         }
     )

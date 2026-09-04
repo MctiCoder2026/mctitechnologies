@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}
+Business Consultation | MCTI Technologies
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .business-contact-page {
+        background: #f6f8fc;
+        padding: 60px 20px;
+        min-height: 80vh;
+    }
+
+    .business-contact-wrapper {
+        max-width: 1150px;
+        margin: auto;
+        display: grid;
+        grid-template-columns: 1fr 1.15fr;
+        gap: 40px;
+        align-items: start;
+    }
+
+    .business-info {
+        background: #111827;
+        color: white;
+        padding: 45px;
+        border-radius: 18px;
+    }
+
+    .business-info .tag {
+        display: inline-block;
+        background: #f97316;
+        color: white;
+        padding: 7px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .business-info h1 {
+        font-size: 38px;
+        line-height: 1.2;
+        margin: 0 0 18px;
+    }
+
+    .business-info p {
+        color: #d1d5db;
+        line-height: 1.7;
+        margin-bottom: 30px;
+    }
+
+    .service-point {
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+
+    .service-point strong {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .service-point span {
+        color: #9ca3af;
+        font-size: 14px;
+    }
+
+    .business-form-card {
+        background: white;
+        padding: 40px;
+        border-radius: 18px;
+        box-shadow: 0 10px 35px rgba(0,0,0,.08);
+    }
+
+    .business-form-card h2 {
+        margin: 0 0 8px;
+        color: #111827;
+        font-size: 28px;
+    }
+
+    .form-subtitle {
+        color: #6b7280;
+        margin-bottom: 28px;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 7px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 9px;
+        font-size: 15px;
+        box-sizing: border-box;
+        background: white;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #f97316;
+        box-shadow: 0 0 0 3px rgba(249,115,22,.12);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+    }
+
+    .field-error {
+        color: #dc2626;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    .submit-btn {
+        width: 100%;
+        border: none;
+        background: #f97316;
+        color: white;
+        padding: 14px 20px;
+        border-radius: 9px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 5px;
+    }
+
+    .submit-btn:hover {
+        background: #ea580c;
+    }
+
+    .privacy-note {
+        text-align: center;
+        color: #9ca3af;
+        font-size: 12px;
+        margin-top: 14px;
+    }
+
+    @media (max-width: 850px) {
+        .business-contact-wrapper {
+            grid-template-columns: 1fr;
+        }
+
+        .business-info,
+        .business-form-card {
+            padding: 28px;
+        }
+
+        .business-info h1 {
+            font-size: 30px;
+        }
+    }
+</style>
+
+
+<section class="business-contact-page">
+
+    <div class="business-contact-wrapper">
+
+        <!-- LEFT SIDE -->
+        <div class="business-info">
+
+            <span class="tag">
+                MCTI BUSINESS SOLUTIONS
+            </span>
+
+            <h1>
+                Tell Us About Your Business Requirement
+            </h1>
+
+            <p>
+                Looking for AI, SaaS, IT solutions or Corporate Training?
+                Share your requirement with MCTI Technologies
+                and our business team will contact you.
+            </p>
+
+            <div class="service-point">
+                <strong>🤖 AI Solutions</strong>
+                <span>
+                    AI automation, business workflows and
+                    intelligent solutions.
+                </span>
+            </div>
+
+            <div class="service-point">
+                <strong>☁️ SaaS Solutions</strong>
+                <span>
+                    Custom cloud-based software and
+                    subscription platforms.
+                </span>
+            </div>
+
+            <div class="service-point">
+                <strong>💻 IT Solutions</strong>
+                <span>
+                    Websites, applications, software and
+                    business technology solutions.
+                </span>
+            </div>
+
+            <div class="service-point">
+                <strong>🏢 Corporate Training</strong>
+                <span>
+                    Customized employee training in AI,
+                    Excel, Data Analytics, Programming,
+                    Digital Marketing and other technology skills.
+                </span>
+            </div>
+
+        </div>
+
+
+        <!-- RIGHT SIDE -->
+        <div class="business-form-card">
+
+            <h2>Request a Consultation</h2>
+
+            <p class="form-subtitle">
+                Submit your requirement and our team will
+                connect with you.
+            </p>
+
+            {% if form.non_field_errors %}
+                <div class="field-error">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label>Your Name *</label>
+                    {{ form.name }}
+                    {% for error in form.name.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label>Company Name</label>
+                    {{ form.company_name }}
+                    {% for error in form.company_name.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label>Mobile Number *</label>
+                    {{ form.mobile }}
+                    {% for error in form.mobile.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label>Business Email</label>
+                    {{ form.email }}
+                    {% for error in form.email.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label>Service Required *</label>
+                    {{ form.service }}
+                    {% for error in form.service.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label>Project / Training Requirement *</label>
+                    {{ form.project_requirement }}
+                    {% for error in form.project_requirement.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label>Estimated Budget</label>
+                    {{ form.budget_range }}
+                    {% for error in form.budget_range.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label>Preferred Contact Time</label>
+                    {{ form.preferred_contact_time }}
+                    {% for error in form.preferred_contact_time.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label>Additional Message</label>
+                    {{ form.message }}
+                    {% for error in form.message.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <button
+                    type="submit"
+                    class="submit-btn">
+                    Submit Business Requirement
+                </button>
+
+                <div class="privacy-note">
+                    Your requirement will be handled by the
+                    MCTI Technologies Business Solutions team.
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

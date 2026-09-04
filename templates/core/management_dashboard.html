@@ -569,6 +569,10 @@ body{
             📞 Enquiries
         </a>
 
+        <a href="{% url 'business_lead_list' %}">
+            🏢 Business Leads
+        </a>
+
         <a href="{% url 'fee_payment_list' %}">
             💳 Fee Payments
         </a>
@@ -896,6 +900,30 @@ body{
 
 
                     <a
+                        href="{% url 'business_lead_list' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            🏢
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Business Leads
+                            </strong>
+
+                            <span>
+                                Review, assign & follow up business enquiries
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    <a
                         href="/contact/"
                         class="action-card"
                     >
@@ -1132,6 +1160,19 @@ body{
 
                         <span>
                             Fee Due Tracking
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Business Lead CRM
                         </span>
 
                         <strong class="status-good">

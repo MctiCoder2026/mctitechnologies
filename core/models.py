@@ -1403,3 +1403,199 @@ class Attendance(models.Model):
             ),
         ]
 
+
+class BusinessLead(models.Model):
+
+    SERVICE_CHOICES = [
+        ("ai", "AI Solutions"),
+        ("saas", "SaaS Solutions"),
+        ("it", "IT Solutions"),
+        ("corporate_training", "Corporate Training"),
+    ]
+
+    STATUS_CHOICES = [
+        ("new", "New"),
+        ("contacted", "Contacted"),
+        ("followup", "Follow Up"),
+        ("qualified", "Qualified"),
+        ("proposal", "Proposal Sent"),
+        ("converted", "Converted"),
+        ("closed", "Closed"),
+    ]
+
+    BUDGET_CHOICES = [
+        ("below_25k", "Below ₹25,000"),
+        ("25k_50k", "₹25,000 - ₹50,000"),
+        ("50k_1l", "₹50,000 - ₹1,00,000"),
+        ("1l_3l", "₹1,00,000 - ₹3,00,000"),
+        ("above_3l", "Above ₹3,00,000"),
+        ("discuss", "Let's Discuss"),
+    ]
+
+    name = models.CharField(max_length=150)
+
+    company_name = models.CharField(
+        max_length=200,
+        blank=True
+    )
+
+    mobile = models.CharField(max_length=20)
+
+    email = models.EmailField(
+        blank=True,
+        null=True
+    )
+
+    service = models.CharField(
+        max_length=20,
+        choices=SERVICE_CHOICES
+    )
+
+    project_requirement = models.TextField()
+
+    budget_range = models.CharField(
+        max_length=30,
+        choices=BUDGET_CHOICES,
+        blank=True
+    )
+
+    preferred_contact_time = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    # --------------------------------------------------------
+    # CORPORATE TRAINING DETAILS
+    # --------------------------------------------------------
+
+    employee_count = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    training_mode = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True
+    )
+
+    training_location = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True
+    )
+
+    preferred_training_date = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    message = models.TextField(
+        blank=True
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="new"
+    )
+
+    assigned_branch = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    assigned_to = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_business_leads"
+    )
+
+    followup_date = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    followup_notes = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    estimated_value = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    final_value = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return (
+            f"{self.name} - "
+            f"{self.company_name or 'Individual'} - "
+            f"{self.get_service_display()}"
+        )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+class BusinessLeadActivity(models.Model):
+
+    ACTIVITY_CHOICES = [
+        ("created", "Lead Created"),
+        ("assigned", "Assigned"),
+        ("status", "Status Updated"),
+        ("followup", "Follow Up"),
+        ("note", "Note"),
+        ("proposal", "Proposal"),
+        ("converted", "Converted"),
+    ]
+
+    lead = models.ForeignKey(
+        BusinessLead,
+        on_delete=models.CASCADE,
+        related_name="activities"
+    )
+
+    activity_type = models.CharField(
+        max_length=30,
+        choices=ACTIVITY_CHOICES,
+        default="note"
+    )
+
+    message = models.TextField()
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"{self.lead} - {self.activity_type}"
+
+    class Meta:
+        ordering = ["-created_at"]

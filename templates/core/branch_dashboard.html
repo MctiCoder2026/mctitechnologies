@@ -385,6 +385,10 @@
             Enquiries
         </a>
 
+        <a href="{% url 'business_lead_list' %}">
+            🏢 Business Leads
+        </a>
+
         <a href="{% url 'admission_list' %}">
             Admissions
         </a>
@@ -626,6 +630,56 @@
     </div>
 
 </div>
+<!-- BUSINESS LEADS -->
+<div class="performance-card" style="margin-bottom:25px; border-left:5px solid #f97316;">
+
+    <div class="performance-title">
+        🏢 Business Leads
+    </div>
+
+    <div class="performance-details" style="margin-bottom:16px;">
+        <span>
+            Total:
+            <strong>{{ total_business_leads }}</strong>
+        </span>
+
+        <span>
+            New:
+            <strong>{{ new_business_leads }}</strong>
+        </span>
+
+        <span>
+            Follow-up:
+            <strong>{{ followup_business_leads }}</strong>
+        </span>
+
+        <span>
+            Proposal:
+            <strong>{{ proposal_business_leads }}</strong>
+        </span>
+
+        <span>
+            Converted:
+            <strong>{{ converted_business_leads }}</strong>
+        </span>
+    </div>
+
+    <a href="{% url 'business_lead_list' %}"
+       style="
+           display:inline-block;
+           text-decoration:none;
+           background:#f97316;
+           color:white;
+           padding:10px 16px;
+           border-radius:8px;
+           font-size:13px;
+           font-weight:bold;
+       ">
+        View Assigned Business Leads →
+    </a>
+
+</div>
+
 <div class="performance-grid">
 
     <!-- BEST PERFORMING BRANCH -->

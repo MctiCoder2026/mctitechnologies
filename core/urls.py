@@ -45,6 +45,12 @@ urlpatterns = [
         name="business_solutions"
     ),
 
+        path(
+        "business-contact/",
+        views.business_contact,
+        name="business_contact"
+    ),
+
     path(
         "ai/",
         views.ai,
@@ -137,6 +143,15 @@ urlpatterns = [
         name="log_enquiry_whatsapp"
     ),
 
+    # ============================================================
+    # BUSINESS LEADS
+    # ============================================================
+
+    path(
+        "business-leads/",
+        views.business_lead_list,
+        name="business_lead_list"
+    ),
     # ============================================================
     # ADMISSION
     # ============================================================
@@ -320,5 +335,11 @@ urlpatterns = [
         views.student_course_enquiry,
         name="student_course_enquiry"
     ),
+
+    path(
+    "business-leads/<int:lead_id>/",
+    views.business_lead_detail,
+    name="business_lead_detail"
+),
 
 ]

@@ -29,11 +29,12 @@ MCTI AI | Artificial Intelligence Training & Solutions
 
         <div class="ai-buttons">
 
-            <a href="#" class="btn-primary">
+            <a href="#ai-services" class="btn-primary">
                 Explore AI →
             </a>
 
-            <a href="#" class="ai-outline-btn">
+            <a href="{% url 'business_contact' %}?service=ai"
+               class="ai-outline-btn">
                 Talk to Our Team
             </a>
 
@@ -70,7 +71,7 @@ MCTI AI | Artificial Intelligence Training & Solutions
      AI SERVICES
 ================================ -->
 
-<section class="ai-services">
+<section class="ai-services" id="ai-services">
 
     <div class="section-heading">
 
@@ -83,6 +84,8 @@ MCTI AI | Artificial Intelligence Training & Solutions
 
     <div class="ai-service-grid">
 
+        <!-- AI TRAINING -->
+
         <div class="ai-service-card">
 
             <div class="ai-service-icon">🎓</div>
@@ -94,10 +97,14 @@ MCTI AI | Artificial Intelligence Training & Solutions
                 content creation and modern AI workflows.
             </p>
 
-            <a href="#">Explore Training →</a>
+            <a href="{% url 'courses' %}">
+                Explore Training →
+            </a>
 
         </div>
 
+
+        <!-- AI AUTOMATION -->
 
         <div class="ai-service-card">
 
@@ -110,10 +117,14 @@ MCTI AI | Artificial Intelligence Training & Solutions
                 using AI-powered tools and integrations.
             </p>
 
-            <a href="#">Explore Automation →</a>
+            <a href="{% url 'business_contact' %}?service=ai">
+                Explore Automation →
+            </a>
 
         </div>
 
+
+        <!-- AI ASSISTANTS -->
 
         <div class="ai-service-card">
 
@@ -126,10 +137,14 @@ MCTI AI | Artificial Intelligence Training & Solutions
                 can support customers and internal teams.
             </p>
 
-            <a href="#">Explore AI Assistants →</a>
+            <a href="{% url 'business_contact' %}?service=ai">
+                Explore AI Assistants →
+            </a>
 
         </div>
 
+
+        <!-- AI FOR DATA -->
 
         <div class="ai-service-card">
 
@@ -142,10 +157,14 @@ MCTI AI | Artificial Intelligence Training & Solutions
                 create reports and support decision-making.
             </p>
 
-            <a href="#">Explore AI Data →</a>
+            <a href="{% url 'business_contact' %}?service=ai">
+                Explore AI Data →
+            </a>
 
         </div>
 
+
+        <!-- AI CONTENT -->
 
         <div class="ai-service-card">
 
@@ -158,10 +177,14 @@ MCTI AI | Artificial Intelligence Training & Solutions
                 research and creative workflows.
             </p>
 
-            <a href="#">Explore AI Content →</a>
+            <a href="{% url 'business_contact' %}?service=ai">
+                Explore AI Content →
+            </a>
 
         </div>
 
+
+        <!-- AI FOR BUSINESS -->
 
         <div class="ai-service-card">
 
@@ -174,7 +197,9 @@ MCTI AI | Artificial Intelligence Training & Solutions
                 solutions around real business requirements.
             </p>
 
-            <a href="#">Explore Business AI →</a>
+            <a href="{% url 'business_contact' %}?service=ai">
+                Explore Business AI →
+            </a>
 
         </div>
 
@@ -336,7 +361,8 @@ MCTI AI | Artificial Intelligence Training & Solutions
             or build an AI solution, let's start with your goal.
         </p>
 
-        <a href="#" class="ai-cta-btn">
+        <a href="{% url 'business_contact' %}?service=ai"
+           class="ai-cta-btn">
             Talk to MCTI AI →
         </a>
 

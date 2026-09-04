@@ -1,0 +1,953 @@
+{% extends "base.html" %}
+
+{% block title %}
+Business Lead Detail | MCTI Technologies
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .lead-detail-page {
+        background: #f4f6f9;
+        min-height: 100vh;
+        padding: 30px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 25px;
+    }
+
+    .page-header h1 {
+        margin: 0;
+        color: #111827;
+        font-size: 30px;
+    }
+
+    .page-header p {
+        margin: 5px 0 0;
+        color: #6b7280;
+    }
+
+    .back-btn {
+        display: inline-block;
+        background: #111827;
+        color: #fff;
+        text-decoration: none;
+        padding: 11px 18px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(0,0,0,.06);
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: #111827;
+        color: #fff;
+        padding: 16px 20px;
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+
+    .info-item {
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 12px;
+    }
+
+    .info-item.full {
+        grid-column: 1 / -1;
+    }
+
+    .info-label {
+        display: block;
+        color: #6b7280;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .info-value {
+        color: #111827;
+        font-size: 15px;
+        line-height: 1.6;
+        word-break: break-word;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .service-badge {
+        background: #fff7ed;
+        color: #c2410c;
+    }
+
+    .status-new {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-contacted {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .status-followup {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-qualified {
+        background: #cffafe;
+        color: #0e7490;
+    }
+
+    .status-proposal {
+        background: #ffedd5;
+        color: #c2410c;
+    }
+
+    .status-converted {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-closed {
+        background: #f3f4f6;
+        color: #4b5563;
+    }
+
+    .unassigned {
+        color: #dc2626;
+        font-weight: 700;
+    }
+
+    .contact-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    .action-btn {
+        display: inline-block;
+        padding: 9px 14px;
+        border-radius: 7px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .call-btn {
+        background: #2563eb;
+        color: white;
+    }
+
+    .whatsapp-btn {
+        background: #16a34a;
+        color: white;
+    }
+
+    .activity-item {
+        padding: 14px 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 5px;
+    }
+
+    .activity-type {
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .activity-date {
+        color: #9ca3af;
+        font-size: 12px;
+    }
+
+    .activity-message {
+        color: #4b5563;
+        line-height: 1.5;
+        font-size: 14px;
+    }
+
+    .assignment-box {
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        border-radius: 10px;
+        padding: 15px;
+    }
+
+    .assignment-row {
+        margin-bottom: 14px;
+    }
+
+    .assignment-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .assignment-label {
+        display: block;
+        font-size: 12px;
+        color: #6b7280;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+
+    .assignment-value {
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .coming-next {
+        margin-top: 15px;
+        background: #f9fafb;
+        border: 1px dashed #d1d5db;
+        padding: 14px;
+        border-radius: 8px;
+        color: #6b7280;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+
+    .assignment-form {
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .assignment-form h3 {
+        margin: 0 0 15px;
+        color: #111827;
+        font-size: 16px;
+    }
+
+    .assignment-field {
+        margin-bottom: 14px;
+    }
+
+    .assignment-field label {
+        display: block;
+        margin-bottom: 6px;
+        color: #374151;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .assignment-field select {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 10px 11px;
+        background: #fff;
+        color: #111827;
+        font-size: 14px;
+    }
+
+    .assignment-field select:focus {
+        outline: none;
+        border-color: #f97316;
+    }
+
+    .assign-btn {
+        width: 100%;
+        border: 0;
+        border-radius: 8px;
+        padding: 11px 15px;
+        background: #f97316;
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .assign-btn:hover {
+        background: #ea580c;
+    }
+
+    .form-error {
+        margin-bottom: 12px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: #fef2f2;
+        color: #b91c1c;
+        font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 650px) {
+        .lead-detail-page {
+            padding: 18px;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .info-item.full {
+            grid-column: auto;
+        }
+    }
+</style>
+
+
+<div class="lead-detail-page">
+
+    <div class="page-header">
+
+        <div>
+            <h1>{{ lead.name }}</h1>
+
+            <p>
+                Business Lead #{{ lead.id }} •
+                {{ lead.get_service_display }}
+            </p>
+        </div>
+
+        <a href="{% url 'business_lead_list' %}"
+           class="back-btn">
+            ← Back to Business Leads
+        </a>
+
+    </div>
+
+
+    <div class="detail-grid">
+
+        <!-- LEFT SIDE -->
+        <div>
+
+            <div class="card">
+
+                <div class="card-header">
+                    Client & Project Details
+                </div>
+
+                <div class="card-body">
+
+                    <div class="info-grid">
+
+                        <div class="info-item">
+                            <span class="info-label">
+                                Client Name
+                            </span>
+
+                            <div class="info-value">
+                                {{ lead.name }}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <span class="info-label">
+                                Company
+                            </span>
+
+                            <div class="info-value">
+                                {{ lead.company_name|default:"Individual" }}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <span class="info-label">
+                                Mobile
+                            </span>
+
+                            <div class="info-value">
+                                {{ lead.mobile }}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <span class="info-label">
+                                Email
+                            </span>
+
+                            <div class="info-value">
+                                {{ lead.email|default:"-" }}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <span class="info-label">
+                                Service Required
+                            </span>
+
+                            <div class="info-value">
+                                <span class="badge service-badge">
+                                    {{ lead.get_service_display }}
+                                </span>
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <span class="info-label">
+                                Status
+                            </span>
+
+                            <div class="info-value">
+                                <span class="badge status-{{ lead.status }}">
+                                    {{ lead.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+
+
+                        {% if lead.service == "corporate_training" %}
+
+                            <div class="info-item">
+                                <span class="info-label">
+                                    Number of Employees
+                                </span>
+
+                                <div class="info-value">
+                                    {{ lead.employee_count|default:"-" }}
+                                </div>
+                            </div>
+
+
+                            <div class="info-item">
+                                <span class="info-label">
+                                    Training Mode
+                                </span>
+
+                                <div class="info-value">
+                                    {% if lead.training_mode == "onsite" %}
+                                        Onsite - Company Location
+                                    {% elif lead.training_mode == "online" %}
+                                        Online
+                                    {% elif lead.training_mode == "mcti_center" %}
+                                        MCTI Training Center
+                                    {% elif lead.training_mode == "hybrid" %}
+                                        Hybrid
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </div>
+                            </div>
+
+
+                            <div class="info-item">
+                                <span class="info-label">
+                                    Training Location
+                                </span>
+
+                                <div class="info-value">
+                                    {{ lead.training_location|default:"-" }}
+                                </div>
+                            </div>
+
+
+                            <div class="info-item">
+                                <span class="info-label">
+                                    Preferred Training Date
+                                </span>
+
+                                <div class="info-value">
+                                    {% if lead.preferred_training_date %}
+                                        {{ lead.preferred_training_date|date:"d M Y" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        {% endif %}
+
+
+                        <div class="info-item">
+                            <span class="info-label">
+                                Budget Range
+                            </span>
+
+                            <div class="info-value">
+                                {% if lead.budget_range %}
+                                    {{ lead.get_budget_range_display }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <span class="info-label">
+                                Preferred Contact Time
+                            </span>
+
+                            <div class="info-value">
+                                {{ lead.preferred_contact_time|default:"-" }}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item full">
+                            <span class="info-label">
+                                Project Requirement
+                            </span>
+
+                            <div class="info-value">
+                                {{ lead.project_requirement|linebreaksbr }}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item full">
+                            <span class="info-label">
+                                Additional Message
+                            </span>
+
+                            <div class="info-value">
+                                {{ lead.message|default:"-"|linebreaksbr }}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <span class="info-label">
+                                Estimated Value
+                            </span>
+
+                            <div class="info-value">
+                                {% if lead.estimated_value %}
+                                    ₹{{ lead.estimated_value }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <span class="info-label">
+                                Final Value
+                            </span>
+
+                            <div class="info-value">
+                                {% if lead.final_value %}
+                                    ₹{{ lead.final_value }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <span class="info-label">
+                                Follow-up Date
+                            </span>
+
+                            <div class="info-value">
+                                {% if lead.followup_date %}
+                                    {{ lead.followup_date|date:"d M Y" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <span class="info-label">
+                                Enquiry Received
+                            </span>
+
+                            <div class="info-value">
+                                {{ lead.created_at|date:"d M Y, h:i A" }}
+                            </div>
+                        </div>
+
+
+                        {% if lead.followup_notes %}
+                            <div class="info-item full">
+                                <span class="info-label">
+                                    Follow-up Notes
+                                </span>
+
+                                <div class="info-value">
+                                    {{ lead.followup_notes|linebreaksbr }}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="contact-actions">
+
+                        <a href="tel:{{ lead.mobile }}"
+                           class="action-btn call-btn">
+                            📞 Call
+                        </a>
+
+                        <a href="https://wa.me/91{{ lead.mobile }}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="action-btn whatsapp-btn">
+                            WhatsApp
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card"
+                 style="margin-top:20px;">
+
+                <div class="card-header">
+                    Activity History
+                </div>
+
+                <div class="card-body">
+
+                    {% for activity in activities %}
+
+                        <div class="activity-item">
+
+                            <div class="activity-top">
+
+                                <span class="activity-type">
+                                    {{ activity.get_activity_type_display }}
+                                </span>
+
+                                <span class="activity-date">
+                                    {{ activity.created_at|date:"d M Y, h:i A" }}
+                                </span>
+
+                            </div>
+
+                            <div class="activity-message">
+                                {{ activity.message }}
+                            </div>
+
+                            {% if activity.created_by %}
+                                <div style="
+                                    margin-top:5px;
+                                    font-size:12px;
+                                    color:#9ca3af;
+                                ">
+                                    By:
+                                    {{ activity.created_by.get_full_name|default:activity.created_by.username }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                    {% empty %}
+
+                        <div style="
+                            text-align:center;
+                            padding:20px;
+                            color:#6b7280;
+                        ">
+                            No activity available.
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- RIGHT SIDE -->
+        <div>
+
+            <div class="card">
+
+                <div class="card-header">
+                    Lead Assignment
+                </div>
+
+                <div class="card-body">
+
+                    <div class="assignment-box">
+
+                        <div class="assignment-row">
+
+                            <span class="assignment-label">
+                                Assigned Branch
+                            </span>
+
+                            <div class="assignment-value">
+
+                                {% if lead.assigned_branch %}
+                                    {{ lead.assigned_branch|title }}
+                                {% else %}
+                                    <span class="unassigned">
+                                        Unassigned
+                                    </span>
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="assignment-row">
+
+                            <span class="assignment-label">
+                                Assigned Staff
+                            </span>
+
+                            <div class="assignment-value">
+
+                                {% if lead.assigned_to %}
+
+                                    {{ lead.assigned_to.get_full_name|default:lead.assigned_to.username }}
+
+                                {% else %}
+
+                                    <span class="unassigned">
+                                        Unassigned
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    {% if is_admin %}
+
+                        <form method="post"
+                              class="assignment-form">
+
+                            {% csrf_token %}
+
+                            <input type="hidden"
+                                   name="form_action"
+                                   value="assignment">
+
+                            <h3>
+                                HO Assignment Control
+                            </h3>
+
+                            {% if assignment_form.non_field_errors %}
+                                <div class="form-error">
+                                    {{ assignment_form.non_field_errors }}
+                                </div>
+                            {% endif %}
+
+                            <div class="assignment-field">
+                                <label for="{{ assignment_form.assigned_branch.id_for_label }}">
+                                    Assign Branch
+                                </label>
+
+                                {{ assignment_form.assigned_branch }}
+
+                                {% if assignment_form.assigned_branch.errors %}
+                                    <div class="form-error">
+                                        {{ assignment_form.assigned_branch.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="assignment-field">
+                                <label for="{{ assignment_form.assigned_to.id_for_label }}">
+                                    Assign Staff
+                                </label>
+
+                                {{ assignment_form.assigned_to }}
+
+                                {% if assignment_form.assigned_to.errors %}
+                                    <div class="form-error">
+                                        {{ assignment_form.assigned_to.errors }}
+                                    </div>
+                                {% endif %}
+
+                                <div style="
+                                    margin-top:6px;
+                                    color:#6b7280;
+                                    font-size:12px;
+                                    line-height:1.4;
+                                ">
+                                    Select branch first. Save once to load that
+                                    branch's staff, then select staff and save again.
+                                </div>
+                            </div>
+
+                            <button type="submit"
+                                    class="assign-btn">
+                                Assign / Update Lead
+                            </button>
+
+                        </form>
+
+                    {% endif %}
+
+
+                    <!-- =======================================================
+                         BUSINESS LEAD UPDATE / FOLLOW-UP
+                    ======================================================== -->
+
+                    <div class="assignment-form" style="margin-top:20px;">
+
+                        <form method="post">
+
+                            {% csrf_token %}
+
+                            <input type="hidden"
+                                   name="form_action"
+                                   value="lead_update">
+
+                            <h3>
+                                Lead Follow-up & Status
+                            </h3>
+
+                            {% if update_form.non_field_errors %}
+                                <div class="form-error">
+                                    {{ update_form.non_field_errors }}
+                                </div>
+                            {% endif %}
+
+                            <div class="assignment-field">
+                                <label for="{{ update_form.status.id_for_label }}">
+                                    Status
+                                </label>
+
+                                {{ update_form.status }}
+
+                                {% if update_form.status.errors %}
+                                    <div class="form-error">
+                                        {{ update_form.status.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="assignment-field">
+                                <label for="{{ update_form.followup_date.id_for_label }}">
+                                    Next Follow-up Date
+                                </label>
+
+                                {{ update_form.followup_date }}
+
+                                {% if update_form.followup_date.errors %}
+                                    <div class="form-error">
+                                        {{ update_form.followup_date.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="assignment-field">
+                                <label for="{{ update_form.followup_notes.id_for_label }}">
+                                    Follow-up Notes
+                                </label>
+
+                                {{ update_form.followup_notes }}
+
+                                {% if update_form.followup_notes.errors %}
+                                    <div class="form-error">
+                                        {{ update_form.followup_notes.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="assignment-field">
+                                <label for="{{ update_form.estimated_value.id_for_label }}">
+                                    Estimated Project Value
+                                </label>
+
+                                {{ update_form.estimated_value }}
+
+                                {% if update_form.estimated_value.errors %}
+                                    <div class="form-error">
+                                        {{ update_form.estimated_value.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="assignment-field">
+                                <label for="{{ update_form.final_value.id_for_label }}">
+                                    Final Converted Value
+                                </label>
+
+                                {{ update_form.final_value }}
+
+                                {% if update_form.final_value.errors %}
+                                    <div class="form-error">
+                                        {{ update_form.final_value.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <button type="submit"
+                                    class="assign-btn">
+                                Update Lead
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

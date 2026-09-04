@@ -28,13 +28,18 @@ MCTI Business Solutions | IT, Software & Digital Transformation
 
         <div class="business-buttons">
 
-            <a href="#" class="btn-primary">
+            <a href="#business-services" class="btn-primary">
                 Explore Solutions →
             </a>
 
-            <a href="#" class="business-outline-btn">
+            <a href="{% url 'business_contact' %}?service=it"
+               class="business-outline-btn">
                 Talk to Our Team
             </a>
+            <a href="{% url 'business_contact' %}?service=corporate_training"
+                class="business-outline-btn">
+                    Corporate Training
+                </a>
 
         </div>
 
@@ -69,7 +74,7 @@ MCTI Business Solutions | IT, Software & Digital Transformation
      SERVICES
 ================================ -->
 
-<section class="business-services">
+<section class="business-services" id="business-services">
 
     <div class="section-heading">
 
@@ -83,7 +88,24 @@ MCTI Business Solutions | IT, Software & Digital Transformation
         </p>
 
     </div>
+        <!-- Corporate Training -->
+        <div class="business-service-card">
 
+            <div class="business-service-icon">🏢</div>
+
+            <h3>Corporate Training</h3>
+
+            <p>
+                Customized employee training programs in AI,
+                Excel, Data Analytics, Programming, Digital Marketing
+                and other technology skills.
+            </p>
+
+            <a href="{% url 'business_contact' %}?service=corporate_training">
+                Explore Corporate Training →
+            </a>
+
+</div>
 
     <div class="business-service-grid">
 
@@ -99,7 +121,9 @@ MCTI Business Solutions | IT, Software & Digital Transformation
                 designed to build your online presence.
             </p>
 
-            <a href="#">Explore Service →</a>
+            <a href="{% url 'business_contact' %}?service=it">
+                Explore Service →
+            </a>
 
         </div>
 
@@ -116,7 +140,9 @@ MCTI Business Solutions | IT, Software & Digital Transformation
                 your business processes and requirements.
             </p>
 
-            <a href="#">Explore Service →</a>
+            <a href="{% url 'business_contact' %}?service=it">
+                Explore Service →
+            </a>
 
         </div>
 
@@ -133,7 +159,9 @@ MCTI Business Solutions | IT, Software & Digital Transformation
                 to save time and improve productivity.
             </p>
 
-            <a href="#">Explore Service →</a>
+            <a href="{% url 'business_contact' %}?service=it">
+                Explore Service →
+            </a>
 
         </div>
 
@@ -150,7 +178,9 @@ MCTI Business Solutions | IT, Software & Digital Transformation
                 data and smarter business decisions.
             </p>
 
-            <a href="#">Explore Service →</a>
+            <a href="{% url 'business_contact' %}?service=ai">
+                Explore Service →
+            </a>
 
         </div>
 
@@ -167,7 +197,9 @@ MCTI Business Solutions | IT, Software & Digital Transformation
                 cloud technology and connected workflows.
             </p>
 
-            <a href="#">Explore Service →</a>
+            <a href="{% url 'business_contact' %}?service=it">
+                Explore Service →
+            </a>
 
         </div>
 
@@ -184,7 +216,9 @@ MCTI Business Solutions | IT, Software & Digital Transformation
                 to keep your business running efficiently.
             </p>
 
-            <a href="#">Explore Service →</a>
+            <a href="{% url 'business_contact' %}?service=it">
+                Explore Service →
+            </a>
 
         </div>
 
@@ -352,7 +386,8 @@ MCTI Business Solutions | IT, Software & Digital Transformation
             to solve. Our team will help you identify the right solution.
         </p>
 
-        <a href="#" class="business-cta-btn">
+        <a href="{% url 'business_contact' %}?service=it"
+           class="business-cta-btn">
             Start a Conversation →
         </a>
 
