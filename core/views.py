@@ -5431,3 +5431,11 @@ def business_lead_list(request):
             "is_admin": is_admin,
         }
     )
+
+def privacy_policy(request):
+    return render(request, "core/privacy_policy.html")
+
+def terms_and_conditions(request):
+    return render(request, "core/terms_and_conditions.html")
+def refund_policy(request):
+    return render(request, "core/refund_policy.html")

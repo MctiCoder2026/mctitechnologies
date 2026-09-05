@@ -227,19 +227,37 @@ content="width=device-width, initial-scale=1.0"
 
 </main>
 
-<!-- =====================================================
-     FOOTER
-===================================================== -->
-
 <footer>
 
-<p>
+    <p>
+        © {% now "Y" %} MCTI Technologies. All Rights Reserved.
+    </p>
 
-© {% now "Y" %} MCTI Technologies.
-All Rights Reserved.
+    <div class="footer-links">
 
+        <a href="{% url 'privacy_policy' %}">
+            Privacy Policy
+        </a>
 
-</p>
+        <span>|</span>
+
+        <a href="{% url 'terms_and_conditions' %}">
+            Terms & Conditions
+        </a>
+
+        <span>|</span>
+
+        <a href="{% url 'refund_policy' %}">
+        Refund & Cancellation Policy
+        </a>
+
+        <span>|</span>
+
+        <a href="{% url 'contact' %}">
+            Contact Us
+        </a>
+
+    </div>
 
 </footer>
 

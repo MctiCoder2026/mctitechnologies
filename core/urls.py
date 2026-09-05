@@ -340,6 +340,21 @@ urlpatterns = [
     "business-leads/<int:lead_id>/",
     views.business_lead_detail,
     name="business_lead_detail"
-),
+    ),
+    path(
+        "privacy-policy/",
+        views.privacy_policy,
+        name="privacy_policy"
+    ),
+    path(
+    "terms-and-conditions/",
+    views.terms_and_conditions,
+    name="terms_and_conditions"
+    ),
+    path(
+        "refund-policy/",
+        views.refund_policy,
+        name="refund_policy"
+    ),
 
 ]
