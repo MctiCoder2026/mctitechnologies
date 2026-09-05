@@ -8448,3 +8448,60 @@ body {
         font-size: 20px;
     }
 }
+/* ========================================
+   PROFESSIONAL FOOTER
+======================================== */
+
+footer {
+    background: #111111;
+    color: #ffffff;
+    text-align: center;
+    padding: 24px 20px;
+    border-top: 4px solid #ff6b00;
+}
+
+footer p {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: #dddddd;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.footer-links a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+
+.footer-links a:hover {
+    color: #ff6b00;
+}
+
+.footer-links span {
+    color: #666666;
+}
+
+@media (max-width: 600px) {
+
+    footer {
+        padding: 22px 15px;
+    }
+
+    .footer-links {
+        gap: 7px;
+        row-gap: 8px;
+    }
+
+    .footer-links a {
+        font-size: 13px;
+    }
+
+}
