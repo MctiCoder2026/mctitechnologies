@@ -8095,4 +8095,89 @@ header {
     .logo span {
         font-size: 19px;
     }
+
+}
+/* =========================================
+   MOBILE NAVIGATION
+========================================= */
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 26px;
+    color: #222;
+    cursor: pointer;
+}
+
+/* Prevent unwanted horizontal scrolling */
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+@media (max-width: 900px) {
+
+    .navbar {
+        position: relative;
+        min-height: 70px;
+        padding: 0 20px;
+    }
+
+    .logo {
+        font-size: 21px;
+    }
+
+    .menu-toggle {
+        display: block;
+        margin-left: auto;
+        z-index: 1001;
+    }
+
+    .nav-links {
+        display: none;
+        position: absolute;
+
+        top: 70px;
+        left: 0;
+        right: 0;
+
+        width: 100%;
+
+        flex-direction: column;
+        gap: 0;
+
+        background: #ffffff;
+
+        padding: 10px 20px 20px;
+
+        box-shadow: 0 10px 20px rgba(0,0,0,0.10);
+
+        z-index: 1000;
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .nav-links li {
+        width: 100%;
+        border-bottom: 1px solid #eeeeee;
+    }
+
+    .nav-links li:last-child {
+        border-bottom: none;
+    }
+
+    .nav-links a {
+        display: block;
+        width: 100%;
+        padding: 14px 5px;
+    }
+
+    /* Hide desktop Enquire Now button on mobile */
+    .nav-btn {
+        display: none;
+    }
 }

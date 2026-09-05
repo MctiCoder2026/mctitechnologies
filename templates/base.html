@@ -59,6 +59,11 @@ content="width=device-width, initial-scale=1.0"
 
 </div>
 
+<button class="menu-toggle" id="menuToggle" aria-label="Open Menu">
+    <i class="fa-solid fa-bars"></i>
+</button>
+
+
 
 <!-- =================================================
      NAVIGATION
@@ -237,6 +242,29 @@ All Rights Reserved.
 </p>
 
 </footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const menuToggle = document.getElementById("menuToggle");
+    const navLinks = document.querySelector(".nav-links");
+
+    menuToggle.addEventListener("click", function () {
+        navLinks.classList.toggle("active");
+
+        const icon = menuToggle.querySelector("i");
+
+        if (navLinks.classList.contains("active")) {
+            icon.classList.remove("fa-bars");
+            icon.classList.add("fa-xmark");
+        } else {
+            icon.classList.remove("fa-xmark");
+            icon.classList.add("fa-bars");
+        }
+    });
+});
+</script>
+
+
 
 </body>
 
