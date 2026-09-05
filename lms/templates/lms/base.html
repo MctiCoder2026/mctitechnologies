@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {% block title %}
+            MCTI One
+        {% endblock %}
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        :root {
+
+            --sidebar: #111827;
+            --sidebar-soft: #1f2937;
+
+            --orange: #ff6b00;
+            --orange-dark: #e85f00;
+
+            --page-bg: #f3f6fa;
+
+            --white: #ffffff;
+
+            --text: #111827;
+
+            --muted: #64748b;
+
+            --border: #dfe5ec;
+
+            --green: #16a34a;
+
+            --red: #dc2626;
+
+            --blue: #2563eb;
+
+            --yellow-bg: #fff7df;
+
+        }
+
+
+        body {
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: var(--page-bg);
+
+            color: var(--text);
+
+        }
+
+
+        .app-shell {
+
+            min-height: 100vh;
+
+            display: flex;
+
+        }
+
+
+        /* =========================================
+           SIDEBAR
+        ========================================= */
+
+        .sidebar {
+
+            width: 220px;
+
+            min-width: 220px;
+
+            background: var(--sidebar);
+
+            color: white;
+
+            position: fixed;
+
+            top: 0;
+
+            bottom: 0;
+
+            left: 0;
+
+            padding: 18px 15px;
+
+            overflow-y: auto;
+
+        }
+
+
+        .brand {
+
+            font-size: 20px;
+
+            font-weight: 700;
+
+            margin-bottom: 6px;
+
+        }
+
+
+        .brand .mcti {
+
+            color: var(--orange);
+
+        }
+
+
+        .brand .tech {
+
+            color: white;
+
+        }
+
+
+        .brand-subtitle {
+
+            font-size: 10px;
+
+            color: #b7c0ce;
+
+            margin-bottom: 24px;
+
+        }
+
+
+        .student-card {
+
+            background: var(--sidebar-soft);
+
+            border-radius: 11px;
+
+            padding: 13px;
+
+            margin-bottom: 22px;
+
+        }
+
+
+        .student-card .label {
+
+            color: #93a4bb;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            margin-bottom: 5px;
+
+        }
+
+
+        .student-card strong {
+
+            display: block;
+
+            font-size: 13px;
+
+            margin-bottom: 3px;
+
+        }
+
+
+        .student-card .student-id {
+
+            color: var(--orange);
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+        }
+
+
+        .student-card .course-name {
+
+            color: #d4dae3;
+
+            font-size: 11px;
+
+            margin-top: 3px;
+
+        }
+
+
+        .menu-heading {
+
+            color: #718096;
+
+            font-size: 9px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            margin: 18px 9px 8px;
+
+        }
+
+
+        .nav-link {
+
+            display: block;
+
+            color: #f4f7fb;
+
+            text-decoration: none;
+
+            padding: 12px 12px;
+
+            border-radius: 9px;
+
+            margin-bottom: 5px;
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+        }
+
+
+        .nav-link:hover,
+        .nav-link.active {
+
+            background: var(--orange);
+
+            color: white;
+
+        }
+
+
+        .nav-divider {
+
+            border-top: 1px solid #334155;
+
+            margin: 17px 0 10px;
+
+        }
+
+
+        .logout-link {
+
+            color: #ffb099;
+
+        }
+
+
+        /* =========================================
+           MAIN
+        ========================================= */
+
+        .main {
+
+            margin-left: 220px;
+
+            width: calc(100% - 220px);
+
+            min-height: 100vh;
+
+        }
+
+
+        .topbar {
+
+            height: 64px;
+
+            background: white;
+
+            border-bottom: 1px solid var(--border);
+
+            padding: 12px 25px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 10;
+
+        }
+
+
+        .topbar-title h1 {
+
+            font-size: 19px;
+
+            margin-bottom: 3px;
+
+        }
+
+
+        .topbar-title p {
+
+            color: var(--muted);
+
+            font-size: 10px;
+
+        }
+
+
+        .topbar-student {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            text-align: right;
+
+        }
+
+
+        .topbar-student strong {
+
+            display: block;
+
+            font-size: 11px;
+
+        }
+
+
+        .topbar-student span {
+
+            display: block;
+
+            color: var(--muted);
+
+            font-size: 9px;
+
+            margin-top: 2px;
+
+        }
+
+
+        .avatar {
+
+            width: 34px;
+
+            height: 34px;
+
+            border-radius: 50%;
+
+            background: var(--orange);
+
+            color: white;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            font-weight: 700;
+
+            font-size: 13px;
+
+        }
+
+
+        .content {
+
+            padding: 26px;
+
+        }
+
+
+        .welcome {
+
+            margin-bottom: 18px;
+
+        }
+
+
+        .welcome h2 {
+
+            font-size: 21px;
+
+            margin-bottom: 3px;
+
+        }
+
+
+        .welcome p {
+
+            color: var(--muted);
+
+            font-size: 11px;
+
+        }
+
+
+        /* =========================================
+           CARDS
+        ========================================= */
+
+        .stats-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+
+            gap: 14px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .stat-card,
+        .panel,
+        .module-card {
+
+            background: white;
+
+            border: 1px solid var(--border);
+
+            border-radius: 13px;
+
+            box-shadow:
+                0 4px 12px
+                rgba(15, 23, 42, 0.04);
+
+        }
+
+
+        .stat-card {
+
+            min-height: 92px;
+
+            padding: 16px;
+
+            border-top:
+                3px solid
+                var(--orange);
+
+        }
+
+
+        .stat-card.green {
+
+            border-top-color: var(--green);
+
+        }
+
+
+        .stat-card.red {
+
+            border-top-color: var(--red);
+
+        }
+
+
+        .stat-card.blue {
+
+            border-top-color: var(--blue);
+
+        }
+
+
+        .stat-label {
+
+            color: var(--muted);
+
+            font-size: 10px;
+
+            margin-bottom: 7px;
+
+        }
+
+
+        .stat-value {
+
+            font-size: 17px;
+
+            font-weight: 700;
+
+        }
+
+
+        .stat-note {
+
+            color: var(--red);
+
+            font-size: 10px;
+
+            margin-top: 6px;
+
+            font-weight: 700;
+
+        }
+
+
+        .panel {
+
+            padding: 18px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .panel-title {
+
+            font-size: 17px;
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .course-overview {
+
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 18px;
+
+            align-items: center;
+
+        }
+
+
+        .progress-meta {
+
+            color: var(--muted);
+
+            font-size: 11px;
+
+            margin-top: 6px;
+
+        }
+
+
+        .progress-track {
+
+            height: 13px;
+
+            width: 100%;
+
+            border-radius: 999px;
+
+            background: #e9edf2;
+
+            overflow: hidden;
+
+            margin-top: 10px;
+
+        }
+
+
+        .progress-fill {
+
+            height: 100%;
+
+            border-radius: inherit;
+
+            background: var(--orange);
+
+            min-width: 0;
+
+        }
+
+
+        .button-row {
+
+            margin-top: 15px;
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 8px;
+
+        }
+
+
+        .btn {
+
+            display: inline-block;
+
+            background: var(--orange);
+
+            color: white;
+
+            text-decoration: none;
+
+            border: none;
+
+            border-radius: 8px;
+
+            padding: 10px 15px;
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+        }
+
+
+        .btn:hover {
+
+            background: var(--orange-dark);
+
+        }
+
+
+        .btn-dark {
+
+            background: var(--sidebar);
+
+        }
+
+
+        .btn-dark:hover {
+
+            background: #1f2937;
+
+        }
+
+
+        .section-title {
+
+            font-size: 18px;
+
+            margin: 7px 0 14px;
+
+        }
+
+
+        .module-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 14px;
+
+        }
+
+
+        .module-card {
+
+            padding: 16px;
+
+            position: relative;
+
+            border-left:
+                4px solid
+                var(--orange);
+
+        }
+
+
+        .module-card a {
+
+            text-decoration: none;
+
+            color: var(--text);
+
+        }
+
+
+        .module-card h3 {
+
+            font-size: 14px;
+
+            margin-bottom: 7px;
+
+        }
+
+
+        .module-card p {
+
+            color: var(--muted);
+
+            font-size: 10px;
+
+        }
+
+
+        .module-status {
+
+            margin-top: 10px;
+
+            font-size: 10px;
+
+            font-weight: 700;
+
+        }
+
+
+        .status-complete {
+
+            color: var(--green);
+
+        }
+
+
+        .status-progress {
+
+            color: var(--orange);
+
+        }
+
+
+        .notice {
+
+            background: var(--yellow-bg);
+
+            border: 1px solid #f4df9c;
+
+            color: #8a5a00;
+
+            border-radius: 9px;
+
+            padding: 12px;
+
+            font-size: 11px;
+
+        }
+
+
+        /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+        @media (max-width: 1100px) {
+
+            .stats-grid {
+
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+
+            }
+
+
+            .course-overview {
+
+                grid-template-columns: 1fr;
+
+            }
+
+        }
+
+
+        @media (max-width: 760px) {
+
+            .sidebar {
+
+                position: static;
+
+                width: 100%;
+
+                min-width: 100%;
+
+            }
+
+
+            .app-shell {
+
+                display: block;
+
+            }
+
+
+            .main {
+
+                margin-left: 0;
+
+                width: 100%;
+
+            }
+
+
+            .topbar {
+
+                position: static;
+
+            }
+
+
+            .content {
+
+                padding: 16px;
+
+            }
+
+
+            .stats-grid,
+            .module-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+        }
+
+    </style>
+
+
+    {% block extra_css %}
+    {% endblock %}
+
+</head>
+
+
+<body>
+
+
+<div class="app-shell">
+
+
+    <!-- =========================================
+         SIDEBAR
+    ========================================= -->
+
+    <aside class="sidebar">
+
+
+        <div class="brand">
+
+            <span class="mcti">
+                MCTI
+            </span>
+
+            <span class="tech">
+                Technologies
+            </span>
+
+        </div>
+
+
+        <div class="brand-subtitle">
+            Student Management System
+        </div>
+
+
+        {% if student %}
+
+            <div class="student-card">
+
+                <div class="label">
+                    Student
+                </div>
+
+                <strong>
+                    {{ student.name }}
+                </strong>
+
+                <div class="student-id">
+                    {{ student.student_id }}
+                </div>
+
+                <div class="course-name">
+
+                    {% if student.course %}
+
+                        {{ student.course.title }}
+
+                    {% else %}
+
+                        Course Not Assigned
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+
+        <div class="menu-heading">
+            Main
+        </div>
+
+
+        <a
+            class="nav-link {% block nav_dashboard %}{% endblock %}"
+            href="{% url 'lms:my_courses' %}"
+        >
+            🏠 Dashboard
+        </a>
+
+
+        <a
+            class="nav-link"
+            href="{% url 'lms:my_courses' %}"
+        >
+            📚 My Learning
+        </a>
+
+
+        <a
+            class="nav-link"
+            href="{% url 'lms:my_progress' %}"
+        >
+            📊 My Progress
+        </a>
+
+
+        <a
+            class="nav-link"
+            href="{% url 'lms:quiz_history' %}"
+        >
+            📝 Quiz Scores
+        </a>
+
+
+        <a
+            class="nav-link"
+            href="#"
+        >
+            🎓 Exam Portal
+        </a>
+
+
+        <a
+            class="nav-link"
+            href="#"
+        >
+            💼 Placement Support
+        </a>
+
+
+        <a
+            class="nav-link {% block nav_certificates %}{% endblock %}"
+            href="{% url 'lms:certificates' %}"
+        >
+            📜 Certificates
+        </a>
+
+
+        <div class="menu-heading">
+            Account
+        </div>
+
+
+        <a
+            class="nav-link"
+            href="#"
+        >
+            👤 My Profile
+        </a>
+
+
+        <div class="nav-divider">
+        </div>
+
+
+        <a
+            class="nav-link logout-link"
+            href="{% url 'student_logout' %}"
+        >
+            🚪 Logout
+        </a>
+
+
+    </aside>
+
+
+    <!-- =========================================
+         MAIN CONTENT
+    ========================================= -->
+
+    <main class="main">
+
+
+        <header class="topbar">
+
+
+            <div class="topbar-title">
+
+                <h1>
+                    {% block page_title %}
+                        Student Dashboard
+                    {% endblock %}
+                </h1>
+
+                <p>
+                    {% block page_subtitle %}
+                        Your MCTI learning overview
+                    {% endblock %}
+                </p>
+
+            </div>
+
+
+            {% if student %}
+
+                <div class="topbar-student">
+
+                    <div>
+
+                        <strong>
+                            {{ student.name }}
+                        </strong>
+
+                        <span>
+                            Student
+                        </span>
+
+                    </div>
+
+
+                    <div class="avatar">
+
+                        {{ student.name|slice:":1"|upper }}
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+        </header>
+
+
+        <section class="content">
+
+            {% block content %}
+            {% endblock %}
+
+        </section>
+
+
+    </main>
+
+
+</div>
+
+
+</body>
+
+</html>

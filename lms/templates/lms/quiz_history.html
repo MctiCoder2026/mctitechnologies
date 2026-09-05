@@ -1,0 +1,511 @@
+{% extends "lms/base.html" %}
+
+{% block title %}
+Quiz Scores - MCTI One
+{% endblock %}
+
+{% block page_title %}
+Quiz Scores
+{% endblock %}
+
+{% block page_subtitle %}
+Track your topic progress, best scores and quiz attempts
+{% endblock %}
+
+
+{% block content %}
+
+<div class="panel">
+
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:15px;
+        flex-wrap:wrap;
+    ">
+
+        <div>
+            <h2 class="panel-title" style="margin-bottom:5px;">
+                📊 Learning Performance
+            </h2>
+
+            <p style="
+                color:#64748b;
+                font-size:11px;
+            ">
+                View your topic-wise best scores and complete quiz history.
+            </p>
+        </div>
+
+        <a
+            href="{% url 'lms:my_courses' %}"
+            class="btn btn-dark"
+        >
+            ← Back to My Learning
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+
+        <div class="stat-label">
+            📝 TOTAL ATTEMPTS
+        </div>
+
+        <div class="stat-value">
+            {{ attempts|length }}
+        </div>
+
+    </div>
+
+
+    <div class="stat-card green">
+
+        <div class="stat-label">
+            ✅ TOPICS COMPLETED
+        </div>
+
+        <div class="stat-value">
+            {% with completed_count=0 %}
+                {{ progress_records|length }}
+            {% endwith %}
+        </div>
+
+        <div class="stat-note" style="color:#16a34a;">
+            Progress records
+        </div>
+
+    </div>
+
+
+    <div class="stat-card red">
+
+        <div class="stat-label">
+            🎯 PASS MARK
+        </div>
+
+        <div class="stat-value">
+            3 / 5
+        </div>
+
+    </div>
+
+
+    <div class="stat-card blue">
+
+        <div class="stat-label">
+            📚 COURSE
+        </div>
+
+        <div class="stat-value" style="font-size:14px;">
+            {{ student.course.title }}
+        </div>
+
+    </div>
+
+</div>
+
+
+<h2 class="section-title">
+    Topic Performance
+</h2>
+
+
+<div style="
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:14px;
+    margin-bottom:25px;
+">
+
+{% for progress in progress_records %}
+
+    <div class="module-card"
+         style="
+            {% if progress.is_completed %}
+                border-left-color:#16a34a;
+            {% elif progress.is_unlocked %}
+                border-left-color:#ff6b00;
+            {% else %}
+                border-left-color:#94a3b8;
+            {% endif %}
+         "
+    >
+
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:10px;
+        ">
+
+            <div style="flex:1;">
+
+                <div style="
+                    color:#64748b;
+                    font-size:10px;
+                    margin-bottom:5px;
+                ">
+                    {{ progress.topic.module.title }}
+                </div>
+
+                <h3 style="
+                    font-size:14px;
+                    margin-bottom:5px;
+                ">
+                    {{ progress.topic.title }}
+                </h3>
+
+            </div>
+
+
+            {% if progress.is_completed %}
+
+                <span style="
+                    background:#dcfce7;
+                    color:#166534;
+                    padding:5px 8px;
+                    border-radius:999px;
+                    font-size:9px;
+                    font-weight:700;
+                ">
+                    ✅ PASSED
+                </span>
+
+            {% elif progress.is_unlocked %}
+
+                <span style="
+                    background:#fff1e6;
+                    color:#c45100;
+                    padding:5px 8px;
+                    border-radius:999px;
+                    font-size:9px;
+                    font-weight:700;
+                ">
+                    IN PROGRESS
+                </span>
+
+            {% else %}
+
+                <span style="
+                    background:#eef2f7;
+                    color:#64748b;
+                    padding:5px 8px;
+                    border-radius:999px;
+                    font-size:9px;
+                    font-weight:700;
+                ">
+                    LOCKED
+                </span>
+
+            {% endif %}
+
+        </div>
+
+
+        <div style="
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:10px;
+            margin-top:14px;
+        ">
+
+            <div style="
+                background:#f8fafc;
+                border-radius:8px;
+                padding:10px;
+            ">
+
+                <div style="
+                    color:#64748b;
+                    font-size:9px;
+                    margin-bottom:4px;
+                ">
+                    BEST SCORE
+                </div>
+
+                <strong style="
+                    font-size:16px;
+                    {% if progress.is_completed %}
+                        color:#16a34a;
+                    {% else %}
+                        color:#ff6b00;
+                    {% endif %}
+                ">
+                    {{ progress.best_score }}/{{ progress.total_questions }}
+                </strong>
+
+            </div>
+
+
+            <div style="
+                background:#f8fafc;
+                border-radius:8px;
+                padding:10px;
+            ">
+
+                <div style="
+                    color:#64748b;
+                    font-size:9px;
+                    margin-bottom:4px;
+                ">
+                    ATTEMPTS
+                </div>
+
+                <strong style="font-size:16px;">
+                    {{ progress.attempts }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        {% if progress.is_unlocked %}
+
+            <div style="margin-top:13px;">
+
+                <a
+                    href="{% url 'lms:topic_detail' progress.topic.id %}"
+                    class="btn"
+                >
+                    {% if progress.is_completed %}
+                        Review Topic
+                    {% else %}
+                        Continue Topic
+                    {% endif %}
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+{% empty %}
+
+    <div class="panel">
+        <p>No topic progress available yet.</p>
+    </div>
+
+{% endfor %}
+
+</div>
+
+
+
+<h2 class="section-title">
+    Quiz Attempt History
+</h2>
+
+
+<div class="panel">
+
+    {% if attempts %}
+
+        <div style="overflow-x:auto;">
+
+            <table style="
+                width:100%;
+                border-collapse:collapse;
+                font-size:11px;
+            ">
+
+                <thead>
+
+                    <tr style="
+                        background:#111827;
+                        color:white;
+                    ">
+
+                        <th style="
+                            text-align:left;
+                            padding:12px;
+                        ">
+                            #
+                        </th>
+
+                        <th style="
+                            text-align:left;
+                            padding:12px;
+                        ">
+                            Topic
+                        </th>
+
+                        <th style="
+                            text-align:left;
+                            padding:12px;
+                        ">
+                            Module
+                        </th>
+
+                        <th style="
+                            text-align:center;
+                            padding:12px;
+                        ">
+                            Score
+                        </th>
+
+                        <th style="
+                            text-align:center;
+                            padding:12px;
+                        ">
+                            Result
+                        </th>
+
+                        <th style="
+                            text-align:left;
+                            padding:12px;
+                        ">
+                            Attempted On
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                {% for attempt in attempts %}
+
+                    <tr style="
+                        border-bottom:1px solid #e5e7eb;
+                    ">
+
+                        <td style="
+                            padding:12px;
+                        ">
+                            {{ forloop.counter }}
+                        </td>
+
+                        <td style="
+                            padding:12px;
+                            font-weight:700;
+                        ">
+                            {{ attempt.topic.title }}
+                        </td>
+
+                        <td style="
+                            padding:12px;
+                            color:#64748b;
+                        ">
+                            {{ attempt.topic.module.title }}
+                        </td>
+
+                        <td style="
+                            padding:12px;
+                            text-align:center;
+                            font-weight:700;
+                        ">
+                            {{ attempt.score }}/{{ attempt.total_questions }}
+                        </td>
+
+                        <td style="
+                            padding:12px;
+                            text-align:center;
+                        ">
+
+                            {% if attempt.passed %}
+
+                                <span style="
+                                    display:inline-block;
+                                    background:#dcfce7;
+                                    color:#166534;
+                                    padding:5px 9px;
+                                    border-radius:999px;
+                                    font-size:9px;
+                                    font-weight:700;
+                                ">
+                                    ✅ Passed
+                                </span>
+
+                            {% else %}
+
+                                <span style="
+                                    display:inline-block;
+                                    background:#fff1e6;
+                                    color:#c45100;
+                                    padding:5px 9px;
+                                    border-radius:999px;
+                                    font-size:9px;
+                                    font-weight:700;
+                                ">
+                                    Try Again
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td style="
+                            padding:12px;
+                            color:#64748b;
+                            white-space:nowrap;
+                        ">
+                            {{ attempt.attempted_at|date:"d M Y, h:i A" }}
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    {% else %}
+
+        <div style="
+            text-align:center;
+            padding:25px;
+        ">
+
+            <div style="
+                font-size:32px;
+                margin-bottom:10px;
+            ">
+                📝
+            </div>
+
+            <h3 style="
+                margin-bottom:5px;
+            ">
+                No Quiz Attempts Yet
+            </h3>
+
+            <p style="
+                color:#64748b;
+                font-size:11px;
+            ">
+                Complete a topic quiz and your score history will appear here.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+<style>
+
+    @media (max-width:760px) {
+
+        .content > div[style*="grid-template-columns"] {
+            grid-template-columns:1fr !important;
+        }
+
+    }
+
+</style>
+
+{% endblock %}

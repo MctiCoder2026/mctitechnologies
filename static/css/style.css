@@ -8505,3 +8505,63 @@ footer p {
     }
 
 }
+.filter-card {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr auto;
+    gap: 14px;
+    align-items: end;
+}
+
+.filter-grid label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.filter-grid input,
+.filter-grid select {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.filter-btn {
+    background: #ff6b00;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.reset-btn {
+    background: #1f2937;
+    color: white !important;
+    padding: 10px 16px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+@media (max-width: 900px) {
+
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+}

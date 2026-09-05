@@ -1,0 +1,378 @@
+{% extends "lms/base.html" %}
+
+{% block title %}
+Quiz Result - {{ topic.title }} | MCTI One
+{% endblock %}
+
+{% block page_title %}
+Quiz Result
+{% endblock %}
+
+{% block page_subtitle %}
+{{ topic.module.title }} → {{ topic.title }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="panel">
+
+    <div style="
+        text-align:center;
+        padding:20px 10px;
+    ">
+
+        {% if passed %}
+
+            <div style="
+                width:72px;
+                height:72px;
+                margin:0 auto 15px;
+                border-radius:50%;
+                background:#dcfce7;
+                color:#16a34a;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:34px;
+            ">
+                ✓
+            </div>
+
+            <div style="
+                color:#16a34a;
+                font-size:12px;
+                font-weight:700;
+                margin-bottom:6px;
+            ">
+                QUIZ PASSED
+            </div>
+
+            <h2 style="
+                font-size:24px;
+                margin-bottom:8px;
+            ">
+                Well Done!
+            </h2>
+
+            <p style="
+                color:#64748b;
+                font-size:12px;
+            ">
+                You successfully completed
+                <strong>{{ topic.title }}</strong>.
+            </p>
+
+        {% else %}
+
+            <div style="
+                width:72px;
+                height:72px;
+                margin:0 auto 15px;
+                border-radius:50%;
+                background:#fff1e6;
+                color:#ff6b00;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:32px;
+                font-weight:700;
+            ">
+                !
+            </div>
+
+            <div style="
+                color:#ff6b00;
+                font-size:12px;
+                font-weight:700;
+                margin-bottom:6px;
+            ">
+                TRY AGAIN
+            </div>
+
+            <h2 style="
+                font-size:24px;
+                margin-bottom:8px;
+            ">
+                Keep Learning
+            </h2>
+
+            <p style="
+                color:#64748b;
+                font-size:12px;
+            ">
+                You need at least
+                <strong>3 correct answers</strong>
+                to complete this topic.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<div style="
+    max-width:520px;
+    margin:0 auto 20px;
+">
+
+    <div class="panel">
+
+        <div style="
+            text-align:center;
+        ">
+
+            <div style="
+                color:#64748b;
+                font-size:11px;
+                text-transform:uppercase;
+                letter-spacing:.6px;
+                margin-bottom:10px;
+            ">
+                Your Score
+            </div>
+
+            <div style="
+                font-size:46px;
+                line-height:1;
+                font-weight:700;
+
+                {% if passed %}
+                    color:#16a34a;
+                {% else %}
+                    color:#ff6b00;
+                {% endif %}
+            ">
+                {{ score }}/{{ total_questions }}
+            </div>
+
+
+            <div style="
+                margin-top:15px;
+                display:inline-block;
+                padding:7px 14px;
+                border-radius:999px;
+                font-size:11px;
+                font-weight:700;
+
+                {% if passed %}
+                    background:#dcfce7;
+                    color:#166534;
+                {% else %}
+                    background:#fff1e6;
+                    color:#c45100;
+                {% endif %}
+            ">
+
+                {% if passed %}
+                    ✅ Passed
+                {% else %}
+                    Minimum Required: 3/5
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% if passed %}
+
+<div style="
+    max-width:720px;
+    margin:0 auto;
+">
+
+    <div style="
+        background:#ecfdf3;
+        border:1px solid #bbf7d0;
+        border-radius:12px;
+        padding:16px;
+        margin-bottom:18px;
+    ">
+
+        <strong style="
+            display:block;
+            color:#166534;
+            font-size:13px;
+            margin-bottom:5px;
+        ">
+            🔓 Next Topic Unlocked
+        </strong>
+
+        <p style="
+            color:#4b6354;
+            font-size:11px;
+            line-height:1.6;
+        ">
+            Your progress has been saved.
+            You can now continue to the next available topic.
+        </p>
+
+    </div>
+
+
+    <div class="panel">
+
+        <div style="
+            display:flex;
+            justify-content:center;
+            gap:10px;
+            flex-wrap:wrap;
+        ">
+
+            <a
+                href="{% url 'lms:module_topics' topic.module.id %}"
+                class="btn"
+            >
+                Continue Learning →
+            </a>
+
+            <a
+                href="{% url 'lms:topic_detail' topic.id %}"
+                class="btn btn-dark"
+            >
+                Review Topic
+            </a>
+
+            <a
+                href="{% url 'lms:my_courses' %}"
+                class="btn btn-dark"
+            >
+                My Learning
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% else %}
+
+<div style="
+    max-width:720px;
+    margin:0 auto;
+">
+
+    <div style="
+        background:#fff7ed;
+        border:1px solid #fed7aa;
+        border-radius:12px;
+        padding:16px;
+        margin-bottom:18px;
+    ">
+
+        <strong style="
+            display:block;
+            color:#9a3412;
+            font-size:13px;
+            margin-bottom:5px;
+        ">
+            📖 Review and Try Again
+        </strong>
+
+        <p style="
+            color:#9a5a34;
+            font-size:11px;
+            line-height:1.6;
+        ">
+            Read the topic material once more and retake the quiz.
+            Your best score and attempts will continue to be recorded.
+        </p>
+
+    </div>
+
+
+    <div class="panel">
+
+        <div style="
+            display:flex;
+            justify-content:center;
+            gap:10px;
+            flex-wrap:wrap;
+        ">
+
+            <a
+                href="{% url 'lms:topic_quiz' topic.id %}"
+                class="btn"
+            >
+                ↻ Retake Quiz
+            </a>
+
+            <a
+                href="{% url 'lms:topic_detail' topic.id %}"
+                class="btn btn-dark"
+            >
+                📖 Review Topic
+            </a>
+
+            <a
+                href="{% url 'lms:module_topics' topic.module.id %}"
+                class="btn btn-dark"
+            >
+                ← Module Topics
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+
+<div style="
+    max-width:720px;
+    margin:20px auto 0;
+">
+
+    <div class="panel">
+
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:15px;
+            flex-wrap:wrap;
+        ">
+
+            <div>
+
+                <strong style="
+                    font-size:13px;
+                ">
+                    📊 Quiz History
+                </strong>
+
+                <p style="
+                    color:#64748b;
+                    font-size:10px;
+                    margin-top:4px;
+                ">
+                    View your previous attempts and best scores.
+                </p>
+
+            </div>
+
+            <a
+                href="{% url 'lms:quiz_history' %}"
+                class="btn btn-dark"
+            >
+                View Scores
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,511 @@
+{% extends "lms/base.html" %}
+
+
+{% block title %}
+
+Certificates - MCTI One
+
+{% endblock %}
+
+
+{% block nav_certificates %}
+
+active
+
+{% endblock %}
+
+
+{% block page_title %}
+
+Certificates
+
+{% endblock %}
+
+
+{% block page_subtitle %}
+
+Check your course completion and certificate eligibility
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =====================================================
+     CERTIFICATE SUMMARY
+===================================================== -->
+
+<div class="stats-grid">
+
+
+    <div class="stat-card">
+
+        <div class="stat-label">
+            📚 COURSE
+        </div>
+
+        <div class="stat-value">
+
+            {% if course %}
+
+                {{ course.title }}
+
+            {% else %}
+
+                Not Assigned
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <div class="stat-card blue">
+
+        <div class="stat-label">
+            📊 COURSE PROGRESS
+        </div>
+
+        <div class="stat-value">
+            {{ progress_percent }}%
+        </div>
+
+    </div>
+
+
+    <div class="stat-card green">
+
+        <div class="stat-label">
+            ✅ TOPICS COMPLETED
+        </div>
+
+        <div class="stat-value">
+            {{ completed_topics }} / {{ total_topics }}
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-label">
+            🎯 REQUIRED PROGRESS
+        </div>
+
+        <div class="stat-value">
+            80%
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     PROGRESS
+===================================================== -->
+
+<div class="panel">
+
+
+    <h2 class="panel-title">
+        Certificate Progress
+    </h2>
+
+
+    <p style="
+        color:#64748b;
+        font-size:11px;
+        margin-bottom:10px;
+    ">
+
+        Your current course completion is
+        <strong>
+            {{ progress_percent }}%
+        </strong>.
+
+    </p>
+
+
+    <div class="progress-track">
+
+        <div
+            class="progress-fill"
+            style="width:{{ progress_percent }}%;"
+        >
+        </div>
+
+    </div>
+
+
+    <div style="
+        margin-top:10px;
+        font-size:11px;
+        font-weight:700;
+        color:#ff6b00;
+    ">
+
+        {{ completed_topics }}
+        of
+        {{ total_topics }}
+        topics completed
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     CERTIFICATE STATUS
+===================================================== -->
+
+<div class="panel">
+
+
+    <h2 class="panel-title">
+        Certificate Eligibility
+    </h2>
+
+
+    {% if certificate_eligible %}
+
+
+        <div style="
+            background:#ecfdf5;
+            border:1px solid #bbf7d0;
+            border-radius:12px;
+            padding:22px;
+        ">
+
+
+            <div style="
+                font-size:24px;
+                margin-bottom:10px;
+            ">
+                🎉
+            </div>
+
+
+            <h3 style="
+                color:#15803d;
+                font-size:20px;
+                margin-bottom:8px;
+            ">
+                Certificate Eligible
+            </h3>
+
+
+            <p style="
+                color:#475569;
+                font-size:12px;
+                line-height:1.7;
+                margin-bottom:5px;
+            ">
+
+                Congratulations,
+                <strong>
+                    {{ student.name }}
+                </strong>.
+
+                You have completed
+                <strong>
+                    {{ progress_percent }}%
+                </strong>
+                of your course.
+
+            </p>
+
+
+            <p style="
+                color:#15803d;
+                font-size:12px;
+                font-weight:700;
+                margin-top:8px;
+            ">
+                Minimum required progress of 80% has been achieved.
+            </p>
+
+
+            <div class="button-row">
+
+
+                <a
+                  href="{% url 'lms:download_certificate' %}"
+                  class="btn"
+                  style="
+                      background:#16a34a;
+                  "
+              >
+                  📥 Download Certificate PDF
+              </a>
+
+
+            </div>
+
+
+            <p style="
+                color:#64748b;
+                font-size:10px;
+                margin-top:12px;
+            ">
+                Your certificate is ready. Click the button above
+                to download your official MCTI course certificate.
+            </p>
+
+
+        </div>
+
+
+    {% else %}
+
+
+        <div style="
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            border-radius:12px;
+            padding:22px;
+        ">
+
+
+            <div style="
+                font-size:24px;
+                margin-bottom:10px;
+            ">
+                ⏳
+            </div>
+
+
+            <h3 style="
+                color:#ea580c;
+                font-size:20px;
+                margin-bottom:8px;
+            ">
+                Not Yet Eligible
+            </h3>
+
+
+            <p style="
+                color:#475569;
+                font-size:12px;
+                line-height:1.7;
+            ">
+
+                Complete at least
+                <strong>
+                    80%
+                </strong>
+                of your course to become eligible
+                for your certificate.
+
+            </p>
+
+
+            <div style="
+                margin-top:14px;
+                background:white;
+                border:1px solid #fed7aa;
+                border-radius:9px;
+                padding:13px;
+            ">
+
+
+                <div style="
+                    font-size:11px;
+                    color:#64748b;
+                    margin-bottom:5px;
+                ">
+                    Current Progress
+                </div>
+
+
+                <strong style="
+                    font-size:19px;
+                    color:#111827;
+                ">
+                    {{ progress_percent }}%
+                </strong>
+
+
+            </div>
+
+
+            {% if total_topics > 0 %}
+
+                <p style="
+                    margin-top:12px;
+                    font-size:11px;
+                    font-weight:700;
+                    color:#ea580c;
+                ">
+
+                    Complete approximately
+                    {{ remaining_percent }}%
+                    more of the course to reach certificate eligibility.
+
+                </p>
+
+            {% else %}
+
+                <p style="
+                    margin-top:12px;
+                    font-size:11px;
+                    font-weight:700;
+                    color:#dc2626;
+                ">
+
+                    LMS topics are not currently available
+                    for this course.
+
+                </p>
+
+            {% endif %}
+
+
+            <div class="button-row">
+
+
+                <a
+                    href="{% url 'lms:my_courses' %}"
+                    class="btn"
+                >
+                    Continue Learning
+                </a>
+
+
+                <a
+                    href="{% url 'lms:my_progress' %}"
+                    class="btn btn-dark"
+                >
+                    View My Progress
+                </a>
+
+
+            </div>
+
+
+        </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+<!-- =====================================================
+     RULE INFORMATION
+===================================================== -->
+
+<div class="panel">
+
+
+    <h2 class="panel-title">
+        Certificate Requirement
+    </h2>
+
+
+    <div style="
+        display:grid;
+        grid-template-columns:
+            repeat(auto-fit, minmax(180px,1fr));
+        gap:12px;
+    ">
+
+
+        <div style="
+            padding:15px;
+            background:#f8fafc;
+            border-radius:10px;
+        ">
+
+            <div style="
+                font-size:10px;
+                color:#64748b;
+                margin-bottom:6px;
+            ">
+                REQUIRED COMPLETION
+            </div>
+
+            <strong style="
+                font-size:18px;
+            ">
+                80%
+            </strong>
+
+        </div>
+
+
+        <div style="
+            padding:15px;
+            background:#f8fafc;
+            border-radius:10px;
+        ">
+
+            <div style="
+                font-size:10px;
+                color:#64748b;
+                margin-bottom:6px;
+            ">
+                YOUR PROGRESS
+            </div>
+
+            <strong style="
+                font-size:18px;
+                color:#ff6b00;
+            ">
+                {{ progress_percent }}%
+            </strong>
+
+        </div>
+
+
+        <div style="
+            padding:15px;
+            background:#f8fafc;
+            border-radius:10px;
+        ">
+
+            <div style="
+                font-size:10px;
+                color:#64748b;
+                margin-bottom:6px;
+            ">
+                STATUS
+            </div>
+
+
+            {% if certificate_eligible %}
+
+                <strong style="
+                    font-size:16px;
+                    color:#16a34a;
+                ">
+                    Eligible
+                </strong>
+
+            {% else %}
+
+                <strong style="
+                    font-size:16px;
+                    color:#ea580c;
+                ">
+                    In Progress
+                </strong>
+
+            {% endif %}
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+{% endblock %}

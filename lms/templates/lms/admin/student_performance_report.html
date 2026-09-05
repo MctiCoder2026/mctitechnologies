@@ -1,0 +1,442 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}
+Student Performance Report | MCTI
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .report-header {
+        margin-bottom: 20px;
+    }
+
+    .report-header h1 {
+        margin-bottom: 6px;
+    }
+
+    .report-header p {
+        color: #666;
+        margin: 0;
+    }
+
+    /* =========================================
+       FILTER
+    ========================================= */
+
+    .filter-card {
+        background: #ffffff;
+        border: 1px solid #dcdcdc;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1.5fr auto;
+        gap: 14px;
+        align-items: end;
+    }
+
+    .filter-group label {
+        display: block;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: #333;
+    }
+
+    .filter-group input,
+.filter-group select {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    box-sizing: border-box;
+    background: #ffffff;
+    color: #1f2937;
+    font-size: 14px;
+    line-height: 38px;
+}
+
+.filter-group select {
+    padding-right: 32px;
+}
+
+    .filter-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .filter-btn {
+        background: #ff6b00;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    .reset-btn {
+        display: inline-block;
+        background: #1f2937;
+        color: white !important;
+        padding: 10px 16px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    /* =========================================
+       REPORT TABLE
+    ========================================= */
+
+    .report-card {
+        background: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow-x: auto;
+    }
+
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .report-table th {
+        background: #1f2937;
+        color: #ffffff;
+        padding: 12px 10px;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .report-table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #e5e7eb;
+        vertical-align: middle;
+    }
+
+    .student-name {
+        font-weight: 700;
+    }
+
+    .progress-box {
+        width: 120px;
+        height: 9px;
+        background: #e5e7eb;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 5px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: #ff6b00;
+        border-radius: 20px;
+    }
+
+    .progress-text {
+        color: #ff6b00;
+        font-weight: 700;
+    }
+
+    .progress-complete {
+        color: #15803d;
+        font-weight: 700;
+    }
+
+    .score {
+        font-weight: 700;
+    }
+
+    .no-activity {
+        color: #999;
+    }
+
+    @media (max-width: 900px) {
+
+        .filter-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+</style>
+
+
+<!-- =========================================
+     HEADER
+========================================= -->
+
+<div class="report-header">
+
+    <h1>
+        Student Performance Report
+    </h1>
+
+    <p>
+        LMS course progress, topic completion and quiz performance
+    </p>
+
+</div>
+
+
+<!-- =========================================
+     FILTERS
+========================================= -->
+
+<div class="filter-card">
+
+    <form method="get">
+
+        <div class="filter-grid">
+
+            <!-- SEARCH -->
+            <div class="filter-group">
+
+                <label>
+                    Search Student
+                </label>
+
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ search_query }}"
+                    placeholder="Enter student name"
+                >
+
+            </div>
+
+
+            <!-- BRANCH -->
+            <div class="filter-group">
+
+                <label>
+                    Branch
+                </label>
+
+                <select name="branch">
+
+                    <option value="">
+                        All Branches
+                    </option>
+
+                    {% for branch in branches %}
+
+                        <option
+                            value="{{ branch }}"
+                            {% if branch_filter == branch %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ branch }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- COURSE -->
+            <div class="filter-group">
+
+                <label>
+                    Course
+                </label>
+
+                <select name="course">
+
+                    <option value="">
+                        All Courses
+                    </option>
+
+                    {% for course in courses %}
+
+                        <option
+                            value="{{ course.course_id }}"
+                            {% if course_filter == course.course_id|stringformat:"s" %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ course.course__title }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- BUTTONS -->
+            <div class="filter-buttons">
+
+                <button
+                    type="submit"
+                    class="filter-btn"
+                >
+                    Apply Filter
+                </button>
+
+                <a
+                    href="{% url 'lms:student_performance_report' %}"
+                    class="reset-btn"
+                >
+                    Reset
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- =========================================
+     PERFORMANCE TABLE
+========================================= -->
+
+<div class="report-card">
+
+    <table class="report-table">
+
+        <thead>
+
+            <tr>
+                <th>Student</th>
+                <th>Student ID</th>
+                <th>Branch</th>
+                <th>Course</th>
+                <th>Topics</th>
+                <th>Progress</th>
+                <th>Quiz Attempts</th>
+                <th>Passed</th>
+                <th>Best Score</th>
+                <th>Last Activity</th>
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            {% for item in report_data %}
+
+                <tr>
+
+                    <td class="student-name">
+                        {{ item.student.name }}
+                    </td>
+
+                    <td>
+                        {{ item.student.student_id }}
+                    </td>
+
+                    <td>
+
+                        {% if item.student.branch %}
+
+                            {{ item.student.branch }}
+
+                        {% else %}
+
+                            -
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+                        {{ item.course.title }}
+                    </td>
+
+                    <td>
+                        {{ item.completed_topics }}
+                        /
+                        {{ item.total_topics }}
+                    </td>
+
+                    <td>
+
+                        <div class="progress-box">
+
+                            <div
+                                class="progress-fill"
+                                style="width: {{ item.progress_percent }}%;">
+                            </div>
+
+                        </div>
+
+                        {% if item.progress_percent == 100 %}
+
+                            <span class="progress-complete">
+                                {{ item.progress_percent }}%
+                            </span>
+
+                        {% else %}
+
+                            <span class="progress-text">
+                                {{ item.progress_percent }}%
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+                        {{ item.total_attempts }}
+                    </td>
+
+                    <td>
+                        {{ item.passed_attempts }}
+                    </td>
+
+                    <td class="score">
+                        {{ item.best_score }}/5
+                    </td>
+
+                    <td>
+
+                        {% if item.last_activity %}
+
+                            {{ item.last_activity|date:"d M Y, h:i A" }}
+
+                        {% else %}
+
+                            <span class="no-activity">
+                                No Activity
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+            {% empty %}
+
+                <tr>
+
+                    <td colspan="10">
+                        No matching student found.
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

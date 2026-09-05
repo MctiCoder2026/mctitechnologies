@@ -1,0 +1,387 @@
+{% extends "lms/base.html" %}
+
+{% block title %}
+My Progress - MCTI One
+{% endblock %}
+
+{% block page_title %}
+My Progress
+{% endblock %}
+
+{% block page_subtitle %}
+Track your overall course completion and quiz performance
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =====================================================
+     TOP SUMMARY CARDS
+===================================================== -->
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+
+        <div class="stat-label">
+            📚 COURSE PROGRESS
+        </div>
+
+        <div class="stat-value">
+            {{ progress_percent }}%
+        </div>
+
+    </div>
+
+
+    <div class="stat-card green">
+
+        <div class="stat-label">
+            ✅ TOPICS COMPLETED
+        </div>
+
+        <div class="stat-value">
+            {{ completed_topics }} / {{ total_topics }}
+        </div>
+
+    </div>
+
+
+    <div class="stat-card red">
+
+        <div class="stat-label">
+            📝 QUIZ ATTEMPTS
+        </div>
+
+        <div class="stat-value">
+            {{ total_attempts }}
+        </div>
+
+    </div>
+
+
+    <div class="stat-card blue">
+
+        <div class="stat-label">
+            🎯 BEST SCORE
+        </div>
+
+        <div class="stat-value">
+            {{ best_score }}/5
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     OVERALL LEARNING PROGRESS
+===================================================== -->
+
+<div class="panel">
+
+    <h2 class="panel-title">
+        Overall Learning Progress
+    </h2>
+
+    <p style="
+        color:#64748b;
+        font-size:11px;
+        margin-bottom:10px;
+    ">
+        {{ completed_topics }} of {{ total_topics }} topics completed
+    </p>
+
+    <div class="progress-track">
+
+        <div
+            class="progress-fill"
+            style="width:{{ progress_percent }}%;">
+        </div>
+
+    </div>
+
+    <div style="
+        margin-top:8px;
+        color:#ff6b00;
+        font-size:11px;
+        font-weight:700;
+    ">
+        {{ progress_percent }}% Completed
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     MODULE PROGRESS
+===================================================== -->
+
+<h2 class="section-title">
+    Module Progress
+</h2>
+
+
+<div class="module-grid">
+
+    {% for item in module_data %}
+
+        <div class="module-card">
+
+            <h3>
+                Module {{ item.module.order }}:
+                {{ item.module.title }}
+            </h3>
+
+            <p>
+                {{ item.completed }} of {{ item.total }}
+                topics completed
+            </p>
+
+            <div class="progress-track">
+
+                <div
+                    class="progress-fill"
+                    style="width:{{ item.percent }}%;">
+                </div>
+
+            </div>
+
+            <div class="
+                module-status
+
+                {% if item.percent == 100 %}
+                    status-complete
+                {% else %}
+                    status-progress
+                {% endif %}
+            ">
+
+                {% if item.percent == 100 %}
+
+                    ✅ Completed
+
+                {% else %}
+
+                    {{ item.percent }}% Completed
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    {% empty %}
+
+        <div class="panel">
+
+            <p>
+                No LMS modules available for this course.
+            </p>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+
+<!-- =====================================================
+     CERTIFICATE ELIGIBILITY
+===================================================== -->
+
+<div class="panel">
+
+    <h2 class="panel-title">
+        Certificate Eligibility
+    </h2>
+
+    {% if certificate_eligible %}
+
+        <div style="
+            background:#ecfdf5;
+            border:1px solid #bbf7d0;
+            padding:16px;
+            border-radius:10px;
+        ">
+
+            <strong style="
+                color:#15803d;
+                font-size:18px;
+            ">
+                ✅ Certificate Eligible
+            </strong>
+
+            <p style="
+                margin-top:7px;
+                margin-bottom:0;
+                color:#475569;
+            ">
+                You have completed
+                <strong>{{ progress_percent }}%</strong>
+                of your course.
+            </p>
+
+            <p style="
+                margin-top:5px;
+                margin-bottom:0;
+                color:#15803d;
+                font-weight:700;
+            ">
+                Minimum required progress: 80%
+            </p>
+
+        </div>
+
+    {% else %}
+
+        <div style="
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            padding:16px;
+            border-radius:10px;
+        ">
+
+            <strong style="
+                color:#ea580c;
+                font-size:18px;
+            ">
+                ⏳ Not Yet Eligible
+            </strong>
+
+            <p style="
+                margin-top:7px;
+                margin-bottom:0;
+                color:#475569;
+            ">
+                Complete at least 80% of your course
+                to become certificate eligible.
+            </p>
+
+            <p style="
+                margin-top:7px;
+                margin-bottom:0;
+                font-weight:700;
+                color:#1f2937;
+            ">
+                Current Progress:
+                {{ progress_percent }}%
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =====================================================
+     QUIZ PERFORMANCE
+===================================================== -->
+
+<div class="panel">
+
+    <h2 class="panel-title">
+        Quiz Performance
+    </h2>
+
+    <div style="
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+        gap:14px;
+    ">
+
+        <!-- TOTAL ATTEMPTS -->
+
+        <div style="
+            background:#f8fafc;
+            padding:15px;
+            border-radius:10px;
+        ">
+
+            <small style="
+                color:#64748b;
+            ">
+                TOTAL ATTEMPTS
+            </small>
+
+            <strong style="
+                display:block;
+                font-size:20px;
+                margin-top:5px;
+            ">
+                {{ total_attempts }}
+            </strong>
+
+        </div>
+
+
+        <!-- PASSED ATTEMPTS -->
+
+        <div style="
+            background:#f8fafc;
+            padding:15px;
+            border-radius:10px;
+        ">
+
+            <small style="
+                color:#64748b;
+            ">
+                PASSED ATTEMPTS
+            </small>
+
+            <strong style="
+                display:block;
+                font-size:20px;
+                margin-top:5px;
+                color:#16a34a;
+            ">
+                {{ passed_attempts }}
+            </strong>
+
+        </div>
+
+
+        <!-- BEST SCORE -->
+
+        <div style="
+            background:#f8fafc;
+            padding:15px;
+            border-radius:10px;
+        ">
+
+            <small style="
+                color:#64748b;
+            ">
+                BEST SCORE
+            </small>
+
+            <strong style="
+                display:block;
+                font-size:20px;
+                margin-top:5px;
+                color:#ff6b00;
+            ">
+                {{ best_score }}/5
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <div class="button-row">
+
+        <a
+            href="{% url 'lms:quiz_history' %}"
+            class="btn btn-dark"
+        >
+            View Quiz History
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

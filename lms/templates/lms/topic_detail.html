@@ -1,0 +1,276 @@
+{% extends "lms/base.html" %}
+
+{% block title %}
+{{ topic.title }} - MCTI One
+{% endblock %}
+
+{% block page_title %}
+{{ topic.title }}
+{% endblock %}
+
+{% block page_subtitle %}
+Module {{ topic.module.order }}: {{ topic.module.title }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="panel">
+
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:15px;
+        flex-wrap:wrap;
+    ">
+
+        <div>
+
+            <div style="
+                color:#ff6b00;
+                font-size:11px;
+                font-weight:700;
+                margin-bottom:6px;
+            ">
+                MODULE {{ topic.module.order }}
+            </div>
+
+            <h2 style="
+                font-size:22px;
+                margin-bottom:7px;
+            ">
+                {{ topic.title }}
+            </h2>
+
+            <p style="
+                color:#64748b;
+                font-size:11px;
+            ">
+                Read the lesson carefully and complete the quiz.
+                Minimum passing score is <strong>3/5</strong>.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{% url 'lms:module_topics' topic.module.id %}"
+            class="btn btn-dark"
+        >
+            ← Back to Topics
+        </a>
+
+    </div>
+
+</div>
+
+
+{% if progress.is_completed %}
+
+<div style="
+    background:#ecfdf3;
+    border:1px solid #bbf7d0;
+    color:#166534;
+    padding:12px 15px;
+    border-radius:10px;
+    margin-bottom:18px;
+    font-size:11px;
+    font-weight:700;
+">
+    ✅ Topic Completed
+    &nbsp; | &nbsp;
+    Best Score: {{ progress.best_score }}/5
+</div>
+
+{% endif %}
+
+
+<div class="panel">
+
+    <h2 class="panel-title">
+        📖 Reading Material
+    </h2>
+
+    <div style="
+        line-height:1.8;
+        font-size:14px;
+        color:#334155;
+        white-space:pre-line;
+    ">
+        {{ topic.description }}
+    </div>
+
+</div>
+
+
+{% if topic.video_url %}
+
+<div class="panel">
+
+    <h2 class="panel-title">
+        🎥 Video Lesson
+    </h2>
+
+    <p style="
+        color:#64748b;
+        font-size:11px;
+        margin-bottom:12px;
+    ">
+        Video is optional. You can continue learning even if no video is available.
+    </p>
+
+    <a
+        href="{{ topic.video_url }}"
+        target="_blank"
+        class="btn"
+    >
+        ▶ Watch Video
+    </a>
+
+</div>
+
+{% endif %}
+
+
+<div style="
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:14px;
+    margin-bottom:20px;
+">
+
+    <div class="panel" style="margin-bottom:0;">
+
+        <h2 class="panel-title">
+            📄 Notes / PDF
+        </h2>
+
+        {% if topic.notes_file %}
+
+            <p style="
+                color:#64748b;
+                font-size:11px;
+                margin-bottom:13px;
+            ">
+                Download the notes for revision and future reference.
+            </p>
+
+            <a
+                href="{{ topic.notes_file.url }}"
+                target="_blank"
+                class="btn"
+            >
+                Download Notes
+            </a>
+
+        {% else %}
+
+            <p style="
+                color:#94a3b8;
+                font-size:11px;
+            ">
+                No additional notes uploaded for this topic.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="panel" style="margin-bottom:0;">
+
+        <h2 class="panel-title">
+            💻 Practice File
+        </h2>
+
+        {% if topic.practice_file %}
+
+            <p style="
+                color:#64748b;
+                font-size:11px;
+                margin-bottom:13px;
+            ">
+                Download and complete the practice exercise.
+            </p>
+
+            <a
+                href="{{ topic.practice_file.url }}"
+                class="btn"
+            >
+                Download Practice File
+            </a>
+
+        {% else %}
+
+            <p style="
+                color:#94a3b8;
+                font-size:11px;
+            ">
+                No practice file uploaded for this topic.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<div class="panel">
+
+    <div style="
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        flex-wrap:wrap;
+        gap:15px;
+    ">
+
+        <div>
+
+            <h2 class="panel-title" style="margin-bottom:5px;">
+                📝 Topic Quiz
+            </h2>
+
+            <p style="
+                color:#64748b;
+                font-size:11px;
+            ">
+                5 Questions • Minimum 3 correct answers required
+            </p>
+
+        </div>
+
+
+        <a
+            href="{% url 'lms:topic_quiz' topic.id %}"
+            class="btn"
+        >
+
+            {% if progress.is_completed %}
+                Retake Quiz →
+            {% else %}
+                Start Quiz →
+            {% endif %}
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    @media (max-width:760px) {
+
+        .content > div[style*="grid-template-columns"] {
+            grid-template-columns:1fr !important;
+        }
+
+    }
+
+</style>
+
+{% endblock %}

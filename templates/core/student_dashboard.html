@@ -535,14 +535,16 @@ tbody tr:last-child td{
 
         <div class="menu-title">MAIN</div>
 
-        <a href="{% url 'student_dashboard' %}" class="active">
-            🏠 Dashboard
-        </a>
+        <a class="nav-link"
+            href="{% url 'student_dashboard' %}">
+                🏠 Student Dashboard
+            </a>
 
-        <a href="#">
-            📚 My Learning
-        </a>
-
+            <a class="nav-link {% block nav_learning %}{% endblock %}"
+            href="{% url 'lms:my_courses' %}">
+                📚 My Learning
+            </a>
+        
         <a href="https://exam.maharashtracomputer.com"
            target="_blank"
            rel="noopener noreferrer">
@@ -623,11 +625,18 @@ tbody tr:last-child td{
         </div>
 
 
-        <!-- TOP SUMMARY -->
+                <!-- TOP SUMMARY -->
         <div class="summary-grid">
 
-            <div class="summary-card orange">
-                <small>📚 MY COURSE</small>
+            <!-- MY COURSE -->
+            <a href="{% url 'lms:my_courses' %}"
+               class="summary-card orange"
+               style="text-decoration:none; color:inherit;">
+
+                <small>
+                    📚 MY COURSE
+                </small>
+
                 <strong>
                     {% if admission.course %}
                         {{ admission.course.title }}
@@ -635,15 +644,34 @@ tbody tr:last-child td{
                         Not Assigned
                     {% endif %}
                 </strong>
-            </div>
 
+                <div class="sub text-orange">
+                    Open My Learning →
+                </div>
+
+            </a>
+
+
+            <!-- PAYMENT STATUS -->
             <div class="summary-card green">
-                <small>✅ PAYMENT STATUS</small>
-                <strong>{{ payment_status }}</strong>
+
+                <small>
+                    ✅ PAYMENT STATUS
+                </small>
+
+                <strong>
+                    {{ payment_status }}
+                </strong>
+
             </div>
 
+
+            <!-- NEXT FEE DUE -->
             <div class="summary-card red">
-                <small>💰 NEXT FEE DUE</small>
+
+                <small>
+                    💰 NEXT FEE DUE
+                </small>
 
                 <strong>
                     {% if next_due_date %}
@@ -656,19 +684,33 @@ tbody tr:last-child td{
                 </strong>
 
                 {% if balance_fee > 0 %}
+
                     <div class="sub text-red">
                         Balance ₹{{ balance_fee|floatformat:2 }}
                     </div>
+
                 {% endif %}
+
             </div>
 
+
+            <!-- ADMISSION NUMBER -->
             <div class="summary-card blue">
-                <small>🎓 ADMISSION NO.</small>
-                <strong>{{ admission.admission_number }}</strong>
+
+                <small>
+                    🎓 ADMISSION NO.
+                </small>
+
+                <strong>
+                    {{ admission.admission_number }}
+                </strong>
+
             </div>
 
         </div>
 
+
+       
 
         <!-- STUDENT INFORMATION -->
         <div class="panel" id="profile-section">

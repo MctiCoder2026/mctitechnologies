@@ -1,0 +1,295 @@
+{% extends "lms/base.html" %}
+
+{% block title %}
+Quiz - {{ topic.title }} | MCTI One
+{% endblock %}
+
+{% block page_title %}
+Topic Quiz
+{% endblock %}
+
+{% block page_subtitle %}
+{{ topic.module.title }} → {{ topic.title }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="panel">
+
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:15px;
+        flex-wrap:wrap;
+    ">
+
+        <div>
+
+            <div style="
+                color:#ff6b00;
+                font-size:11px;
+                font-weight:700;
+                margin-bottom:6px;
+            ">
+                📝 TOPIC QUIZ
+            </div>
+
+            <h2 style="
+                font-size:21px;
+                margin-bottom:7px;
+            ">
+                {{ topic.title }}
+            </h2>
+
+            <p style="
+                color:#64748b;
+                font-size:11px;
+            ">
+                {{ total_questions }} Questions
+                • Minimum passing score:
+                <strong>3/5</strong>
+            </p>
+
+        </div>
+
+        <a
+            href="{% url 'lms:topic_detail' topic.id %}"
+            class="btn btn-dark"
+        >
+            ← Back to Topic
+        </a>
+
+    </div>
+
+</div>
+
+
+<div style="
+    background:#fff7ed;
+    border:1px solid #fed7aa;
+    color:#9a3412;
+    padding:13px 15px;
+    border-radius:10px;
+    margin-bottom:18px;
+    font-size:11px;
+">
+    <strong>Quiz Instructions:</strong>
+    Select one answer for each question and click
+    <strong>Submit Quiz</strong>.
+    Score 3 or more correct answers to unlock the next topic.
+</div>
+
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    {% for question in questions %}
+
+        <div class="panel">
+
+            <div style="
+                display:flex;
+                gap:12px;
+                align-items:flex-start;
+            ">
+
+                <div style="
+                    min-width:34px;
+                    width:34px;
+                    height:34px;
+                    border-radius:50%;
+                    background:#ff6b00;
+                    color:white;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:12px;
+                    font-weight:700;
+                ">
+                    {{ forloop.counter }}
+                </div>
+
+
+                <div style="flex:1;">
+
+                    <h3 style="
+                        font-size:15px;
+                        line-height:1.5;
+                        margin-bottom:15px;
+                    ">
+                        {{ question.question }}
+                    </h3>
+
+
+                    <label style="
+                        display:block;
+                        border:1px solid #e2e8f0;
+                        border-radius:9px;
+                        padding:11px 13px;
+                        margin-bottom:9px;
+                        cursor:pointer;
+                    ">
+
+                        <input
+                            type="radio"
+                            name="question_{{ question.id }}"
+                            value="A"
+                            required
+                            style="margin-right:9px;"
+                        >
+
+                        <strong>A.</strong>
+                        {{ question.option_a }}
+
+                    </label>
+
+
+                    <label style="
+                        display:block;
+                        border:1px solid #e2e8f0;
+                        border-radius:9px;
+                        padding:11px 13px;
+                        margin-bottom:9px;
+                        cursor:pointer;
+                    ">
+
+                        <input
+                            type="radio"
+                            name="question_{{ question.id }}"
+                            value="B"
+                            required
+                            style="margin-right:9px;"
+                        >
+
+                        <strong>B.</strong>
+                        {{ question.option_b }}
+
+                    </label>
+
+
+                    <label style="
+                        display:block;
+                        border:1px solid #e2e8f0;
+                        border-radius:9px;
+                        padding:11px 13px;
+                        margin-bottom:9px;
+                        cursor:pointer;
+                    ">
+
+                        <input
+                            type="radio"
+                            name="question_{{ question.id }}"
+                            value="C"
+                            required
+                            style="margin-right:9px;"
+                        >
+
+                        <strong>C.</strong>
+                        {{ question.option_c }}
+
+                    </label>
+
+
+                    <label style="
+                        display:block;
+                        border:1px solid #e2e8f0;
+                        border-radius:9px;
+                        padding:11px 13px;
+                        cursor:pointer;
+                    ">
+
+                        <input
+                            type="radio"
+                            name="question_{{ question.id }}"
+                            value="D"
+                            required
+                            style="margin-right:9px;"
+                        >
+
+                        <strong>D.</strong>
+                        {{ question.option_d }}
+
+                    </label>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% empty %}
+
+        <div class="panel">
+            <p>No quiz questions are available for this topic.</p>
+        </div>
+
+    {% endfor %}
+
+
+    {% if questions %}
+
+        <div class="panel">
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:12px;
+                flex-wrap:wrap;
+            ">
+
+                <div>
+
+                    <strong style="font-size:13px;">
+                        Ready to submit?
+                    </strong>
+
+                    <p style="
+                        color:#64748b;
+                        font-size:10px;
+                        margin-top:4px;
+                    ">
+                        Make sure all {{ total_questions }} questions are answered.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="btn"
+                    style="
+                        min-width:140px;
+                        font-size:12px;
+                    "
+                >
+                    Submit Quiz →
+                </button>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+</form>
+
+
+<style>
+
+    label:has(input[type="radio"]:checked) {
+        border-color:#ff6b00 !important;
+        background:#fff7ed;
+        box-shadow:0 0 0 1px #ff6b00;
+    }
+
+    input[type="radio"] {
+        accent-color:#ff6b00;
+    }
+
+</style>
+
+{% endblock %}
