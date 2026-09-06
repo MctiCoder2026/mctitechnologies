@@ -944,6 +944,64 @@ tbody tr:last-child td{
     </div>
 
 </main>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    if (!navigator.geolocation) {
+        console.log("Geolocation is not supported by this browser.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        function (position) {
+
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            const formData = new FormData();
+            formData.append("latitude", latitude);
+            formData.append("longitude", longitude);
+
+            fetch("{% url 'mark_student_attendance' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                console.log(data);
+
+                if (data.success) {
+                    console.log(data.message);
+                } else {
+                    console.log(data.message);
+                }
+
+            })
+            .catch(error => {
+                console.error("Attendance error:", error);
+            });
+        },
+
+        function (error) {
+            console.log(
+                "Location permission denied or unavailable.",
+                error
+            );
+        },
+
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+
+});
+</script>
 
 </body>
 </html>

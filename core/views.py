@@ -1,3 +1,5 @@
+from math import radians, sin, cos, sqrt, atan2
+
 from datetime import timedelta
 from django.utils import timezone
 from django.contrib.auth import authenticate, login
@@ -5,13 +7,14 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import logout as auth_logout
 from django.contrib import messages
-from .models import JobPost, StaffProfile
+from .models import JobPost, StaffProfile, Attendance, BranchLocation
 from .forms import JobPostForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.db.models import Q, Sum
 from django.utils import timezone
 from datetime import datetime, timedelta
+
 
 from .forms import (
     EnquiryForm,
@@ -39,9 +42,151 @@ from .models import (
     BusinessLeadActivity,
 )
 
+def calculate_distance_meters(lat1, lon1, lat2, lon2):
+    earth_radius = 6371000  # meters
+
+    lat1 = radians(float(lat1))
+    lon1 = radians(float(lon1))
+    lat2 = radians(float(lat2))
+    lon2 = radians(float(lon2))
+
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    a = (
+        sin(dlat / 2) ** 2
+        + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+    )
+
+    c = 2 * atan2(
+        sqrt(a),
+        sqrt(1 - a)
+    )
+
+    return earth_radius * c
+
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 
 
+@login_required
+def mark_student_attendance(request):
 
+    if request.method != "POST":
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid request."
+        }, status=405)
+
+    student = getattr(
+        request.user,
+        "student_account",
+        None
+    )
+
+    if not student:
+        return JsonResponse({
+            "success": False,
+            "message": "Student account not found."
+        }, status=403)
+
+    latitude = request.POST.get("latitude")
+    longitude = request.POST.get("longitude")
+
+    if not latitude or not longitude:
+        return JsonResponse({
+            "success": False,
+            "message": "Location not received."
+        }, status=400)
+
+    # --------------------------------------------------------
+    # CHECK IF ATTENDANCE ALREADY EXISTS TODAY
+    # --------------------------------------------------------
+
+    today = timezone.localdate()
+
+    existing_attendance = Attendance.objects.filter(
+        student=student,
+        attendance_date=today
+    ).first()
+
+    if existing_attendance:
+        return JsonResponse({
+            "success": True,
+            "already_marked": True,
+            "message": "Attendance already marked for today."
+        })
+
+    # --------------------------------------------------------
+    # FIND NEAREST ACTIVE BRANCH
+    # --------------------------------------------------------
+
+    matched_branch = None
+    matched_distance = None
+
+    branches = BranchLocation.objects.filter(
+        is_active=True
+    )
+
+    for branch in branches:
+
+        distance = calculate_distance_meters(
+            latitude,
+            longitude,
+            branch.latitude,
+            branch.longitude
+        )
+
+        if distance <= branch.radius_meters:
+
+            if (
+                matched_distance is None
+                or distance < matched_distance
+            ):
+                matched_branch = branch
+                matched_distance = distance
+
+    if not matched_branch:
+        return JsonResponse({
+            "success": False,
+            "message": "You are outside the allowed branch radius."
+        })
+
+    # --------------------------------------------------------
+    # MARK ATTENDANCE
+    # --------------------------------------------------------
+
+    attendance, created = Attendance.objects.get_or_create(
+        student=student,
+        attendance_date=today,
+        defaults={
+            "status": "present",
+            "branch": matched_branch.branch_name,
+            "course": student.course,
+            "first_login_time": timezone.now(),
+            "latitude": latitude,
+            "longitude": longitude,
+            "source": "auto",
+        }
+    )
+
+    if not created:
+        return JsonResponse({
+            "success": True,
+            "already_marked": True,
+            "message": "Attendance already marked for today."
+        })
+
+    return JsonResponse({
+        "success": True,
+        "already_marked": False,
+        "branch": matched_branch.branch_name,
+        "distance_meters": round(
+            matched_distance,
+            2
+        ),
+        "message": "Attendance marked successfully."
+    })
 
 # ============================================================
 # BUSINESS LEAD DETAIL

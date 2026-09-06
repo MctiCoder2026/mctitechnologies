@@ -1297,6 +1297,12 @@ class Attendance(models.Model):
         ("leave", "Leave"),
     ]
 
+    SOURCE_CHOICES = [
+        ("auto", "Auto - Student Login"),
+        ("staff", "Staff Manual"),
+        ("admin", "Admin Manual"),
+    ]
+
     student = models.ForeignKey(
         Student,
         on_delete=models.CASCADE,
@@ -1305,6 +1311,10 @@ class Attendance(models.Model):
 
     attendance_date = models.DateField(
         default=timezone.localdate
+    )
+    first_login_time = models.DateTimeField(
+        null=True,
+        blank=True
     )
 
     status = models.CharField(
@@ -1326,7 +1336,26 @@ class Attendance(models.Model):
         blank=True,
         related_name="attendance_records"
     )
+    latitude = models.DecimalField(
+        max_digits=10,
+        decimal_places=7,
+        null=True,
+        blank=True
+    )
 
+    longitude = models.DecimalField(
+        max_digits=10,
+        decimal_places=7,
+        null=True,
+        blank=True
+    )
+
+    source = models.CharField(
+        max_length=20,
+        choices=SOURCE_CHOICES,
+        default="auto"
+    )
+    
     remarks = models.CharField(
         max_length=255,
         blank=True,
@@ -1404,6 +1433,50 @@ class Attendance(models.Model):
         ]
 
 
+# ============================================================
+# BRANCH GPS LOCATION
+# ============================================================
+
+class BranchLocation(models.Model):
+
+    branch_name = models.CharField(
+        max_length=100,
+        unique=True
+    )
+
+    latitude = models.DecimalField(
+        max_digits=10,
+        decimal_places=7
+    )
+
+    longitude = models.DecimalField(
+        max_digits=10,
+        decimal_places=7
+    )
+
+    radius_meters = models.PositiveIntegerField(
+        default=150
+    )
+
+    is_active = models.BooleanField(
+        default=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return self.branch_name
+
+    class Meta:
+        ordering = ["branch_name"]
+
+
 class BusinessLead(models.Model):
 
     SERVICE_CHOICES = [
@@ -1422,7 +1495,6 @@ class BusinessLead(models.Model):
         ("converted", "Converted"),
         ("closed", "Closed"),
     ]
-
     BUDGET_CHOICES = [
         ("below_25k", "Below ₹25,000"),
         ("25k_50k", "₹25,000 - ₹50,000"),
@@ -1599,3 +1671,34 @@ class BusinessLeadActivity(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+first_login_time = models.DateTimeField(
+    null=True,
+    blank=True
+)
+
+latitude = models.DecimalField(
+    max_digits=10,
+    decimal_places=7,
+    null=True,
+    blank=True
+)
+
+longitude = models.DecimalField(
+    max_digits=10,
+    decimal_places=7,
+    null=True,
+    blank=True
+)
+
+SOURCE_CHOICES = [
+    ("auto", "Auto - Student Login"),
+    ("staff", "Staff Manual"),
+    ("admin", "Admin Manual"),
+]
+
+source = models.CharField(
+    max_length=20,
+    choices=SOURCE_CHOICES,
+    default="auto"
+)

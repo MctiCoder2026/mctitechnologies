@@ -78,7 +78,11 @@ urlpatterns = [
     # ============================================================
     # STUDENT LOGIN / PORTAL
     # ============================================================
-
+    path(
+    "student/mark-attendance/",
+    views.mark_student_attendance,
+    name="mark_student_attendance",
+    ),
     path(
         "student/login/",
         views.student_login,

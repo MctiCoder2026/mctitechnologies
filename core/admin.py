@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
+from .models import Attendance, BranchLocation
 
 from .models import (
     Course,
@@ -437,4 +438,21 @@ class AttendanceAdmin(admin.ModelAdmin):
     ordering = (
         "-attendance_date",
         "student__name",
+    )
+@admin.register(BranchLocation)
+class BranchLocationAdmin(admin.ModelAdmin):
+    list_display = (
+        "branch_name",
+        "latitude",
+        "longitude",
+        "radius_meters",
+        "is_active",
+    )
+
+    list_filter = (
+        "is_active",
+    )
+
+    search_fields = (
+        "branch_name",
     )
