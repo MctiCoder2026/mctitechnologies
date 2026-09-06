@@ -2176,17 +2176,39 @@ def mark_attendance(request):
                 ""
             ).strip()
 
-            Attendance.objects.update_or_create(
+            existing = Attendance.objects.filter(
                 student=student,
                 attendance_date=attendance_date,
-                defaults={
-                    "status": status_value,
-                    "branch": student.branch or "",
-                    "course": student.course,
-                    "remarks": remarks,
-                    "marked_by": request.user,
-                }
-            )
+            ).first()
+
+            if existing:
+                current_remarks = existing.remarks or ""
+
+                if (
+                    existing.status == status_value
+                    and current_remarks == remarks
+                ):
+                    continue
+
+                existing.status = status_value
+                existing.branch = student.branch or ""
+                existing.course = student.course
+                existing.remarks = remarks
+                existing.marked_by = request.user
+                existing.source = "admin" if admin_access else "staff"
+                existing.save()
+
+            else:
+                Attendance.objects.create(
+                    student=student,
+                    attendance_date=attendance_date,
+                    status=status_value,
+                    branch=student.branch or "",
+                    course=student.course,
+                    remarks=remarks,
+                    marked_by=request.user,
+                    source="admin" if admin_access else "staff",
+                )
 
             saved_count += 1
 

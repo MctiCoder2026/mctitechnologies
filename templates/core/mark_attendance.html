@@ -140,7 +140,7 @@ td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
             <td>{% if row.student.course %}{{ row.student.course.title }}{% else %}-{% endif %}</td>
             <td>{{ row.student.branch|title }}</td>
             <td>
-              <select name="status_{{ row.student.id }}" required>
+              <select name="status_{{ row.student.id }}">
                 <option value="">Select</option>
                 <option value="present" {% if row.record and row.record.status == "present" %}selected{% endif %}>Present</option>
                 <option value="absent" {% if row.record and row.record.status == "absent" %}selected{% endif %}>Absent</option>
