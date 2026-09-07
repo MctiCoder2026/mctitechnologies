@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.conf import settings
 
@@ -107,7 +108,78 @@ class LMSTopic(models.Model):
     def __str__(self):
         return f"{self.module.title} - {self.title}"
 
+# =========================================================
+# LMS TOPIC CONTENT - MULTILINGUAL
+# =========================================================
 
+class LMSTopicContent(models.Model):
+
+    LANGUAGE_CHOICES = [
+        ("en", "English"),
+        ("hi", "Hindi"),
+        ("mr", "Marathi"),
+    ]
+
+    topic = models.ForeignKey(
+        LMSTopic,
+        on_delete=models.CASCADE,
+        related_name="contents"
+    )
+
+    language = models.CharField(
+        max_length=2,
+        choices=LANGUAGE_CHOICES,
+        default="en"
+    )
+
+    description = models.TextField(
+        blank=True
+    )
+
+    video_url = models.URLField(
+        blank=True
+    )
+
+    notes_file = models.FileField(
+        upload_to="lms/notes/",
+        blank=True,
+        null=True
+    )
+
+    practice_file = models.FileField(
+        upload_to="lms/practice/",
+        blank=True,
+        null=True
+    )
+
+    is_active = models.BooleanField(
+        default=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    class Meta:
+        unique_together = (
+            "topic",
+            "language",
+        )
+
+        ordering = (
+            "topic",
+            "language",
+        )
+
+    def __str__(self):
+        return (
+            f"{self.topic.title} - "
+            f"{self.get_language_display()}"
+        )
 # =========================================================
 # QUIZ QUESTION
 # =========================================================
@@ -118,6 +190,17 @@ class QuizQuestion(models.Model):
         LMSTopic,
         on_delete=models.CASCADE,
         related_name="quiz_questions"
+    )
+    LANGUAGE_CHOICES = [
+    ("en", "English"),
+    ("hi", "Hindi"),
+    ("mr", "Marathi"),
+    ]
+
+    language = models.CharField(
+        max_length=2,
+        choices=LANGUAGE_CHOICES,
+        default="en"
     )
 
     question = models.TextField()
@@ -262,4 +345,57 @@ class QuizAttempt(models.Model):
             f"{self.student} - "
             f"{self.topic.title} - "
             f"{self.score}/{self.total_questions}"
+        )
+    # =========================================================
+# CERTIFICATE
+# =========================================================
+
+class Certificate(models.Model):
+
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name="lms_certificates"
+    )
+
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="lms_certificates"
+    )
+
+    certificate_number = models.CharField(
+        max_length=50,
+        unique=True
+    )
+
+    verification_token = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False
+    )
+
+    issue_date = models.DateField(
+        auto_now_add=True
+    )
+
+    is_active = models.BooleanField(
+        default=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        unique_together = (
+            "student",
+            "course",
+        )
+        ordering = ["-issue_date"]
+
+    def __str__(self):
+        return (
+            f"{self.certificate_number} - "
+            f"{self.student.name}"
         )

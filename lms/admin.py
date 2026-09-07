@@ -3,9 +3,11 @@ from django.contrib import admin
 from .models import (
     LMSModule,
     LMSTopic,
+    LMSTopicContent,
     QuizQuestion,
     StudentTopicProgress,
     QuizAttempt,
+    
 )
 
 
@@ -48,13 +50,26 @@ class LMSModuleAdmin(admin.ModelAdmin):
 # =========================================================
 # QUIZ QUESTION INLINE
 # =========================================================
+class LMSTopicContentInline(admin.TabularInline):
 
+    model = LMSTopicContent
+    extra = 0
+
+    fields = (
+        "language",
+        "description",
+        "video_url",
+        "notes_file",
+        "practice_file",
+        "is_active",
+    )
 class QuizQuestionInline(admin.TabularInline):
 
     model = QuizQuestion
     extra = 0
 
     fields = (
+        "language",
         "order",
         "question",
         "option_a",
@@ -66,6 +81,7 @@ class QuizQuestionInline(admin.TabularInline):
     )
 
     ordering = (
+        "language",
         "order",
     )
 
@@ -112,8 +128,9 @@ class LMSTopicAdmin(admin.ModelAdmin):
     )
 
     inlines = [
-        QuizQuestionInline,
-    ]
+    LMSTopicContentInline,
+    QuizQuestionInline,
+]
 
     fieldsets = (
 
@@ -172,6 +189,7 @@ class QuizQuestionAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "topic",
+        "language",
         "order",
         "short_question",
         "correct_answer",
@@ -179,6 +197,7 @@ class QuizQuestionAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
+        "language",
         "topic__module__course",
         "topic__module",
         "topic",
@@ -196,10 +215,12 @@ class QuizQuestionAdmin(admin.ModelAdmin):
         "topic__module__course",
         "topic__module__order",
         "topic__order",
+        "language",
         "order",
     )
 
     list_editable = (
+        "language",
         "order",
         "correct_answer",
         "is_active",
@@ -212,6 +233,7 @@ class QuizQuestionAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "topic",
+                    "language",
                     "question",
                     "order",
                     "is_active",

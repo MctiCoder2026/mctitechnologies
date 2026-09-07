@@ -971,7 +971,13 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(response => response.json())
             .then(data => {
-                
+
+                alert(
+                    "LAT: " + latitude +
+                    "\nLON: " + longitude +
+                    "\nACCURACY: " + position.coords.accuracy + " meters\n\n" +
+                    JSON.stringify(data)
+                );
 
                 console.log(data);
 

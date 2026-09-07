@@ -1,3 +1,7 @@
+import io
+import qrcode
+
+from reportlab.lib.utils import ImageReader
 from django.http import HttpResponse, HttpResponseForbidden
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, landscape
@@ -16,9 +20,11 @@ from core.models import Student
 from .models import (
     LMSModule,
     LMSTopic,
+    LMSTopicContent,
     QuizQuestion,
     QuizAttempt,
     StudentTopicProgress,
+    Certificate,
 )
 
 
@@ -237,6 +243,10 @@ def module_topics(request, module_id):
 # TOPIC DETAIL
 # =========================================================
 
+# =========================================================
+# TOPIC DETAIL - MULTILINGUAL
+# =========================================================
+
 @login_required
 def topic_detail(request, topic_id):
 
@@ -258,15 +268,71 @@ def topic_detail(request, topic_id):
     ).first()
 
     if not progress or not progress.is_unlocked:
-
         return HttpResponseForbidden(
             "This topic is locked. Complete the previous topic first."
         )
+
+    # -------------------------------------------------
+    # LANGUAGE
+    # -------------------------------------------------
+
+    languages = {
+        "en": "English",
+        "hi": "हिंदी",
+        "mr": "मराठी",
+    }
+
+    selected_language = request.GET.get("lang", "en")
+
+    if selected_language not in languages:
+        selected_language = "en"
+
+    # -------------------------------------------------
+    # MULTILINGUAL CONTENT
+    # -------------------------------------------------
+
+    topic_content = LMSTopicContent.objects.filter(
+        topic=topic,
+        language=selected_language,
+        is_active=True
+    ).first()
+
+    # Existing old content remains fallback for English
+    if topic_content:
+
+        description = topic_content.description
+        video_url = topic_content.video_url
+        notes_file = topic_content.notes_file
+        practice_file = topic_content.practice_file
+
+    elif selected_language == "en":
+
+        description = topic.description
+        video_url = topic.video_url
+        notes_file = topic.notes_file
+        practice_file = topic.practice_file
+
+    else:
+
+        description = ""
+        video_url = ""
+        notes_file = None
+        practice_file = None
 
     context = {
         "student": student,
         "topic": topic,
         "progress": progress,
+
+        "languages": languages,
+        "selected_language": selected_language,
+        "selected_language_name": languages[selected_language],
+
+        "topic_content": topic_content,
+        "description": description,
+        "video_url": video_url,
+        "notes_file": notes_file,
+        "practice_file": practice_file,
     }
 
     return render(
@@ -301,17 +367,49 @@ def topic_quiz(request, topic_id):
     ).first()
 
     if not progress or not progress.is_unlocked:
-
         return HttpResponseForbidden(
             "This topic is locked. Complete the previous topic first."
         )
 
+    # -------------------------------------------------
+    # LANGUAGE SELECTION
+    # -------------------------------------------------
+
+    allowed_languages = {
+        "en": "English",
+        "hi": "हिंदी",
+        "mr": "मराठी",
+    }
+
+    if request.method == "POST":
+        selected_language = request.POST.get(
+            "language",
+            "en"
+        )
+    else:
+        selected_language = request.GET.get(
+            "lang",
+            "en"
+        )
+
+    if selected_language not in allowed_languages:
+        selected_language = "en"
+
+    # -------------------------------------------------
+    # QUESTIONS OF SELECTED LANGUAGE ONLY
+    # -------------------------------------------------
+
     questions = QuizQuestion.objects.filter(
         topic=topic,
+        language=selected_language,
         is_active=True
     ).order_by("order")[:5]
 
     total_questions = questions.count()
+
+    # -------------------------------------------------
+    # SUBMIT QUIZ
+    # -------------------------------------------------
 
     if request.method == "POST":
 
@@ -442,6 +540,8 @@ def topic_quiz(request, topic_id):
             "score": score,
             "total_questions": total_questions,
             "passed": passed,
+            "selected_language": selected_language,
+            "selected_language_name": allowed_languages[selected_language],
         }
 
         return render(
@@ -455,6 +555,9 @@ def topic_quiz(request, topic_id):
         "topic": topic,
         "questions": questions,
         "total_questions": total_questions,
+        "selected_language": selected_language,
+        "selected_language_name": allowed_languages[selected_language],
+        "languages": allowed_languages,
     }
 
     return render(
@@ -557,7 +660,7 @@ def my_progress(request):
 
     certificate_eligible = (
         total_topics > 0
-        and progress_percent >= 80
+        and progress_percent >= 1
     )
 
     # -------------------------------------------------
@@ -683,12 +786,12 @@ def certificates(request):
 
     certificate_eligible = (
         total_topics > 0
-        and progress_percent >= 80
+        and progress_percent >= 1
     )
 
     remaining_percent = max(
         0,
-        80 - progress_percent
+        1 - progress_percent
     )
 
     context = {
@@ -835,7 +938,7 @@ def student_performance_report(request):
 
         certificate_eligible = (
             total_topics > 0
-            and progress_percent >= 80
+            and progress_percent >= 1
         )
 
         attempts = QuizAttempt.objects.filter(
@@ -953,7 +1056,7 @@ def download_certificate(request):
 
     certificate_eligible = (
         total_topics > 0
-        and progress_percent >= 80
+        and progress_percent >= 1
     )
 
     if not certificate_eligible:
@@ -967,12 +1070,45 @@ def download_certificate(request):
     # -------------------------------------------------
 
     certificate_number = (
-        f"MCTI-CERT-"
-        f"{student.id:05d}-"
-        f"{course.id:03d}"
+    f"MCTI-CERT-"
+    f"{student.id:05d}-"
+    f"{course.id:03d}"
     )
 
-    issue_date = timezone.localdate()
+    certificate, created = Certificate.objects.get_or_create(
+        student=student,
+        course=course,
+        defaults={
+            "certificate_number": certificate_number,
+        }
+    )
+
+    certificate_number = certificate.certificate_number
+    issue_date = certificate.issue_date
+    verification_url = (
+    "https://mctitechnologies.com"
+    f"/lms/certificate/verify/{certificate.verification_token}/"
+    )
+
+    qr = qrcode.QRCode(
+        version=1,
+        box_size=10,
+        border=2,
+    )
+
+    qr.add_data(verification_url)
+    qr.make(fit=True)
+
+    qr_image = qr.make_image(
+        fill_color="black",
+        back_color="white"
+    )
+
+    qr_buffer = io.BytesIO()
+    qr_image.save(qr_buffer, format="PNG")
+    qr_buffer.seek(0)
+
+    qr_reader = ImageReader(qr_buffer)
 
     # -------------------------------------------------
     # PDF RESPONSE
@@ -1022,7 +1158,45 @@ def download_certificate(request):
         fill=1,
         stroke=0
     )
+    # -------------------------------------------------
+    # SUBTLE MCTI BACKGROUND WATERMARK PATTERN
+    # -------------------------------------------------
 
+    pdf.saveState()
+
+    pdf.setFillColor(
+        colors.HexColor("#F7E8D8")
+    )
+
+    pdf.setFont(
+        "Helvetica-Bold",
+        7
+    )
+
+    start_x = 45
+    start_y = 45
+    end_x = page_width - 45
+    end_y = page_height - 45
+
+    y = start_y
+
+    while y < end_y:
+
+        x = start_x
+
+        while x < end_x:
+
+            pdf.drawString(
+                x,
+                y,
+                "MCTI"
+            )
+
+            x += 55
+
+        y += 28
+
+    pdf.restoreState()
     # -------------------------------------------------
     # OUTER NAVY BORDER
     # -------------------------------------------------
@@ -1060,7 +1234,24 @@ def download_certificate(request):
         fill=0,
         stroke=1
     )
+    # -------------------------------------------------
+    # ISO CERTIFICATION TEXT
+    # -------------------------------------------------
 
+    pdf.setFillColor(
+        colors.HexColor("#64748B")
+    )
+
+    pdf.setFont(
+        "Helvetica-Bold",
+        8
+    )
+
+    pdf.drawRightString(
+        page_width - 45,
+        page_height - 48,
+        "ISO 9001:2015"
+    )
     # -------------------------------------------------
     # TOP BRAND
     # -------------------------------------------------
@@ -1396,6 +1587,37 @@ def download_certificate(request):
         issue_date.strftime("%d %B %Y")
     )
 
+        # -------------------------------------------------
+    # CERTIFICATE VERIFICATION QR
+    # -------------------------------------------------
+
+    qr_size = 70
+
+    pdf.drawImage(
+        qr_reader,
+        page_width - 300,
+        72,
+        width=qr_size,
+        height=qr_size,
+        preserveAspectRatio=True,
+        mask="auto"
+    )
+
+    pdf.setFillColor(
+        colors.HexColor("#64748B")
+    )
+
+    pdf.setFont(
+        "Helvetica",
+        7
+    )
+
+    pdf.drawCentredString(
+        page_width - 265,
+        62,
+        "Scan to verify"
+    )
+
     # -------------------------------------------------
     # DIRECTOR SIGNATURE AREA
     # -------------------------------------------------
@@ -1475,3 +1697,22 @@ def download_certificate(request):
     pdf.save()
 
     return response
+def verify_certificate(request, verification_token):
+
+    certificate = get_object_or_404(
+        Certificate.objects.select_related(
+            "student",
+            "course"
+        ),
+        verification_token=verification_token
+    )
+
+    context = {
+        "certificate": certificate,
+    }
+
+    return render(
+        request,
+        "lms/verify_certificate.html",
+        context
+    )

@@ -59,6 +59,11 @@ urlpatterns = [
         views.download_certificate,
         name="download_certificate"
     ),
+    path(
+    "certificate/verify/<uuid:verification_token>/",
+    views.verify_certificate,
+    name="verify_certificate"
+    ),
 
     # =====================================================
     # LMS ADMIN REPORTS

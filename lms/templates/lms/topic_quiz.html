@@ -66,6 +66,70 @@ Topic Quiz
 </div>
 
 
+<!-- ===================================================== -->
+<!-- LANGUAGE SELECTOR -->
+<!-- ===================================================== -->
+
+<div class="panel">
+
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:12px;
+        flex-wrap:wrap;
+    ">
+
+        <div>
+            <strong style="font-size:13px;">
+                Choose Quiz Language
+            </strong>
+
+            <p style="
+                color:#64748b;
+                font-size:10px;
+                margin-top:4px;
+            ">
+                Current language:
+                <strong>{{ selected_language_name }}</strong>
+            </p>
+        </div>
+
+
+        <div style="
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+        ">
+
+            <a
+                href="?lang=en"
+                class="language-btn {% if selected_language == 'en' %}active{% endif %}"
+            >
+                English
+            </a>
+
+            <a
+                href="?lang=hi"
+                class="language-btn {% if selected_language == 'hi' %}active{% endif %}"
+            >
+                हिंदी
+            </a>
+
+            <a
+                href="?lang=mr"
+                class="language-btn {% if selected_language == 'mr' %}active{% endif %}"
+            >
+                मराठी
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
 <div style="
     background:#fff7ed;
     border:1px solid #fed7aa;
@@ -85,6 +149,14 @@ Topic Quiz
 <form method="POST">
 
     {% csrf_token %}
+
+    <!-- Keep selected language during quiz submission -->
+    <input
+        type="hidden"
+        name="language"
+        value="{{ selected_language }}"
+    >
+
 
     {% for question in questions %}
 
@@ -223,7 +295,28 @@ Topic Quiz
     {% empty %}
 
         <div class="panel">
-            <p>No quiz questions are available for this topic.</p>
+
+            <div style="
+                text-align:center;
+                padding:20px;
+            ">
+
+                <h3 style="
+                    font-size:15px;
+                    margin-bottom:8px;
+                ">
+                    Quiz not available in {{ selected_language_name }}
+                </h3>
+
+                <p style="
+                    color:#64748b;
+                    font-size:11px;
+                ">
+                    Please choose another language or contact your trainer.
+                </p>
+
+            </div>
+
         </div>
 
     {% endfor %}
@@ -288,6 +381,31 @@ Topic Quiz
 
     input[type="radio"] {
         accent-color:#ff6b00;
+    }
+
+    .language-btn {
+        display:inline-block;
+        padding:9px 16px;
+        border-radius:8px;
+        border:1px solid #e2e8f0;
+        background:#ffffff;
+        color:#111827;
+        text-decoration:none;
+        font-size:11px;
+        font-weight:700;
+        transition:0.2s;
+    }
+
+    .language-btn:hover {
+        border-color:#ff6b00;
+        background:#fff7ed;
+    }
+
+    .language-btn.active {
+        background:#ff6b00;
+        color:#ffffff;
+        border-color:#ff6b00;
+        box-shadow:0 3px 8px rgba(255,107,0,0.18);
     }
 
 </style>
