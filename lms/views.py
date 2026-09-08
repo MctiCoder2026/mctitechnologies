@@ -29,6 +29,36 @@ from .models import (
 
 
 # =========================================================
+# STUDENT LMS COURSE ACCESS
+# =========================================================
+
+def get_student_lms_courses(student):
+    course = student.course
+
+    if not course:
+        return []
+
+    if course.is_package:
+        included_courses = list(
+            course.included_courses.filter(
+                is_active=True
+            ).order_by("title")
+        )
+
+        if included_courses:
+            return included_courses
+
+    return [course]
+
+
+def student_can_access_course(student, course):
+    return any(
+        allowed_course.id == course.id
+        for allowed_course in get_student_lms_courses(student)
+    )
+
+
+# =========================================================
 # MY COURSES
 # =========================================================
 
@@ -40,105 +70,141 @@ def my_courses(request):
         user=request.user
     )
 
-    course = student.course
+    enrolled_course = student.course
+    courses = get_student_lms_courses(student)
+    course_data = []
 
-    modules = LMSModule.objects.filter(
-        course=course,
-        is_active=True
-    ).order_by("order")
+    for course in courses:
 
-    all_topics = LMSTopic.objects.filter(
-        module__course=course,
-        module__is_active=True,
-        is_active=True
-    ).order_by(
-        "module__order",
-        "order"
-    )
-
-    total_topics = all_topics.count()
-
-    completed_topics = StudentTopicProgress.objects.filter(
-        student=student,
-        topic__in=all_topics,
-        is_completed=True
-    ).count()
-
-    if total_topics > 0:
-        progress_percent = round(
-            (completed_topics / total_topics) * 100
-        )
-    else:
-        progress_percent = 0
-
-    # -------------------------------------------------
-    # CONTINUE LEARNING
-    # -------------------------------------------------
-
-    continue_topic = None
-
-    for topic in all_topics:
-
-        progress = StudentTopicProgress.objects.filter(
-            student=student,
-            topic=topic
-        ).first()
-
-        if (
-            progress
-            and progress.is_unlocked
-            and not progress.is_completed
-        ):
-            continue_topic = topic
-            break
-
-    # -------------------------------------------------
-    # MODULE-WISE PROGRESS
-    # -------------------------------------------------
-
-    module_data = []
-
-    for module in modules:
-
-        module_topics = LMSTopic.objects.filter(
-            module=module,
+        modules = LMSModule.objects.filter(
+            course=course,
             is_active=True
+        ).order_by("order")
+
+        all_topics = LMSTopic.objects.filter(
+            module__course=course,
+            module__is_active=True,
+            is_active=True
+        ).order_by(
+            "module__order",
+            "order"
         )
 
-        module_total = module_topics.count()
+        total_topics = all_topics.count()
 
-        module_completed = StudentTopicProgress.objects.filter(
+        completed_topics = StudentTopicProgress.objects.filter(
             student=student,
-            topic__in=module_topics,
+            topic__in=all_topics,
             is_completed=True
         ).count()
 
-        if module_total > 0:
-            module_percent = round(
-                (module_completed / module_total) * 100
-            )
-        else:
-            module_percent = 0
+        progress_percent = (
+            round((completed_topics / total_topics) * 100)
+            if total_topics > 0
+            else 0
+        )
 
-        module_data.append({
-            "module": module,
-            "total": module_total,
-            "completed": module_completed,
-            "percent": module_percent,
-            "is_completed": (
-                module_total > 0
-                and module_completed == module_total
-            ),
+        continue_topic = None
+
+        for topic in all_topics:
+            progress = StudentTopicProgress.objects.filter(
+                student=student,
+                topic=topic
+            ).first()
+
+            if (
+                progress
+                and progress.is_unlocked
+                and not progress.is_completed
+            ):
+                continue_topic = topic
+                break
+
+        module_data = []
+
+        for module in modules:
+            module_topics = LMSTopic.objects.filter(
+                module=module,
+                is_active=True
+            )
+
+            module_total = module_topics.count()
+
+            module_completed = StudentTopicProgress.objects.filter(
+                student=student,
+                topic__in=module_topics,
+                is_completed=True
+            ).count()
+
+            module_percent = (
+                round((module_completed / module_total) * 100)
+                if module_total > 0
+                else 0
+            )
+
+            module_data.append({
+                "module": module,
+                "total": module_total,
+                "completed": module_completed,
+                "percent": module_percent,
+                "is_completed": (
+                    module_total > 0
+                    and module_completed == module_total
+                ),
+            })
+
+        course_data.append({
+            "course": course,
+            "module_data": module_data,
+            "total_topics": total_topics,
+            "completed_topics": completed_topics,
+            "progress_percent": progress_percent,
+            "continue_topic": continue_topic,
         })
+
+    # Keep old template working until we update my_courses.html.
+    first_course_data = course_data[0] if course_data else None
 
     context = {
         "student": student,
-        "course": course,
-        "module_data": module_data,
-        "total_topics": total_topics,
-        "completed_topics": completed_topics,
-        "progress_percent": progress_percent,
-        "continue_topic": continue_topic,
+        "enrolled_course": enrolled_course,
+        "is_package": bool(
+            enrolled_course
+            and enrolled_course.is_package
+        ),
+        "courses": courses,
+        "course_data": course_data,
+
+        "course": (
+            first_course_data["course"]
+            if first_course_data
+            else enrolled_course
+        ),
+        "module_data": (
+            first_course_data["module_data"]
+            if first_course_data
+            else []
+        ),
+        "total_topics": (
+            first_course_data["total_topics"]
+            if first_course_data
+            else 0
+        ),
+        "completed_topics": (
+            first_course_data["completed_topics"]
+            if first_course_data
+            else 0
+        ),
+        "progress_percent": (
+            first_course_data["progress_percent"]
+            if first_course_data
+            else 0
+        ),
+        "continue_topic": (
+            first_course_data["continue_topic"]
+            if first_course_data
+            else None
+        ),
     }
 
     return render(
@@ -163,9 +229,16 @@ def module_topics(request, module_id):
     module = get_object_or_404(
         LMSModule,
         id=module_id,
-        course=student.course,
         is_active=True
     )
+
+    if not student_can_access_course(
+        student,
+        module.course
+    ):
+        return HttpResponseForbidden(
+            "You do not have access to this course."
+        )
 
     topics = list(
         module.topics.filter(
@@ -174,7 +247,7 @@ def module_topics(request, module_id):
     )
 
     first_module = LMSModule.objects.filter(
-        course=student.course,
+        course=module.course,
         is_active=True
     ).order_by("order").first()
 
@@ -258,9 +331,16 @@ def topic_detail(request, topic_id):
     topic = get_object_or_404(
         LMSTopic,
         id=topic_id,
-        module__course=student.course,
         is_active=True
     )
+
+    if not student_can_access_course(
+        student,
+        topic.module.course
+    ):
+        return HttpResponseForbidden(
+            "You do not have access to this course."
+        )
 
     progress = StudentTopicProgress.objects.filter(
         student=student,
@@ -357,9 +437,16 @@ def topic_quiz(request, topic_id):
     topic = get_object_or_404(
         LMSTopic,
         id=topic_id,
-        module__course=student.course,
         is_active=True
     )
+
+    if not student_can_access_course(
+        student,
+        topic.module.course
+    ):
+        return HttpResponseForbidden(
+            "You do not have access to this course."
+        )
 
     progress = StudentTopicProgress.objects.filter(
         student=student,
@@ -504,7 +591,7 @@ def topic_quiz(request, topic_id):
                 # -----------------------------------------
 
                 next_module = LMSModule.objects.filter(
-                    course=student.course,
+                    course=topic.module.course,
                     is_active=True,
                     order__gt=topic.module.order
                 ).order_by("order").first()

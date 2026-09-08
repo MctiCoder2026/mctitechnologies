@@ -15,178 +15,196 @@ Your MCTI learning, course progress and quiz overview
 
 <div class="welcome">
     <h2>Welcome, {{ student.name }} 👋</h2>
-    <p>Manage your course, continue learning and track your progress from MCTI One.</p>
+
+    {% if is_package %}
+        <p>
+            Your package
+            <strong>{{ enrolled_course.title }}</strong>
+            includes {{ course_data|length }} learning courses.
+        </p>
+    {% else %}
+        <p>
+            Manage your course, continue learning and track your progress from MCTI One.
+        </p>
+    {% endif %}
 </div>
 
 
-<div class="stats-grid">
+{% if is_package %}
 
-    <div class="stat-card">
-        <div class="stat-label">📚 MY COURSE</div>
-        <div class="stat-value">{{ course.title }}</div>
-    </div>
+    <div class="stats-grid">
 
-    <div class="stat-card green">
-        <div class="stat-label">✅ TOPICS COMPLETED</div>
-        <div class="stat-value">
-            {{ completed_topics }} / {{ total_topics }}
+        <div class="stat-card">
+            <div class="stat-label">📦 MY PACKAGE</div>
+            <div class="stat-value">{{ enrolled_course.title }}</div>
         </div>
-    </div>
 
-    <div class="stat-card red">
-        <div class="stat-label">📈 COURSE PROGRESS</div>
-        <div class="stat-value">{{ progress_percent }}%</div>
-    </div>
-
-    <div class="stat-card blue">
-        <div class="stat-label">🎯 LEARNING STATUS</div>
-
-        <div class="stat-value">
-            {% if progress_percent == 100 %}
-                Completed
-            {% elif continue_topic %}
-                In Progress
-            {% else %}
-                Ready to Start
-            {% endif %}
+        <div class="stat-card green">
+            <div class="stat-label">📚 INCLUDED COURSES</div>
+            <div class="stat-value">{{ course_data|length }}</div>
         </div>
+
+        <div class="stat-card blue">
+            <div class="stat-label">🎯 LEARNING ACCESS</div>
+            <div class="stat-value">Active</div>
+        </div>
+
+        <div class="stat-card red">
+            <div class="stat-label">📊 QUIZ HISTORY</div>
+            <div class="stat-value">
+                <a
+                    class="btn btn-dark"
+                    href="{% url 'lms:quiz_history' %}">
+                    View Scores
+                </a>
+            </div>
+        </div>
+
     </div>
 
-</div>
 
+    <h2 class="section-title">My Included Courses</h2>
 
-<div class="panel">
+    {% for course_item in course_data %}
 
-    <h2 class="panel-title">Course Overview</h2>
+        <div class="panel">
 
-    <div class="course-overview">
+            <div class="course-overview">
 
-        <div>
+                <div>
 
-            <h3>{{ course.title }}</h3>
+                    <h2 class="panel-title">
+                        {{ course_item.course.title }}
+                    </h2>
 
-            <p class="progress-meta">
-                Duration:
-                <strong>{{ course.duration }}</strong>
-            </p>
+                    <p class="progress-meta">
+                        Duration:
+                        <strong>
+                            {{ course_item.course.duration }}
+                        </strong>
+                    </p>
 
-            <p class="progress-meta">
-                {{ completed_topics }} of {{ total_topics }}
-                topics completed
-            </p>
+                    <p class="progress-meta">
+                        {{ course_item.completed_topics }}
+                        of
+                        {{ course_item.total_topics }}
+                        topics completed
+                    </p>
 
-            <div class="progress-track">
-                <div
-                    class="progress-fill"
-                    style="width: {{ progress_percent }}%;">
+                    <div class="progress-track">
+                        <div
+                            class="progress-fill"
+                            style="width: {{ course_item.progress_percent }}%;">
+                        </div>
+                    </div>
+
+                    <div class="progress-meta">
+                        {{ course_item.progress_percent }}% completed
+                    </div>
+
                 </div>
+
+
+                <div>
+
+                    {% if course_item.continue_topic %}
+
+                        <div class="notice">
+                            Continue from:
+                            <strong>
+                                {{ course_item.continue_topic.module.title }}
+                                →
+                                {{ course_item.continue_topic.title }}
+                            </strong>
+                        </div>
+
+                        <div class="button-row">
+                            <a
+                                class="btn"
+                                href="{% url 'lms:topic_detail' course_item.continue_topic.id %}">
+                                ▶ Continue Learning
+                            </a>
+                        </div>
+
+                    {% elif course_item.progress_percent == 100 %}
+
+                        <div class="notice">
+                            🎉 Congratulations! You have completed this course.
+                        </div>
+
+                    {% else %}
+
+                        <div class="notice">
+                            Your learning content is ready.
+                            Open the first module to start.
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
             </div>
 
-            <div class="progress-meta">
-                {{ progress_percent }}% completed
-            </div>
 
-        </div>
+            <h3 class="section-title">
+                {{ course_item.course.title }} Modules
+            </h3>
 
+            <div class="module-grid">
 
-        <div>
+                {% for item in course_item.module_data %}
 
-            {% if continue_topic %}
+                    <div class="module-card">
 
-                <div class="notice">
-                    Continue from:
-                    <strong>
-                        {{ continue_topic.module.title }}
-                        →
-                        {{ continue_topic.title }}
-                    </strong>
-                </div>
+                        <a href="{% url 'lms:module_topics' item.module.id %}">
 
-                <div class="button-row">
-                    <a
-                        class="btn"
-                        href="{% url 'lms:topic_detail' continue_topic.id %}">
-                        ▶ Continue Learning
-                    </a>
+                            <h3>
+                                Module {{ item.module.order }}:
+                                {{ item.module.title }}
+                            </h3>
 
-                    <a
-                        class="btn btn-dark"
-                        href="{% url 'lms:quiz_history' %}">
-                        📊 Quiz Scores
-                    </a>
-                </div>
+                        </a>
 
-            {% elif progress_percent == 100 %}
+                        <p>
+                            {{ item.completed }}
+                            of
+                            {{ item.total }}
+                            topics completed
+                        </p>
 
-                <div class="notice">
-                    🎉 Congratulations! You have completed this course.
-                </div>
+                        <div class="progress-track">
+                            <div
+                                class="progress-fill"
+                                style="width: {{ item.percent }}%;">
+                            </div>
+                        </div>
 
-                <div class="button-row">
-                    <a
-                        class="btn btn-dark"
-                        href="{% url 'lms:quiz_history' %}">
-                        📊 View Quiz Scores
-                    </a>
-                </div>
+                        <div class="module-status
+                            {% if item.is_completed %}
+                                status-complete
+                            {% else %}
+                                status-progress
+                            {% endif %}
+                        ">
 
-            {% else %}
+                            {% if item.is_completed %}
+                                ✅ Module Completed
+                            {% else %}
+                                {{ item.percent }}% Completed
+                            {% endif %}
 
-                <div class="notice">
-                    Your learning content is ready.
-                </div>
+                        </div>
 
-            {% endif %}
+                    </div>
 
-        </div>
+                {% empty %}
 
-    </div>
+                    <div class="panel">
+                        No modules are available yet for
+                        {{ course_item.course.title }}.
+                    </div>
 
-</div>
-
-
-<h2 class="section-title">Course Modules</h2>
-
-<div class="module-grid">
-
-    {% for item in module_data %}
-
-        <div class="module-card">
-
-            <a href="{% url 'lms:module_topics' item.module.id %}">
-
-                <h3>
-                    Module {{ item.module.order }}:
-                    {{ item.module.title }}
-                </h3>
-
-            </a>
-
-            <p>
-                {{ item.completed }} of {{ item.total }}
-                topics completed
-            </p>
-
-            <div class="progress-track">
-                <div
-                    class="progress-fill"
-                    style="width: {{ item.percent }}%;">
-                </div>
-            </div>
-
-            <div class="module-status
-                {% if item.is_completed %}
-                    status-complete
-                {% else %}
-                    status-progress
-                {% endif %}
-            ">
-
-                {% if item.is_completed %}
-                    ✅ Module Completed
-                {% else %}
-                    {{ item.percent }}% Completed
-                {% endif %}
+                {% endfor %}
 
             </div>
 
@@ -195,11 +213,197 @@ Your MCTI learning, course progress and quiz overview
     {% empty %}
 
         <div class="panel">
-            No modules are available yet.
+            No learning courses are assigned to this package yet.
         </div>
 
     {% endfor %}
 
-</div>
+
+{% else %}
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-label">📚 MY COURSE</div>
+            <div class="stat-value">{{ course.title }}</div>
+        </div>
+
+        <div class="stat-card green">
+            <div class="stat-label">✅ TOPICS COMPLETED</div>
+            <div class="stat-value">
+                {{ completed_topics }} / {{ total_topics }}
+            </div>
+        </div>
+
+        <div class="stat-card red">
+            <div class="stat-label">📈 COURSE PROGRESS</div>
+            <div class="stat-value">{{ progress_percent }}%</div>
+        </div>
+
+        <div class="stat-card blue">
+            <div class="stat-label">🎯 LEARNING STATUS</div>
+
+            <div class="stat-value">
+                {% if progress_percent == 100 %}
+                    Completed
+                {% elif continue_topic %}
+                    In Progress
+                {% else %}
+                    Ready to Start
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="panel">
+
+        <h2 class="panel-title">Course Overview</h2>
+
+        <div class="course-overview">
+
+            <div>
+
+                <h3>{{ course.title }}</h3>
+
+                <p class="progress-meta">
+                    Duration:
+                    <strong>{{ course.duration }}</strong>
+                </p>
+
+                <p class="progress-meta">
+                    {{ completed_topics }} of {{ total_topics }}
+                    topics completed
+                </p>
+
+                <div class="progress-track">
+                    <div
+                        class="progress-fill"
+                        style="width: {{ progress_percent }}%;">
+                    </div>
+                </div>
+
+                <div class="progress-meta">
+                    {{ progress_percent }}% completed
+                </div>
+
+            </div>
+
+
+            <div>
+
+                {% if continue_topic %}
+
+                    <div class="notice">
+                        Continue from:
+                        <strong>
+                            {{ continue_topic.module.title }}
+                            →
+                            {{ continue_topic.title }}
+                        </strong>
+                    </div>
+
+                    <div class="button-row">
+                        <a
+                            class="btn"
+                            href="{% url 'lms:topic_detail' continue_topic.id %}">
+                            ▶ Continue Learning
+                        </a>
+
+                        <a
+                            class="btn btn-dark"
+                            href="{% url 'lms:quiz_history' %}">
+                            📊 Quiz Scores
+                        </a>
+                    </div>
+
+                {% elif progress_percent == 100 %}
+
+                    <div class="notice">
+                        🎉 Congratulations! You have completed this course.
+                    </div>
+
+                    <div class="button-row">
+                        <a
+                            class="btn btn-dark"
+                            href="{% url 'lms:quiz_history' %}">
+                            📊 View Quiz Scores
+                        </a>
+                    </div>
+
+                {% else %}
+
+                    <div class="notice">
+                        Your learning content is ready.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <h2 class="section-title">Course Modules</h2>
+
+    <div class="module-grid">
+
+        {% for item in module_data %}
+
+            <div class="module-card">
+
+                <a href="{% url 'lms:module_topics' item.module.id %}">
+
+                    <h3>
+                        Module {{ item.module.order }}:
+                        {{ item.module.title }}
+                    </h3>
+
+                </a>
+
+                <p>
+                    {{ item.completed }} of {{ item.total }}
+                    topics completed
+                </p>
+
+                <div class="progress-track">
+                    <div
+                        class="progress-fill"
+                        style="width: {{ item.percent }}%;">
+                    </div>
+                </div>
+
+                <div class="module-status
+                    {% if item.is_completed %}
+                        status-complete
+                    {% else %}
+                        status-progress
+                    {% endif %}
+                ">
+
+                    {% if item.is_completed %}
+                        ✅ Module Completed
+                    {% else %}
+                        {{ item.percent }}% Completed
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <div class="panel">
+                No modules are available yet.
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+{% endif %}
 
 {% endblock %}

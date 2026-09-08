@@ -64,6 +64,21 @@ class Course(models.Model):
         default=True
     )
 
+    # --------------------------------------------------------
+    # COURSE PACKAGE
+    # --------------------------------------------------------
+
+    is_package = models.BooleanField(
+        default=False
+    )
+
+    included_courses = models.ManyToManyField(
+        "self",
+        symmetrical=False,
+        blank=True,
+        related_name="included_in_packages"
+    )
+
     created_at = models.DateTimeField(
         auto_now_add=True
     )
