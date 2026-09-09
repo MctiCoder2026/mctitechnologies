@@ -1,0 +1,416 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>
+    Add New Course | MCTI Technologies
+</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --orange: #ff6b00;
+    --orange-dark: #e85d00;
+    --orange-light: #fff3e8;
+    --black: #111111;
+    --white: #ffffff;
+    --bg: #f4f4f4;
+    --border: #e5e5e5;
+    --muted: #777777;
+    --red: #dc3545;
+}
+
+body {
+    margin: 0;
+    padding: 30px;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--black);
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+.page-header {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 6px solid var(--orange);
+    border-radius: 12px;
+    padding: 22px 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.page-header h1 span {
+    color: var(--orange);
+}
+
+.page-header p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.btn-back {
+    display: inline-block;
+    text-decoration: none;
+    background: var(--black);
+    color: var(--white);
+    padding: 10px 16px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.btn-back:hover {
+    background: var(--orange);
+}
+
+.card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.06);
+}
+
+.card-title {
+    font-size: 16px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.student-box {
+    background: var(--orange-light);
+    border-left: 4px solid var(--orange);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 22px;
+}
+
+.student-name {
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 5px;
+}
+
+.student-meta {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.form-group {
+    margin-bottom: 5px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.form-control,
+select,
+input,
+textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #dcdcdc;
+    border-radius: 7px;
+    font-size: 14px;
+    background: white;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.errorlist {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    color: var(--red);
+    font-size: 12px;
+}
+
+.alert {
+    background: #fff0f1;
+    border: 1px solid #f5c6cb;
+    color: var(--red);
+    padding: 12px;
+    border-radius: 7px;
+    margin-bottom: 18px;
+}
+
+.submit-btn {
+    width: 100%;
+    border: none;
+    background: var(--orange);
+    color: white;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.submit-btn:hover {
+    background: var(--orange-dark);
+}
+
+@media (max-width: 700px) {
+
+    body {
+        padding: 12px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full {
+        grid-column: auto;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="page-header">
+
+        <div>
+            <h1>
+                Add <span>New Course</span>
+            </h1>
+
+            <p>
+                Create a new enrollment for existing student
+            </p>
+        </div>
+
+        {% if student.admission %}
+        <a
+            href="{% url 'admission_detail' student.admission.id %}"
+            class="btn-back"
+        >
+            ← Back
+        </a>
+        {% endif %}
+
+    </div>
+
+    <div class="card">
+
+        <div class="card-title">
+            Student Enrollment
+        </div>
+
+        <div class="student-box">
+
+            <div class="student-name">
+                {{ student.name }}
+            </div>
+
+            <div class="student-meta">
+                Student ID:
+                {{ student.student_id }}
+
+                {% if student.branch %}
+                    &nbsp; | &nbsp;
+                    Branch:
+                    {{ student.branch }}
+                {% endif %}
+            </div>
+
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="alert">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>Course</label>
+                    {{ form.course }}
+                    {{ form.course.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>Enrollment Date</label>
+                    {{ form.enrollment_date }}
+                    {{ form.enrollment_date.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>Branch</label>
+                    {{ form.branch }}
+                    {{ form.branch.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    {{ form.status }}
+                    {{ form.status.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>Standard Fee</label>
+                    {{ form.standard_fee }}
+                    {{ form.standard_fee.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>Discount Amount</label>
+                    {{ form.discount_amount }}
+                    {{ form.discount_amount.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>Final Fee</label>
+                    {{ form.final_fee }}
+                    {{ form.final_fee.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>Initial Payment</label>
+                    {{ form.initial_payment }}
+                    {{ form.initial_payment.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>Payment Mode</label>
+                    {{ form.payment_mode }}
+                    {{ form.payment_mode.errors }}
+                </div>
+
+                <div class="form-group full">
+                    <label>Notes</label>
+                    {{ form.notes }}
+                    {{ form.notes.errors }}
+                </div>
+
+            </div>
+
+            <button
+                type="submit"
+                class="submit-btn"
+            >
+                Create Enrollment
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+{{ course_fees|json_script:"course-fees-data" }}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const courseSelect = document.getElementById("id_course");
+    const standardFeeInput = document.getElementById("id_standard_fee");
+    const discountInput = document.getElementById("id_discount_amount");
+    const finalFeeInput = document.getElementById("id_final_fee");
+
+    const courseFees = JSON.parse(
+        document.getElementById("course-fees-data").textContent
+    );
+
+    function updateFees() {
+
+        const courseId = courseSelect.value;
+
+        let standardFee = parseFloat(
+            courseFees[courseId] || 0
+        );
+
+        let discountAmount = parseFloat(
+            discountInput.value || 0
+        );
+
+        if (discountAmount < 0) {
+            discountAmount = 0;
+        }
+
+        if (discountAmount > standardFee) {
+            discountAmount = standardFee;
+        }
+
+        const finalFee = standardFee - discountAmount;
+
+        standardFeeInput.value = standardFee.toFixed(2);
+        discountInput.value = discountAmount.toFixed(2);
+        finalFeeInput.value = finalFee.toFixed(2);
+    }
+
+    courseSelect.addEventListener(
+        "change",
+        updateFees
+    );
+
+    discountInput.addEventListener(
+        "input",
+        updateFees
+    );
+
+    updateFees();
+
+});
+</script>
+</body>
+</html>

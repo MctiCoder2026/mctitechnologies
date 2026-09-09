@@ -15,7 +15,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.utils import timezone
 from django.db.models import Max
 
-from core.models import Student
+from core.models import Student, Enrollment
 
 from .models import (
     LMSModule,
@@ -32,30 +32,270 @@ from .models import (
 # STUDENT LMS COURSE ACCESS
 # =========================================================
 
-def get_student_lms_courses(student):
-    course = student.course
+def get_student_active_enrollments(student):
 
-    if not course:
-        return []
-
-    if course.is_package:
-        included_courses = list(
-            course.included_courses.filter(
-                is_active=True
-            ).order_by("title")
+    return (
+        Enrollment.objects
+        .filter(
+            student=student,
+            status="active"
         )
+        .select_related("course")
+        .prefetch_related(
+            "course__included_courses"
+        )
+        .order_by(
+            "enrollment_date",
+            "id"
+        )
+    )
 
-        if included_courses:
-            return included_courses
 
-    return [course]
+def get_student_lms_courses(student):
+
+    courses = []
+    added_course_ids = set()
+
+    enrollments = get_student_active_enrollments(
+        student
+    )
+
+    for enrollment in enrollments:
+
+        course = enrollment.course
+
+        if not course:
+            continue
+
+        if course.is_package:
+
+            included_courses = (
+                course.included_courses
+                .filter(is_active=True)
+                .order_by("title")
+            )
+
+            if included_courses.exists():
+
+                for included_course in included_courses:
+
+                    if included_course.id not in added_course_ids:
+
+                        courses.append(
+                            included_course
+                        )
+
+                        added_course_ids.add(
+                            included_course.id
+                        )
+
+                continue
+
+        if (
+            course.is_active
+            and course.id not in added_course_ids
+        ):
+
+            courses.append(course)
+
+            added_course_ids.add(
+                course.id
+            )
+
+    # Legacy safety fallback.
+    # Once every student is fully enrollment-based,
+    # this fallback can be removed.
+    if not courses:
+
+        course = student.course
+
+        if not course:
+            return []
+
+        if course.is_package:
+
+            included_courses = list(
+                course.included_courses
+                .filter(is_active=True)
+                .order_by("title")
+            )
+
+            if included_courses:
+                return included_courses
+
+        if course.is_active:
+            return [course]
+
+    return courses
 
 
 def student_can_access_course(student, course):
+
     return any(
         allowed_course.id == course.id
-        for allowed_course in get_student_lms_courses(student)
+        for allowed_course
+        in get_student_lms_courses(student)
     )
+
+
+# =========================================================
+# LMS ENROLLMENT / FEE ACCESS
+# =========================================================
+
+def get_lms_enrollment(student, course):
+
+    # First preference:
+    # direct enrollment in this exact course.
+    enrollment = (
+        Enrollment.objects
+        .filter(
+            student=student,
+            course=course,
+            status="active"
+        )
+        .order_by(
+            "-enrollment_date",
+            "-id"
+        )
+        .first()
+    )
+
+    if enrollment:
+        return enrollment
+
+    # Second preference:
+    # package enrollment containing this LMS course.
+    enrollment = (
+        Enrollment.objects
+        .filter(
+            student=student,
+            status="active",
+            course__is_package=True,
+            course__included_courses=course
+        )
+        .distinct()
+        .order_by(
+            "-enrollment_date",
+            "-id"
+        )
+        .first()
+    )
+
+    return enrollment
+
+
+def get_module_fee_access(student, module):
+
+    """
+    Fee rule:
+
+    Module 1-4:
+        No fee restriction.
+
+    Module 5:
+        Minimum 50% of enrollment final fee paid.
+
+    Module 6 onwards:
+        Enrollment fee must be 100% paid.
+    """
+
+    module_order = module.order or 0
+
+    # Modules 1-4 follow normal LMS progress rules only.
+    if module_order <= 4:
+
+        return {
+            "allowed": True,
+            "required_percent": 0,
+            "paid_percent": 0,
+            "enrollment": None,
+            "message": "",
+        }
+
+    enrollment = get_lms_enrollment(
+        student,
+        module.course
+    )
+
+    if not enrollment:
+
+        return {
+            "allowed": False,
+            "required_percent": (
+                50
+                if module_order == 5
+                else 100
+            ),
+            "paid_percent": 0,
+            "enrollment": None,
+            "message": (
+                "Active enrollment not found "
+                "for this course."
+            ),
+        }
+
+    final_fee = enrollment.final_fee or 0
+    paid_fee = enrollment.total_paid or 0
+
+    # Free / zero-fee course should not be fee locked.
+    if final_fee <= 0:
+
+        return {
+            "allowed": True,
+            "required_percent": 0,
+            "paid_percent": 100,
+            "enrollment": enrollment,
+            "message": "",
+        }
+
+    paid_percent = (
+        paid_fee / final_fee
+    ) * 100
+
+    if module_order == 5:
+
+        required_percent = 50
+
+        allowed = (
+            paid_percent >= required_percent
+        )
+
+        message = (
+            ""
+            if allowed
+            else (
+                "Module 5 will unlock after "
+                "minimum 50% course fee is paid."
+            )
+        )
+
+    else:
+
+        required_percent = 100
+
+        allowed = (
+            paid_fee >= final_fee
+        )
+
+        message = (
+            ""
+            if allowed
+            else (
+                "This module will unlock after "
+                "the complete course fee is paid."
+            )
+        )
+
+    return {
+        "allowed": allowed,
+        "required_percent": required_percent,
+        "paid_percent": round(
+            float(paid_percent),
+            2
+        ),
+        "enrollment": enrollment,
+        "message": message,
+    }
 
 
 # =========================================================
@@ -107,6 +347,15 @@ def my_courses(request):
         continue_topic = None
 
         for topic in all_topics:
+
+            fee_access = get_module_fee_access(
+                student,
+                topic.module
+            )
+
+            if not fee_access["allowed"]:
+                continue
+
             progress = StudentTopicProgress.objects.filter(
                 student=student,
                 topic=topic
@@ -123,6 +372,12 @@ def my_courses(request):
         module_data = []
 
         for module in modules:
+
+            fee_access = get_module_fee_access(
+                student,
+                module
+            )
+
             module_topics = LMSTopic.objects.filter(
                 module=module,
                 is_active=True
@@ -151,6 +406,14 @@ def my_courses(request):
                     module_total > 0
                     and module_completed == module_total
                 ),
+                "fee_allowed": fee_access["allowed"],
+                "required_fee_percent": fee_access[
+                    "required_percent"
+                ],
+                "paid_fee_percent": fee_access[
+                    "paid_percent"
+                ],
+                "fee_message": fee_access["message"],
             })
 
         course_data.append({
@@ -238,6 +501,16 @@ def module_topics(request, module_id):
     ):
         return HttpResponseForbidden(
             "You do not have access to this course."
+        )
+
+    fee_access = get_module_fee_access(
+        student,
+        module
+    )
+
+    if not fee_access["allowed"]:
+        return HttpResponseForbidden(
+            fee_access["message"]
         )
 
     topics = list(
@@ -340,6 +613,16 @@ def topic_detail(request, topic_id):
     ):
         return HttpResponseForbidden(
             "You do not have access to this course."
+        )
+
+    fee_access = get_module_fee_access(
+        student,
+        topic.module
+    )
+
+    if not fee_access["allowed"]:
+        return HttpResponseForbidden(
+            fee_access["message"]
         )
 
     progress = StudentTopicProgress.objects.filter(
@@ -446,6 +729,16 @@ def topic_quiz(request, topic_id):
     ):
         return HttpResponseForbidden(
             "You do not have access to this course."
+        )
+
+    fee_access = get_module_fee_access(
+        student,
+        topic.module
+    )
+
+    if not fee_access["allowed"]:
+        return HttpResponseForbidden(
+            fee_access["message"]
         )
 
     progress = StudentTopicProgress.objects.filter(
@@ -598,6 +891,13 @@ def topic_quiz(request, topic_id):
 
                 if next_module:
 
+                    next_module_fee_access = (
+                        get_module_fee_access(
+                            student,
+                            next_module
+                        )
+                    )
+
                     first_topic_next_module = (
                         LMSTopic.objects.filter(
                             module=next_module,
@@ -605,7 +905,10 @@ def topic_quiz(request, topic_id):
                         ).order_by("order").first()
                     )
 
-                    if first_topic_next_module:
+                    if (
+                        first_topic_next_module
+                        and next_module_fee_access["allowed"]
+                    ):
 
                         next_progress, created = (
                             StudentTopicProgress.objects.get_or_create(

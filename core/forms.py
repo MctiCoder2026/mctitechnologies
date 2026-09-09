@@ -7,6 +7,8 @@ from .models import (
     Admission,
     FeePayment,
     JobPost,
+    Course,
+    Enrollment,
 )
 
 
@@ -959,3 +961,219 @@ class BusinessLeadUpdateForm(forms.ModelForm):
 
         return cleaned_data
 
+# ============================================================
+# STUDENT ENROLLMENT FORM
+# ============================================================
+
+class EnrollmentForm(forms.ModelForm):
+
+    initial_payment = forms.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        required=False,
+        min_value=0,
+        initial=0,
+        widget=forms.NumberInput(
+            attrs={
+                "class": "form-control",
+                "step": "0.01",
+            }
+        )
+    )
+
+    payment_mode = forms.ChoiceField(
+        required=False,
+        choices=[
+            ("", "Select Payment Mode"),
+            ("cash", "Cash"),
+            ("upi", "UPI"),
+            ("bank", "Bank Transfer"),
+            ("card", "Card"),
+            ("cheque", "Cheque"),
+        ],
+        widget=forms.Select(
+            attrs={
+                "class": "form-control",
+            }
+        )
+    )
+
+    class Meta:
+
+        model = Enrollment
+
+        fields = [
+            "course",
+            "enrollment_date",
+            "branch",
+            "standard_fee",
+            "discount_amount",
+            "final_fee",
+            "status",
+            "notes",
+        ]
+
+        widgets = {
+
+            "course": forms.Select(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+
+            "enrollment_date": forms.DateInput(
+                attrs={
+                    "type": "date",
+                    "class": "form-control",
+                }
+            ),
+
+            "branch": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+
+            "standard_fee": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "readonly": "readonly",
+                }
+            ),
+
+            "discount_amount": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0",
+                }
+            ),
+
+            "final_fee": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "readonly": "readonly",
+                }
+            ),
+
+            "status": forms.Select(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+
+            "notes": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                }
+            ),
+        }
+
+    def clean(self):
+
+        cleaned_data = super().clean()
+
+        course = cleaned_data.get("course")
+
+        discount_amount = (
+            cleaned_data.get("discount_amount")
+            or 0
+        )
+
+        initial_payment = (
+            cleaned_data.get("initial_payment")
+            or 0
+        )
+
+        payment_mode = (
+            cleaned_data.get("payment_mode")
+            or ""
+        )
+
+        if not course:
+            return cleaned_data
+
+        # Always take Standard Fee from Course Master.
+        standard_fee = course.fee or 0
+
+        if discount_amount > standard_fee:
+
+            self.add_error(
+                "discount_amount",
+                "Discount cannot be greater than Standard Fee."
+            )
+
+            return cleaned_data
+
+        final_fee = (
+            standard_fee
+            - discount_amount
+        )
+
+        # Ignore any manually changed browser values.
+        cleaned_data["standard_fee"] = standard_fee
+        cleaned_data["final_fee"] = final_fee
+
+        if initial_payment > final_fee:
+
+            self.add_error(
+                "initial_payment",
+                "Initial payment cannot exceed Final Fee."
+            )
+
+        if (
+            initial_payment > 0
+            and
+            not payment_mode
+        ):
+
+            self.add_error(
+                "payment_mode",
+                "Select payment mode for the initial payment."
+            )
+
+        return cleaned_data
+
+    def save(
+        self,
+        commit=True
+    ):
+
+        enrollment = super().save(
+            commit=False
+        )
+
+        course = self.cleaned_data.get(
+            "course"
+        )
+
+        discount_amount = (
+            self.cleaned_data.get(
+                "discount_amount"
+            )
+            or 0
+        )
+
+        if course:
+
+            enrollment.standard_fee = (
+                course.fee
+                or 0
+            )
+
+            enrollment.discount_amount = (
+                discount_amount
+            )
+
+            enrollment.final_fee = (
+                enrollment.standard_fee
+                - discount_amount
+            )
+
+        if commit:
+            enrollment.save()
+
+        return enrollment

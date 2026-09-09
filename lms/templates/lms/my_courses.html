@@ -24,7 +24,8 @@ Your MCTI learning, course progress and quiz overview
         </p>
     {% else %}
         <p>
-            Manage your course, continue learning and track your progress from MCTI One.
+            Manage your course, continue learning and track
+            your progress from MCTI One.
         </p>
     {% endif %}
 </div>
@@ -35,35 +36,62 @@ Your MCTI learning, course progress and quiz overview
     <div class="stats-grid">
 
         <div class="stat-card">
-            <div class="stat-label">📦 MY PACKAGE</div>
-            <div class="stat-value">{{ enrolled_course.title }}</div>
+            <div class="stat-label">
+                📦 MY PACKAGE
+            </div>
+
+            <div class="stat-value">
+                {{ enrolled_course.title }}
+            </div>
         </div>
+
 
         <div class="stat-card green">
-            <div class="stat-label">📚 INCLUDED COURSES</div>
-            <div class="stat-value">{{ course_data|length }}</div>
+            <div class="stat-label">
+                📚 INCLUDED COURSES
+            </div>
+
+            <div class="stat-value">
+                {{ course_data|length }}
+            </div>
         </div>
+
 
         <div class="stat-card blue">
-            <div class="stat-label">🎯 LEARNING ACCESS</div>
-            <div class="stat-value">Active</div>
+            <div class="stat-label">
+                🎯 LEARNING ACCESS
+            </div>
+
+            <div class="stat-value">
+                Active
+            </div>
         </div>
 
+
         <div class="stat-card red">
-            <div class="stat-label">📊 QUIZ HISTORY</div>
+            <div class="stat-label">
+                📊 QUIZ HISTORY
+            </div>
+
             <div class="stat-value">
+
                 <a
                     class="btn btn-dark"
-                    href="{% url 'lms:quiz_history' %}">
+                    href="{% url 'lms:quiz_history' %}"
+                >
                     View Scores
                 </a>
+
             </div>
         </div>
 
     </div>
 
 
-    <h2 class="section-title">My Included Courses</h2>
+    <h2 class="section-title">
+        My Included Courses
+    </h2>
+
 
     {% for course_item in course_data %}
 
@@ -77,12 +105,14 @@ Your MCTI learning, course progress and quiz overview
                         {{ course_item.course.title }}
                     </h2>
 
+
                     <p class="progress-meta">
                         Duration:
                         <strong>
                             {{ course_item.course.duration }}
                         </strong>
                     </p>
+
 
                     <p class="progress-meta">
                         {{ course_item.completed_topics }}
@@ -91,15 +121,21 @@ Your MCTI learning, course progress and quiz overview
                         topics completed
                     </p>
 
+
                     <div class="progress-track">
+
                         <div
                             class="progress-fill"
-                            style="width: {{ course_item.progress_percent }}%;">
+                            style="width: {{ course_item.progress_percent }}%;"
+                        >
                         </div>
+
                     </div>
 
+
                     <div class="progress-meta">
-                        {{ course_item.progress_percent }}% completed
+                        {{ course_item.progress_percent }}%
+                        completed
                     </div>
 
                 </div>
@@ -110,33 +146,43 @@ Your MCTI learning, course progress and quiz overview
                     {% if course_item.continue_topic %}
 
                         <div class="notice">
+
                             Continue from:
+
                             <strong>
                                 {{ course_item.continue_topic.module.title }}
                                 →
                                 {{ course_item.continue_topic.title }}
                             </strong>
+
                         </div>
 
+
                         <div class="button-row">
+
                             <a
                                 class="btn"
-                                href="{% url 'lms:topic_detail' course_item.continue_topic.id %}">
+                                href="{% url 'lms:topic_detail' course_item.continue_topic.id %}"
+                            >
                                 ▶ Continue Learning
                             </a>
+
                         </div>
+
 
                     {% elif course_item.progress_percent == 100 %}
 
                         <div class="notice">
-                            🎉 Congratulations! You have completed this course.
+                            🎉 Congratulations!
+                            You have completed this course.
                         </div>
+
 
                     {% else %}
 
                         <div class="notice">
                             Your learning content is ready.
-                            Open the first module to start.
+                            Open the first available module to start.
                         </div>
 
                     {% endif %}
@@ -150,20 +196,36 @@ Your MCTI learning, course progress and quiz overview
                 {{ course_item.course.title }} Modules
             </h3>
 
+
             <div class="module-grid">
 
                 {% for item in course_item.module_data %}
 
                     <div class="module-card">
 
-                        <a href="{% url 'lms:module_topics' item.module.id %}">
+
+                        {% if item.fee_allowed %}
+
+                            <a
+                                href="{% url 'lms:module_topics' item.module.id %}"
+                            >
+
+                                <h3>
+                                    Module {{ item.module.order }}:
+                                    {{ item.module.title }}
+                                </h3>
+
+                            </a>
+
+                        {% else %}
 
                             <h3>
-                                Module {{ item.module.order }}:
+                                🔒 Module {{ item.module.order }}:
                                 {{ item.module.title }}
                             </h3>
 
-                        </a>
+                        {% endif %}
+
 
                         <p>
                             {{ item.completed }}
@@ -172,30 +234,80 @@ Your MCTI learning, course progress and quiz overview
                             topics completed
                         </p>
 
+
                         <div class="progress-track">
+
                             <div
                                 class="progress-fill"
-                                style="width: {{ item.percent }}%;">
+                                style="width: {{ item.percent }}%;"
+                            >
                             </div>
-                        </div>
-
-                        <div class="module-status
-                            {% if item.is_completed %}
-                                status-complete
-                            {% else %}
-                                status-progress
-                            {% endif %}
-                        ">
-
-                            {% if item.is_completed %}
-                                ✅ Module Completed
-                            {% else %}
-                                {{ item.percent }}% Completed
-                            {% endif %}
 
                         </div>
+
+
+                        {% if not item.fee_allowed %}
+
+                            <div class="notice">
+
+                                🔒
+                                <strong>
+                                    Fee Pending
+                                </strong>
+
+                                <br>
+
+                                {{ item.fee_message }}
+
+                                {% if item.required_fee_percent %}
+
+                                    <br>
+
+                                    Required Fee:
+                                    <strong>
+                                        {{ item.required_fee_percent }}%
+                                    </strong>
+
+                                    <br>
+
+                                    Paid:
+                                    <strong>
+                                        {{ item.paid_fee_percent }}%
+                                    </strong>
+
+                                {% endif %}
+
+                            </div>
+
+                        {% else %}
+
+                            <div
+                                class="module-status
+                                {% if item.is_completed %}
+                                    status-complete
+                                {% else %}
+                                    status-progress
+                                {% endif %}
+                                "
+                            >
+
+                                {% if item.is_completed %}
+
+                                    ✅ Module Completed
+
+                                {% else %}
+
+                                    {{ item.percent }}%
+                                    Completed
+
+                                {% endif %}
+
+                            </div>
+
+                        {% endif %}
 
                     </div>
+
 
                 {% empty %}
 
@@ -210,10 +322,12 @@ Your MCTI learning, course progress and quiz overview
 
         </div>
 
+
     {% empty %}
 
         <div class="panel">
-            No learning courses are assigned to this package yet.
+            No learning courses are assigned
+            to this package yet.
         </div>
 
     {% endfor %}
@@ -221,37 +335,75 @@ Your MCTI learning, course progress and quiz overview
 
 {% else %}
 
+
     <div class="stats-grid">
 
         <div class="stat-card">
-            <div class="stat-label">📚 MY COURSE</div>
-            <div class="stat-value">{{ course.title }}</div>
+
+            <div class="stat-label">
+                📚 MY COURSE
+            </div>
+
+            <div class="stat-value">
+                {{ course.title }}
+            </div>
+
         </div>
+
 
         <div class="stat-card green">
-            <div class="stat-label">✅ TOPICS COMPLETED</div>
-            <div class="stat-value">
-                {{ completed_topics }} / {{ total_topics }}
+
+            <div class="stat-label">
+                ✅ TOPICS COMPLETED
             </div>
+
+            <div class="stat-value">
+                {{ completed_topics }}
+                /
+                {{ total_topics }}
+            </div>
+
         </div>
+
 
         <div class="stat-card red">
-            <div class="stat-label">📈 COURSE PROGRESS</div>
-            <div class="stat-value">{{ progress_percent }}%</div>
-        </div>
 
-        <div class="stat-card blue">
-            <div class="stat-label">🎯 LEARNING STATUS</div>
+            <div class="stat-label">
+                📈 COURSE PROGRESS
+            </div>
 
             <div class="stat-value">
-                {% if progress_percent == 100 %}
-                    Completed
-                {% elif continue_topic %}
-                    In Progress
-                {% else %}
-                    Ready to Start
-                {% endif %}
+                {{ progress_percent }}%
             </div>
+
+        </div>
+
+
+        <div class="stat-card blue">
+
+            <div class="stat-label">
+                🎯 LEARNING STATUS
+            </div>
+
+
+            <div class="stat-value">
+
+                {% if progress_percent == 100 %}
+
+                    Completed
+
+                {% elif continue_topic %}
+
+                    In Progress
+
+                {% else %}
+
+                    Ready to Start
+
+                {% endif %}
+
+            </div>
+
         </div>
 
     </div>
@@ -259,33 +411,53 @@ Your MCTI learning, course progress and quiz overview
 
     <div class="panel">
 
-        <h2 class="panel-title">Course Overview</h2>
+        <h2 class="panel-title">
+            Course Overview
+        </h2>
+
 
         <div class="course-overview">
 
             <div>
 
-                <h3>{{ course.title }}</h3>
+                <h3>
+                    {{ course.title }}
+                </h3>
+
 
                 <p class="progress-meta">
+
                     Duration:
-                    <strong>{{ course.duration }}</strong>
+
+                    <strong>
+                        {{ course.duration }}
+                    </strong>
+
                 </p>
 
+
                 <p class="progress-meta">
-                    {{ completed_topics }} of {{ total_topics }}
+                    {{ completed_topics }}
+                    of
+                    {{ total_topics }}
                     topics completed
                 </p>
 
+
                 <div class="progress-track">
+
                     <div
                         class="progress-fill"
-                        style="width: {{ progress_percent }}%;">
+                        style="width: {{ progress_percent }}%;"
+                    >
                     </div>
+
                 </div>
 
+
                 <div class="progress-meta">
-                    {{ progress_percent }}% completed
+                    {{ progress_percent }}%
+                    completed
                 </div>
 
             </div>
@@ -296,41 +468,57 @@ Your MCTI learning, course progress and quiz overview
                 {% if continue_topic %}
 
                     <div class="notice">
+
                         Continue from:
+
                         <strong>
                             {{ continue_topic.module.title }}
                             →
                             {{ continue_topic.title }}
                         </strong>
+
                     </div>
 
+
                     <div class="button-row">
+
                         <a
                             class="btn"
-                            href="{% url 'lms:topic_detail' continue_topic.id %}">
+                            href="{% url 'lms:topic_detail' continue_topic.id %}"
+                        >
                             ▶ Continue Learning
                         </a>
 
+
                         <a
                             class="btn btn-dark"
-                            href="{% url 'lms:quiz_history' %}">
+                            href="{% url 'lms:quiz_history' %}"
+                        >
                             📊 Quiz Scores
                         </a>
+
                     </div>
+
 
                 {% elif progress_percent == 100 %}
 
                     <div class="notice">
-                        🎉 Congratulations! You have completed this course.
+                        🎉 Congratulations!
+                        You have completed this course.
                     </div>
 
+
                     <div class="button-row">
+
                         <a
                             class="btn btn-dark"
-                            href="{% url 'lms:quiz_history' %}">
+                            href="{% url 'lms:quiz_history' %}"
+                        >
                             📊 View Quiz Scores
                         </a>
+
                     </div>
+
 
                 {% else %}
 
@@ -347,52 +535,125 @@ Your MCTI learning, course progress and quiz overview
     </div>
 
 
-    <h2 class="section-title">Course Modules</h2>
+    <h2 class="section-title">
+        Course Modules
+    </h2>
+
 
     <div class="module-grid">
+
 
         {% for item in module_data %}
 
             <div class="module-card">
 
-                <a href="{% url 'lms:module_topics' item.module.id %}">
+
+                {% if item.fee_allowed %}
+
+                    <a
+                        href="{% url 'lms:module_topics' item.module.id %}"
+                    >
+
+                        <h3>
+                            Module {{ item.module.order }}:
+                            {{ item.module.title }}
+                        </h3>
+
+                    </a>
+
+                {% else %}
 
                     <h3>
-                        Module {{ item.module.order }}:
+                        🔒 Module {{ item.module.order }}:
                         {{ item.module.title }}
                     </h3>
 
-                </a>
+                {% endif %}
+
 
                 <p>
-                    {{ item.completed }} of {{ item.total }}
+                    {{ item.completed }}
+                    of
+                    {{ item.total }}
                     topics completed
                 </p>
 
+
                 <div class="progress-track">
+
                     <div
                         class="progress-fill"
-                        style="width: {{ item.percent }}%;">
+                        style="width: {{ item.percent }}%;"
+                    >
                     </div>
-                </div>
-
-                <div class="module-status
-                    {% if item.is_completed %}
-                        status-complete
-                    {% else %}
-                        status-progress
-                    {% endif %}
-                ">
-
-                    {% if item.is_completed %}
-                        ✅ Module Completed
-                    {% else %}
-                        {{ item.percent }}% Completed
-                    {% endif %}
 
                 </div>
+
+
+                {% if not item.fee_allowed %}
+
+                    <div class="notice">
+
+                        🔒
+                        <strong>
+                            Fee Pending
+                        </strong>
+
+                        <br>
+
+                        {{ item.fee_message }}
+
+
+                        {% if item.required_fee_percent %}
+
+                            <br>
+
+                            Required Fee:
+                            <strong>
+                                {{ item.required_fee_percent }}%
+                            </strong>
+
+                            <br>
+
+                            Paid:
+                            <strong>
+                                {{ item.paid_fee_percent }}%
+                            </strong>
+
+                        {% endif %}
+
+                    </div>
+
+
+                {% else %}
+
+                    <div
+                        class="module-status
+                        {% if item.is_completed %}
+                            status-complete
+                        {% else %}
+                            status-progress
+                        {% endif %}
+                        "
+                    >
+
+                        {% if item.is_completed %}
+
+                            ✅ Module Completed
+
+                        {% else %}
+
+                            {{ item.percent }}%
+                            Completed
+
+                        {% endif %}
+
+                    </div>
+
+                {% endif %}
 
             </div>
+
 
         {% empty %}
 

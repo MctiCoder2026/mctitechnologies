@@ -14,6 +14,8 @@ from django.urls import reverse
 from django.db.models import Q, Sum
 from django.utils import timezone
 from datetime import datetime, timedelta
+from .models import Enrollment
+from .forms import EnrollmentForm
 
 
 from .forms import (
@@ -1724,7 +1726,6 @@ def export_reports_excel(request):
 # FEE DUE DATE REPORT
 # ============================================================
 
-@login_required
 def fee_due_report(request):
 
     today = timezone.localdate()
@@ -1757,8 +1758,6 @@ def fee_due_report(request):
 
     # --------------------------------------------------------
     # ACCESS CONTROL
-    # HO/Admin can see all branches.
-    # Branch staff can see only their own branch.
     # --------------------------------------------------------
 
     if not is_admin_user(request.user):
@@ -1768,7 +1767,9 @@ def fee_due_report(request):
         )
 
         if not user_branch:
+
             auth_logout(request)
+
             return redirect(
                 "staff_login"
             )
@@ -1781,34 +1782,47 @@ def fee_due_report(request):
             if item[0] == user_branch
         ]
 
-    admissions = (
-        Admission.objects
+    # --------------------------------------------------------
+    # ENROLLMENTS
+    # --------------------------------------------------------
+
+    enrollments = (
+        Enrollment.objects
         .select_related(
-            "course",
             "student",
+            "student__admission",
+            "course",
+        )
+        .prefetch_related(
+            "fee_payments"
+        )
+        .filter(
+            status="active"
         )
         .order_by(
-            "admission_date",
+            "enrollment_date",
             "id",
         )
     )
 
     if branch_filter:
-        admissions = admissions.filter(
+
+        enrollments = enrollments.filter(
             branch__iexact=branch_filter
         )
 
     if search:
-        admissions = admissions.filter(
-            Q(student_name__icontains=search)
-            |
-            Q(admission_number__icontains=search)
-            |
+
+        enrollments = enrollments.filter(
             Q(student__name__icontains=search)
+            |
+            Q(student__student_id__icontains=search)
             |
             Q(student__mobile__icontains=search)
             |
             Q(course__title__icontains=search)
+            |
+            Q(enrollment_number__icontains=search)
         )
 
     due_rows = []
@@ -1823,32 +1837,19 @@ def fee_due_report(request):
 
     total_outstanding = 0
 
-    for admission in admissions:
+    for enrollment in enrollments:
 
-        student = getattr(
-            admission,
-            "student",
-            None
-        )
+        student = enrollment.student
 
         total_fee = (
-            admission.total_fee
+            enrollment.final_fee
             or 0
         )
 
-        paid_fee = 0
-
-        if student:
-            paid_fee = (
-                FeePayment.objects
-                .filter(
-                    student=student
-                )
-                .aggregate(
-                    total=Sum("amount")
-                )["total"]
-                or 0
-            )
+        paid_fee = sum(
+            payment.amount
+            for payment in enrollment.fee_payments.all()
+        )
 
         balance_fee = max(
             total_fee - paid_fee,
@@ -1864,46 +1865,52 @@ def fee_due_report(request):
 
             total_outstanding += balance_fee
 
-            if admission.admission_date:
+            enrollment_date = (
+                enrollment.enrollment_date
+            )
 
-                admission_date = (
-                    admission.admission_date
-                )
+            if enrollment_date:
 
                 if hasattr(
-                    admission_date,
+                    enrollment_date,
                     "date"
                 ):
-                    admission_date = (
-                        admission_date.date()
+                    enrollment_date = (
+                        enrollment_date.date()
                     )
 
                 next_due_date = (
-                    admission_date
+                    enrollment_date
                     + timedelta(days=31)
                 )
 
                 days_remaining = (
-                    next_due_date - today
+                    next_due_date
+                    - today
                 ).days
 
                 if next_due_date < today:
+
                     due_key = "overdue"
                     due_status = "Overdue"
 
                 elif next_due_date == today:
+
                     due_key = "today"
                     due_status = "Due Today"
 
                 elif days_remaining <= 7:
+
                     due_key = "upcoming"
                     due_status = "Upcoming 7 Days"
 
                 else:
+
                     due_key = "future"
                     due_status = "Future Due"
 
             else:
+
                 due_key = "future"
                 due_status = "Due Date Not Available"
 
@@ -1911,51 +1918,47 @@ def fee_due_report(request):
 
         if (
             status_filter
-            and due_key != status_filter
+            and
+            due_key != status_filter
         ):
             continue
+
+        admission = getattr(
+            student,
+            "admission",
+            None
+        )
 
         due_rows.append(
             {
                 "student": student,
                 "student_name": (
-                    getattr(
-                        student,
-                        "name",
-                        None
-                    )
-                    or admission.student_name
+                    student.name
                     or "-"
                 ),
                 "mobile": (
-                    getattr(
-                        student,
-                        "mobile",
-                        None
-                    )
+                    student.mobile
                     or "-"
                 ),
                 "admission": admission,
                 "admission_number": (
                     admission.admission_number
+                    if admission
+                    else "-"
+                ),
+                "enrollment": enrollment,
+                "enrollment_number": (
+                    enrollment.enrollment_number
                     or "-"
                 ),
                 "course": (
-                    admission.course.title
-                    if admission.course
+                    enrollment.course.title
+                    if enrollment.course
                     else "-"
                 ),
                 "branch": (
-                    admission.branch
-                    or (
-                        getattr(
-                            student,
-                            "branch",
-                            None
-                        )
-                        if student
-                        else ""
-                    )
+                    enrollment.branch
+                    or student.branch
                     or "-"
                 ),
                 "total_fee": total_fee,
@@ -1968,13 +1971,13 @@ def fee_due_report(request):
             }
         )
 
-    # Most urgent records first.
     due_rows.sort(
         key=lambda row: (
             row["balance_fee"] <= 0,
             row["next_due_date"] is None,
             row["next_due_date"] or today,
             row["student_name"],
+            row["course"],
         )
     )
 
@@ -4929,6 +4932,135 @@ def add_fee_payment(
             "form": form,
         }
     )
+# ============================================================
+# ADD FEE PAYMENT - ENROLLMENT WISE
+# ============================================================
+
+@user_passes_test(
+    staff_or_admin,
+    login_url="staff_login"
+)
+def add_enrollment_fee_payment(
+    request,
+    enrollment_id
+):
+
+    enrollment = get_object_or_404(
+        Enrollment.objects.select_related(
+            "student",
+            "course",
+            "student__admission",
+        ),
+        id=enrollment_id
+    )
+
+    student = enrollment.student
+
+    # --------------------------------------------------------
+    # BRANCH PERMISSION
+    # --------------------------------------------------------
+
+    if not request.user.is_superuser:
+
+        user_branch = get_user_branch(
+            request.user
+        )
+
+        if not user_branch:
+
+            auth_logout(request)
+
+            return redirect(
+                "staff_login"
+            )
+
+        if (
+            (enrollment.branch or student.branch or "")
+            .strip()
+            .lower()
+            !=
+            user_branch.strip().lower()
+        ):
+
+            return redirect(
+                "student_list"
+            )
+
+    # --------------------------------------------------------
+    # PAYMENT ALREADY COMPLETE
+    # --------------------------------------------------------
+
+    if enrollment.balance_fee <= 0:
+
+        if student.admission:
+
+            return redirect(
+                "admission_detail",
+                admission_id=student.admission.id
+            )
+
+        return redirect(
+            "student_list"
+        )
+
+    # --------------------------------------------------------
+    # POST
+    # --------------------------------------------------------
+
+    if request.method == "POST":
+
+        form = FeePaymentForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            payment = form.save(
+                commit=False
+            )
+
+            payment.student = student
+            payment.enrollment = enrollment
+            payment.collected_by = request.user
+
+            if payment.amount > enrollment.balance_fee:
+
+                form.add_error(
+                    "amount",
+                    (
+                        "Payment cannot be greater "
+                        "than enrollment balance."
+                    )
+                )
+
+            else:
+
+                payment.save()
+
+                if student.admission:
+
+                    return redirect(
+                        "admission_detail",
+                        admission_id=student.admission.id
+                    )
+
+                return redirect(
+                    "fee_payment_list"
+                )
+
+    else:
+
+        form = FeePaymentForm()
+
+    return render(
+        request,
+        "core/add_enrollment_fee_payment.html",
+        {
+            "student": student,
+            "enrollment": enrollment,
+            "form": form,
+        }
+    )
 
 @login_required
 def student_quick_view(request):
@@ -5606,3 +5738,151 @@ def terms_and_conditions(request):
     return render(request, "core/terms_and_conditions.html")
 def refund_policy(request):
     return render(request, "core/refund_policy.html")
+# ============================================================
+# ADD NEW COURSE / STUDENT ENROLLMENT
+# ============================================================
+
+@user_passes_test(
+    staff_or_admin,
+    login_url="staff_login"
+)
+def add_student_enrollment(
+    request,
+    student_id
+):
+
+    student = get_object_or_404(
+        Student,
+        id=student_id
+    )
+
+    # --------------------------------------------------------
+    # BRANCH PERMISSION
+    # --------------------------------------------------------
+
+    if not request.user.is_superuser:
+
+        user_branch = get_user_branch(
+            request.user
+        )
+
+        if not user_branch:
+
+            auth_logout(request)
+
+            return redirect(
+                "staff_login"
+            )
+
+        if (
+            (student.branch or "").strip().lower()
+            !=
+            user_branch.strip().lower()
+        ):
+
+            return redirect(
+                "student_list"
+            )
+
+    # --------------------------------------------------------
+    # POST
+    # --------------------------------------------------------
+
+    if request.method == "POST":
+
+        form = EnrollmentForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            enrollment = form.save(
+                commit=False
+            )
+
+            enrollment.student = student
+            enrollment.created_by = request.user
+
+            # Branch staff cannot move enrollment
+            # to another branch manually.
+            if not request.user.is_superuser:
+
+                enrollment.branch = (
+                    get_user_branch(
+                        request.user
+                    )
+                )
+
+            elif not enrollment.branch:
+
+                enrollment.branch = (
+                    student.branch
+                )
+
+            enrollment.save()
+
+            # ------------------------------------------------
+            # INITIAL PAYMENT
+            # ------------------------------------------------
+
+            initial_payment = (
+                form.cleaned_data.get(
+                    "initial_payment"
+                )
+                or 0
+            )
+
+            payment_mode = (
+                form.cleaned_data.get(
+                    "payment_mode"
+                )
+                or ""
+            )
+
+            if initial_payment > 0:
+
+                FeePayment.objects.create(
+                    student=student,
+                    enrollment=enrollment,
+                    amount=initial_payment,
+                    payment_mode=payment_mode,
+                    remarks=(
+                        "Initial payment for "
+                        f"{enrollment.course.title} "
+                        f"({enrollment.enrollment_number})"
+                    ),
+                    collected_by=request.user,
+                )
+
+            return redirect(
+                "admission_detail",
+                admission_id=student.admission.id
+            )
+
+    # --------------------------------------------------------
+    # GET
+    # --------------------------------------------------------
+
+    else:
+
+        initial_data = {
+            "branch": student.branch,
+            "status": "active",
+        }
+
+        form = EnrollmentForm(
+            initial=initial_data
+        )
+
+    return render(
+    request,
+    "core/add_student_enrollment.html",
+    {
+        "student": student,
+        "form": form,
+        "course_fees": {
+            str(course.id): str(course.fee or 0)
+            for course in Course.objects.all()
+        },
+    }
+)

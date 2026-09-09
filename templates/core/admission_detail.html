@@ -471,7 +471,6 @@ body {
     font-size: 20px;
 }
 
-
 /* =========================
    COLLECT FEE BUTTON
 ========================= */
@@ -1048,7 +1047,159 @@ body {
 
 
 </div>
+<!-- =========================
+     COURSE ENROLLMENTS
+========================= -->
 
+<div class="card">
+
+    <div class="card-title">
+        Course Enrollments
+    </div>
+
+    <a
+        href="{% url 'add_student_enrollment' admission.student.id %}"
+        class="payment-btn"
+        style="margin-bottom: 18px;"
+    >
+        + Add New Course / Enrollment
+    </a>
+
+    {% for enrollment in admission.student.enrollments.all %}
+
+        <div
+            style="
+                border: 1px solid var(--border);
+                border-left: 4px solid var(--orange);
+                border-radius: 8px;
+                padding: 15px;
+                margin-bottom: 12px;
+                background: #fafafa;
+            "
+        >
+
+            <div
+                style="
+                    font-size: 16px;
+                    font-weight: 900;
+                    margin-bottom: 5px;
+                "
+            >
+                {{ enrollment.course.title }}
+            </div>
+
+            <div
+                style="
+                    font-size: 11px;
+                    color: var(--muted);
+                    margin-bottom: 12px;
+                "
+            >
+                {{ enrollment.enrollment_number }}
+                &nbsp; | &nbsp;
+                {{ enrollment.enrollment_date|date:"d M Y" }}
+                &nbsp; | &nbsp;
+                {{ enrollment.get_status_display }}
+            </div>
+
+            <div class="info-grid">
+
+                <div class="info-item">
+                    <span class="label">
+                        Standard Fee
+                    </span>
+
+                    <span class="value">
+                        ₹{{ enrollment.standard_fee|floatformat:2 }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="label">
+                        Discount
+                    </span>
+
+                    <span class="value">
+                        ₹{{ enrollment.discount_amount|floatformat:2 }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="label">
+                        Final Fee
+                    </span>
+
+                    <span class="value">
+                        ₹{{ enrollment.final_fee|floatformat:2 }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="label">
+                        Paid
+                    </span>
+
+                    <span class="value">
+                        ₹{{ enrollment.total_paid|floatformat:2 }}
+                    </span>
+                </div>
+
+                <div
+                    class="info-item"
+                    style="grid-column: 1 / -1;"
+                >
+                    <span class="label">
+                        Balance
+                    </span>
+
+                    <span
+                        class="value"
+                        style="color: var(--orange);"
+                    >
+                        ₹{{ enrollment.balance_fee|floatformat:2 }}
+                    </span>
+                </div>
+
+            </div>
+
+            {% if enrollment.balance_fee > 0 %}
+
+                <a
+                    href="{% url 'add_enrollment_fee_payment' enrollment.id %}"
+                    class="payment-btn"
+                >
+                    Collect Fee - {{ enrollment.course.title }}
+                </a>
+
+            {% else %}
+
+                <div
+                    style="
+                        margin-top: 12px;
+                        padding: 11px;
+                        background: var(--green-light);
+                        color: var(--green);
+                        text-align: center;
+                        border-radius: 7px;
+                        font-weight: 800;
+                    "
+                >
+                    ✓ Fully Paid
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    {% empty %}
+
+        <div class="notes">
+            No course enrollment found.
+        </div>
+
+    {% endfor %}
+
+</div>
 <!-- NOTES -->
 
 {% if admission.notes %}
@@ -1129,18 +1280,6 @@ body {
     </div>
 
 </div>
-
-
-{% if admission.balance_fee > 0 %}
-
-<a 
-    href="{% url 'add_fee_payment' admission.student.id %}" 
-    class="payment-btn"
->
-    💰 Collect Fee
-</a>
-
-{% endif %}
 
 
 <a

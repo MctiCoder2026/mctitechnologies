@@ -205,6 +205,11 @@ urlpatterns = [
         views.fee_receipt,
         name="fee_receipt"
     ),
+    path(
+    "enrollment/<int:enrollment_id>/fee-payment/add/",
+    views.add_enrollment_fee_payment,
+    name="add_enrollment_fee_payment"
+),
 
     # ============================================================
     # DASHBOARDS / REPORTS
@@ -276,6 +281,11 @@ urlpatterns = [
         "student-quick-view/",
         views.student_quick_view,
         name="student_quick_view"
+    ),
+    path(
+    "students/<int:student_id>/add-enrollment/",
+    views.add_student_enrollment,
+    name="add_student_enrollment"
     ),
 
     # ============================================================

@@ -999,10 +999,10 @@ tbody tr:hover{
                                     </a>
 
 
-                                    {% if admission.student %}
+                                   {% if admission.student %}
 
                                     <a
-                                        href="{% url 'add_fee_payment' admission.student.id %}"
+                                        href="{% url 'admission_detail' admission.id %}"
                                         class="payment-btn"
                                     >
                                         + Fee

@@ -805,7 +805,132 @@ class Student(models.Model):
             "-created_at"
         ]
 
+# ============================================================
+# STUDENT ENROLLMENT
+# ============================================================
 
+class Enrollment(models.Model):
+
+    STATUS_CHOICES = [
+        ("active", "Active"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+        ("hold", "On Hold"),
+    ]
+
+    enrollment_number = models.CharField(
+        max_length=30,
+        unique=True,
+        blank=True
+    )
+
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name="enrollments"
+    )
+
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.PROTECT,
+        related_name="enrollments"
+    )
+
+    enrollment_date = models.DateField(
+        default=timezone.localdate
+    )
+
+    branch = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    standard_fee = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    discount_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    final_fee = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="active"
+    )
+
+    notes = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_enrollments"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def save(self, *args, **kwargs):
+
+        if not self.enrollment_number:
+
+            last_enrollment = (
+                Enrollment.objects
+                .order_by("-id")
+                .first()
+            )
+
+            if last_enrollment:
+                next_number = last_enrollment.id + 1
+            else:
+                next_number = 1
+
+            self.enrollment_number = (
+                f"MCTI-ENR-{next_number:05d}"
+            )
+
+        super().save(*args, **kwargs)
+
+    @property
+    def total_paid(self):
+        return sum(
+            payment.amount
+            for payment in self.fee_payments.all()
+        )
+
+    @property
+    def balance_fee(self):
+        return max(
+            self.final_fee - self.total_paid,
+            0
+        )
+
+    def __str__(self):
+        return (
+            f"{self.enrollment_number} - "
+            f"{self.student.name} - "
+            f"{self.course.title}"
+        )
+
+    class Meta:
+        ordering = ["-created_at"]
 # ============================================================
 # FEE PAYMENT
 # ============================================================
@@ -844,6 +969,13 @@ class FeePayment(models.Model):
         Student,
         on_delete=models.CASCADE,
         related_name="fee_payments"
+    )
+    enrollment = models.ForeignKey(
+        Enrollment,
+        on_delete=models.PROTECT,
+        related_name="fee_payments",
+        null=True,
+        blank=True
     )
 
     # --------------------------------------------------------
@@ -965,15 +1097,32 @@ class FeePayment(models.Model):
         # ----------------------------------------------------
 
         previous_paid = sum(
-            payment.amount
-            for payment in FeePayment.objects.filter(
-                student=self.student
-            ).exclude(
-                pk=self.pk
-            )
+        payment.amount
+        for payment in FeePayment.objects.filter(
+            enrollment=self.enrollment
+        ).exclude(
+            pk=self.pk
         )
+    )
 
-        self.previous_paid = previous_paid
+        if self.enrollment:
+
+            total_fee = self.enrollment.final_fee
+
+            balance = (
+                total_fee
+                - previous_paid
+                - self.amount
+            )
+
+            self.balance_after_payment = max(
+                balance,
+                0
+            )
+
+        else:
+
+            self.balance_after_payment = 0
 
         # ----------------------------------------------------
         # BALANCE AFTER PAYMENT
@@ -1075,6 +1224,77 @@ def sync_student_from_admission(
 # ============================================================
 # AUTO CREATE INITIAL RECEIPT FROM ADMISSION
 # ============================================================
+# ============================================================
+# AUTO CREATE / SYNC ORIGINAL ENROLLMENT FROM ADMISSION
+# ============================================================
+
+@receiver(post_save, sender=Admission)
+def sync_enrollment_from_admission(
+    sender,
+    instance,
+    created,
+    **kwargs
+):
+
+    if kwargs.get("raw"):
+        return
+
+    student = getattr(
+        instance,
+        "student",
+        None
+    )
+
+    if not student:
+        return
+
+    enrollment = (
+        Enrollment.objects
+        .filter(
+            student=student,
+            course=instance.course,
+            enrollment_date=instance.admission_date,
+        )
+        .order_by("id")
+        .first()
+    )
+
+    if enrollment:
+
+        enrollment.branch = instance.branch
+        enrollment.standard_fee = instance.total_fee
+        enrollment.final_fee = instance.total_fee
+        enrollment.created_by = instance.created_by
+
+        enrollment.save(
+            update_fields=[
+                "branch",
+                "standard_fee",
+                "final_fee",
+                "created_by",
+            ]
+        )
+
+    else:
+
+        Enrollment.objects.create(
+            student=student,
+            course=instance.course,
+            enrollment_date=instance.admission_date,
+            branch=instance.branch,
+            standard_fee=instance.total_fee,
+            discount_amount=0,
+            final_fee=instance.total_fee,
+            status="active",
+            created_by=instance.created_by,
+            notes=(
+                "Original enrollment from Admission "
+                f"{instance.admission_number}"
+            ),
+        )
+# ============================================================
+# AUTO CREATE INITIAL RECEIPT FROM ADMISSION
+# ============================================================
 
 @receiver(post_save, sender=Admission)
 def create_initial_fee_payment(
@@ -1087,24 +1307,47 @@ def create_initial_fee_payment(
     if kwargs.get("raw"):
         return
 
-    if created and instance.paid_fee > 0:
+    if not created:
+        return
 
-        student = getattr(
-            instance,
-            "student",
-            None
+    if instance.paid_fee <= 0:
+        return
+
+    student = getattr(
+        instance,
+        "student",
+        None
+    )
+
+    if not student:
+        return
+
+    enrollment = (
+        Enrollment.objects
+        .filter(
+            student=student,
+            course=instance.course,
+            enrollment_date=instance.admission_date,
         )
+        .order_by("id")
+        .first()
+    )
 
-        if student:
+    if not enrollment:
+        return
 
-            FeePayment.objects.create(
-                student=student,
-                payment_date=instance.admission_date,
-                amount=instance.paid_fee,
-                payment_mode=instance.initial_payment_mode,
-                collected_by=instance.created_by,
-                remarks="Initial payment at admission"
-            )
+    FeePayment.objects.create(
+        student=student,
+        enrollment=enrollment,
+        payment_date=instance.admission_date,
+        amount=instance.paid_fee,
+        payment_mode=instance.initial_payment_mode,
+        collected_by=instance.created_by,
+        remarks="Initial payment at admission",
+    )
+    # ============================================================
+# STAFF PROFILE
+# ============================================================
 
 class StaffProfile(models.Model):
 
@@ -1182,28 +1425,41 @@ def update_admission_fees(
     if kwargs.get("raw"):
         return
 
-    admission = (
-        instance.student.admission
+    # Payment must belong to an Enrollment
+    if not instance.enrollment_id:
+        return
+
+    admission = instance.student.admission
+
+    if not admission:
+        return
+
+    # Only the student's original admission enrollment
+    # should update the legacy Admission fee fields.
+    if (
+        instance.enrollment.course_id != admission.course_id
+        or
+        instance.enrollment.enrollment_date != admission.admission_date
+    ):
+        return
+
+    total_paid = sum(
+        payment.amount
+        for payment in FeePayment.objects.filter(
+            enrollment=instance.enrollment
+        )
     )
 
-    if admission:
+    if admission.paid_fee != total_paid:
 
-        total_paid = sum(
-            payment.amount
-            for payment in instance.student.fee_payments.all()
+        admission.paid_fee = total_paid
+
+        admission.save(
+            update_fields=[
+                "paid_fee",
+                "payment_status"
+            ]
         )
-
-        # Avoid unnecessary save if value is already same
-        if admission.paid_fee != total_paid:
-
-            admission.paid_fee = total_paid
-
-            admission.save(
-                update_fields=[
-                    "paid_fee",
-                    "payment_status"
-                ]
-            )
 
 class JobPost(models.Model):
 
