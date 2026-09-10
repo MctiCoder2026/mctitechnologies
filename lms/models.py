@@ -1,6 +1,8 @@
 import uuid
+
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 
 from core.models import Course, Student
 
@@ -108,6 +110,7 @@ class LMSTopic(models.Model):
     def __str__(self):
         return f"{self.module.title} - {self.title}"
 
+
 # =========================================================
 # LMS TOPIC CONTENT - MULTILINGUAL
 # =========================================================
@@ -180,22 +183,25 @@ class LMSTopicContent(models.Model):
             f"{self.topic.title} - "
             f"{self.get_language_display()}"
         )
+
+
 # =========================================================
 # QUIZ QUESTION
 # =========================================================
 
 class QuizQuestion(models.Model):
 
+    LANGUAGE_CHOICES = [
+        ("en", "English"),
+        ("hi", "Hindi"),
+        ("mr", "Marathi"),
+    ]
+
     topic = models.ForeignKey(
         LMSTopic,
         on_delete=models.CASCADE,
         related_name="quiz_questions"
     )
-    LANGUAGE_CHOICES = [
-    ("en", "English"),
-    ("hi", "Hindi"),
-    ("mr", "Marathi"),
-    ]
 
     language = models.CharField(
         max_length=2,
@@ -346,7 +352,9 @@ class QuizAttempt(models.Model):
             f"{self.topic.title} - "
             f"{self.score}/{self.total_questions}"
         )
-    # =========================================================
+
+
+# =========================================================
 # CERTIFICATE
 # =========================================================
 
@@ -366,7 +374,8 @@ class Certificate(models.Model):
 
     certificate_number = models.CharField(
         max_length=50,
-        unique=True
+        unique=True,
+        blank=True
     )
 
     verification_token = models.UUIDField(
@@ -393,6 +402,24 @@ class Certificate(models.Model):
             "course",
         )
         ordering = ["-issue_date"]
+
+    def save(self, *args, **kwargs):
+
+        if not self.certificate_number:
+
+            year = (
+                self.issue_date.year
+                if self.issue_date
+                else timezone.now().year
+            )
+
+            unique_code = self.verification_token.hex[:10].upper()
+
+            self.certificate_number = (
+                f"MCTI-CERT-{year}-{unique_code}"
+            )
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return (

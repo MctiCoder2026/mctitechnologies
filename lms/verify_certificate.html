@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Verified Skill Record | MCTI Technologies
+    </title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            color: #111827;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.10);
+            border-top: 5px solid #ff6a00;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .brand {
+            font-size: 30px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .brand-orange {
+            color: #ff6a00;
+        }
+
+        .brand-black {
+            color: #111827;
+        }
+
+        .sub-brand {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .record-title {
+            font-size: 24px;
+            margin: 0 0 15px 0;
+            color: #111827;
+        }
+
+        .verified {
+            display: inline-block;
+            background: #ecfdf5;
+            border: 1px solid #86efac;
+            color: #15803d;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .invalid {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #b91c1c;
+        }
+
+        .details {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .box {
+            background: #fafafa;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 7px;
+        }
+
+        .value {
+            font-size: 17px;
+            font-weight: 700;
+            color: #111827;
+            word-break: break-word;
+        }
+
+        .section-title {
+            font-size: 19px;
+            margin-top: 32px;
+            margin-bottom: 15px;
+            color: #111827;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e5e7eb;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #ff6a00;
+            border-radius: 20px;
+        }
+
+        .completion-text {
+            margin-top: 10px;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            min-width: 560px;
+        }
+
+        th {
+            background: #111827;
+            color: #ffffff;
+            padding: 13px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 13px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .score {
+            font-weight: 700;
+            color: #ff6a00;
+        }
+
+        .status-box {
+            margin-top: 30px;
+            padding: 16px;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 700px) {
+
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .details {
+                grid-template-columns: 1fr;
+            }
+
+            .brand {
+                font-size: 26px;
+            }
+
+            .record-title {
+                font-size: 21px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+
+        <div class="brand">
+            <span class="brand-orange">MCTI</span>
+            <span class="brand-black">Technologies</span>
+        </div>
+
+        <div class="sub-brand">
+            An Initiative by Maharashtra Computer Training Institute
+        </div>
+
+        <h1 class="record-title">
+            Verified Skill Record
+        </h1>
+
+        {% if certificate.is_active %}
+
+            <div class="verified">
+                ✓ VERIFIED CERTIFICATE
+            </div>
+
+        {% else %}
+
+            <div class="verified invalid">
+                CERTIFICATE NOT ACTIVE
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- CERTIFICATE DETAILS -->
+    <div class="details">
+
+        <div class="box">
+            <div class="label">
+                Student Name
+            </div>
+
+            <div class="value">
+                {{ student.name }}
+            </div>
+        </div>
+
+
+        <div class="box">
+            <div class="label">
+                Student ID
+            </div>
+
+            <div class="value">
+                {{ student.student_id }}
+            </div>
+        </div>
+
+
+        <div class="box">
+            <div class="label">
+                Course
+            </div>
+
+            <div class="value">
+                {{ course.title }}
+            </div>
+        </div>
+
+
+        <div class="box">
+            <div class="label">
+                Certificate Number
+            </div>
+
+            <div class="value">
+                {{ certificate.certificate_number }}
+            </div>
+        </div>
+
+
+        <div class="box">
+            <div class="label">
+                Issue Date
+            </div>
+
+            <div class="value">
+                {{ certificate.issue_date|date:"d F Y" }}
+            </div>
+        </div>
+
+
+        <div class="box">
+            <div class="label">
+                Certificate Status
+            </div>
+
+            <div class="value">
+
+                {% if certificate.is_active %}
+                    Active & Verified
+                {% else %}
+                    Inactive
+                {% endif %}
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- COURSE COMPLETION -->
+    <h2 class="section-title">
+        Overall Learning Progress
+    </h2>
+
+    <div class="progress-info">
+
+        <span>
+            Course Completion
+        </span>
+
+        <strong>
+            {{ completion_percentage }}%
+        </strong>
+
+    </div>
+
+    <div class="progress-bar">
+
+        <div
+            class="progress-fill"
+            style="width: {{ completion_percentage }}%;">
+        </div>
+
+    </div>
+
+    <div class="completion-text">
+
+        {{ completion_percentage }}% of the prescribed LMS learning
+        topics have been successfully completed.
+
+    </div>
+
+
+    <!-- MODULE PERFORMANCE -->
+    <h2 class="section-title">
+        Verified Module Performance
+    </h2>
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Module</th>
+                    <th>Topics Completed</th>
+                    <th>Verified Score</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for item in module_results %}
+
+                    <tr>
+
+                        <td>
+                            {{ item.module.title }}
+                        </td>
+
+                        <td>
+                            {{ item.completed }} / {{ item.total }}
+                        </td>
+
+                        <td class="score">
+                            {{ item.score }}%
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="3">
+                            No learning performance record available.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- VERIFICATION NOTE -->
+    <div class="status-box">
+
+        This digital skill record is generated from the student's
+        learning progress recorded through the MCTI One Learning
+        Management System.
+
+        <br><br>
+
+        Employers and authorised verifiers may use this page to
+        confirm the validity of the certificate and the student's
+        verified course learning performance.
+
+    </div>
+
+
+    <!-- FOOTER -->
+    <div class="footer">
+
+        Verified by
+        <strong>
+            Maharashtra Computer Training Institute
+        </strong>
+
+        <br>
+
+        MCTI Technologies | MCTI One Learning Management System
+
+        <br>
+
+        Certificate verification is linked to a unique secure
+        verification token.
+
+    </div>
+
+</div>
+
+</body>
+</html>

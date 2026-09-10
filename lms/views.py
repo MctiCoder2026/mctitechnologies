@@ -1,5 +1,8 @@
+import random
 import io
 import qrcode
+
+from django.conf import settings
 
 from reportlab.lib.utils import ImageReader
 from django.http import HttpResponse, HttpResponseForbidden
@@ -752,40 +755,43 @@ def topic_quiz(request, topic_id):
         )
 
     # -------------------------------------------------
-    # LANGUAGE SELECTION
+    # QUIZ LANGUAGE - ENGLISH ONLY
     # -------------------------------------------------
 
-    allowed_languages = {
-        "en": "English",
-        "hi": "हिंदी",
-        "mr": "मराठी",
-    }
-
-    if request.method == "POST":
-        selected_language = request.POST.get(
-            "language",
-            "en"
-        )
-    else:
-        selected_language = request.GET.get(
-            "lang",
-            "en"
-        )
-
-    if selected_language not in allowed_languages:
-        selected_language = "en"
+    selected_language = "en"
+    selected_language_name = "English"
 
     # -------------------------------------------------
-    # QUESTIONS OF SELECTED LANGUAGE ONLY
+    # ENGLISH QUIZ QUESTIONS ONLY
     # -------------------------------------------------
 
-    questions = QuizQuestion.objects.filter(
-        topic=topic,
-        language=selected_language,
-        is_active=True
-    ).order_by("order")[:5]
+    questions = list(
+        QuizQuestion.objects.filter(
+            topic=topic,
+            language="en",
+            is_active=True
+        ).order_by("order")[:5]
+    )
 
-    total_questions = questions.count()
+    total_questions = len(questions)
+
+    # -------------------------------------------------
+    # SHUFFLE QUIZ OPTIONS
+    # -------------------------------------------------
+    # Only the visible order changes.
+    # Original A/B/C/D keys are preserved for scoring.
+
+    for question in questions:
+
+        shuffled_options = [
+            {"key": "A", "text": question.option_a},
+            {"key": "B", "text": question.option_b},
+            {"key": "C", "text": question.option_c},
+            {"key": "D", "text": question.option_d},
+        ]
+
+        random.shuffle(shuffled_options)
+        question.shuffled_options = shuffled_options
 
     # -------------------------------------------------
     # SUBMIT QUIZ
@@ -924,6 +930,10 @@ def topic_quiz(request, topic_id):
                             next_progress.is_unlocked = True
                             next_progress.save()
 
+        # -------------------------------------------------
+        # QUIZ RESULT
+        # -------------------------------------------------
+
         context = {
             "student": student,
             "topic": topic,
@@ -931,7 +941,7 @@ def topic_quiz(request, topic_id):
             "total_questions": total_questions,
             "passed": passed,
             "selected_language": selected_language,
-            "selected_language_name": allowed_languages[selected_language],
+            "selected_language_name": selected_language_name,
         }
 
         return render(
@@ -940,14 +950,17 @@ def topic_quiz(request, topic_id):
             context
         )
 
+    # -------------------------------------------------
+    # QUIZ PAGE
+    # -------------------------------------------------
+
     context = {
         "student": student,
         "topic": topic,
         "questions": questions,
         "total_questions": total_questions,
         "selected_language": selected_language,
-        "selected_language_name": allowed_languages[selected_language],
-        "languages": allowed_languages,
+        "selected_language_name": selected_language_name,
     }
 
     return render(
@@ -1050,7 +1063,7 @@ def my_progress(request):
 
     certificate_eligible = (
         total_topics > 0
-        and progress_percent >= 1
+        and progress_percent >= 80
     )
 
     # -------------------------------------------------
@@ -1176,12 +1189,12 @@ def certificates(request):
 
     certificate_eligible = (
         total_topics > 0
-        and progress_percent >= 1
+        and progress_percent >= 80
     )
 
     remaining_percent = max(
         0,
-        1 - progress_percent
+        100 - progress_percent
     )
 
     context = {
@@ -1328,7 +1341,7 @@ def student_performance_report(request):
 
         certificate_eligible = (
             total_topics > 0
-            and progress_percent >= 1
+            and progress_percent >= 80
         )
 
         attempts = QuizAttempt.objects.filter(
@@ -1446,7 +1459,7 @@ def download_certificate(request):
 
     certificate_eligible = (
         total_topics > 0
-        and progress_percent >= 1
+        and progress_percent >= 80
     )
 
     if not certificate_eligible:
@@ -1499,6 +1512,41 @@ def download_certificate(request):
     qr_buffer.seek(0)
 
     qr_reader = ImageReader(qr_buffer)
+
+    # -------------------------------------------------
+    # CERTIFICATE BRANDING ASSETS
+    # -------------------------------------------------
+
+    certificate_asset_dir = (
+        settings.BASE_DIR
+        / "lms"
+        / "static"
+        / "lms"
+        / "certificate"
+    )
+
+    logo_path = (
+        certificate_asset_dir
+        / "mcti_technologies_logo.png"
+    )
+
+    signature_path = (
+        certificate_asset_dir
+        / "director_signature.png"
+    )
+
+    logo_reader = None
+    signature_reader = None
+
+    if logo_path.exists():
+        logo_reader = ImageReader(
+            str(logo_path)
+        )
+
+    if signature_path.exists():
+        signature_reader = ImageReader(
+            str(signature_path)
+        )
 
     # -------------------------------------------------
     # PDF RESPONSE
@@ -1643,53 +1691,56 @@ def download_certificate(request):
         "ISO 9001:2015"
     )
     # -------------------------------------------------
-    # TOP BRAND
+    # TOP BRAND / MCTI TECHNOLOGIES LOGO
     # -------------------------------------------------
 
-    pdf.setFillColor(
-        colors.HexColor("#FF6B00")
-    )
+    if logo_reader:
 
-    pdf.setFont(
-        "Helvetica-Bold",
-        24
-    )
+        logo_width = 300
+        logo_height = 92
 
-    pdf.drawCentredString(
-        page_width / 2,
-        page_height - 72,
-        "MCTI"
-    )
+        pdf.drawImage(
+            logo_reader,
+            (page_width - logo_width) / 2,
+            page_height - 128,
+            width=logo_width,
+            height=logo_height,
+            preserveAspectRatio=True,
+            mask="auto"
+        )
 
-    pdf.setFillColor(
-        colors.HexColor("#111827")
-    )
+    else:
 
-    pdf.setFont(
-        "Helvetica-Bold",
-        13
-    )
+        # Fallback text if logo file is missing.
+        pdf.setFillColor(
+            colors.HexColor("#FF6B00")
+        )
 
-    pdf.drawCentredString(
-        page_width / 2,
-        page_height - 92,
-        "MAHARASHTRA COMPUTER TRAINING INSTITUTE"
-    )
+        pdf.setFont(
+            "Helvetica-Bold",
+            24
+        )
 
-    pdf.setFont(
-        "Helvetica",
-        9
-    )
+        pdf.drawCentredString(
+            page_width / 2,
+            page_height - 72,
+            "MCTI"
+        )
 
-    pdf.setFillColor(
-        colors.HexColor("#64748B")
-    )
+        pdf.setFillColor(
+            colors.HexColor("#111827")
+        )
 
-    pdf.drawCentredString(
-        page_width / 2,
-        page_height - 108,
-        "Education | Skills | Career Development"
-    )
+        pdf.setFont(
+            "Helvetica-Bold",
+            13
+        )
+
+        pdf.drawCentredString(
+            page_width / 2,
+            page_height - 92,
+            "TECHNOLOGIES"
+        )
 
     # -------------------------------------------------
     # CERTIFICATE TITLE
@@ -2012,6 +2063,21 @@ def download_certificate(request):
     # DIRECTOR SIGNATURE AREA
     # -------------------------------------------------
 
+    if signature_reader:
+
+        signature_width = 115
+        signature_height = 48
+
+        pdf.drawImage(
+            signature_reader,
+            page_width - 198,
+            108,
+            width=signature_width,
+            height=signature_height,
+            preserveAspectRatio=True,
+            mask="auto"
+        )
+
     pdf.setStrokeColor(
         colors.HexColor("#111827")
     )
@@ -2087,6 +2153,11 @@ def download_certificate(request):
     pdf.save()
 
     return response
+
+# =========================================================
+# PUBLIC CERTIFICATE VERIFICATION
+# =========================================================
+
 def verify_certificate(request, verification_token):
 
     certificate = get_object_or_404(
@@ -2097,8 +2168,86 @@ def verify_certificate(request, verification_token):
         verification_token=verification_token
     )
 
+    student = certificate.student
+    course = certificate.course
+
+    modules = (
+        LMSModule.objects
+        .filter(
+            course=course,
+            is_active=True
+        )
+        .prefetch_related("topics")
+        .order_by("order")
+    )
+
+    module_results = []
+
+    total_topics = 0
+    completed_topics = 0
+
+    for module in modules:
+
+        topics = module.topics.filter(
+            is_active=True
+        ).order_by("order")
+
+        module_total = topics.count()
+
+        progress_records = StudentTopicProgress.objects.filter(
+            student=student,
+            topic__in=topics
+        )
+
+        module_completed = progress_records.filter(
+            is_completed=True
+        ).count()
+
+        scores = []
+
+        for progress in progress_records:
+
+            if progress.total_questions > 0:
+
+                percentage = round(
+                    (
+                        progress.best_score
+                        / progress.total_questions
+                    ) * 100
+                )
+
+                scores.append(percentage)
+
+        module_score = (
+            round(sum(scores) / len(scores))
+            if scores
+            else 0
+        )
+
+        total_topics += module_total
+        completed_topics += module_completed
+
+        module_results.append({
+            "module": module,
+            "completed": module_completed,
+            "total": module_total,
+            "score": module_score,
+        })
+
+    completion_percentage = (
+        round(
+            (completed_topics / total_topics) * 100
+        )
+        if total_topics > 0
+        else 0
+    )
+
     context = {
         "certificate": certificate,
+        "student": student,
+        "course": course,
+        "module_results": module_results,
+        "completion_percentage": completion_percentage,
     }
 
     return render(
@@ -2106,3 +2255,4 @@ def verify_certificate(request, verification_token):
         "lms/verify_certificate.html",
         context
     )
+

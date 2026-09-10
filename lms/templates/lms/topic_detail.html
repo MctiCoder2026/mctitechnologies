@@ -87,72 +87,6 @@ Module {{ topic.module.order }}: {{ topic.module.title }}
 
 
 <!-- ===================================================== -->
-<!-- LANGUAGE SELECTOR -->
-<!-- ===================================================== -->
-
-<div class="panel">
-
-    <div style="
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        gap:15px;
-        flex-wrap:wrap;
-    ">
-
-        <div>
-
-            <strong style="font-size:13px;">
-                Choose Learning Language
-            </strong>
-
-            <p style="
-                color:#64748b;
-                font-size:10px;
-                margin-top:4px;
-            ">
-                Current:
-                <strong>{{ selected_language_name }}</strong>
-            </p>
-
-        </div>
-
-
-        <div style="
-            display:flex;
-            gap:8px;
-            flex-wrap:wrap;
-        ">
-
-            <a
-                href="?lang=en"
-                class="language-btn {% if selected_language == 'en' %}active{% endif %}"
-            >
-                English
-            </a>
-
-            <a
-                href="?lang=hi"
-                class="language-btn {% if selected_language == 'hi' %}active{% endif %}"
-            >
-                हिंदी
-            </a>
-
-            <a
-                href="?lang=mr"
-                class="language-btn {% if selected_language == 'mr' %}active{% endif %}"
-            >
-                मराठी
-            </a>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- ===================================================== -->
 <!-- READING MATERIAL -->
 <!-- ===================================================== -->
 
@@ -179,8 +113,7 @@ Module {{ topic.module.order }}: {{ topic.module.title }}
             color:#94a3b8;
             font-size:11px;
         ">
-            Reading material is not available in
-            {{ selected_language_name }}.
+            Reading material is not available for this topic.
         </p>
 
     {% endif %}
@@ -245,7 +178,7 @@ Module {{ topic.module.order }}: {{ topic.module.title }}
                 font-size:11px;
                 margin-bottom:13px;
             ">
-                Download {{ selected_language_name }} notes for revision.
+                Download notes for revision.
             </p>
 
             <a
@@ -262,7 +195,7 @@ Module {{ topic.module.order }}: {{ topic.module.title }}
                 color:#94a3b8;
                 font-size:11px;
             ">
-                No {{ selected_language_name }} notes uploaded for this topic.
+                No notes uploaded for this topic.
             </p>
 
         {% endif %}
@@ -299,8 +232,7 @@ Module {{ topic.module.order }}: {{ topic.module.title }}
                 color:#94a3b8;
                 font-size:11px;
             ">
-                No practice file available in
-                {{ selected_language_name }}.
+                No practice file available for this topic.
             </p>
 
         {% endif %}
@@ -334,9 +266,7 @@ Module {{ topic.module.order }}: {{ topic.module.title }}
                 color:#64748b;
                 font-size:11px;
             ">
-                Quiz Language:
-                <strong>{{ selected_language_name }}</strong>
-                • 5 Questions
+                5 Questions
                 • Minimum 3 correct answers required
             </p>
 
@@ -344,7 +274,7 @@ Module {{ topic.module.order }}: {{ topic.module.title }}
 
 
         <a
-            href="{% url 'lms:topic_quiz' topic.id %}?lang={{ selected_language }}"
+            href="{% url 'lms:topic_quiz' topic.id %}"
             class="btn"
         >
 
@@ -362,32 +292,6 @@ Module {{ topic.module.order }}: {{ topic.module.title }}
 
 
 <style>
-
-    .language-btn {
-        display:inline-block;
-        padding:9px 16px;
-        border-radius:8px;
-        border:1px solid #e2e8f0;
-        background:#ffffff;
-        color:#111827;
-        text-decoration:none;
-        font-size:11px;
-        font-weight:700;
-        transition:0.2s;
-    }
-
-    .language-btn:hover {
-        border-color:#ff6b00;
-        background:#fff7ed;
-    }
-
-    .language-btn.active {
-        background:#ff6b00;
-        color:#ffffff;
-        border-color:#ff6b00;
-        box-shadow:0 3px 8px rgba(255,107,0,0.18);
-    }
-
 
     @media (max-width:760px) {
 

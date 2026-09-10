@@ -48,6 +48,10 @@ urlpatterns = [
         name="my_progress"
     ),
 
+    # =====================================================
+    # CERTIFICATES
+    # =====================================================
+
     path(
         "certificates/",
         views.certificates,
@@ -59,10 +63,11 @@ urlpatterns = [
         views.download_certificate,
         name="download_certificate"
     ),
+
     path(
-    "certificate/verify/<uuid:verification_token>/",
-    views.verify_certificate,
-    name="verify_certificate"
+        "certificate/verify/<uuid:verification_token>/",
+        views.verify_certificate,
+        name="verify_certificate"
     ),
 
     # =====================================================

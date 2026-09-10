@@ -28,6 +28,8 @@
     --border: #e5e5e5;
     --muted: #777777;
     --red: #dc3545;
+    --green: #198754;
+    --green-light: #edf9f3;
 }
 
 body {
@@ -158,6 +160,19 @@ textarea {
     background: white;
 }
 
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--orange);
+    box-shadow: 0 0 0 2px rgba(255,107,0,.10);
+}
+
+input[readonly] {
+    background: #f7f7f7;
+    color: #555555;
+}
+
 textarea {
     resize: vertical;
 }
@@ -178,6 +193,24 @@ textarea {
     margin-bottom: 18px;
 }
 
+.fee-warning {
+    display: none;
+    margin-top: 7px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #fff0f1;
+    border: 1px solid #f5c6cb;
+    color: var(--red);
+}
+
+.fee-info {
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 10px;
+}
+
 .submit-btn {
     width: 100%;
     border: none;
@@ -193,6 +226,11 @@ textarea {
 
 .submit-btn:hover {
     background: var(--orange-dark);
+}
+
+.submit-btn:disabled {
+    background: #bbbbbb;
+    cursor: not-allowed;
 }
 
 @media (max-width: 700px) {
@@ -277,7 +315,7 @@ textarea {
         </div>
         {% endif %}
 
-        <form method="post">
+        <form method="post" id="enrollment-form">
 
             {% csrf_token %}
 
@@ -311,24 +349,50 @@ textarea {
                     <label>Standard Fee</label>
                     {{ form.standard_fee }}
                     {{ form.standard_fee.errors }}
+
+                    <div class="fee-info">
+                        Auto-filled from Course Master.
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label>Discount Amount</label>
                     {{ form.discount_amount }}
                     {{ form.discount_amount.errors }}
+
+                    <div class="fee-info">
+                        Enter direct amount, e.g. 500, 2500 or 5000.
+                    </div>
+
+                    <div
+                        id="discount-warning"
+                        class="fee-warning"
+                    >
+                        Discount cannot be more than Standard Fee.
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label>Final Fee</label>
                     {{ form.final_fee }}
                     {{ form.final_fee.errors }}
+
+                    <div class="fee-info">
+                        Standard Fee − Discount Amount
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label>Initial Payment</label>
                     {{ form.initial_payment }}
                     {{ form.initial_payment.errors }}
+
+                    <div
+                        id="payment-warning"
+                        class="fee-warning"
+                    >
+                        Initial Payment cannot be more than Final Fee.
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -348,6 +412,7 @@ textarea {
             <button
                 type="submit"
                 class="submit-btn"
+                id="submit-btn"
             >
                 Create Enrollment
             </button>
@@ -357,60 +422,451 @@ textarea {
     </div>
 
 </div>
+
+
 {{ course_fees|json_script:"course-fees-data" }}
 
+
 <script>
+
 document.addEventListener("DOMContentLoaded", function () {
 
-    const courseSelect = document.getElementById("id_course");
-    const standardFeeInput = document.getElementById("id_standard_fee");
-    const discountInput = document.getElementById("id_discount_amount");
-    const finalFeeInput = document.getElementById("id_final_fee");
+    const courseSelect =
+        document.getElementById("id_course");
+
+    const standardFeeInput =
+        document.getElementById("id_standard_fee");
+
+    const discountInput =
+        document.getElementById("id_discount_amount");
+
+    const finalFeeInput =
+        document.getElementById("id_final_fee");
+
+    const initialPaymentInput =
+        document.getElementById("id_initial_payment");
+
+    const discountWarning =
+        document.getElementById("discount-warning");
+
+    const paymentWarning =
+        document.getElementById("payment-warning");
+
+    const submitButton =
+        document.getElementById("submit-btn");
+
+    const form =
+        document.getElementById("enrollment-form");
+
 
     const courseFees = JSON.parse(
-        document.getElementById("course-fees-data").textContent
+        document.getElementById(
+            "course-fees-data"
+        ).textContent
     );
 
-    function updateFees() {
 
-        const courseId = courseSelect.value;
+    /*
+    ============================================================
+    READ NUMBER SAFELY
+    ============================================================
+    */
 
-        let standardFee = parseFloat(
-            courseFees[courseId] || 0
-        );
+    function getNumber(value) {
 
-        let discountAmount = parseFloat(
-            discountInput.value || 0
-        );
+        const parsed = parseFloat(value);
+
+        if (isNaN(parsed)) {
+            return 0;
+        }
+
+        return parsed;
+    }
+
+
+    /*
+    ============================================================
+    UPDATE STANDARD FEE WHEN COURSE CHANGES
+    ============================================================
+    */
+
+    function updateCourseFee() {
+
+        if (!courseSelect) {
+            return;
+        }
+
+        const courseId =
+            courseSelect.value;
+
+        const standardFee =
+            getNumber(
+                courseFees[courseId]
+            );
+
+        if (standardFeeInput) {
+            standardFeeInput.value =
+                standardFee.toFixed(2);
+        }
+
+        /*
+        Reset discount only when user changes course.
+        This avoids carrying old-course discount into new course.
+        */
+
+        if (discountInput) {
+            discountInput.value = "0";
+        }
+
+        calculateFinalFee();
+    }
+
+
+    /*
+    ============================================================
+    CALCULATE FINAL FEE
+    ============================================================
+    Important:
+    We DO NOT modify discountInput.value while user is typing.
+    ============================================================
+    */
+
+    function calculateFinalFee() {
+
+        const standardFee =
+            getNumber(
+                standardFeeInput
+                    ? standardFeeInput.value
+                    : 0
+            );
+
+        let discountAmount =
+            getNumber(
+                discountInput
+                    ? discountInput.value
+                    : 0
+            );
 
         if (discountAmount < 0) {
             discountAmount = 0;
         }
 
-        if (discountAmount > standardFee) {
-            discountAmount = standardFee;
+        let finalFee =
+            standardFee - discountAmount;
+
+
+        if (
+            discountAmount >
+            standardFee
+        ) {
+
+            finalFee = 0;
+
+            if (discountWarning) {
+                discountWarning.style.display =
+                    "block";
+            }
+
+        } else {
+
+            if (discountWarning) {
+                discountWarning.style.display =
+                    "none";
+            }
+
         }
 
-        const finalFee = standardFee - discountAmount;
 
-        standardFeeInput.value = standardFee.toFixed(2);
-        discountInput.value = discountAmount.toFixed(2);
-        finalFeeInput.value = finalFee.toFixed(2);
+        if (finalFeeInput) {
+            finalFeeInput.value =
+                Math.max(
+                    finalFee,
+                    0
+                ).toFixed(2);
+        }
+
+
+        validateInitialPayment();
+
+        updateSubmitState();
     }
 
-    courseSelect.addEventListener(
-        "change",
-        updateFees
-    );
 
-    discountInput.addEventListener(
-        "input",
-        updateFees
-    );
+    /*
+    ============================================================
+    INITIAL PAYMENT VALIDATION
+    ============================================================
+    */
 
-    updateFees();
+    function validateInitialPayment() {
+
+        const finalFee =
+            getNumber(
+                finalFeeInput
+                    ? finalFeeInput.value
+                    : 0
+            );
+
+        const initialPayment =
+            getNumber(
+                initialPaymentInput
+                    ? initialPaymentInput.value
+                    : 0
+            );
+
+
+        if (
+            initialPayment < 0 ||
+            initialPayment > finalFee
+        ) {
+
+            if (paymentWarning) {
+                paymentWarning.style.display =
+                    "block";
+            }
+
+            return false;
+        }
+
+
+        if (paymentWarning) {
+            paymentWarning.style.display =
+                "none";
+        }
+
+        return true;
+    }
+
+
+    /*
+    ============================================================
+    SUBMIT BUTTON STATE
+    ============================================================
+    */
+
+    function updateSubmitState() {
+
+        const standardFee =
+            getNumber(
+                standardFeeInput
+                    ? standardFeeInput.value
+                    : 0
+            );
+
+        const discountAmount =
+            getNumber(
+                discountInput
+                    ? discountInput.value
+                    : 0
+            );
+
+        const paymentValid =
+            validateInitialPayment();
+
+        const discountValid =
+            discountAmount >= 0 &&
+            discountAmount <= standardFee;
+
+
+        if (submitButton) {
+
+            submitButton.disabled =
+                !discountValid ||
+                !paymentValid;
+        }
+    }
+
+
+    /*
+    ============================================================
+    EVENTS
+    ============================================================
+    */
+
+    if (courseSelect) {
+
+        courseSelect.addEventListener(
+            "change",
+            updateCourseFee
+        );
+    }
+
+
+    if (discountInput) {
+
+        /*
+        User can freely type:
+        5
+        50
+        500
+        5000
+
+        No .toFixed() is applied here.
+        */
+
+        discountInput.addEventListener(
+            "input",
+            calculateFinalFee
+        );
+
+
+        /*
+        Format only after user leaves field.
+        */
+
+        discountInput.addEventListener(
+            "blur",
+            function () {
+
+                let value =
+                    getNumber(
+                        discountInput.value
+                    );
+
+                if (value < 0) {
+                    value = 0;
+                }
+
+                discountInput.value =
+                    value.toFixed(2);
+
+                calculateFinalFee();
+            }
+        );
+    }
+
+
+    if (initialPaymentInput) {
+
+        initialPaymentInput.addEventListener(
+            "input",
+            function () {
+
+                validateInitialPayment();
+                updateSubmitState();
+            }
+        );
+
+
+        initialPaymentInput.addEventListener(
+            "blur",
+            function () {
+
+                let value =
+                    getNumber(
+                        initialPaymentInput.value
+                    );
+
+                if (value < 0) {
+                    value = 0;
+                }
+
+                initialPaymentInput.value =
+                    value.toFixed(2);
+
+                validateInitialPayment();
+                updateSubmitState();
+            }
+        );
+    }
+
+
+    /*
+    ============================================================
+    FINAL SUBMIT SAFETY
+    ============================================================
+    */
+
+    if (form) {
+
+        form.addEventListener(
+            "submit",
+            function (event) {
+
+                const standardFee =
+                    getNumber(
+                        standardFeeInput.value
+                    );
+
+                const discountAmount =
+                    getNumber(
+                        discountInput.value
+                    );
+
+                const finalFee =
+                    getNumber(
+                        finalFeeInput.value
+                    );
+
+                const initialPayment =
+                    getNumber(
+                        initialPaymentInput.value
+                    );
+
+
+                if (
+                    discountAmount < 0 ||
+                    discountAmount > standardFee
+                ) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "Discount Amount cannot be more than Standard Fee."
+                    );
+
+                    discountInput.focus();
+
+                    return;
+                }
+
+
+                if (
+                    finalFee < 0
+                ) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "Final Fee cannot be negative."
+                    );
+
+                    return;
+                }
+
+
+                if (
+                    initialPayment < 0 ||
+                    initialPayment > finalFee
+                ) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "Initial Payment cannot be more than Final Fee."
+                    );
+
+                    initialPaymentInput.focus();
+
+                    return;
+                }
+
+            }
+        );
+    }
+
+
+    /*
+    ============================================================
+    INITIAL PAGE LOAD
+    ============================================================
+    */
+
+    calculateFinalFee();
 
 });
+
 </script>
+
 </body>
 </html>

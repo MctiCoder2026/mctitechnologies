@@ -104,6 +104,8 @@
             padding: 18px 15px;
 
             overflow-y: auto;
+            z-index: 1000;
+            transition: transform .25s ease;
 
         }
 
@@ -753,6 +755,54 @@
 
 
         /* =========================================
+           MOBILE SIDEBAR CONTROLS
+        ========================================= */
+
+        .mobile-menu-btn {
+            display: none;
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 8px;
+            background: var(--sidebar);
+            color: white;
+            font-size: 21px;
+            line-height: 1;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .mobile-sidebar-close {
+            display: none;
+            width: 34px;
+            height: 34px;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            background: #1f2937;
+            color: white;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            margin-left: auto;
+            margin-bottom: 14px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .52);
+            z-index: 999;
+        }
+
+        body.sidebar-open {
+            overflow: hidden;
+        }
+
+
+        /* =========================================
            RESPONSIVE
         ========================================= */
 
@@ -778,51 +828,79 @@
         @media (max-width: 760px) {
 
             .sidebar {
-
-                position: static;
-
-                width: 100%;
-
-                min-width: 100%;
-
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: min(86vw, 300px);
+                min-width: 0;
+                transform: translateX(-105%);
+                box-shadow: 12px 0 30px rgba(0,0,0,.22);
             }
 
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .mobile-sidebar-close {
+                display: flex;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
 
             .app-shell {
-
                 display: block;
-
             }
-
 
             .main {
-
                 margin-left: 0;
-
                 width: 100%;
-
             }
-
 
             .topbar {
-
-                position: static;
-
+                position: sticky;
+                top: 0;
+                padding: 10px 14px;
+                gap: 10px;
             }
 
+            .mobile-menu-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .topbar-title {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .topbar-title h1 {
+                font-size: 16px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .topbar-title p {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .topbar-student > div:first-child {
+                display: none;
+            }
 
             .content {
-
                 padding: 16px;
-
             }
-
 
             .stats-grid,
             .module-grid {
-
                 grid-template-columns: 1fr;
-
             }
 
         }
@@ -843,10 +921,33 @@
 
 
     <!-- =========================================
+         MOBILE SIDEBAR OVERLAY
+    ========================================= -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+        aria-hidden="true"
+    ></div>
+
+
+    <!-- =========================================
          SIDEBAR
     ========================================= -->
 
-    <aside class="sidebar">
+    <aside
+        class="sidebar"
+        id="studentSidebar"
+    >
+
+        <button
+            type="button"
+            class="mobile-sidebar-close"
+            id="mobileSidebarClose"
+            aria-label="Close navigation menu"
+        >
+            ×
+        </button>
 
 
         <div class="brand">
@@ -1001,6 +1102,18 @@
         <header class="topbar">
 
 
+            <button
+                type="button"
+                class="mobile-menu-btn"
+                id="mobileMenuButton"
+                aria-label="Open navigation menu"
+                aria-controls="studentSidebar"
+                aria-expanded="false"
+            >
+                ☰
+            </button>
+
+
             <div class="topbar-title">
 
                 <h1>
@@ -1062,6 +1175,73 @@
 
 </div>
 
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const sidebar = document.getElementById("studentSidebar");
+    const openButton = document.getElementById("mobileMenuButton");
+    const closeButton = document.getElementById("mobileSidebarClose");
+    const overlay = document.getElementById("sidebarOverlay");
+
+    function openSidebar() {
+        if (!sidebar || !overlay || !openButton) return;
+
+        sidebar.classList.add("mobile-open");
+        overlay.classList.add("active");
+        document.body.classList.add("sidebar-open");
+
+        openButton.setAttribute("aria-expanded", "true");
+        overlay.setAttribute("aria-hidden", "false");
+    }
+
+    function closeSidebar() {
+        if (!sidebar || !overlay || !openButton) return;
+
+        sidebar.classList.remove("mobile-open");
+        overlay.classList.remove("active");
+        document.body.classList.remove("sidebar-open");
+
+        openButton.setAttribute("aria-expanded", "false");
+        overlay.setAttribute("aria-hidden", "true");
+    }
+
+    if (openButton) {
+        openButton.addEventListener("click", openSidebar);
+    }
+
+    if (closeButton) {
+        closeButton.addEventListener("click", closeSidebar);
+    }
+
+    if (overlay) {
+        overlay.addEventListener("click", closeSidebar);
+    }
+
+    if (sidebar) {
+        sidebar.querySelectorAll(".nav-link").forEach(function (link) {
+            link.addEventListener("click", function () {
+                if (window.innerWidth <= 760) {
+                    closeSidebar();
+                }
+            });
+        });
+    }
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            closeSidebar();
+        }
+    });
+
+    window.addEventListener("resize", function () {
+        if (window.innerWidth > 760) {
+            closeSidebar();
+        }
+    });
+
+});
+</script>
 
 </body>
 

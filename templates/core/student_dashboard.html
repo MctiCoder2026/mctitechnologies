@@ -51,6 +51,8 @@ body{
     left:0;
     bottom:0;
     overflow-y:auto;
+    z-index:1001;
+    transition:transform .25s ease;
 }
 
 .logo{
@@ -450,6 +452,59 @@ tbody tr:last-child td{
     color:var(--muted);
 }
 
+
+/* =========================
+   MOBILE MENU
+========================= */
+.mobile-menu-btn{
+    display:none;
+    width:40px;
+    height:40px;
+    border:none;
+    border-radius:9px;
+    background:var(--dark);
+    color:white;
+    font-size:22px;
+    line-height:1;
+    cursor:pointer;
+    flex-shrink:0;
+    align-items:center;
+    justify-content:center;
+}
+
+.mobile-close-btn{
+    display:none;
+    width:36px;
+    height:36px;
+    margin-left:auto;
+    margin-bottom:14px;
+    border:1px solid #374151;
+    border-radius:9px;
+    background:var(--dark2);
+    color:white;
+    font-size:22px;
+    line-height:1;
+    cursor:pointer;
+    align-items:center;
+    justify-content:center;
+}
+
+.sidebar-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.52);
+    z-index:1000;
+}
+
+.sidebar-overlay.active{
+    display:block;
+}
+
+body.menu-open{
+    overflow:hidden;
+}
+
 /* =========================
    RESPONSIVE
 ========================= */
@@ -466,12 +521,36 @@ tbody tr:last-child td{
 
 @media(max-width:900px){
     .sidebar{
-        display:none;
+        display:block;
+        width:min(84vw,300px);
+        transform:translateX(-105%);
+        box-shadow:12px 0 30px rgba(0,0,0,.22);
+    }
+
+    .sidebar.mobile-open{
+        transform:translateX(0);
+    }
+
+    .mobile-close-btn{
+        display:flex;
+    }
+
+    .mobile-menu-btn{
+        display:inline-flex;
     }
 
     .main{
         margin-left:0;
         width:100%;
+    }
+
+    .topbar{
+        gap:10px;
+    }
+
+    .topbar > div:first-of-type{
+        flex:1;
+        min-width:0;
     }
 }
 
@@ -504,7 +583,18 @@ tbody tr:last-child td{
 
 <body>
 
-<aside class="sidebar">
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<aside class="sidebar" id="studentSidebar">
+
+    <button
+        type="button"
+        class="mobile-close-btn"
+        id="mobileCloseButton"
+        aria-label="Close menu"
+    >
+        ×
+    </button>
 
     <div class="logo">
         <h2><span>MCTI</span> Technologies</h2>
@@ -535,15 +625,12 @@ tbody tr:last-child td{
 
         <div class="menu-title">MAIN</div>
 
-        <a class="nav-link"
-            href="{% url 'student_dashboard' %}">
-                🏠 Student Dashboard
-            </a>
-
-            <a class="nav-link {% block nav_learning %}{% endblock %}"
-            href="{% url 'lms:my_courses' %}">
-                📚 My Learning
-            </a>
+        <a href="{% url 'student_dashboard' %}" class="active">
+            🏠 Dashboard
+        </a>
+        <a href="{% url 'lms:my_courses' %}">
+        📚 My Learning
+        </a>
         
         <a href="https://exam.maharashtracomputer.com"
            target="_blank"
@@ -586,6 +673,18 @@ tbody tr:last-child td{
 
     <div class="topbar">
 
+        <button
+            type="button"
+            class="mobile-menu-btn"
+            id="mobileMenuButton"
+            aria-label="Open menu"
+            aria-controls="studentSidebar"
+            aria-expanded="false"
+        >
+            ☰
+        </button>
+
+
         <div>
             <h1>Student Dashboard</h1>
             <p>Your MCTI learning, fees, exam and placement overview</p>
@@ -625,53 +724,49 @@ tbody tr:last-child td{
         </div>
 
 
-                <!-- TOP SUMMARY -->
+        <!-- TOP SUMMARY -->
         <div class="summary-grid">
 
-            <!-- MY COURSE -->
-            <a href="{% url 'lms:my_courses' %}"
-               class="summary-card orange"
-               style="text-decoration:none; color:inherit;">
+          <a href="{% url 'lms:my_courses' %}"
+   style="text-decoration:none; color:inherit;">
 
-                <small>
-                    📚 MY COURSE
-                </small>
+    <div class="stat-card">
 
-                <strong>
+        <div class="stat-label">
+            📚 MY COURSE
+        </div>
+
+        <div class="stat-value">
+            {{ student.course.title }}
+        </div>
+
+        <div style="
+            margin-top:8px;
+            color:#ff6b00;
+            font-size:11px;
+            font-weight:700;
+        ">
+            Open My Learning →
+        </div>
+
+    </div>
+
+</a>
                     {% if admission.course %}
                         {{ admission.course.title }}
                     {% else %}
                         Not Assigned
                     {% endif %}
                 </strong>
-
-                <div class="sub text-orange">
-                    Open My Learning →
-                </div>
-
-            </a>
-
-
-            <!-- PAYMENT STATUS -->
-            <div class="summary-card green">
-
-                <small>
-                    ✅ PAYMENT STATUS
-                </small>
-
-                <strong>
-                    {{ payment_status }}
-                </strong>
-
             </div>
 
+            <div class="summary-card green">
+                <small>✅ PAYMENT STATUS</small>
+                <strong>{{ payment_status }}</strong>
+            </div>
 
-            <!-- NEXT FEE DUE -->
             <div class="summary-card red">
-
-                <small>
-                    💰 NEXT FEE DUE
-                </small>
+                <small>💰 NEXT FEE DUE</small>
 
                 <strong>
                     {% if next_due_date %}
@@ -684,33 +779,19 @@ tbody tr:last-child td{
                 </strong>
 
                 {% if balance_fee > 0 %}
-
                     <div class="sub text-red">
                         Balance ₹{{ balance_fee|floatformat:2 }}
                     </div>
-
                 {% endif %}
-
             </div>
 
-
-            <!-- ADMISSION NUMBER -->
             <div class="summary-card blue">
-
-                <small>
-                    🎓 ADMISSION NO.
-                </small>
-
-                <strong>
-                    {{ admission.admission_number }}
-                </strong>
-
+                <small>🎓 ADMISSION NO.</small>
+                <strong>{{ admission.admission_number }}</strong>
             </div>
 
         </div>
 
-
-       
 
         <!-- STUDENT INFORMATION -->
         <div class="panel" id="profile-section">
@@ -944,69 +1025,48 @@ tbody tr:last-child td{
     </div>
 
 </main>
+
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    const sidebar = document.getElementById("studentSidebar");
+    const openBtn = document.getElementById("mobileMenuButton");
+    const closeBtn = document.getElementById("mobileCloseButton");
+    const overlay = document.getElementById("sidebarOverlay");
 
-    if (!navigator.geolocation) {
-        console.log("Geolocation is not supported by this browser.");
-        return;
+    function openMenu() {
+        sidebar.classList.add("mobile-open");
+        overlay.classList.add("active");
+        document.body.classList.add("menu-open");
+        openBtn.setAttribute("aria-expanded", "true");
     }
 
-    navigator.geolocation.getCurrentPosition(
-        function (position) {
+    function closeMenu() {
+        sidebar.classList.remove("mobile-open");
+        overlay.classList.remove("active");
+        document.body.classList.remove("menu-open");
+        openBtn.setAttribute("aria-expanded", "false");
+    }
 
-            const latitude = position.coords.latitude;
-            const longitude = position.coords.longitude;
+    if (openBtn) openBtn.addEventListener("click", openMenu);
+    if (closeBtn) closeBtn.addEventListener("click", closeMenu);
+    if (overlay) overlay.addEventListener("click", closeMenu);
 
-            const formData = new FormData();
-            formData.append("latitude", latitude);
-            formData.append("longitude", longitude);
-
-            fetch("{% url 'mark_student_attendance' %}", {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}"
-                },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-
-                alert(
-                    "LAT: " + latitude +
-                    "\nLON: " + longitude +
-                    "\nACCURACY: " + position.coords.accuracy + " meters\n\n" +
-                    JSON.stringify(data)
-                );
-
-                console.log(data);
-
-                if (data.success) {
-                    console.log(data.message);
-                } else {
-                    console.log(data.message);
-                }
-
-            })
-            .catch(error => {
-                console.error("Attendance error:", error);
+    if (sidebar) {
+        sidebar.querySelectorAll("a").forEach(function (link) {
+            link.addEventListener("click", function () {
+                if (window.innerWidth <= 900) closeMenu();
             });
-        },
+        });
+    }
 
-        function (error) {
-            console.log(
-                "Location permission denied or unavailable.",
-                error
-            );
-        },
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") closeMenu();
+    });
 
-        {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-        }
-    );
-
+    window.addEventListener("resize", function () {
+        if (window.innerWidth > 900) closeMenu();
+    });
 });
 </script>
 
