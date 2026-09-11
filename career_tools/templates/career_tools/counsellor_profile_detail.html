@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MCTI Counselling Profile</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #171717;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            background: #111;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .profile-type {
+            background: #fff3eb;
+            color: #f36a21;
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .hero {
+            background: #111;
+            color: #fff;
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 22px;
+        }
+
+        .hero h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+        }
+
+        .hero p {
+            margin: 3px 0;
+            color: #ddd;
+        }
+
+        .orange {
+            color: #f36a21;
+        }
+
+        .section {
+            background: #fff;
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            border-left: 4px solid #f36a21;
+            padding-left: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        .info-box {
+            background: #f8f8f8;
+            padding: 14px;
+            border-radius: 10px;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            font-weight: bold;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        .score-card {
+            text-align: center;
+            background: #fff7f2;
+            border: 1px solid #ffd3ba;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 18px;
+        }
+
+        .score {
+            font-size: 44px;
+            font-weight: bold;
+            color: #f36a21;
+        }
+
+        .score-sub {
+            margin-top: 5px;
+            color: #555;
+        }
+
+        .category-row {
+            margin-bottom: 14px;
+        }
+
+        .category-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 7px;
+            font-size: 14px;
+        }
+
+        .category-name {
+            font-weight: bold;
+        }
+
+        .category-score {
+            color: #f36a21;
+            font-weight: bold;
+        }
+
+        .progress {
+            height: 9px;
+            background: #eee;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #f36a21;
+        }
+
+        .highlight-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .highlight-box {
+            background: #f8f8f8;
+            border-left: 4px solid #f36a21;
+            padding: 16px;
+            border-radius: 10px;
+        }
+
+        .recommendation-card {
+            border: 1px solid #eee;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 14px;
+        }
+
+        .recommendation-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .career-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .match {
+            background: #fff3eb;
+            color: #f36a21;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .detail-row {
+            margin-top: 12px;
+        }
+
+        .detail-label {
+            color: #777;
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .detail-text {
+            line-height: 1.6;
+            color: #444;
+        }
+
+        .course-box {
+            margin-top: 12px;
+            background: #fff7f2;
+            padding: 12px;
+            border-radius: 9px;
+            border: 1px solid #ffd3ba;
+        }
+
+        .course-box strong {
+            color: #f36a21;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th,
+        .history-table td {
+            text-align: left;
+            padding: 11px 9px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+
+        .history-table th {
+            color: #666;
+            background: #fafafa;
+        }
+
+        .empty {
+            color: #777;
+            padding: 10px 0;
+        }
+
+        .crm-box {
+            background: #f8f8f8;
+            padding: 16px;
+            border-radius: 10px;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 650px) {
+            .container {
+                padding: 12px;
+                margin-top: 10px;
+            }
+
+            .grid,
+            .highlight-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding: 22px;
+            }
+
+            .hero h1 {
+                font-size: 24px;
+            }
+
+            .recommendation-header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="topbar">
+
+        <a
+            href="{% url 'career_tools:counsellor_dashboard' %}"
+            class="back-btn"
+        >
+            ← Back to Dashboard
+        </a>
+
+        <div class="profile-type">
+            {% if profile.is_guest %}
+                Guest Lead
+            {% else %}
+                MCTI Student
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="hero">
+
+        <h1>
+            {{ profile.full_name }}
+            <span class="orange">Career Profile</span>
+        </h1>
+
+        <p>{{ profile.mobile }}</p>
+
+        {% if profile.email %}
+            <p>{{ profile.email }}</p>
+        {% endif %}
+
+    </div>
+
+    <div class="section">
+
+        <div class="section-title">
+            Career Profile
+        </div>
+
+        <div class="grid">
+
+            <div class="info-box">
+                <div class="label">Qualification</div>
+                <div class="value">
+                    {{ profile.highest_qualification|default:"Not added" }}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="label">College</div>
+                <div class="value">
+                    {{ profile.college_name|default:"Not added" }}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="label">Passing Year</div>
+                <div class="value">
+                    {{ profile.passing_year|default:"Not added" }}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="label">City</div>
+                <div class="value">
+                    {{ profile.city|default:"Not added" }}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="label">Career Interest</div>
+                <div class="value">
+                    {{ profile.career_interest|default:"Not added" }}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="label">Preferred Job Role</div>
+                <div class="value">
+                    {{ profile.preferred_job_role|default:"Not added" }}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="label">Skills</div>
+                <div class="value">
+                    {{ profile.skills|default:"Not added" }}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="label">Languages</div>
+                <div class="value">
+                    {{ profile.languages|default:"Not added" }}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="section">
+
+        <div class="section-title">
+            Latest Aptitude Result
+        </div>
+
+        {% if latest_attempt %}
+
+        <div class="score-card">
+
+            <div class="score">
+                {{ latest_attempt.score_percentage }}%
+            </div>
+
+            <div class="score-sub">
+                {{ latest_attempt.correct_answers }}
+                /
+                {{ latest_attempt.total_questions }}
+                Correct Answers
+            </div>
+
+        </div>
+
+        <div class="category-row">
+            <div class="category-top">
+                <span class="category-name">Numerical Aptitude</span>
+                <span class="category-score">
+                    {{ latest_attempt.numerical_score }}%
+                </span>
+            </div>
+
+            <div class="progress">
+                <div
+                    class="progress-bar"
+                    style="width: {{ latest_attempt.numerical_score }}%;"
+                ></div>
+            </div>
+        </div>
+
+        <div class="category-row">
+            <div class="category-top">
+                <span class="category-name">Logical Reasoning</span>
+                <span class="category-score">
+                    {{ latest_attempt.logical_score }}%
+                </span>
+            </div>
+
+            <div class="progress">
+                <div
+                    class="progress-bar"
+                    style="width: {{ latest_attempt.logical_score }}%;"
+                ></div>
+            </div>
+        </div>
+
+        <div class="category-row">
+            <div class="category-top">
+                <span class="category-name">Verbal Ability</span>
+                <span class="category-score">
+                    {{ latest_attempt.verbal_score }}%
+                </span>
+            </div>
+
+            <div class="progress">
+                <div
+                    class="progress-bar"
+                    style="width: {{ latest_attempt.verbal_score }}%;"
+                ></div>
+            </div>
+        </div>
+
+        <div class="category-row">
+            <div class="category-top">
+                <span class="category-name">Computer / Digital</span>
+                <span class="category-score">
+                    {{ latest_attempt.computer_score }}%
+                </span>
+            </div>
+
+            <div class="progress">
+                <div
+                    class="progress-bar"
+                    style="width: {{ latest_attempt.computer_score }}%;"
+                ></div>
+            </div>
+        </div>
+
+        <div class="category-row">
+            <div class="category-top">
+                <span class="category-name">Career / Work Aptitude</span>
+                <span class="category-score">
+                    {{ latest_attempt.career_score }}%
+                </span>
+            </div>
+
+            <div class="progress">
+                <div
+                    class="progress-bar"
+                    style="width: {{ latest_attempt.career_score }}%;"
+                ></div>
+            </div>
+        </div>
+
+        {% else %}
+
+        <div class="empty">
+            Student has not completed the aptitude test yet.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    <div class="section">
+
+        <div class="section-title">
+            Career Recommendation
+        </div>
+
+        {% if latest_recommendation %}
+
+        <div class="highlight-grid">
+
+            <div class="highlight-box">
+                <div class="label">
+                    Strongest Area
+                </div>
+
+                <div class="value">
+                    {{ latest_recommendation.strongest_area }}
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="label">
+                    Area to Improve
+                </div>
+
+                <div class="value">
+                    {{ latest_recommendation.improvement_area }}
+                </div>
+            </div>
+
+        </div>
+
+        {% for item in top_recommendations %}
+
+        <div class="recommendation-card">
+
+            <div class="recommendation-header">
+
+                <div class="career-title">
+                    #{{ item.rank }}
+                    {{ item.career_title }}
+                </div>
+
+                <div class="match">
+                    {{ item.match_percentage }}% Match
+                </div>
+
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    Why Suitable
+                </div>
+
+                <div class="detail-text">
+                    {{ item.reason }}
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    Skills to Develop
+                </div>
+
+                <div class="detail-text">
+                    {{ item.skills_to_improve }}
+                </div>
+            </div>
+
+            <div class="course-box">
+                <strong>Recommended MCTI Course:</strong>
+                {{ item.recommended_course }}
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    Next Step
+                </div>
+
+                <div class="detail-text">
+                    {{ item.next_step }}
+                </div>
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+        {% else %}
+
+        <div class="empty">
+            Career recommendation has not been generated yet.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    <div class="section">
+
+        <div class="section-title">
+            CRM Enquiry
+        </div>
+
+        {% if enquiry %}
+
+        <div class="grid">
+
+            <div class="info-box">
+                <div class="label">CRM Status</div>
+                <div class="value">
+                    {{ enquiry.status|default:"New" }}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="label">Branch</div>
+                <div class="value">
+                    {{ enquiry.branch|default:"Not assigned" }}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="label">Assigned To</div>
+                <div class="value">
+                    {% if enquiry.assigned_user %}
+                        {{ enquiry.assigned_user }}
+                    {% elif enquiry.assigned_to %}
+                        {{ enquiry.assigned_to }}
+                    {% else %}
+                        Not assigned
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="label">Follow-up Date</div>
+                <div class="value">
+                    {{ enquiry.followup_date|default:"Not set" }}
+                </div>
+            </div>
+
+        </div>
+
+        {% if enquiry.message %}
+
+        <div style="margin-top: 16px;">
+
+            <div class="label">
+                CRM Notes / Career Data
+            </div>
+
+            <div class="crm-box">
+                {{ enquiry.message }}
+            </div>
+
+        </div>
+
+        {% endif %}
+
+        {% else %}
+
+        <div class="empty">
+            No CRM enquiry is linked to this career profile.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    <div class="section">
+
+        <div class="section-title">
+            Aptitude Attempt History
+        </div>
+
+        {% if attempts %}
+
+        <div style="overflow-x:auto;">
+
+            <table class="history-table">
+
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Overall Score</th>
+                        <th>Correct</th>
+                        <th>Numerical</th>
+                        <th>Logical</th>
+                        <th>Verbal</th>
+                        <th>Computer</th>
+                        <th>Career</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for item in attempts %}
+
+                    <tr>
+                        <td>
+                            {{ item.completed_at|date:"d M Y, h:i A" }}
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ item.score_percentage }}%
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ item.correct_answers }}
+                            /
+                            {{ item.total_questions }}
+                        </td>
+
+                        <td>
+                            {{ item.numerical_score }}%
+                        </td>
+
+                        <td>
+                            {{ item.logical_score }}%
+                        </td>
+
+                        <td>
+                            {{ item.verbal_score }}%
+                        </td>
+
+                        <td>
+                            {{ item.computer_score }}%
+                        </td>
+
+                        <td>
+                            {{ item.career_score }}%
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="empty">
+            No aptitude attempts found.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

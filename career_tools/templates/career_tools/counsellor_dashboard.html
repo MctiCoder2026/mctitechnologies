@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MCTI Counsellor Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #171717;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: #111;
+            color: #fff;
+            padding: 28px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #ddd;
+        }
+
+        .orange {
+            color: #f36a21;
+        }
+
+        .filters {
+            background: #fff;
+            padding: 18px;
+            border-radius: 14px;
+            margin-bottom: 22px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-row input,
+        .filter-row select {
+            flex: 1;
+            min-width: 220px;
+            padding: 12px 14px;
+            border: 1px solid #ddd;
+            border-radius: 9px;
+            font-size: 14px;
+        }
+
+        .filter-row button {
+            border: none;
+            background: #f36a21;
+            color: #fff;
+            font-weight: bold;
+            padding: 12px 22px;
+            border-radius: 9px;
+            cursor: pointer;
+        }
+
+        .stats {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .profile-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+        }
+
+        .profile-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .name {
+            font-size: 21px;
+            font-weight: bold;
+        }
+
+        .mobile {
+            margin-top: 4px;
+            color: #666;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            background: #fff3eb;
+            color: #f36a21;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .info-box {
+            background: #f8f8f8;
+            padding: 14px;
+            border-radius: 10px;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .recommendations {
+            margin-top: 16px;
+        }
+
+        .recommendations strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .rec-item {
+            display: inline-block;
+            background: #fff7f2;
+            border: 1px solid #ffd5bd;
+            padding: 8px 10px;
+            border-radius: 8px;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .actions {
+            margin-top: 16px;
+        }
+
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .btn-dark {
+            background: #111;
+            color: #fff;
+        }
+
+        .empty {
+            background: #fff;
+            padding: 30px;
+            text-align: center;
+            border-radius: 14px;
+            color: #666;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 12px;
+                margin-top: 10px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>
+            MCTI <span class="orange">Counsellor Dashboard</span>
+        </h1>
+
+        <p>
+            Career profiles, aptitude results and recommendations in one place.
+        </p>
+    </div>
+
+    <div class="filters">
+
+        <form method="get">
+
+            <div class="filter-row">
+
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Search name, mobile, email, career interest..."
+                    value="{{ search_query }}"
+                >
+
+                <select name="type">
+                    <option value="">All Profiles</option>
+
+                    <option
+                        value="student"
+                        {% if profile_type == "student" %}selected{% endif %}
+                    >
+                        Existing Students
+                    </option>
+
+                    <option
+                        value="guest"
+                        {% if profile_type == "guest" %}selected{% endif %}
+                    >
+                        Guest Leads
+                    </option>
+                </select>
+
+                <button type="submit">
+                    Search
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <div class="stats">
+        Showing <strong>{{ total_profiles }}</strong> career profiles
+    </div>
+
+    {% for row in rows %}
+
+    <div class="profile-card">
+
+        <div class="profile-top">
+
+            <div>
+                <div class="name">
+                    {{ row.profile.full_name }}
+                </div>
+
+                <div class="mobile">
+                    {{ row.profile.mobile }}
+                    {% if row.profile.email %}
+                        · {{ row.profile.email }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div>
+                {% if row.profile.is_guest %}
+                    <span class="badge">
+                        Guest Lead
+                    </span>
+                {% else %}
+                    <span class="badge">
+                        MCTI Student
+                    </span>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="grid">
+
+            <div class="info-box">
+                <div class="label">
+                    Qualification
+                </div>
+
+                <div class="value">
+                    {{ row.profile.highest_qualification|default:"Not added" }}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="label">
+                    Career Interest
+                </div>
+
+                <div class="value">
+                    {{ row.profile.career_interest|default:"Not added" }}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="label">
+                    Aptitude Score
+                </div>
+
+                <div class="value">
+                    {% if row.latest_attempt %}
+                        {{ row.latest_attempt.score_percentage }}%
+                    {% else %}
+                        Not attempted
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="label">
+                    CRM Status
+                </div>
+
+                <div class="value">
+                    {% if row.profile.enquiry %}
+                        {{ row.profile.enquiry.status|default:"New" }}
+                    {% else %}
+                        No enquiry
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        {% if row.latest_recommendation %}
+
+        <div class="recommendations">
+
+            <strong>
+                Top Career Matches
+            </strong>
+
+            {% for item in row.top_recommendations %}
+
+            <span class="rec-item">
+                #{{ item.rank }}
+                {{ item.career_title }}
+                ·
+                {{ item.match_percentage }}%
+            </span>
+
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+
+        <div class="actions">
+
+            <a
+                href="{% url 'career_tools:counsellor_profile_detail' row.profile.id %}"
+                class="btn btn-dark"
+            >
+                View Counselling Profile
+            </a>
+
+        </div>
+
+    </div>
+
+    {% empty %}
+
+    <div class="empty">
+        No career profiles found.
+    </div>
+
+    {% endfor %}
+
+</div>
+
+</body>
+</html>

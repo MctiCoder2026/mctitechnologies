@@ -641,6 +641,9 @@ body.menu-open{
         <a href="{% url 'student_jobs' %}">
             💼 Placement Support
         </a>
+        <a href="{% url 'career_tools:home' %}">
+            🎯 Career Kit
+        </a>
 
         <a href="{% url 'student_attendance' %}">
             📋 My Attendance
@@ -727,38 +730,28 @@ body.menu-open{
         <!-- TOP SUMMARY -->
         <div class="summary-grid">
 
-          <a href="{% url 'lms:my_courses' %}"
-   style="text-decoration:none; color:inherit;">
+            <a href="{% url 'lms:my_courses' %}"
+               style="text-decoration:none; color:inherit; display:block;">
 
-    <div class="stat-card">
+                <div class="summary-card orange">
+                    <small>📚 MY COURSE</small>
 
-        <div class="stat-label">
-            📚 MY COURSE
-        </div>
+                    <strong>
+                        {% if admission.course %}
+                            {{ admission.course.title }}
+                        {% elif student.course %}
+                            {{ student.course.title }}
+                        {% else %}
+                            Not Assigned
+                        {% endif %}
+                    </strong>
 
-        <div class="stat-value">
-            {{ student.course.title }}
-        </div>
+                    <div class="sub text-orange">
+                        Open My Learning →
+                    </div>
+                </div>
 
-        <div style="
-            margin-top:8px;
-            color:#ff6b00;
-            font-size:11px;
-            font-weight:700;
-        ">
-            Open My Learning →
-        </div>
-
-    </div>
-
-</a>
-                    {% if admission.course %}
-                        {{ admission.course.title }}
-                    {% else %}
-                        Not Assigned
-                    {% endif %}
-                </strong>
-            </div>
+            </a>
 
             <div class="summary-card green">
                 <small>✅ PAYMENT STATUS</small>

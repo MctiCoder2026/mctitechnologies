@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 
 from . import views
 
@@ -370,5 +370,10 @@ urlpatterns = [
         views.refund_policy,
         name="refund_policy"
     ),
+
+    # ============================================================
+    # Career_Kit
+    # ============================================================
+    path("career/", include("career_tools.urls")),
 
 ]

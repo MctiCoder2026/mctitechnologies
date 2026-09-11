@@ -1,0 +1,2168 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    .career-page {
+        background: #f5f6f8;
+        min-height: 100vh;
+        padding: 32px 18px 60px;
+        font-family: Arial, sans-serif;
+    }
+
+    .career-container {
+        max-width: 1400px;
+        margin: auto;
+    }
+
+    .career-header {
+        background: linear-gradient(135deg, #111111, #272727);
+        color: white;
+        border-radius: 20px;
+        padding: 30px 34px;
+        margin-bottom: 25px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .career-header::after {
+        content: "";
+        width: 180px;
+        height: 180px;
+        background: #ff6500;
+        border-radius: 50%;
+        position: absolute;
+        right: -60px;
+        top: -80px;
+        opacity: .9;
+    }
+
+    .career-brand {
+        color: #ff6500;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .career-header h1 {
+        margin: 0 0 8px;
+        font-size: 32px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .career-header p {
+        margin: 0;
+        color: #d6d6d6;
+        position: relative;
+        z-index: 2;
+    }
+
+    .career-badge {
+        display: inline-block;
+        margin-top: 15px;
+        background: rgba(255,255,255,.1);
+        padding: 7px 13px;
+        border-radius: 50px;
+        font-size: 12px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .builder-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(380px, .95fr);
+        gap: 24px;
+        align-items: start;
+    }
+
+    .builder-card {
+        background: white;
+        border-radius: 18px;
+        padding: 25px;
+        margin-bottom: 18px;
+        border: 1px solid #eeeeee;
+        box-shadow: 0 5px 18px rgba(0,0,0,.045);
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .section-number {
+        width: 34px;
+        height: 34px;
+        background: #ff6500;
+        color: white;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 800;
+    }
+
+    .section-title h3 {
+        margin: 0;
+        font-size: 18px;
+        color: #161616;
+    }
+
+    .section-title small {
+        display: block;
+        color: #888;
+        margin-top: 3px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .form-full {
+        grid-column: 1 / -1;
+    }
+
+    .career-field label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 7px;
+    }
+
+    .career-field input,
+    .career-field select,
+    .career-field textarea {
+        width: 100%;
+        padding: 12px 13px;
+        border: 1px solid #dfe1e5;
+        border-radius: 9px;
+        background: #fafafa;
+        font-size: 14px;
+        outline: none;
+        transition: .2s;
+    }
+
+    .career-field textarea {
+        resize: vertical;
+        min-height: 95px;
+    }
+
+    .career-field input:focus,
+    .career-field select:focus,
+    .career-field textarea:focus {
+        background: white;
+        border-color: #ff6500;
+        box-shadow: 0 0 0 3px rgba(255,101,0,.08);
+    }
+
+    .career-field input:disabled {
+        background: #eeeeee;
+        color: #555;
+        cursor: not-allowed;
+    }
+
+    .consent-box {
+        background: #fff8f2;
+        border: 1px solid #ffe0ca;
+        border-radius: 10px;
+        padding: 13px;
+        margin-top: 15px;
+    }
+
+    .consent-box label {
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .save-button {
+        width: 100%;
+        background: #ff6500;
+        color: white;
+        border: 0;
+        padding: 15px 20px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .save-button:hover {
+        background: #e95b00;
+        transform: translateY(-1px);
+    }
+
+    .preview-sticky {
+        position: sticky;
+        top: 20px;
+    }
+
+    .preview-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .preview-heading h3 {
+        margin: 0;
+        font-size: 17px;
+    }
+
+    .preview-tag {
+        font-size: 11px;
+        font-weight: 700;
+        color: #ff6500;
+        background: #fff0e6;
+        padding: 6px 9px;
+        border-radius: 30px;
+    }
+
+    .resume-paper {
+        background: white;
+        min-height: 720px;
+        border-radius: 4px;
+        padding: 30px 34px;
+        box-shadow: 0 10px 35px rgba(0,0,0,.11);
+        border-top: 6px solid #ff6500;
+    }
+
+    .resume-name {
+        font-size: 29px;
+        font-weight: 900;
+        color: #161616;
+        margin-bottom: 4px;
+        word-break: break-word;
+    }
+
+    .resume-role {
+        color: #ff6500;
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .resume-contact {
+        font-size: 12px;
+        color: #666;
+        padding-bottom: 18px;
+        border-bottom: 1px solid #ddd;
+        line-height: 1.8;
+    }
+
+    .resume-section {
+        margin-top: 16px;
+    }
+
+    .resume-section.preview-empty {
+        display: none;
+    }
+
+    .resume-section-title {
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 1.3px;
+        font-weight: 900;
+        color: #222;
+        border-left: 4px solid #ff6500;
+        padding-left: 9px;
+        margin-bottom: 9px;
+    }
+
+    .resume-text {
+        color: #555;
+        font-size: 13px;
+        line-height: 1.7;
+        white-space: pre-line;
+    }
+
+    .empty-text {
+        color: #aaa;
+        font-style: italic;
+    }
+
+    .resume-footer {
+        margin-top: 24px;
+        padding-top: 12px;
+        border-top: 1px solid #eee;
+        color: #aaa;
+        font-size: 10px;
+        text-align: center;
+    }
+
+    .form-error {
+        color: #c62828;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+
+    .dynamic-item {
+        background: #fafafa;
+        border: 1px solid #e8e8e8;
+        border-radius: 12px;
+        padding: 18px;
+        margin-bottom: 15px;
+    }
+
+    .dynamic-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+
+    .dynamic-header strong {
+        color: #222;
+        font-size: 14px;
+    }
+
+    .remove-entry-btn {
+        background: transparent;
+        border: 0;
+        color: #d32f2f;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 4px 0;
+    }
+
+    .add-section-btn {
+        width: 100%;
+        background: #fff7f1;
+        color: #ff6500;
+        border: 1px dashed #ff6500;
+        padding: 12px;
+        border-radius: 9px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .add-section-btn:hover {
+        background: #ff6500;
+        color: white;
+    }
+
+    .hidden-delete {
+        display: none;
+    }
+
+
+    .preview-entry {
+        margin-bottom: 13px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .preview-entry:last-child {
+        border-bottom: 0;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .preview-entry-title {
+        font-size: 13px;
+        font-weight: 800;
+        color: #222;
+        margin-bottom: 2px;
+    }
+
+    .preview-entry-subtitle {
+        font-size: 12px;
+        font-weight: 700;
+        color: #666;
+        margin-bottom: 2px;
+    }
+
+    .preview-entry-meta {
+        font-size: 11px;
+        color: #888;
+        margin-bottom: 4px;
+    }
+
+    .preview-entry-description {
+        font-size: 12px;
+        color: #555;
+        line-height: 1.55;
+        white-space: pre-line;
+    }
+
+    .preview-entry-link {
+        font-size: 11px;
+        color: #ff6500;
+        word-break: break-all;
+    }
+
+    @media (max-width: 950px) {
+        .builder-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .preview-sticky {
+            position: static;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-full {
+            grid-column: auto;
+        }
+
+        .career-header {
+            padding: 24px;
+        }
+
+        .career-header h1 {
+            font-size: 25px;
+        }
+
+        .resume-paper {
+            padding: 25px;
+        }
+    }
+</style>
+
+
+<div class="career-page">
+
+    <div class="career-container">
+
+        <div class="career-header">
+
+            <div class="career-brand">
+                MCTI Career Kit
+            </div>
+
+            <h1>Professional Resume Builder</h1>
+
+            <p>
+                Build a professional resume that represents
+                your skills, education and career goals.
+            </p>
+
+            <div class="career-badge">
+                {% if is_guest %}
+                    Guest Career Profile
+                {% else %}
+                    MCTI Student Career Profile
+                {% endif %}
+            </div>
+
+        </div>
+
+
+        <form method="post" id="resumeForm">
+
+            {% csrf_token %}
+
+            <div class="builder-grid">
+
+                <!-- LEFT SIDE -->
+                <div>
+
+                    <!-- PERSONAL DETAILS -->
+                    <div class="builder-card">
+
+                        <div class="section-title">
+                            <div class="section-number">1</div>
+
+                            <div>
+                                <h3>Personal Details</h3>
+                                <small>Your basic contact information</small>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+
+                            <div class="career-field">
+                                <label>
+                                    {{ profile_form.full_name.label }}
+                                </label>
+
+                                {{ profile_form.full_name }}
+
+                                {% for error in profile_form.full_name.errors %}
+                                    <div class="form-error">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+
+                            <div class="career-field">
+                                <label>
+                                    {{ profile_form.mobile.label }}
+                                </label>
+
+                                {{ profile_form.mobile }}
+
+                                {% for error in profile_form.mobile.errors %}
+                                    <div class="form-error">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+
+                            <div class="career-field">
+                                <label>
+                                    {{ profile_form.email.label }}
+                                </label>
+
+                                {{ profile_form.email }}
+                            </div>
+
+
+                            <div class="career-field">
+                                <label>
+                                    {{ profile_form.date_of_birth.label }}
+                                </label>
+
+                                {{ profile_form.date_of_birth }}
+                            </div>
+
+
+                            <div class="career-field form-full">
+                                <label>
+                                    {{ profile_form.city.label }}
+                                </label>
+
+                                {{ profile_form.city }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- EDUCATION -->
+                    <div class="builder-card">
+
+                        <div class="section-title">
+                            <div class="section-number">2</div>
+
+                            <div>
+                                <h3>Education</h3>
+                                <small>Your current academic background</small>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+
+                            <div class="career-field">
+                                <label>
+                                    Highest Qualification
+                                </label>
+                                {{ profile_form.highest_qualification }}
+                            </div>
+
+                            <div class="career-field">
+                                <label>
+                                    Passing Year
+                                </label>
+                                {{ profile_form.passing_year }}
+                            </div>
+
+                            <div class="career-field form-full">
+                                <label>
+                                    College / Institute Name
+                                </label>
+                                {{ profile_form.college_name }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- CAREER -->
+                    <div class="builder-card">
+
+                        <div class="section-title">
+                            <div class="section-number">3</div>
+
+                            <div>
+                                <h3>Career Direction</h3>
+                                <small>
+                                    Tell us where you want your career to go
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+
+                            <div class="career-field">
+                                <label>Career Interest</label>
+                                {{ profile_form.career_interest }}
+                            </div>
+
+                            <div class="career-field">
+                                <label>Preferred Job Role</label>
+                                {{ profile_form.preferred_job_role }}
+                            </div>
+
+                            <div class="career-field form-full">
+                                <label>Skills</label>
+                                {{ profile_form.skills }}
+                            </div>
+
+                            <div class="career-field form-full">
+                                <label>Languages</label>
+                                {{ profile_form.languages }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- RESUME CONTENT -->
+                    <div class="builder-card">
+
+                        <div class="section-title">
+                            <div class="section-number">4</div>
+
+                            <div>
+                                <h3>Professional Profile</h3>
+                                <small>
+                                    Content that appears on your resume
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+
+                            <div class="career-field form-full">
+                                <label>Resume Title</label>
+                                {{ resume_form.title }}
+                            </div>
+
+                            <div class="career-field form-full">
+                                <label>Professional Summary</label>
+                                {{ resume_form.professional_summary }}
+                            </div>
+
+                            <div class="career-field form-full">
+                                <label>Career Objective</label>
+                                {{ resume_form.objective }}
+                            </div>
+
+                        </div>
+
+                        {% if is_guest %}
+                            <div class="consent-box">
+                                {{ profile_form.consent_given }}
+                                {{ profile_form.consent_given.label }}
+                            </div>
+                        {% else %}
+                            <div style="display:none;">
+                                {{ profile_form.consent_given }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <!-- DYNAMIC EDUCATION -->
+                    <div class="builder-card">
+
+                        <div class="section-title">
+                            <div class="section-number">5</div>
+
+                            <div>
+                                <h3>Education Details</h3>
+                                <small>
+                                    Add degrees, diplomas or academic qualifications
+                                </small>
+                            </div>
+                        </div>
+
+                        {{ education_formset.management_form }}
+
+                        <div id="education-container">
+                            {% for form in education_formset %}
+                                <div class="dynamic-item">
+
+                                    {% for hidden in form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+
+                                    <div class="hidden-delete">
+                                        {{ form.DELETE }}
+                                    </div>
+
+                                    <div class="dynamic-header">
+                                        <strong>
+                                            Education {{ forloop.counter }}
+                                        </strong>
+
+                                        <button
+                                            type="button"
+                                            class="remove-entry-btn"
+                                            onclick="removeFormItem(this)"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+
+                                    <div class="form-grid">
+
+                                        <div class="career-field">
+                                            <label>Qualification</label>
+                                            {{ form.qualification }}
+                                        </div>
+
+                                        <div class="career-field">
+                                            <label>Institute Name</label>
+                                            {{ form.institute_name }}
+                                        </div>
+
+                                        <div class="career-field">
+                                            <label>Board / University</label>
+                                            {{ form.board_university }}
+                                        </div>
+
+                                        <div class="career-field">
+                                            <label>Percentage / CGPA</label>
+                                            {{ form.percentage_cgpa }}
+                                        </div>
+
+                                        <div class="career-field">
+                                            <label>Start Year</label>
+                                            {{ form.start_year }}
+                                        </div>
+
+                                        <div class="career-field">
+                                            <label>End Year</label>
+                                            {{ form.end_year }}
+                                        </div>
+
+                                        <div style="display:none;">
+                                            {{ form.order }}
+                                        </div>
+
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <button
+                            type="button"
+                            class="add-section-btn"
+                            onclick="addFormItem(
+                                'education',
+                                'education-container',
+                                'education-empty-form'
+                            )"
+                        >
+                            + Add Education
+                        </button>
+
+                        <template id="education-empty-form">
+                            <div class="dynamic-item">
+
+                                {% for hidden in education_formset.empty_form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+
+                                <div class="hidden-delete">
+                                    {{ education_formset.empty_form.DELETE }}
+                                </div>
+
+                                <div class="dynamic-header">
+                                    <strong>Education</strong>
+
+                                    <button
+                                        type="button"
+                                        class="remove-entry-btn"
+                                        onclick="removeFormItem(this)"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+
+                                <div class="form-grid">
+
+                                    <div class="career-field">
+                                        <label>Qualification</label>
+                                        {{ education_formset.empty_form.qualification }}
+                                    </div>
+
+                                    <div class="career-field">
+                                        <label>Institute Name</label>
+                                        {{ education_formset.empty_form.institute_name }}
+                                    </div>
+
+                                    <div class="career-field">
+                                        <label>Board / University</label>
+                                        {{ education_formset.empty_form.board_university }}
+                                    </div>
+
+                                    <div class="career-field">
+                                        <label>Percentage / CGPA</label>
+                                        {{ education_formset.empty_form.percentage_cgpa }}
+                                    </div>
+
+                                    <div class="career-field">
+                                        <label>Start Year</label>
+                                        {{ education_formset.empty_form.start_year }}
+                                    </div>
+
+                                    <div class="career-field">
+                                        <label>End Year</label>
+                                        {{ education_formset.empty_form.end_year }}
+                                    </div>
+
+                                    <div style="display:none;">
+                                        {{ education_formset.empty_form.order }}
+                                    </div>
+
+                                </div>
+                            </div>
+                        </template>
+
+                    </div>
+
+
+                    <!-- WORK EXPERIENCE -->
+                    <div class="builder-card">
+
+                        <div class="section-title">
+                            <div class="section-number">6</div>
+
+                            <div>
+                                <h3>Work Experience</h3>
+                                <small>
+                                    Add internships, jobs or professional experience
+                                </small>
+                            </div>
+                        </div>
+
+                        {{ experience_formset.management_form }}
+
+                        <div id="experience-container">
+                            {% for form in experience_formset %}
+                                <div class="dynamic-item">
+
+                                    {% for hidden in form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+
+                                    <div class="hidden-delete">
+                                        {{ form.DELETE }}
+                                    </div>
+
+                                    <div class="dynamic-header">
+                                        <strong>
+                                            Experience {{ forloop.counter }}
+                                        </strong>
+
+                                        <button
+                                            type="button"
+                                            class="remove-entry-btn"
+                                            onclick="removeFormItem(this)"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+
+                                    <div class="form-grid">
+
+                                        <div class="career-field">
+                                            <label>Company Name</label>
+                                            {{ form.company_name }}
+                                        </div>
+
+                                        <div class="career-field">
+                                            <label>Job Title</label>
+                                            {{ form.job_title }}
+                                        </div>
+
+                                        <div class="career-field">
+                                            <label>Start Date</label>
+                                            {{ form.start_date }}
+                                        </div>
+
+                                        <div class="career-field">
+                                            <label>End Date</label>
+                                            {{ form.end_date }}
+                                        </div>
+
+                                        <div class="career-field form-full">
+                                            <label>
+                                                {{ form.currently_working }}
+                                                Currently Working Here
+                                            </label>
+                                        </div>
+
+                                        <div class="career-field form-full">
+                                            <label>Responsibilities / Achievements</label>
+                                            {{ form.description }}
+                                        </div>
+
+                                        <div style="display:none;">
+                                            {{ form.order }}
+                                        </div>
+
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <button
+                            type="button"
+                            class="add-section-btn"
+                            onclick="addFormItem(
+                                'experience',
+                                'experience-container',
+                                'experience-empty-form'
+                            )"
+                        >
+                            + Add Experience
+                        </button>
+
+                        <template id="experience-empty-form">
+                            <div class="dynamic-item">
+
+                                {% for hidden in experience_formset.empty_form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+
+                                <div class="hidden-delete">
+                                    {{ experience_formset.empty_form.DELETE }}
+                                </div>
+
+                                <div class="dynamic-header">
+                                    <strong>Experience</strong>
+
+                                    <button
+                                        type="button"
+                                        class="remove-entry-btn"
+                                        onclick="removeFormItem(this)"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+
+                                <div class="form-grid">
+
+                                    <div class="career-field">
+                                        <label>Company Name</label>
+                                        {{ experience_formset.empty_form.company_name }}
+                                    </div>
+
+                                    <div class="career-field">
+                                        <label>Job Title</label>
+                                        {{ experience_formset.empty_form.job_title }}
+                                    </div>
+
+                                    <div class="career-field">
+                                        <label>Start Date</label>
+                                        {{ experience_formset.empty_form.start_date }}
+                                    </div>
+
+                                    <div class="career-field">
+                                        <label>End Date</label>
+                                        {{ experience_formset.empty_form.end_date }}
+                                    </div>
+
+                                    <div class="career-field form-full">
+                                        <label>
+                                            {{ experience_formset.empty_form.currently_working }}
+                                            Currently Working Here
+                                        </label>
+                                    </div>
+
+                                    <div class="career-field form-full">
+                                        <label>Responsibilities / Achievements</label>
+                                        {{ experience_formset.empty_form.description }}
+                                    </div>
+
+                                    <div style="display:none;">
+                                        {{ experience_formset.empty_form.order }}
+                                    </div>
+
+                                </div>
+                            </div>
+                        </template>
+
+                    </div>
+
+
+                    <!-- PROJECTS -->
+                    <div class="builder-card">
+
+                        <div class="section-title">
+                            <div class="section-number">7</div>
+
+                            <div>
+                                <h3>Projects</h3>
+                                <small>
+                                    Showcase academic or professional projects
+                                </small>
+                            </div>
+                        </div>
+
+                        {{ project_formset.management_form }}
+
+                        <div id="project-container">
+                            {% for form in project_formset %}
+                                <div class="dynamic-item">
+
+                                    {% for hidden in form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+
+                                    <div class="hidden-delete">
+                                        {{ form.DELETE }}
+                                    </div>
+
+                                    <div class="dynamic-header">
+                                        <strong>
+                                            Project {{ forloop.counter }}
+                                        </strong>
+
+                                        <button
+                                            type="button"
+                                            class="remove-entry-btn"
+                                            onclick="removeFormItem(this)"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+
+                                    <div class="form-grid">
+
+                                        <div class="career-field">
+                                            <label>Project Title</label>
+                                            {{ form.project_title }}
+                                        </div>
+
+                                        <div class="career-field">
+                                            <label>Project URL</label>
+                                            {{ form.project_url }}
+                                        </div>
+
+                                        <div class="career-field form-full">
+                                            <label>Project Description</label>
+                                            {{ form.description }}
+                                        </div>
+
+                                        <div style="display:none;">
+                                            {{ form.order }}
+                                        </div>
+
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <button
+                            type="button"
+                            class="add-section-btn"
+                            onclick="addFormItem(
+                                'project',
+                                'project-container',
+                                'project-empty-form'
+                            )"
+                        >
+                            + Add Project
+                        </button>
+
+                        <template id="project-empty-form">
+                            <div class="dynamic-item">
+
+                                {% for hidden in project_formset.empty_form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+
+                                <div class="hidden-delete">
+                                    {{ project_formset.empty_form.DELETE }}
+                                </div>
+
+                                <div class="dynamic-header">
+                                    <strong>Project</strong>
+
+                                    <button
+                                        type="button"
+                                        class="remove-entry-btn"
+                                        onclick="removeFormItem(this)"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+
+                                <div class="form-grid">
+
+                                    <div class="career-field">
+                                        <label>Project Title</label>
+                                        {{ project_formset.empty_form.project_title }}
+                                    </div>
+
+                                    <div class="career-field">
+                                        <label>Project URL</label>
+                                        {{ project_formset.empty_form.project_url }}
+                                    </div>
+
+                                    <div class="career-field form-full">
+                                        <label>Project Description</label>
+                                        {{ project_formset.empty_form.description }}
+                                    </div>
+
+                                    <div style="display:none;">
+                                        {{ project_formset.empty_form.order }}
+                                    </div>
+
+                                </div>
+                            </div>
+                        </template>
+
+                    </div>
+
+
+                    <!-- CERTIFICATIONS -->
+                    <div class="builder-card">
+
+                        <div class="section-title">
+                            <div class="section-number">8</div>
+
+                            <div>
+                                <h3>Certifications</h3>
+                                <small>
+                                    Add professional certifications and credentials
+                                </small>
+                            </div>
+                        </div>
+
+                        {{ certification_formset.management_form }}
+
+                        <div id="certification-container">
+                            {% for form in certification_formset %}
+                                <div class="dynamic-item">
+
+                                    {% for hidden in form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+
+                                    <div class="hidden-delete">
+                                        {{ form.DELETE }}
+                                    </div>
+
+                                    <div class="dynamic-header">
+                                        <strong>
+                                            Certification {{ forloop.counter }}
+                                        </strong>
+
+                                        <button
+                                            type="button"
+                                            class="remove-entry-btn"
+                                            onclick="removeFormItem(this)"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+
+                                    <div class="form-grid">
+
+                                        <div class="career-field">
+                                            <label>Certification Name</label>
+                                            {{ form.certification_name }}
+                                        </div>
+
+                                        <div class="career-field">
+                                            <label>Issuing Organization</label>
+                                            {{ form.issuing_organization }}
+                                        </div>
+
+                                        <div class="career-field">
+                                            <label>Issue Year</label>
+                                            {{ form.issue_year }}
+                                        </div>
+
+                                        <div style="display:none;">
+                                            {{ form.order }}
+                                        </div>
+
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <button
+                            type="button"
+                            class="add-section-btn"
+                            onclick="addFormItem(
+                                'certification',
+                                'certification-container',
+                                'certification-empty-form'
+                            )"
+                        >
+                            + Add Certification
+                        </button>
+
+                        <template id="certification-empty-form">
+                            <div class="dynamic-item">
+
+                                {% for hidden in certification_formset.empty_form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+
+                                <div class="hidden-delete">
+                                    {{ certification_formset.empty_form.DELETE }}
+                                </div>
+
+                                <div class="dynamic-header">
+                                    <strong>Certification</strong>
+
+                                    <button
+                                        type="button"
+                                        class="remove-entry-btn"
+                                        onclick="removeFormItem(this)"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+
+                                <div class="form-grid">
+
+                                    <div class="career-field">
+                                        <label>Certification Name</label>
+                                        {{ certification_formset.empty_form.certification_name }}
+                                    </div>
+
+                                    <div class="career-field">
+                                        <label>Issuing Organization</label>
+                                        {{ certification_formset.empty_form.issuing_organization }}
+                                    </div>
+
+                                    <div class="career-field">
+                                        <label>Issue Year</label>
+                                        {{ certification_formset.empty_form.issue_year }}
+                                    </div>
+
+                                    <div style="display:none;">
+                                        {{ certification_formset.empty_form.order }}
+                                    </div>
+
+                                </div>
+                            </div>
+                        </template>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="save-button"
+                    >
+                        Save & Continue Resume
+                    </button>
+                    <a
+                        href="{% url 'career_tools:download_resume_pdf' %}"
+                        class="save-button"
+                        style="
+                            display:block;
+                            text-align:center;
+                            margin-top:12px;
+                            background:#111;
+                            text-decoration:none;
+                        "
+                    >
+                        Download Resume PDF
+                    </a>
+                </div>
+
+
+                <!-- RIGHT SIDE PREVIEW -->
+                <div class="preview-sticky">
+
+                    <div class="preview-heading">
+                        <h3>Live Resume Preview</h3>
+                        <span class="preview-tag">
+                            Professional
+                        </span>
+                    </div>
+
+                    <div class="resume-paper">
+
+                        <div
+                            class="resume-name"
+                            id="previewName"
+                        >
+                            {{ profile.full_name|default:"Your Name" }}
+                        </div>
+
+                        <div
+                            class="resume-role"
+                            id="previewRole"
+                        >
+                            {{ profile.preferred_job_role|default:"Your Professional Role" }}
+                        </div>
+
+                        <div class="resume-contact">
+
+                            <span id="previewMobile">
+                                {{ profile.mobile|default:"Mobile" }}
+                            </span>
+
+                            &nbsp; • &nbsp;
+
+                            <span id="previewEmail">
+                                {{ profile.email|default:"Email" }}
+                            </span>
+
+                            &nbsp; • &nbsp;
+
+                            <span id="previewCity">
+                                {{ profile.city|default:"City" }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="resume-section">
+
+                            <div class="resume-section-title">
+                                Professional Summary
+                            </div>
+
+                            <div
+                                class="resume-text"
+                                id="previewSummary"
+                            >
+                                {% if resume.professional_summary %}
+                                    {{ resume.professional_summary }}
+                                {% else %}
+                                    <span class="empty-text">
+                                        Add a professional summary...
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+
+                        <div class="resume-section">
+
+                            <div class="resume-section-title">
+                                Career Objective
+                            </div>
+
+                            <div
+                                class="resume-text"
+                                id="previewObjective"
+                            >
+                                {% if resume.objective %}
+                                    {{ resume.objective }}
+                                {% else %}
+                                    <span class="empty-text">
+                                        Add your career objective...
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+
+                        <div class="resume-section">
+
+                            <div class="resume-section-title">
+                                Education
+                            </div>
+
+                            <div
+                                class="resume-text"
+                                id="previewEducation"
+                            >
+                                {% if profile.highest_qualification %}
+                                    <strong>
+                                        {{ profile.highest_qualification }}
+                                    </strong>
+
+                                    {% if profile.college_name %}
+                                        <br>
+                                        {{ profile.college_name }}
+                                    {% endif %}
+
+                                    {% if profile.passing_year %}
+                                        <br>
+                                        {{ profile.passing_year }}
+                                    {% endif %}
+                                {% else %}
+                                    <span class="empty-text">
+                                        Add your education details...
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+
+                        <div class="resume-section">
+
+                            <div class="resume-section-title">
+                                Skills
+                            </div>
+
+                            <div
+                                class="resume-text"
+                                id="previewSkills"
+                            >
+                                {% if profile.skills %}
+                                    {{ profile.skills }}
+                                {% else %}
+                                    <span class="empty-text">
+                                        Add your professional skills...
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+
+                        <div class="resume-section">
+
+                            <div class="resume-section-title">
+                                Languages
+                            </div>
+
+                            <div
+                                class="resume-text"
+                                id="previewLanguages"
+                            >
+                                {% if profile.languages %}
+                                    {{ profile.languages }}
+                                {% else %}
+                                    <span class="empty-text">
+                                        Add languages you know...
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="resume-section">
+                            <div class="resume-section-title">
+                                Detailed Education
+                            </div>
+                            <div class="resume-text" id="previewEducationDetails">
+                                <span class="empty-text">
+                                    Add detailed education entries...
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="resume-section">
+                            <div class="resume-section-title">
+                                Work Experience
+                            </div>
+                            <div class="resume-text" id="previewExperience">
+                                <span class="empty-text">
+                                    Add your work experience...
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="resume-section">
+                            <div class="resume-section-title">
+                                Projects
+                            </div>
+                            <div class="resume-text" id="previewProjects">
+                                <span class="empty-text">
+                                    Add your projects...
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="resume-section">
+                            <div class="resume-section-title">
+                                Certifications
+                            </div>
+                            <div class="resume-text" id="previewCertifications">
+                                <span class="empty-text">
+                                    Add your certifications...
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="resume-footer">
+                            Resume created with MCTI Career Kit
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function addFormItem(prefix, containerId, templateId) {
+
+    const totalForms = document.getElementById(
+        "id_" + prefix + "-TOTAL_FORMS"
+    );
+
+    const container = document.getElementById(containerId);
+    const template = document.getElementById(templateId);
+
+    if (!totalForms || !container || !template) {
+        return;
+    }
+
+    const formIndex = parseInt(totalForms.value, 10);
+
+    const html = template.innerHTML.replace(
+        /__prefix__/g,
+        formIndex
+    );
+
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = html.trim();
+
+    const newItem = wrapper.firstElementChild;
+
+    const heading = newItem.querySelector(
+        ".dynamic-header strong"
+    );
+
+    if (heading) {
+        heading.textContent =
+            heading.textContent.trim() +
+            " " +
+            (formIndex + 1);
+    }
+
+    container.appendChild(newItem);
+
+    totalForms.value = formIndex + 1;
+
+    if (typeof updateDynamicPreview === "function") {
+        updateDynamicPreview();
+    }
+}
+
+
+function removeFormItem(button) {
+
+    const item = button.closest(".dynamic-item");
+
+    if (!item) {
+        return;
+    }
+
+    const deleteInput = item.querySelector(
+        'input[name$="-DELETE"]'
+    );
+
+    const idInput = item.querySelector(
+        'input[name$="-id"]'
+    );
+
+    if (
+        idInput &&
+        idInput.value &&
+        deleteInput
+    ) {
+        deleteInput.checked = true;
+        item.style.display = "none";
+
+        if (typeof updateDynamicPreview === "function") {
+            updateDynamicPreview();
+        }
+
+        return;
+    }
+
+    if (deleteInput) {
+        deleteInput.checked = true;
+    }
+
+    item.style.display = "none";
+
+    if (typeof updateDynamicPreview === "function") {
+        updateDynamicPreview();
+    }
+}
+
+
+
+function escapePreviewHtml(value) {
+    const div = document.createElement("div");
+    div.textContent = value || "";
+    return div.innerHTML;
+}
+
+function activeDynamicItems(containerId) {
+    const container = document.getElementById(containerId);
+
+    if (!container) {
+        return [];
+    }
+
+    return Array.from(
+        container.querySelectorAll(".dynamic-item")
+    ).filter(function (item) {
+        const deleteInput = item.querySelector(
+            'input[name$="-DELETE"]'
+        );
+
+        return (
+            item.style.display !== "none" &&
+            !(deleteInput && deleteInput.checked)
+        );
+    });
+}
+
+function fieldValue(item, suffix) {
+    const field = item.querySelector(
+        '[name$="' + suffix + '"]'
+    );
+
+    if (!field) {
+        return "";
+    }
+
+    if (field.type === "checkbox") {
+        return field.checked;
+    }
+
+    return field.value.trim();
+}
+
+function updateEducationDetailsPreview() {
+    const preview = document.getElementById(
+        "previewEducationDetails"
+    );
+
+    if (!preview) return;
+
+    const rows = [];
+
+    activeDynamicItems("education-container")
+        .forEach(function (item) {
+            const qualification = fieldValue(item, "-qualification");
+            const institute = fieldValue(item, "-institute_name");
+            const board = fieldValue(item, "-board_university");
+            const start = fieldValue(item, "-start_year");
+            const end = fieldValue(item, "-end_year");
+            const score = fieldValue(item, "-percentage_cgpa");
+
+            if (
+                !qualification &&
+                !institute &&
+                !board &&
+                !start &&
+                !end &&
+                !score
+            ) {
+                return;
+            }
+
+            let html = '<div class="preview-entry">';
+
+            if (qualification) {
+                html +=
+                    '<div class="preview-entry-title">' +
+                    escapePreviewHtml(qualification) +
+                    '</div>';
+            }
+
+            if (institute) {
+                html +=
+                    '<div class="preview-entry-subtitle">' +
+                    escapePreviewHtml(institute) +
+                    '</div>';
+            }
+
+            const meta = [];
+
+            if (board) meta.push(board);
+
+            if (start || end) {
+                meta.push(
+                    [start, end]
+                        .filter(Boolean)
+                        .join(" - ")
+                );
+            }
+
+            if (score) {
+                meta.push(score);
+            }
+
+            if (meta.length) {
+                html +=
+                    '<div class="preview-entry-meta">' +
+                    meta.map(escapePreviewHtml).join(" • ") +
+                    '</div>';
+            }
+
+            html += "</div>";
+            rows.push(html);
+        });
+
+    preview.innerHTML = rows.length
+        ? rows.join("")
+        : '<span class="empty-text">' +
+          'Add detailed education entries...' +
+          '</span>';
+}
+
+function updateExperiencePreview() {
+    const preview = document.getElementById(
+        "previewExperience"
+    );
+
+    if (!preview) return;
+
+    const rows = [];
+
+    activeDynamicItems("experience-container")
+        .forEach(function (item) {
+            const company = fieldValue(item, "-company_name");
+            const title = fieldValue(item, "-job_title");
+            const start = fieldValue(item, "-start_date");
+            const end = fieldValue(item, "-end_date");
+            const current = fieldValue(item, "-currently_working");
+            const description = fieldValue(item, "-description");
+
+            if (
+                !company &&
+                !title &&
+                !start &&
+                !end &&
+                !description
+            ) {
+                return;
+            }
+
+            let html = '<div class="preview-entry">';
+
+            if (title) {
+                html +=
+                    '<div class="preview-entry-title">' +
+                    escapePreviewHtml(title) +
+                    '</div>';
+            }
+
+            if (company) {
+                html +=
+                    '<div class="preview-entry-subtitle">' +
+                    escapePreviewHtml(company) +
+                    '</div>';
+            }
+
+            if (start || end || current) {
+                const endText = current ? "Present" : end;
+
+                html +=
+                    '<div class="preview-entry-meta">' +
+                    escapePreviewHtml(
+                        [start, endText]
+                            .filter(Boolean)
+                            .join(" - ")
+                    ) +
+                    '</div>';
+            }
+
+            if (description) {
+                html +=
+                    '<div class="preview-entry-description">' +
+                    escapePreviewHtml(description) +
+                    '</div>';
+            }
+
+            html += "</div>";
+            rows.push(html);
+        });
+
+    preview.innerHTML = rows.length
+        ? rows.join("")
+        : '<span class="empty-text">' +
+          'Add your work experience...' +
+          '</span>';
+}
+
+function updateProjectsPreview() {
+    const preview = document.getElementById(
+        "previewProjects"
+    );
+
+    if (!preview) return;
+
+    const rows = [];
+
+    activeDynamicItems("project-container")
+        .forEach(function (item) {
+            const title = fieldValue(item, "-project_title");
+            const url = fieldValue(item, "-project_url");
+            const description = fieldValue(item, "-description");
+
+            if (!title && !url && !description) {
+                return;
+            }
+
+            let html = '<div class="preview-entry">';
+
+            if (title) {
+                html +=
+                    '<div class="preview-entry-title">' +
+                    escapePreviewHtml(title) +
+                    '</div>';
+            }
+
+            if (url) {
+                html +=
+                    '<div class="preview-entry-link">' +
+                    escapePreviewHtml(url) +
+                    '</div>';
+            }
+
+            if (description) {
+                html +=
+                    '<div class="preview-entry-description">' +
+                    escapePreviewHtml(description) +
+                    '</div>';
+            }
+
+            html += "</div>";
+            rows.push(html);
+        });
+
+    preview.innerHTML = rows.length
+        ? rows.join("")
+        : '<span class="empty-text">' +
+          'Add your projects...' +
+          '</span>';
+}
+
+function updateCertificationsPreview() {
+    const preview = document.getElementById(
+        "previewCertifications"
+    );
+
+    if (!preview) return;
+
+    const rows = [];
+
+    activeDynamicItems("certification-container")
+        .forEach(function (item) {
+            const name = fieldValue(item, "-certification_name");
+            const organization = fieldValue(item, "-issuing_organization");
+            const year = fieldValue(item, "-issue_year");
+
+            if (!name && !organization && !year) {
+                return;
+            }
+
+            let html = '<div class="preview-entry">';
+
+            if (name) {
+                html +=
+                    '<div class="preview-entry-title">' +
+                    escapePreviewHtml(name) +
+                    '</div>';
+            }
+
+            const meta = [];
+
+            if (organization) {
+                meta.push(organization);
+            }
+
+            if (year) {
+                meta.push(year);
+            }
+
+            if (meta.length) {
+                html +=
+                    '<div class="preview-entry-meta">' +
+                    meta.map(escapePreviewHtml).join(" • ") +
+                    '</div>';
+            }
+
+            html += "</div>";
+            rows.push(html);
+        });
+
+    preview.innerHTML = rows.length
+        ? rows.join("")
+        : '<span class="empty-text">' +
+          'Add your certifications...' +
+          '</span>';
+}
+
+function previewHasRealContent(element) {
+    if (!element) return false;
+
+    const text = element.textContent.trim();
+
+    if (!text) return false;
+
+    const emptyPhrases = [
+        "Add a professional summary...",
+        "Add your career objective...",
+        "Add your education details...",
+        "Add your professional skills...",
+        "Add languages you know...",
+        "Add detailed education entries...",
+        "Add your work experience...",
+        "Add your projects...",
+        "Add your certifications..."
+    ];
+
+    return !emptyPhrases.includes(text);
+}
+
+function updatePreviewSectionVisibility() {
+    const previewIds = [
+        "previewSummary",
+        "previewObjective",
+        "previewEducation",
+        "previewSkills",
+        "previewLanguages",
+        "previewEducationDetails",
+        "previewExperience",
+        "previewProjects",
+        "previewCertifications"
+    ];
+
+    previewIds.forEach(function (previewId) {
+        const content = document.getElementById(previewId);
+
+        if (!content) return;
+
+        const section = content.closest(".resume-section");
+
+        if (!section) return;
+
+        section.classList.toggle(
+            "preview-empty",
+            !previewHasRealContent(content)
+        );
+    });
+}
+
+function updateDynamicPreview() {
+    updateEducationDetailsPreview();
+    updateExperiencePreview();
+    updateProjectsPreview();
+    updateCertificationsPreview();
+    updatePreviewSectionVisibility();
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    function connect(inputId, previewId, fallback) {
+
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+
+        if (!input || !preview) return;
+
+        function updatePreview() {
+            const value = input.value.trim();
+
+            preview.textContent =
+                value || fallback;
+
+            updatePreviewSectionVisibility();
+        }
+
+        input.addEventListener(
+            "input",
+            updatePreview
+        );
+    }
+
+
+    connect(
+        "id_full_name",
+        "previewName",
+        "Your Name"
+    );
+
+    connect(
+        "id_mobile",
+        "previewMobile",
+        "Mobile"
+    );
+
+    connect(
+        "id_email",
+        "previewEmail",
+        "Email"
+    );
+
+    connect(
+        "id_city",
+        "previewCity",
+        "City"
+    );
+
+    connect(
+        "id_preferred_job_role",
+        "previewRole",
+        "Your Professional Role"
+    );
+
+    connect(
+        "id_professional_summary",
+        "previewSummary",
+        "Add a professional summary..."
+    );
+
+    connect(
+        "id_objective",
+        "previewObjective",
+        "Add your career objective..."
+    );
+
+    connect(
+        "id_skills",
+        "previewSkills",
+        "Add your professional skills..."
+    );
+
+    connect(
+        "id_languages",
+        "previewLanguages",
+        "Add languages you know..."
+    );
+
+
+    const qualification =
+        document.getElementById(
+            "id_highest_qualification"
+        );
+
+    const college =
+        document.getElementById(
+            "id_college_name"
+        );
+
+    const year =
+        document.getElementById(
+            "id_passing_year"
+        );
+
+    const educationPreview =
+        document.getElementById(
+            "previewEducation"
+        );
+
+
+    function updateEducation() {
+
+        if (!educationPreview) return;
+
+        const q =
+            qualification
+            ? qualification.value.trim()
+            : "";
+
+        const c =
+            college
+            ? college.value.trim()
+            : "";
+
+        const y =
+            year
+            ? year.value.trim()
+            : "";
+
+        const values = [];
+
+        if (q) values.push(q);
+        if (c) values.push(c);
+        if (y) values.push(y);
+
+        educationPreview.innerHTML =
+            values.length
+            ? values.join("<br>")
+            : "Add your education details...";
+
+        updatePreviewSectionVisibility();
+    }
+
+
+    [qualification, college, year]
+        .forEach(function (field) {
+
+            if (field) {
+                field.addEventListener(
+                    "input",
+                    updateEducation
+                );
+            }
+
+        });
+
+    document.addEventListener(
+        "input",
+        function (event) {
+            if (
+                event.target.closest(
+                    "#education-container, " +
+                    "#experience-container, " +
+                    "#project-container, " +
+                    "#certification-container"
+                )
+            ) {
+                updateDynamicPreview();
+            }
+        }
+    );
+
+    document.addEventListener(
+        "change",
+        function (event) {
+            if (
+                event.target.closest(
+                    "#education-container, " +
+                    "#experience-container, " +
+                    "#project-container, " +
+                    "#certification-container"
+                )
+            ) {
+                updateDynamicPreview();
+            }
+        }
+    );
+
+    updateDynamicPreview();
+    updatePreviewSectionVisibility();
+
+});
+</script>
+
+{% endblock %}

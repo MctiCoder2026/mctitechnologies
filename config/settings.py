@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     "lms",
+    'career_tools',
 ]
 
 MIDDLEWARE = [
@@ -193,3 +194,5 @@ LOGIN_REDIRECT_URL = "/management-dashboard/"
 
 LOGOUT_REDIRECT_URL = "/admin/login/"
 
+
+LOGIN_URL = "/student/login/"

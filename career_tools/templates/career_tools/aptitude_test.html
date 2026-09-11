@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MCTI Aptitude Test</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: #111;
+            color: #fff;
+            padding: 25px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #ddd;
+        }
+
+        .orange {
+            color: #f36a21;
+        }
+
+        .question-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+        }
+
+        .question-number {
+            font-size: 13px;
+            font-weight: bold;
+            color: #f36a21;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+
+        .option {
+            display: block;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .option:hover {
+            border-color: #f36a21;
+            background: #fff7f2;
+        }
+
+        .option input {
+            margin-right: 10px;
+        }
+
+        .submit-box {
+            text-align: center;
+            margin-top: 25px;
+            margin-bottom: 40px;
+        }
+
+        .submit-btn {
+            border: none;
+            background: #f36a21;
+            color: #fff;
+            font-size: 17px;
+            font-weight: bold;
+            padding: 14px 34px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background: #d95714;
+        }
+
+        .info-box {
+            background: #fff;
+            border-left: 4px solid #f36a21;
+            padding: 15px 18px;
+            margin-bottom: 22px;
+            border-radius: 8px;
+        }
+
+        .info-box strong {
+            color: #111;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 12px;
+                margin-top: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .question-card {
+                padding: 17px;
+            }
+
+            .question-text {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>
+            MCTI <span class="orange">Aptitude Test</span>
+        </h1>
+
+        <p>
+            Assess your aptitude and understand your career strengths.
+        </p>
+    </div>
+
+    <div class="info-box">
+        <strong>{{ profile.full_name }}</strong><br>
+        Total Questions: {{ total_questions }}<br>
+        Select one answer for every question.
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for question in questions %}
+
+        <div class="question-card">
+
+            <div class="question-number">
+                Question {{ forloop.counter }}
+                ·
+                {{ question.get_category_display }}
+            </div>
+
+            <div class="question-text">
+                {{ question.question }}
+            </div>
+
+            <label class="option">
+                <input
+                    type="radio"
+                    name="question_{{ question.id }}"
+                    value="A"
+                    required
+                >
+                A. {{ question.option_a }}
+            </label>
+
+            <label class="option">
+                <input
+                    type="radio"
+                    name="question_{{ question.id }}"
+                    value="B"
+                    required
+                >
+                B. {{ question.option_b }}
+            </label>
+
+            <label class="option">
+                <input
+                    type="radio"
+                    name="question_{{ question.id }}"
+                    value="C"
+                    required
+                >
+                C. {{ question.option_c }}
+            </label>
+
+            <label class="option">
+                <input
+                    type="radio"
+                    name="question_{{ question.id }}"
+                    value="D"
+                    required
+                >
+                D. {{ question.option_d }}
+            </label>
+
+        </div>
+
+        {% endfor %}
+
+        <div class="submit-box">
+            <button
+                type="submit"
+                class="submit-btn"
+            >
+                Submit Aptitude Test
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>

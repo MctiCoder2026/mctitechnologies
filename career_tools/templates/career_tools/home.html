@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MCTI Career Tools</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f6f6f6;
+            color: #171717;
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: 0 auto;
+            padding: 22px;
+        }
+
+        .hero {
+            background: #111;
+            color: #fff;
+            border-radius: 20px;
+            padding: 48px 38px;
+            margin-top: 25px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: #f36a21;
+            opacity: 0.08;
+            right: -70px;
+            top: -70px;
+        }
+
+        .brand {
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            margin-bottom: 14px;
+            color: #f36a21;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 46px;
+            line-height: 1.12;
+            max-width: 760px;
+        }
+
+        .hero h1 span {
+            color: #f36a21;
+        }
+
+        .hero p {
+            max-width: 680px;
+            color: #ddd;
+            font-size: 17px;
+            line-height: 1.7;
+            margin: 18px 0 0;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 28px;
+        }
+
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            padding: 14px 22px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .btn-orange {
+            background: #f36a21;
+            color: #fff;
+        }
+
+        .btn-white {
+            background: #fff;
+            color: #111;
+        }
+
+        .section {
+            margin-top: 34px;
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        .section-subtitle {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 22px;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .tool-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+
+        .tool-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #fff3eb;
+            color: #f36a21;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .tool-card h3 {
+            margin: 0 0 10px;
+            font-size: 20px;
+        }
+
+        .tool-card p {
+            margin: 0;
+            color: #666;
+            line-height: 1.6;
+            min-height: 76px;
+        }
+
+        .tool-link {
+            display: inline-block;
+            margin-top: 18px;
+            color: #f36a21;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .flow-box {
+            background: #fff;
+            border-radius: 18px;
+            padding: 26px;
+            margin-top: 34px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        }
+
+        .flow-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .flow-step {
+            background: #f8f8f8;
+            border-radius: 12px;
+            padding: 18px;
+            border-left: 4px solid #f36a21;
+        }
+
+        .flow-step strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .flow-step span {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .student-box {
+            margin-top: 34px;
+            background: #fff7f2;
+            border: 1px solid #ffd5bd;
+            border-radius: 18px;
+            padding: 26px;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .student-box h3 {
+            margin: 0 0 7px;
+            font-size: 22px;
+        }
+
+        .student-box p {
+            margin: 0;
+            color: #666;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px 10px 20px;
+            color: #888;
+            font-size: 13px;
+        }
+
+        @media (max-width: 900px) {
+            .tool-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .flow-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .hero h1 {
+                font-size: 38px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 12px;
+            }
+
+            .hero {
+                padding: 32px 22px;
+                margin-top: 10px;
+            }
+
+            .hero h1 {
+                font-size: 31px;
+            }
+
+            .hero p {
+                font-size: 15px;
+            }
+
+            .flow-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .student-box {
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <section class="hero">
+
+        <div class="brand">
+            MCTI CAREER KIT
+        </div>
+
+        <h1>
+            Build Your Career with
+            <span>Skills + Aptitude + Guidance</span>
+        </h1>
+
+        <p>
+            Create a professional resume, test your aptitude and get
+            personalized career recommendations — all in one place.
+        </p>
+
+        <div class="hero-actions">
+
+            <a
+                href="{% url 'career_tools:guest_start' %}"
+                class="btn btn-orange"
+            >
+                Start Free Career Kit
+            </a>
+
+            <a
+                href="{% url 'student_login' %}"
+                class="btn btn-white"
+            >
+                Existing Student Login
+            </a>
+
+        </div>
+
+    </section>
+
+    <section class="section">
+
+        <div class="section-title">
+            Career Tools
+        </div>
+
+        <div class="section-subtitle">
+            Start with any tool. Your Career Profile connects your journey
+            across Resume, Aptitude and Career Guidance.
+        </div>
+
+        <div class="tool-grid">
+
+            <div class="tool-card">
+
+                <div class="tool-number">
+                    01
+                </div>
+
+                <h3>
+                    Professional Resume Builder
+                </h3>
+
+                <p>
+                    Create a clean professional resume with education,
+                    experience, projects, certifications and PDF download.
+                </p>
+
+                {% if request.user.is_authenticated %}
+
+                    <a
+                        href="{% url 'career_tools:resume_builder' %}"
+                        class="tool-link"
+                    >
+                        Build Resume →
+                    </a>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'career_tools:guest_start' %}"
+                        class="tool-link"
+                    >
+                        Build Resume →
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+            <div class="tool-card">
+
+                <div class="tool-number">
+                    02
+                </div>
+
+                <h3>
+                    Aptitude Test
+                </h3>
+
+                <p>
+                    Assess Numerical, Logical, Verbal, Computer and
+                    Workplace aptitude through a practical 20-question test.
+                </p>
+
+                {% if request.user.is_authenticated %}
+
+                    <a
+                        href="{% url 'career_tools:aptitude_test' %}"
+                        class="tool-link"
+                    >
+                        Start Aptitude Test →
+                    </a>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'career_tools:guest_start' %}"
+                        class="tool-link"
+                    >
+                        Start Aptitude Test →
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+            <div class="tool-card">
+
+                <div class="tool-number">
+                    03
+                </div>
+
+                <h3>
+                    Career Recommendation
+                </h3>
+
+                <p>
+                    Discover your Top 3 career matches based on your
+                    aptitude, career interests and practical skill profile.
+                </p>
+
+                <span
+                    class="tool-link"
+                    style="color:#777;"
+                >
+                    Available after Aptitude Test
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="flow-box">
+
+        <div class="section-title">
+            How It Works
+        </div>
+
+        <div class="section-subtitle">
+            One simple journey from career profile to counselling.
+        </div>
+
+        <div class="flow-grid">
+
+            <div class="flow-step">
+                <strong>1. Create Profile</strong>
+                <span>
+                    Add your basic education, skills and career interests.
+                </span>
+            </div>
+
+            <div class="flow-step">
+                <strong>2. Build Resume</strong>
+                <span>
+                    Create and download your professional resume.
+                </span>
+            </div>
+
+            <div class="flow-step">
+                <strong>3. Take Aptitude Test</strong>
+                <span>
+                    Understand your strengths across five aptitude areas.
+                </span>
+            </div>
+
+            <div class="flow-step">
+                <strong>4. Get Career Guidance</strong>
+                <span>
+                    Receive career matches, skills to improve and next steps.
+                </span>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="student-box">
+
+        <div>
+            <h3>
+                Already an MCTI Student?
+            </h3>
+
+            <p>
+                Login with your existing student account and continue your Career Kit.
+            </p>
+        </div>
+
+        <a
+            href="{% url 'student_login' %}"
+            class="btn btn-orange"
+        >
+            Student Login
+        </a>
+
+    </section>
+
+    <div class="footer">
+        MCTI Career Kit · Maharashtra Computer Training Institute
+    </div>
+
+</div>
+
+</body>
+</html>
