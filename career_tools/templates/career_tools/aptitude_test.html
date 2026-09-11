@@ -156,6 +156,15 @@
         </p>
     </div>
 
+    {% if request.user.is_authenticated %}
+    <div style="margin-bottom: 18px;">
+        <a href="{% url 'student_dashboard' %}"
+           style="display:inline-block; text-decoration:none; padding:10px 18px; border:1px solid #222; border-radius:8px; color:#222; font-weight:600;">
+            ← Back to Student Dashboard
+        </a>
+    </div>
+    {% endif %}
+
     <div class="info-box">
         <strong>{{ profile.full_name }}</strong><br>
         Total Questions: {{ total_questions }}<br>

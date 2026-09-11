@@ -21,7 +21,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils import timezone
 
-from core.models import Student, Enquiry
+from core.models import Student, Enquiry, Admission
 
 from .models import (
     CareerProfile,
@@ -58,9 +58,18 @@ def career_home(request):
 @login_required
 def resume_builder(request):
 
-    student = Student.objects.filter(
-        user=request.user
-    ).first()
+    admission = (
+        Admission.objects
+        .select_related("student")
+        .filter(user=request.user)
+        .first()
+    )
+
+    student = getattr(
+        admission,
+        "student",
+        None
+    )
 
     profile = None
 

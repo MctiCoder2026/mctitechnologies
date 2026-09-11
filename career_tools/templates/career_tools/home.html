@@ -290,6 +290,22 @@
 
         <div class="hero-actions">
 
+            {% if request.user.is_authenticated %}
+            <a
+                href="{% url 'career_tools:resume_builder' %}"
+                class="btn btn-orange"
+            >
+                Start Career Kit
+            </a>
+
+            <a
+                href="{% url 'student_dashboard' %}"
+                class="btn btn-white"
+            >
+                ← Back to Student Dashboard
+            </a>
+
+            {% else %}
             <a
                 href="{% url 'career_tools:guest_start' %}"
                 class="btn btn-orange"
@@ -303,6 +319,7 @@
             >
                 Existing Student Login
             </a>
+            {% endif %}
 
         </div>
 
