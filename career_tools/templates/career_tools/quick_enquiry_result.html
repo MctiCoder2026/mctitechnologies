@@ -325,6 +325,20 @@
 
         <div class="actions">
             <a
+                href="{% url 'career_tools:career_report_pdf' profile.id %}"
+                class="action-btn action-primary"
+            >
+                Download Career Report PDF
+            </a>
+
+            <a
+                href="https://wa.me/91{{ profile.mobile }}?text=Hello%20{{ profile.full_name|urlencode }}%2C%20your%20personalized%20MCTI%20Career%20Recommendation%20Report%20is%20ready.%20Please%20review%20the%20report%20and%20complete%20your%20Aptitude%20Test."
+                target="_blank"
+                class="action-btn action-dark"
+            >
+                Open WhatsApp
+            </a>
+            <a
                 href="{% url 'career_tools:quick_career_enquiry' %}"
                 class="action-btn action-primary"
             >

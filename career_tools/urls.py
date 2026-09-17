@@ -9,6 +9,7 @@ from . import views
 app_name = "career_tools"
 
 from . import quick_views
+from . import report_views
 
 urlpatterns = [
     path("", views.career_home, name="home"),
@@ -23,6 +24,12 @@ urlpatterns = [
         "quick-enquiry/result/<int:profile_id>/",
         quick_views.quick_enquiry_result,
         name="quick_enquiry_result"
+    ),
+
+    path(
+        "quick-enquiry/report/<int:profile_id>/",
+        report_views.career_report_pdf,
+        name="career_report_pdf"
     ),
 
     path(
