@@ -26,6 +26,18 @@ urlpatterns = [
     ),
 
     path(
+        "aptitude-access/<str:token>/",
+        quick_views.aptitude_access,
+        name="aptitude_access"
+    ),
+
+    path(
+        "quick-enquiry/aptitude-qr/<int:profile_id>/",
+        quick_views.aptitude_qr,
+        name="aptitude_qr"
+    ),
+
+    path(
         "resume-builder/",
         views.resume_builder,
         name="resume_builder"

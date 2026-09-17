@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 
@@ -237,6 +237,84 @@
             {% endfor %}
         </section>
 
+        <section style="
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 24px;
+            align-items: center;
+            margin-top: 24px;
+            padding: 24px;
+            border-radius: 17px;
+            background: #fff;
+            border: 1px solid #e7e7e7;
+            box-shadow: 0 8px 24px rgba(0,0,0,.05);
+        ">
+            <div>
+                <div style="
+                    color: #f36a21;
+                    font-size: 13px;
+                    font-weight: 850;
+                    letter-spacing: 1px;
+                ">
+                    STUDENT APTITUDE TEST QR
+                </div>
+
+                <h2 style="margin: 9px 0;">
+                    Scan & Discover the Right Career
+                </h2>
+
+                <p style="
+                    max-width: 590px;
+                    margin: 0;
+                    color: #666;
+                    line-height: 1.6;
+                ">
+                    Ask the student to scan this personal QR.
+                    The test will open with the same Career Profile,
+                    so the student does not need to enter details again.
+                </p>
+
+                <a
+                    href="{{ aptitude_url }}"
+                    target="_blank"
+                    style="
+                        display: inline-block;
+                        margin-top: 16px;
+                        padding: 12px 17px;
+                        border-radius: 9px;
+                        background: #111;
+                        color: #fff;
+                        font-weight: 800;
+                        text-decoration: none;
+                    "
+                >
+                    Open Aptitude Test Link
+                </a>
+            </div>
+
+            <div style="text-align: center;">
+                <img
+                    src="{{ aptitude_qr_url }}"
+                    alt="Student Aptitude Test QR"
+                    width="210"
+                    height="210"
+                    style="
+                        display: block;
+                        border: 8px solid #fff;
+                        border-radius: 12px;
+                        box-shadow: 0 4px 18px rgba(0,0,0,.12);
+                    "
+                >
+
+                <small style="
+                    display: block;
+                    margin-top: 8px;
+                    color: #666;
+                ">
+                    Personal QR for {{ profile.full_name }}
+                </small>
+            </div>
+        </section>
         <section class="next-box">
             <strong>Next step:</strong>
             The student should complete the MCTI Aptitude Test.

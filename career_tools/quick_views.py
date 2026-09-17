@@ -1,8 +1,14 @@
-﻿from datetime import timedelta
+import io
+from datetime import timedelta
+
+import qrcode
 
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core import signing
 from django.db import transaction
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.utils import timezone
 
 from core.models import Enquiry, EnquiryActivity
@@ -158,6 +164,22 @@ def quick_enquiry_result(request, profile_id):
 
     suggestions = get_course_suggestions(profile)
 
+    aptitude_token = signing.Signer(
+        salt="mcti-career-aptitude"
+    ).sign(str(profile.id))
+
+    aptitude_url = request.build_absolute_uri(
+        reverse(
+            "career_tools:aptitude_access",
+            kwargs={"token": aptitude_token},
+        )
+    )
+
+    aptitude_qr_url = reverse(
+        "career_tools:aptitude_qr",
+        kwargs={"profile_id": profile.id},
+    )
+
     return render(
         request,
         "career_tools/quick_enquiry_result.html",
@@ -165,5 +187,87 @@ def quick_enquiry_result(request, profile_id):
             "profile": profile,
             "enquiry": profile.enquiry,
             "suggestions": suggestions,
+            "aptitude_url": aptitude_url,
+            "aptitude_qr_url": aptitude_qr_url,
         },
     )
+
+def aptitude_access(request, token):
+    try:
+        profile_id = signing.Signer(
+            salt="mcti-career-aptitude"
+        ).unsign(token)
+    except signing.BadSignature:
+        return render(
+            request,
+            "career_tools/invalid_aptitude_link.html",
+            status=400,
+        )
+
+    profile = CareerProfile.objects.filter(
+        id=profile_id
+    ).first()
+
+    if profile is None:
+        return render(
+            request,
+            "career_tools/invalid_aptitude_link.html",
+            status=404,
+        )
+
+    request.session[
+        "career_guest_profile_id"
+    ] = profile.id
+
+    return redirect(
+        "career_tools:aptitude_test"
+    )
+
+
+@staff_member_required
+def aptitude_qr(request, profile_id):
+    profile = CareerProfile.objects.filter(
+        id=profile_id
+    ).first()
+
+    if profile is None:
+        return HttpResponse(
+            "Career profile not found.",
+            status=404,
+        )
+
+    token = signing.Signer(
+        salt="mcti-career-aptitude"
+    ).sign(str(profile.id))
+
+    aptitude_url = request.build_absolute_uri(
+        reverse(
+            "career_tools:aptitude_access",
+            kwargs={"token": token},
+        )
+    )
+
+    qr = qrcode.QRCode(
+        version=1,
+        box_size=10,
+        border=3,
+    )
+    qr.add_data(aptitude_url)
+    qr.make(fit=True)
+
+    qr_image = qr.make_image(
+        fill_color="#111111",
+        back_color="white",
+    )
+
+    qr_buffer = io.BytesIO()
+    qr_image.save(qr_buffer, format="PNG")
+
+    response = HttpResponse(
+        qr_buffer.getvalue(),
+        content_type="image/png",
+    )
+    response["Content-Disposition"] = (
+        f'inline; filename="mcti-aptitude-{profile.id}.png"'
+    )
+    return response
