@@ -7,7 +7,13 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import logout as auth_logout
 from django.contrib import messages
-from .models import JobPost, StaffProfile, Attendance, BranchLocation
+from .models import (
+    JobPost,
+    StaffProfile,
+    StaffLoginLog,
+    Attendance,
+    BranchLocation,
+)
 from .forms import JobPostForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -859,7 +865,13 @@ def branch_dashboard(request):
         request.user
     )
 
-    if not is_admin_user(request.user):
+    admin_access = is_admin_user(
+        request.user
+    )
+
+    can_view_financials = admin_access
+
+    if not admin_access:
 
         if not user_branch:
             auth_logout(request)
@@ -873,6 +885,17 @@ def branch_dashboard(request):
             if item[0] == user_branch
         ]
 
+        try:
+            staff_profile = request.user.staff_profile
+            can_view_financials = (
+                staff_profile.designation
+                .strip()
+                .lower()
+                == "branch head"
+            )
+        except StaffProfile.DoesNotExist:
+            can_view_financials = False
+
     branch_data = []
 
     # --------------------------------------------------------
@@ -882,7 +905,9 @@ def branch_dashboard(request):
     overall_enquiries = 0
     overall_converted = 0
     overall_admissions = 0
+    overall_billing = 0
     overall_collection = 0
+    overall_outstanding = 0
     overall_active_students = 0
 
     # --------------------------------------------------------
@@ -930,6 +955,26 @@ def branch_dashboard(request):
             status="active"
         ).count()
 
+        enrollments = Enrollment.objects.filter(
+            branch__iexact=branch_value
+        )
+
+        if start_date and end_date:
+
+            enrollments = enrollments.filter(
+                enrollment_date__range=[
+                    start_date,
+                    end_date
+                ]
+            )
+
+        total_billing = (
+            enrollments.aggregate(
+                total=Sum("final_fee")
+            )["total"]
+            or 0
+        )
+
         payments = FeePayment.objects.filter(
             student__branch__iexact=branch_value
         )
@@ -950,6 +995,11 @@ def branch_dashboard(request):
             or 0
         )
 
+        total_outstanding = (
+            total_billing
+            - total_collection
+        )
+
         if total_enquiries > 0:
 
             conversion_rate = round(
@@ -967,20 +1017,30 @@ def branch_dashboard(request):
         overall_enquiries += total_enquiries
         overall_converted += converted
         overall_admissions += total_admissions
+        overall_billing += total_billing
         overall_collection += total_collection
+        overall_outstanding += total_outstanding
         overall_active_students += active_students
 
-        branch_data.append(
-            {
-                "branch": branch_name,
-                "total_enquiries": total_enquiries,
-                "converted": converted,
-                "admissions": total_admissions,
-                "collection": total_collection,
-                "conversion_rate": conversion_rate,
-                "active_students": active_students,
-            }
-        )
+        branch_item = {
+            "branch": branch_name,
+            "total_enquiries": total_enquiries,
+            "converted": converted,
+            "admissions": total_admissions,
+            "conversion_rate": conversion_rate,
+            "active_students": active_students,
+        }
+
+        if can_view_financials:
+            branch_item.update(
+                {
+                    "billing": total_billing,
+                    "collection": total_collection,
+                    "outstanding": total_outstanding,
+                }
+            )
+
+        branch_data.append(branch_item)
 
     # --------------------------------------------------------
     # BUSINESS LEADS FOR BRANCH DASHBOARD
@@ -1022,7 +1082,7 @@ def branch_dashboard(request):
         if (
             item["total_enquiries"] > 0
             or item["admissions"] > 0
-            or item["collection"] > 0
+            or item.get("collection", 0) > 0
         )
     ]
 
@@ -1032,7 +1092,7 @@ def branch_dashboard(request):
             active_branch_data,
             key=lambda x: (
                 x["admissions"],
-                x["collection"],
+                x.get("collection", 0),
                 x["conversion_rate"]
             )
         )
@@ -1041,7 +1101,7 @@ def branch_dashboard(request):
             active_branch_data,
             key=lambda x: (
                 x["admissions"],
-                x["collection"],
+                x.get("collection", 0),
                 x["conversion_rate"]
             )
         )
@@ -1069,35 +1129,42 @@ def branch_dashboard(request):
 
         overall_conversion_rate = 0
 
+    context = {
+        "branch_data": branch_data,
+        "overall_enquiries": overall_enquiries,
+        "overall_converted": overall_converted,
+        "overall_admissions": overall_admissions,
+        "overall_active_students": overall_active_students,
+        "overall_conversion_rate": overall_conversion_rate,
+        "total_business_leads": total_business_leads,
+        "new_business_leads": new_business_leads,
+        "followup_business_leads": followup_business_leads,
+        "proposal_business_leads": proposal_business_leads,
+        "converted_business_leads": converted_business_leads,
+        "best_branch": best_branch,
+        "attention_branch": attention_branch,
+        "date_filter": date_filter,
+        "start_date": start_date,
+        "end_date": end_date,
+        "custom_start": custom_start,
+        "custom_end": custom_end,
+        "is_admin": admin_access,
+        "can_view_financials": can_view_financials,
+    }
+
+    if can_view_financials:
+        context.update(
+            {
+                "overall_billing": overall_billing,
+                "overall_collection": overall_collection,
+                "overall_outstanding": overall_outstanding,
+            }
+        )
+
     return render(
         request,
         "core/branch_dashboard.html",
-        {
-            "branch_data": branch_data,
-            "overall_enquiries": overall_enquiries,
-            "overall_converted": overall_converted,
-            "overall_admissions": overall_admissions,
-            "overall_collection": overall_collection,
-            "overall_active_students": overall_active_students,
-            "overall_conversion_rate": overall_conversion_rate,
-
-            "total_business_leads": total_business_leads,
-            "new_business_leads": new_business_leads,
-            "followup_business_leads": followup_business_leads,
-            "proposal_business_leads": proposal_business_leads,
-            "converted_business_leads": converted_business_leads,
-
-            "best_branch": best_branch,
-            "attention_branch": attention_branch,
-            "date_filter": date_filter,
-            "start_date": start_date,
-            "end_date": end_date,
-            "custom_start": custom_start,
-            "custom_end": custom_end,
-            "is_admin": is_admin_user(
-                request.user
-            ),
-        }
+        context,
     )
 
 
@@ -2402,161 +2469,323 @@ def attendance_report(request):
 # ============================================================
 # STAFF LOGIN
 # ============================================================
+def get_client_ip(request):
+    forwarded_for = request.META.get(
+        "HTTP_X_FORWARDED_FOR",
+        ""
+    )
+
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+
+    return request.META.get("REMOTE_ADDR")
+
+
+def create_staff_login_log(
+    request,
+    entered_username,
+    status,
+    reason,
+    user=None,
+    branch="",
+    latitude=None,
+    longitude=None,
+    distance_meters=None,
+):
+    StaffLoginLog.objects.create(
+        user=user,
+        entered_username=entered_username,
+        branch=branch,
+        status=status,
+        reason=reason,
+        latitude=latitude,
+        longitude=longitude,
+        distance_meters=distance_meters,
+        ip_address=get_client_ip(request),
+        user_agent=request.META.get(
+            "HTTP_USER_AGENT",
+            ""
+        )[:1000],
+    )
+
 
 def staff_login(request):
-
-    # --------------------------------------------------------
-    # ALREADY LOGGED IN
-    # --------------------------------------------------------
-
     if request.user.is_authenticated:
-
         if is_admin_user(request.user):
-            return redirect(
-                "management_dashboard"
-            )
-
+            return redirect("management_dashboard")
         if request.user.is_staff:
-
-            branch = get_user_branch(
-                request.user
-            )
-
+            branch = get_user_branch(request.user)
             if branch:
-                return redirect(
-                    "branch_dashboard"
-                )
-
+                return redirect("branch_dashboard")
             auth_logout(request)
-
             return render(
                 request,
                 "core/staff_login.html",
-                {
-                    "error": (
-                        "Branch is not assigned "
-                        "to this staff account."
-                    )
-                }
+                {"error": "Branch is not assigned to this staff account."},
             )
-
-        # Student/other user should not enter staff portal
         auth_logout(request)
 
-    # --------------------------------------------------------
-    # LOGIN
-    # --------------------------------------------------------
-
     if request.method == "POST":
-
-        username = request.POST.get(
-            "username",
-            ""
-        ).strip()
-
-        password = request.POST.get(
-            "password",
-            ""
-        ).strip()
+        username = request.POST.get("username", "").strip()
+        password = request.POST.get("password", "").strip()
+        latitude_value = request.POST.get("latitude", "").strip()
+        longitude_value = request.POST.get("longitude", "").strip()
 
         if not username or not password:
-
+            create_staff_login_log(
+                request=request,
+                entered_username=username,
+                status="denied",
+                reason="Username or password missing.",
+            )
             return render(
                 request,
                 "core/staff_login.html",
                 {
-                    "error": (
-                        "Please enter username "
-                        "and password."
-                    )
-                }
+                    "error": "Please enter username and password.",
+                    "entered_username": username,
+                },
             )
 
         user = authenticate(
             request,
             username=username,
-            password=password
+            password=password,
         )
 
         if user is None:
-
+            create_staff_login_log(
+                request=request,
+                entered_username=username,
+                status="denied",
+                reason="Invalid username or password.",
+            )
             return render(
                 request,
                 "core/staff_login.html",
                 {
-                    "error": (
-                        "Invalid username or password."
-                    )
-                }
+                    "error": "Invalid username or password.",
+                    "entered_username": username,
+                },
             )
 
         if not user.is_active:
-
+            create_staff_login_log(
+                request=request,
+                entered_username=username,
+                status="denied",
+                reason="User account is inactive.",
+                user=user,
+            )
             return render(
                 request,
                 "core/staff_login.html",
                 {
-                    "error": (
-                        "This account is inactive."
-                    )
-                }
+                    "error": "This account is inactive.",
+                    "entered_username": username,
+                },
             )
 
-        if not (
-            user.is_staff
-            or user.is_superuser
-        ):
-
+        if not (user.is_staff or user.is_superuser):
+            create_staff_login_log(
+                request=request,
+                entered_username=username,
+                status="denied",
+                reason="User is not authorized as staff.",
+                user=user,
+            )
             return render(
                 request,
                 "core/staff_login.html",
                 {
-                    "error": (
-                        "You are not authorized as staff."
-                    )
-                }
+                    "error": "You are not authorized as staff.",
+                    "entered_username": username,
+                },
             )
-
-        login(
-            request,
-            user
-        )
 
         if is_admin_user(user):
-            return redirect(
-                "management_dashboard"
+            login(request, user)
+            create_staff_login_log(
+                request=request,
+                entered_username=username,
+                status="success",
+                reason="Administrator login successful.",
+                user=user,
+                branch="head_office",
+            )
+            return redirect("management_dashboard")
+
+        try:
+            profile = user.staff_profile
+        except StaffProfile.DoesNotExist:
+            create_staff_login_log(
+                request=request,
+                entered_username=username,
+                status="denied",
+                reason="Staff profile is not assigned.",
+                user=user,
+            )
+            return render(
+                request,
+                "core/staff_login.html",
+                {
+                    "error": "Staff profile is not assigned to this account.",
+                    "entered_username": username,
+                },
             )
 
-        branch = get_user_branch(
-            user
-        )
-
-        if branch:
-            return redirect(
-                "branch_dashboard"
+        if not profile.is_active:
+            create_staff_login_log(
+                request=request,
+                entered_username=username,
+                status="denied",
+                reason="Staff profile is inactive.",
+                user=user,
+                branch=profile.branch,
+            )
+            return render(
+                request,
+                "core/staff_login.html",
+                {
+                    "error": "This staff profile is inactive.",
+                    "entered_username": username,
+                },
             )
 
-        auth_logout(request)
+        login_latitude = None
+        login_longitude = None
+        login_distance = None
 
-        return render(
-            request,
-            "core/staff_login.html",
-            {
-                "error": (
-                    "Branch is not assigned "
-                    "to this staff account."
+        if profile.requires_location_login:
+            if not latitude_value or not longitude_value:
+                create_staff_login_log(
+                    request=request,
+                    entered_username=username,
+                    status="denied",
+                    reason="Location permission was not provided.",
+                    user=user,
+                    branch=profile.branch,
                 )
-            }
+                return render(
+                    request,
+                    "core/staff_login.html",
+                    {
+                        "error": "Location permission is required. Please allow location and login again.",
+                        "entered_username": username,
+                    },
+                )
+
+            try:
+                login_latitude = float(latitude_value)
+                login_longitude = float(longitude_value)
+                if not (
+                    -90 <= login_latitude <= 90
+                    and -180 <= login_longitude <= 180
+                ):
+                    raise ValueError
+            except (TypeError, ValueError):
+                create_staff_login_log(
+                    request=request,
+                    entered_username=username,
+                    status="denied",
+                    reason="Invalid GPS coordinates received.",
+                    user=user,
+                    branch=profile.branch,
+                )
+                return render(
+                    request,
+                    "core/staff_login.html",
+                    {
+                        "error": "Invalid location received. Please refresh and try again.",
+                        "entered_username": username,
+                    },
+                )
+
+            branch_location = (
+                BranchLocation.objects.filter(is_active=True)
+                .filter(
+                    Q(branch_name__iexact=profile.branch)
+                    | Q(branch_name__iexact=profile.get_branch_display())
+                )
+                .first()
+            )
+
+            if not branch_location:
+                create_staff_login_log(
+                    request=request,
+                    entered_username=username,
+                    status="denied",
+                    reason="Assigned branch GPS location is not configured.",
+                    user=user,
+                    branch=profile.branch,
+                    latitude=login_latitude,
+                    longitude=login_longitude,
+                )
+                return render(
+                    request,
+                    "core/staff_login.html",
+                    {
+                        "error": "Branch location is not configured. Please contact the administrator.",
+                        "entered_username": username,
+                    },
+                )
+
+            login_distance = calculate_distance_meters(
+                login_latitude,
+                login_longitude,
+                branch_location.latitude,
+                branch_location.longitude,
+            )
+
+            if login_distance > branch_location.radius_meters:
+                create_staff_login_log(
+                    request=request,
+                    entered_username=username,
+                    status="denied",
+                    reason="Login attempted outside assigned branch radius.",
+                    user=user,
+                    branch=profile.branch,
+                    latitude=login_latitude,
+                    longitude=login_longitude,
+                    distance_meters=round(login_distance, 2),
+                )
+                return render(
+                    request,
+                    "core/staff_login.html",
+                    {
+                        "error": "Login is allowed only from your assigned branch location.",
+                        "entered_username": username,
+                    },
+                )
+
+        login(request, user)
+        request.session["staff_location_verified"] = bool(
+            profile.requires_location_login
+        )
+        request.session["staff_verified_branch"] = profile.branch
+
+        if profile.requires_location_login:
+            request.session.set_expiry(60 * 60 * 8)
+
+        create_staff_login_log(
+            request=request,
+            entered_username=username,
+            status="success",
+            reason="Staff login successful.",
+            user=user,
+            branch=profile.branch,
+            latitude=login_latitude,
+            longitude=login_longitude,
+            distance_meters=(
+                round(login_distance, 2)
+                if login_distance is not None
+                else None
+            ),
         )
 
-    # --------------------------------------------------------
-    # LOGIN PAGE
-    # --------------------------------------------------------
+        return redirect("branch_dashboard")
 
-    return render(
-        request,
-        "core/staff_login.html"
-    )
+    return render(request, "core/staff_login.html")
 
 
 # ============================================================

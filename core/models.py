@@ -1345,7 +1345,7 @@ def create_initial_fee_payment(
         collected_by=instance.created_by,
         remarks="Initial payment at admission",
     )
-    # ============================================================
+# ============================================================
 # STAFF PROFILE
 # ============================================================
 
@@ -1400,6 +1400,14 @@ class StaffProfile(models.Model):
     is_active = models.BooleanField(
         default=True
     )
+    
+    requires_location_login = models.BooleanField(
+        default=False,
+        help_text=(
+            "If enabled, this staff account can log in "
+            "only from its assigned branch location."
+        )
+    )
 
     created_at = models.DateTimeField(
         auto_now_add=True
@@ -1410,6 +1418,84 @@ class StaffProfile(models.Model):
             f"{self.user.username} - "
             f"{self.designation}"
         )
+class StaffLoginLog(models.Model):
+
+    STATUS_CHOICES = [
+        ("success", "Success"),
+        ("denied", "Denied"),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="staff_login_logs"
+    )
+
+    entered_username = models.CharField(
+        max_length=150,
+        blank=True
+    )
+
+    branch = models.CharField(
+        max_length=50,
+        blank=True
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES
+    )
+
+    reason = models.CharField(
+        max_length=255,
+        blank=True
+    )
+
+    latitude = models.DecimalField(
+        max_digits=10,
+        decimal_places=7,
+        null=True,
+        blank=True
+    )
+
+    longitude = models.DecimalField(
+        max_digits=10,
+        decimal_places=7,
+        null=True,
+        blank=True
+    )
+
+    distance_meters = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    ip_address = models.GenericIPAddressField(
+        null=True,
+        blank=True
+    )
+
+    user_agent = models.TextField(
+        blank=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return (
+            f"{self.entered_username} - "
+            f"{self.status} - "
+            f"{self.created_at}"
+        )
+
+    class Meta:
+        ordering = ["-created_at"]
 # ============================================================
 # AUTO UPDATE ADMISSION FEES AFTER PAYMENT
 # ============================================================

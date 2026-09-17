@@ -294,6 +294,29 @@ body{
     transform:translateY(-1px);
 }
 
+.login-btn:disabled{
+    cursor:not-allowed;
+    opacity:0.7;
+    transform:none;
+}
+
+.location-status{
+    display:none;
+    margin-top:12px;
+    padding:10px 12px;
+    border:1px solid #fed7aa;
+    border-radius:8px;
+    background:#fff7ed;
+    color:#9a3412;
+    font-size:11px;
+    font-weight:700;
+    line-height:1.5;
+}
+
+.location-status.show{
+    display:block;
+}
+
 /* ============================
    INFO
 ============================ */
@@ -410,7 +433,7 @@ body{
                     <div class="feature">
 
                         <div class="feature-icon">
-                            📞
+                            &#9742;
                         </div>
 
                         Enquiry & Follow-up Management
@@ -421,7 +444,7 @@ body{
                     <div class="feature">
 
                         <div class="feature-icon">
-                            🎓
+                            &#127891;
                         </div>
 
                         Admission & Student Management
@@ -432,7 +455,7 @@ body{
                     <div class="feature">
 
                         <div class="feature-icon">
-                            💳
+                            &#128179;
                         </div>
 
                         Fee Collection & Payment Tracking
@@ -443,7 +466,7 @@ body{
                     <div class="feature">
 
                         <div class="feature-icon">
-                            📊
+                            &#128202;
                         </div>
 
                         Management Reports & Analytics
@@ -459,7 +482,7 @@ body{
 
         <div class="left-footer">
 
-            © {% now "Y" %} MCTI Technologies.
+            &copy; {% now "Y" %} MCTI Technologies.
             Management System.
 
         </div>
@@ -491,15 +514,27 @@ body{
             {% if error %}
 
                 <div class="error-box">
-                    ⚠ {{ error }}
+                    &#9888; {{ error }}
                 </div>
 
             {% endif %}
 
 
-            <form method="POST">
+            <form method="POST" id="staff-login-form">
 
                 {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="latitude"
+                    id="login-latitude"
+                >
+
+                <input
+                    type="hidden"
+                    name="longitude"
+                    id="login-longitude"
+                >
 
 
                 <div class="form-group">
@@ -511,7 +546,7 @@ body{
                     <div class="input-wrap">
 
                         <span class="input-icon">
-                            👤
+                            &#128100;
                         </span>
 
                         <input
@@ -519,6 +554,7 @@ body{
                             name="username"
                             class="form-control"
                             placeholder="Enter username"
+                            value="{{ entered_username|default:'' }}"
                             required
                             autofocus
                         >
@@ -537,7 +573,7 @@ body{
                     <div class="input-wrap">
 
                         <span class="input-icon">
-                            🔒
+                            &#128274;
                         </span>
 
                         <input
@@ -556,9 +592,17 @@ body{
                 <button
                     type="submit"
                     class="login-btn"
+                    id="login-button"
                 >
-                    Login to Management Dashboard →
+                    Login to Branch Dashboard &rarr;
                 </button>
+
+                <div
+                    class="location-status"
+                    id="location-status"
+                    role="status"
+                    aria-live="polite"
+                ></div>
 
             </form>
 
@@ -584,6 +628,75 @@ body{
     </div>
 
 </div>
+
+<script>
+(function () {
+    const form = document.getElementById("staff-login-form");
+    const button = document.getElementById("login-button");
+    const latitudeInput = document.getElementById("login-latitude");
+    const longitudeInput = document.getElementById("login-longitude");
+    const statusBox = document.getElementById("location-status");
+
+    let submitting = false;
+
+    function showStatus(message) {
+        statusBox.textContent = message;
+        statusBox.classList.add("show");
+    }
+
+    function submitForm() {
+        if (submitting) {
+            return;
+        }
+
+        submitting = true;
+        button.disabled = true;
+        button.textContent = "Signing in...";
+        form.submit();
+    }
+
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        if (submitting) {
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Checking branch location...";
+        showStatus("Please allow location access to verify your branch.");
+
+        if (!navigator.geolocation) {
+            showStatus("Location is not supported on this device. Verifying account...");
+            button.disabled = false;
+            submitForm();
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                latitudeInput.value = position.coords.latitude.toFixed(7);
+                longitudeInput.value = position.coords.longitude.toFixed(7);
+                showStatus("Branch location received. Signing in securely...");
+                button.disabled = false;
+                submitForm();
+            },
+            function () {
+                latitudeInput.value = "";
+                longitudeInput.value = "";
+                showStatus("Location permission was not available. Verifying account...");
+                button.disabled = false;
+                submitForm();
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0
+            }
+        );
+    });
+})();
+</script>
 
 </body>
 </html>

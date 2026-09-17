@@ -386,7 +386,7 @@
         </a>
 
         <a href="{% url 'business_lead_list' %}">
-            🏢 Business Leads
+            Business Leads
         </a>
 
         <a href="{% url 'admission_list' %}">
@@ -406,18 +406,18 @@
         </a>
 
         <a href="{% url 'attendance_dashboard' %}">
-            📋 Attendance
+            Attendance
         </a>
 
         <a href="{% url 'attendance_report' %}">
-            📊 Attendance Report
+            Attendance Report
         </a>
 
         <a href="{% url 'job_list' %}">
-            💼 Placement / Jobs
+            Placement / Jobs
         </a>
         <a href="{% url 'fee_due_report' %}">
-        📅 Fee Due Report
+        Fee Due Report
         </a>
         <a href="{% url 'reports_dashboard' %}">
             Reports
@@ -484,7 +484,7 @@
     >
         Today
     </a>
-    
+
 
     <a
         href="?date_filter=this_month"
@@ -538,7 +538,7 @@
     </button>
 
 </form>
-   
+
 </div>
     <div class="summary-card">
         <div class="label">
@@ -585,19 +585,53 @@
     </div>
 
 
-    <div class="summary-card">
-        <div class="label">
-            Total Collection
+    {% if can_view_financials %}
+
+        <div class="summary-card">
+            <div class="label">
+                Total Billing
+            </div>
+
+            <div class="value">
+                &#8377;{{ overall_billing|floatformat:0 }}
+            </div>
+
+            <div class="subtext">
+                Final fees for selected period
+            </div>
         </div>
 
-        <div class="value">
-            ₹{{ overall_collection|floatformat:0 }}
+
+        <div class="summary-card">
+            <div class="label">
+                Total Collection
+            </div>
+
+            <div class="value">
+                &#8377;{{ overall_collection|floatformat:0 }}
+            </div>
+
+            <div class="subtext">
+                Actual fee collection
+            </div>
         </div>
 
-        <div class="subtext">
-            Actual fee collection
+
+        <div class="summary-card">
+            <div class="label">
+                Outstanding
+            </div>
+
+            <div class="value">
+                &#8377;{{ overall_outstanding|floatformat:0 }}
+            </div>
+
+            <div class="subtext">
+                Billing minus collection
+            </div>
         </div>
-    </div>
+
+    {% endif %}
 
 
     <div class="summary-card">
@@ -631,10 +665,10 @@
 
 </div>
 <!-- BUSINESS LEADS -->
-<div class="performance-card" style="margin-bottom:25px; border-left:5px solid #f97316;">
+<div class="performance-card" style="margin-bottom:25px; border-left:5px solid #f97316;">       
 
     <div class="performance-title">
-        🏢 Business Leads
+        Business Leads
     </div>
 
     <div class="performance-details" style="margin-bottom:16px;">
@@ -675,7 +709,7 @@
            font-size:13px;
            font-weight:bold;
        ">
-        View Assigned Business Leads →
+        View Assigned Business Leads &rarr;
     </a>
 
 </div>
@@ -687,7 +721,7 @@
     <div class="performance-card best">
 
         <div class="performance-title">
-            🏆 Best Performing Branch
+            Best Performing Branch
         </div>
 
         {% if best_branch %}
@@ -703,12 +737,14 @@
                     <strong>{{ best_branch.admissions }}</strong>
                 </span>
 
-                <span>
-                    Collection:
-                    <strong>
-                        ₹{{ best_branch.collection|floatformat:0 }}
-                    </strong>
-                </span>
+                {% if can_view_financials %}
+                    <span>
+                        Collection:
+                        <strong>
+                            &#8377;{{ best_branch.collection|floatformat:0 }}
+                        </strong>
+                    </span>
+                {% endif %}
 
                 <span>
                     Conversion:
@@ -735,7 +771,7 @@
     <div class="performance-card attention">
 
         <div class="performance-title">
-            ⚠️ Needs Attention
+            Needs Attention
         </div>
 
         {% if attention_branch %}
@@ -751,12 +787,14 @@
                     <strong>{{ attention_branch.admissions }}</strong>
                 </span>
 
-                <span>
-                    Collection:
-                    <strong>
-                        ₹{{ attention_branch.collection|floatformat:0 }}
-                    </strong>
-                </span>
+                {% if can_view_financials %}
+                    <span>
+                        Collection:
+                        <strong>
+                            &#8377;{{ attention_branch.collection|floatformat:0 }}
+                        </strong>
+                    </span>
+                {% endif %}
 
                 <span>
                     Conversion:
@@ -804,9 +842,19 @@
                                     Admissions
                                 </th>
 
-                                <th>
-                                    Collection
-                                </th>
+                                {% if can_view_financials %}
+                                    <th>
+                                        Billing
+                                    </th>
+
+                                    <th>
+                                        Collection
+                                    </th>
+
+                                    <th>
+                                        Outstanding
+                                    </th>
+                                {% endif %}
 
                                 <th>
                                     Conversion
@@ -843,9 +891,19 @@
                                     {{ item.admissions }}
                                 </td>
 
-                                <td class="collection">
-                                    ₹{{ item.collection|floatformat:0 }}
-                                </td>
+                                {% if can_view_financials %}
+                                    <td class="collection">
+                                        &#8377;{{ item.billing|floatformat:0 }}
+                                    </td>
+
+                                    <td class="collection">
+                                        &#8377;{{ item.collection|floatformat:0 }}
+                                    </td>
+
+                                    <td class="collection">
+                                        &#8377;{{ item.outstanding|floatformat:0 }}
+                                    </td>
+                                {% endif %}
 
                                 <td>
 
