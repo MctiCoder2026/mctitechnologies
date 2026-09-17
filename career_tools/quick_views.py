@@ -1,0 +1,169 @@
+﻿from datetime import timedelta
+
+from django.contrib.admin.views.decorators import staff_member_required
+from django.db import transaction
+from django.shortcuts import redirect, render
+from django.utils import timezone
+
+from core.models import Enquiry, EnquiryActivity
+
+from .forms import QuickCareerEnquiryForm
+from .models import CareerProfile
+from .services import get_course_suggestions
+
+
+@staff_member_required
+@transaction.atomic
+def quick_career_enquiry(request):
+    if request.method == "POST":
+        form = QuickCareerEnquiryForm(request.POST)
+
+        if form.is_valid():
+            data = form.cleaned_data
+
+            full_name = data["full_name"].strip()
+            mobile = data["mobile"]
+            branch = data["preferred_branch"]
+
+            enquiry = (
+                Enquiry.objects.filter(mobile=mobile)
+                .order_by("-created_at")
+                .first()
+            )
+
+            if enquiry is None:
+                enquiry = Enquiry.objects.create(
+                    name=full_name,
+                    mobile=mobile,
+                    branch=branch,
+                    status="new",
+                    followup_date=(
+                        timezone.localdate()
+                        + timedelta(days=1)
+                    ),
+                    message=(
+                        "Lead captured through "
+                        "MCTI Quick Career Enquiry."
+                    ),
+                )
+            else:
+                enquiry.name = full_name
+                enquiry.branch = branch
+
+                if enquiry.followup_date is None:
+                    enquiry.followup_date = (
+                        timezone.localdate()
+                        + timedelta(days=1)
+                    )
+
+                if not enquiry.message:
+                    enquiry.message = (
+                        "Lead updated through "
+                        "MCTI Quick Career Enquiry."
+                    )
+
+                enquiry.save(
+                    update_fields=[
+                        "name",
+                        "branch",
+                        "followup_date",
+                        "message",
+                    ]
+                )
+
+            profile = (
+                CareerProfile.objects.filter(mobile=mobile)
+                .order_by("-updated_at")
+                .first()
+            )
+
+            if profile is None:
+                profile = CareerProfile(
+                    mobile=mobile,
+                    is_guest=True,
+                )
+
+            profile.full_name = full_name
+            profile.mobile = mobile
+            profile.enquiry = enquiry
+            profile.highest_qualification = (
+                data["highest_qualification"]
+            )
+            profile.stream = data["stream"]
+            profile.current_status = data["current_status"]
+            profile.career_interest = data["career_interest"]
+            profile.preferred_branch = branch
+            profile.consent_given = data["consent_given"]
+
+            if profile.student_id is None:
+                profile.is_guest = True
+                profile.source = "MCTI Quick Career Enquiry"
+
+            profile.save()
+
+            suggestions = get_course_suggestions(profile)
+
+            if suggestions and enquiry.course_id is None:
+                enquiry.course = suggestions[0]["course"]
+                enquiry.save(update_fields=["course"])
+
+            course_names = ", ".join(
+                item["course"].title
+                for item in suggestions
+            )
+
+            EnquiryActivity.objects.create(
+                enquiry=enquiry,
+                created_by=request.user,
+                activity_type="note",
+                message=(
+                    "Quick Career Enquiry completed. "
+                    f"Suggested courses: {course_names}"
+                ),
+            )
+
+            request.session[
+                "career_guest_profile_id"
+            ] = profile.id
+
+            return redirect(
+                "career_tools:quick_enquiry_result",
+                profile_id=profile.id,
+            )
+    else:
+        form = QuickCareerEnquiryForm()
+
+    return render(
+        request,
+        "career_tools/quick_enquiry.html",
+        {
+            "form": form,
+        },
+    )
+
+
+@staff_member_required
+def quick_enquiry_result(request, profile_id):
+    profile = (
+        CareerProfile.objects
+        .select_related("enquiry", "student")
+        .filter(id=profile_id)
+        .first()
+    )
+
+    if profile is None:
+        return redirect(
+            "career_tools:quick_career_enquiry"
+        )
+
+    suggestions = get_course_suggestions(profile)
+
+    return render(
+        request,
+        "career_tools/quick_enquiry_result.html",
+        {
+            "profile": profile,
+            "enquiry": profile.enquiry,
+            "suggestions": suggestions,
+        },
+    )

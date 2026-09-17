@@ -146,6 +146,72 @@ class GuestCareerStartForm(forms.Form):
         return digits
 
 
+
+class QuickCareerEnquiryForm(GuestCareerStartForm):
+
+    highest_qualification = forms.ChoiceField(
+        label="Highest Qualification",
+        choices=[
+            ("10th", "10th"),
+            ("12th", "12th"),
+            ("diploma", "Diploma"),
+            ("graduate", "Graduate"),
+            ("postgraduate", "Postgraduate"),
+            ("other", "Other"),
+        ],
+    )
+
+    stream = forms.ChoiceField(
+        label="Stream",
+        choices=[
+            ("arts", "Arts"),
+            ("commerce", "Commerce"),
+            ("science", "Science"),
+            ("it_cs", "IT / Computer Science"),
+            ("engineering", "Engineering"),
+            ("management", "Management"),
+            ("vocational", "Vocational"),
+            ("other", "Other"),
+        ],
+    )
+
+    current_status = forms.ChoiceField(
+        label="Current Status",
+        choices=[
+            ("student", "Student"),
+            ("fresher", "Fresher"),
+            ("working", "Working Professional"),
+            ("business", "Business / Self-employed"),
+            ("other", "Other"),
+        ],
+    )
+
+    career_interest = forms.CharField(
+        max_length=200,
+        required=False,
+        label="Career Interest",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": (
+                    "Example: Accounts, IT, Coding, Office Job"
+                )
+            }
+        ),
+    )
+
+    preferred_branch = forms.ChoiceField(
+        label="Preferred Branch",
+        choices=[
+            ("kharghar", "Kharghar"),
+            ("panvel", "Panvel"),
+            ("koperkhairane", "Koperkhairane"),
+            ("kamothe", "Kamothe"),
+            ("ghansoli", "Ghansoli"),
+            ("nerul", "Nerul"),
+            ("online", "Online"),
+        ],
+    )
+
 # =========================================================
 # RESUME EDUCATION FORMSET
 # =========================================================

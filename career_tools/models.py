@@ -38,6 +38,10 @@ class CareerProfile(models.Model):
 
     city = models.CharField(max_length=100, blank=True)
 
+    stream = models.CharField(max_length=100, blank=True)
+    current_status = models.CharField(max_length=50, blank=True)
+    preferred_branch = models.CharField(max_length=100, blank=True)
+
     is_guest = models.BooleanField(default=False)
     consent_given = models.BooleanField(default=False)
 

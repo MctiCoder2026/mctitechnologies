@@ -8,8 +8,22 @@ from . import views
 
 app_name = "career_tools"
 
+from . import quick_views
+
 urlpatterns = [
     path("", views.career_home, name="home"),
+
+    path(
+        "quick-enquiry/",
+        quick_views.quick_career_enquiry,
+        name="quick_career_enquiry"
+    ),
+
+    path(
+        "quick-enquiry/result/<int:profile_id>/",
+        quick_views.quick_enquiry_result,
+        name="quick_enquiry_result"
+    ),
 
     path(
         "resume-builder/",
