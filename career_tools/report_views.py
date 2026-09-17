@@ -636,36 +636,52 @@ def career_report_pdf(request, profile_id):
         )
     )
 
-    qr_image = build_aptitude_qr(aptitude_url)
+    if attempt:
+        cta_data = [
+            [
+                Paragraph(
+                    "<b>Your Detailed Career Report is Ready</b>"
+                    "<br/><br/>"
+                    "Contact an MCTI career counsellor to discuss "
+                    "your aptitude results, career matches and the "
+                    "right learning roadmap."
+                    "<br/><br/>"
+                    "<b>Call:</b> +91 8655556219"
+                    "<br/><b>Email:</b> "
+                    "info@mctitechnologies.com",
+                    body_style,
+                )
+            ]
+        ]
+        cta_widths = [6.7 * inch]
 
-    cta_text = (
-        "Your aptitude test is complete. Contact an MCTI "
-        "career counsellor to discuss this report and choose "
-        "the right learning roadmap."
-        if attempt
-        else
-        "Scan this personal QR to complete the MCTI Aptitude "
-        "Test from home or anywhere. After completion, the "
-        "same report will include detailed aptitude scores "
-        "and Top 3 career matches."
-    )
+    else:
+        qr_image = build_aptitude_qr(aptitude_url)
 
-    cta_table = Table(
-        [
+        cta_data = [
             [
                 qr_image,
                 Paragraph(
-                    "<b>Scan for MCTI Aptitude Test</b><br/><br/>"
-                    + clean_text(cta_text)
-                    + "<br/><br/>"
+                    "<b>Scan for MCTI Aptitude Test</b>"
+                    "<br/><br/>"
+                    "Scan this personal QR to complete the MCTI "
+                    "Aptitude Test from home or anywhere. After "
+                    "completion, the same report will include "
+                    "detailed aptitude scores and Top 3 career "
+                    "matches."
+                    "<br/><br/>"
                     "<b>Call:</b> +91 8655556219"
                     "<br/><b>Email:</b> "
                     "info@mctitechnologies.com",
                     body_style,
                 ),
             ]
-        ],
-        colWidths=[1.7 * inch, 5 * inch],
+        ]
+        cta_widths = [1.7 * inch, 5 * inch]
+
+    cta_table = Table(
+        cta_data,
+        colWidths=cta_widths,
     )
     cta_table.setStyle(
         TableStyle(
