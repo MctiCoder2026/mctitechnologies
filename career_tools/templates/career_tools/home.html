@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -285,7 +285,7 @@
 
         <p>
             Create a professional resume, test your aptitude and get
-            personalized career recommendations — all in one place.
+            personalized career recommendations â€” all in one place.
         </p>
 
         <div class="hero-actions">
@@ -295,6 +295,13 @@
                 class="btn btn-orange"
             >
                 Start Free Career Kit
+            </a>
+
+            <a
+                href="{% url 'career_tools:public_aptitude_start' %}"
+                class="btn btn-white"
+            >
+                Free Aptitude Test
             </a>
 
             <a
@@ -342,16 +349,16 @@
                         href="{% url 'career_tools:resume_builder' %}"
                         class="tool-link"
                     >
-                        Build Resume →
+                        Build Resume â†’
                     </a>
 
                 {% else %}
 
                     <a
-                        href="{% url 'career_tools:guest_start' %}"
+                        href="{% url 'career_tools:guest_start' %}?next=resume"
                         class="tool-link"
                     >
-                        Build Resume →
+                        Build Resume â†’
                     </a>
 
                 {% endif %}
@@ -379,16 +386,16 @@
                         href="{% url 'career_tools:aptitude_test' %}"
                         class="tool-link"
                     >
-                        Start Aptitude Test →
+                        Start Aptitude Test â†’
                     </a>
 
                 {% else %}
 
                     <a
-                        href="{% url 'career_tools:guest_start' %}"
+                        href="{% url 'career_tools:public_aptitude_start' %}"
                         class="tool-link"
                     >
-                        Start Aptitude Test →
+                        Start Aptitude Test â†’
                     </a>
 
                 {% endif %}
@@ -489,7 +496,7 @@
     </section>
 
     <div class="footer">
-        MCTI Career Kit · Maharashtra Computer Training Institute
+        MCTI Career Kit Â· Maharashtra Computer Training Institute
     </div>
 
 </div>
