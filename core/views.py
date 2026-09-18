@@ -17,7 +17,7 @@ from .models import (
 from .forms import JobPostForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count, Max
 from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import Enrollment
@@ -3769,6 +3769,24 @@ def enquiry_dashboard(request):
             )
         )
 
+    # --------------------------------------------------------
+    # CAREER KIT STATUS
+    # --------------------------------------------------------
+
+    enquiries = enquiries.annotate(
+        career_profile_id=Max(
+            "career_profiles__id"
+        ),
+        completed_aptitude_count=Count(
+            "career_profiles__aptitude_attempts",
+            filter=Q(
+                career_profiles__aptitude_attempts__status=(
+                    "completed"
+                )
+            ),
+            distinct=True,
+        ),
+    )
     search = request.GET.get(
         "search",
         ""

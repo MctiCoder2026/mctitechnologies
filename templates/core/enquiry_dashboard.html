@@ -694,6 +694,7 @@ Enquiry Dashboard | MCTI Technologies
                             <th>Branch</th>
                             <th>Status</th>
                             <th>Date</th>
+                            <th>Career Kit</th>
                             <th>Action</th>
 
                         </tr>
@@ -803,6 +804,52 @@ Enquiry Dashboard | MCTI Technologies
 
                                 </td>
 
+
+                                <!-- CAREER KIT -->
+
+                                <td style="min-width:190px;">
+
+                                    {% if enquiry.career_profile_id %}
+
+                                        <div style="display:flex; flex-direction:column; gap:6px;">
+
+                                            {% if enquiry.completed_aptitude_count %}
+                                                <span style="color:#15803d; font-size:12px; font-weight:800;">
+                                                    Aptitude Completed
+                                                </span>
+                                            {% else %}
+                                                <span style="color:#c2410c; font-size:12px; font-weight:800;">
+                                                    Aptitude Pending
+                                                </span>
+                                            {% endif %}
+
+                                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                                <a
+                                                    href="{% url 'career_tools:quick_enquiry_result' enquiry.career_profile_id %}"
+                                                    style="padding:6px 9px; border-radius:7px; background:#111; color:#fff; text-decoration:none; font-size:12px; font-weight:800;"
+                                                >
+                                                    Open
+                                                </a>
+
+                                                <a
+                                                    href="{% url 'career_tools:career_report_pdf' enquiry.career_profile_id %}"
+                                                    style="padding:6px 9px; border-radius:7px; background:#f36a21; color:#fff; text-decoration:none; font-size:12px; font-weight:800;"
+                                                >
+                                                    PDF
+                                                </a>
+                                            </div>
+
+                                        </div>
+
+                                    {% else %}
+
+                                        <span style="color:#888; font-size:12px;">
+                                            Not Generated
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
 
                                 <!-- ACTION -->
 
