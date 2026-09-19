@@ -263,6 +263,18 @@ def resume_builder(request):
 
 def guest_start(request):
 
+    # -------------------------------------------------
+    # WHICH CAREER TOOL USER WANTS TO OPEN
+    # -------------------------------------------------
+    next_tool = (
+        request.GET.get("next")
+        or request.POST.get("next")
+        or "resume"
+    )
+
+    if next_tool not in ["resume", "aptitude"]:
+        next_tool = "resume"
+
     if request.method == "POST":
 
         form = GuestCareerStartForm(
@@ -303,8 +315,7 @@ def guest_start(request):
                     status="new",
                     message=(
                         "Lead generated from "
-                        "MCTI Career Kit - "
-                        "Guest Resume Builder"
+                        "MCTI Career Kit - Guest"
                     ),
                 )
 
@@ -348,12 +359,21 @@ def guest_start(request):
                 )
 
             # ---------------------------------------------
-            # SAVE GUEST PROFILE IN SESSION
+            # SAVE SAME GUEST PROFILE IN SESSION
             # ---------------------------------------------
 
             request.session[
                 "career_guest_profile_id"
             ] = profile.id
+
+            # ---------------------------------------------
+            # OPEN SELECTED CAREER TOOL
+            # ---------------------------------------------
+
+            if next_tool == "aptitude":
+                return redirect(
+                    "career_tools:aptitude_test"
+                )
 
             return redirect(
                 "career_tools:guest_resume_builder"
@@ -366,11 +386,10 @@ def guest_start(request):
         request,
         "career_tools/guest_start.html",
         {
-            "form": form
+            "form": form,
+            "next_tool": next_tool,
         }
     )
-
-
 # =========================================================
 # GUEST RESUME BUILDER
 # =========================================================
@@ -2086,4 +2105,5 @@ def counsellor_profile_detail(request, profile_id):
         "career_tools/counsellor_profile_detail.html",
         context,
     )
+
 
