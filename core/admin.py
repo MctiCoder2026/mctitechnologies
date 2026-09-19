@@ -1,6 +1,11 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
+from django.urls import path, reverse
+from django.shortcuts import redirect, get_object_or_404
+from django.utils.html import format_html
+from django.contrib import messages
+
 from .models import Attendance, BranchLocation
 
 from .models import (
@@ -90,6 +95,7 @@ class EnquiryAdmin(admin.ModelAdmin):
         "status",
         "followup_date",
         "created_at",
+        "delete_duplicate_button",
     )
 
     list_filter = (
@@ -107,6 +113,74 @@ class EnquiryAdmin(admin.ModelAdmin):
     readonly_fields = (
         "created_at",
     )
+
+    @admin.display(description="Delete")
+    def delete_duplicate_button(self, obj):
+        url = reverse(
+            "admin:core_enquiry_delete_duplicate",
+            args=[obj.pk]
+        )
+        return format_html(
+            '<a href="{}" style="background:#ba2121;color:#fff;'
+            'padding:6px 10px;border-radius:4px;'
+            'text-decoration:none;font-weight:600;">'
+            'Delete Dummy</a>',
+            url
+        )
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "<int:object_id>/delete-duplicate/",
+                self.admin_site.admin_view(
+                    self.delete_duplicate_view
+                ),
+                name="core_enquiry_delete_duplicate",
+            ),
+        ]
+        return custom_urls + urls
+
+    def delete_duplicate_view(self, request, object_id):
+        if not request.user.is_superuser:
+            messages.error(
+                request,
+                "Only Super Admin can delete enquiries."
+            )
+            return redirect("admin:core_enquiry_changelist")
+
+        obj = get_object_or_404(Enquiry, pk=object_id)
+
+        if request.method == "POST":
+            enquiry_id = obj.pk
+            enquiry_name = obj.name
+
+            obj.delete()
+
+            messages.success(
+                request,
+                f"Enquiry #{enquiry_id} - {enquiry_name} deleted successfully."
+            )
+
+            return redirect("admin:core_enquiry_changelist")
+
+        context = {
+            **self.admin_site.each_context(request),
+            "title": "Delete Duplicate / Dummy Enquiry",
+            "object": obj,
+            "object_type": "Enquiry",
+            "cancel_url": reverse(
+                "admin:core_enquiry_changelist"
+            ),
+        }
+
+        from django.template.response import TemplateResponse
+
+        return TemplateResponse(
+            request,
+            "admin/delete_duplicate_confirm.html",
+            context,
+        )
 
 
 # ============================================================
@@ -156,6 +230,7 @@ class AdmissionAdmin(admin.ModelAdmin):
         "balance_fee_display",
         "payment_status",
         "admission_date",
+        "delete_duplicate_button",
     )
 
     list_filter = (
@@ -183,6 +258,78 @@ class AdmissionAdmin(admin.ModelAdmin):
     @admin.display(description="Balance Fee")
     def balance_fee_display(self, obj):
         return obj.balance_fee
+
+    @admin.display(description="Delete")
+    def delete_duplicate_button(self, obj):
+        url = reverse(
+            "admin:core_admission_delete_duplicate",
+            args=[obj.pk]
+        )
+        return format_html(
+            '<a href="{}" style="background:#ba2121;color:#fff;'
+            'padding:6px 10px;border-radius:4px;'
+            'text-decoration:none;font-weight:600;">'
+            'Delete Dummy</a>',
+            url
+        )
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "<int:object_id>/delete-duplicate/",
+                self.admin_site.admin_view(
+                    self.delete_duplicate_view
+                ),
+                name="core_admission_delete_duplicate",
+            ),
+        ]
+        return custom_urls + urls
+
+    def delete_duplicate_view(self, request, object_id):
+        if not request.user.is_superuser:
+            messages.error(
+                request,
+                "Only Super Admin can delete admissions."
+            )
+            return redirect("admin:core_admission_changelist")
+
+        obj = get_object_or_404(Admission, pk=object_id)
+
+        linked_student = getattr(obj, "student", None)
+
+        if request.method == "POST":
+            admission_id = obj.pk
+            admission_number = obj.admission_number
+
+            obj.delete()
+
+            messages.success(
+                request,
+                f"Admission {admission_number} (ID {admission_id}) deleted. "
+                "Student, enrollments and payments were not renumbered."
+            )
+
+            return redirect("admin:core_admission_changelist")
+
+        context = {
+            **self.admin_site.each_context(request),
+            "title": "Delete Duplicate / Dummy Admission",
+            "object": obj,
+            "object_type": "Admission",
+            "linked_student": linked_student,
+            "cancel_url": reverse(
+                "admin:core_admission_changelist"
+            ),
+        }
+
+        from django.template.response import TemplateResponse
+
+        return TemplateResponse(
+            request,
+            "admin/delete_duplicate_confirm.html",
+            context,
+        )
 
 
 # ============================================================

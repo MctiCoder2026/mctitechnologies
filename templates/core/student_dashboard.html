@@ -1063,5 +1063,119 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+
+<!-- MCTI AUTO ATTENDANCE V1 -->
+<div id="mcti-auto-attendance-v1" style="display:none;">
+    <form>
+        {% csrf_token %}
+    </form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const attendanceBox = document.getElementById(
+        "mcti-auto-attendance-v1"
+    );
+
+    if (!attendanceBox) {
+        return;
+    }
+
+    const csrfInput = attendanceBox.querySelector(
+        'input[name="csrfmiddlewaretoken"]'
+    );
+
+    if (!csrfInput) {
+        console.log("Attendance: CSRF token unavailable.");
+        return;
+    }
+
+    if (!navigator.geolocation) {
+        console.log("Attendance: Geolocation not supported.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(position) {
+
+            const formData = new FormData();
+
+            formData.append(
+                "latitude",
+                position.coords.latitude
+            );
+
+            formData.append(
+                "longitude",
+                position.coords.longitude
+            );
+
+            fetch(
+                "{% url 'mark_student_attendance' %}",
+                {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfInput.value
+                    },
+                    body: formData,
+                    credentials: "same-origin"
+                }
+            )
+            .then(response => response.json())
+            .then(data => {
+
+                if (data.success) {
+
+                    if (data.already_marked) {
+                        console.log(
+                            "Attendance already marked today."
+                        );
+                    } else {
+                        console.log(
+                            "✅ Attendance marked automatically:",
+                            data.branch
+                        );
+                    }
+
+                } else {
+
+                    console.log(
+                        "Attendance not marked:",
+                        data.message
+                    );
+
+                }
+
+            })
+            .catch(error => {
+                console.log(
+                    "Attendance request error:",
+                    error
+                );
+            });
+        },
+
+        function(error) {
+
+            console.log(
+                "Attendance GPS error:",
+                error.message
+            );
+
+        },
+
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        }
+
+    );
+
+});
+</script>
+
 </body>
 </html>

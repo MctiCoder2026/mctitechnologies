@@ -1,3 +1,21 @@
+
+<style>
+.delete-admission-btn {
+    background: #dc2626;
+    color: #ffffff;
+    border: none;
+    padding: 8px 11px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.delete-admission-btn:hover {
+    background: #b91c1c;
+}
+</style>
+
 {% load static %}
 
 <!DOCTYPE html>
@@ -1007,6 +1025,26 @@ tbody tr:hover{
                                     >
                                         + Fee
                                     </a>
+
+                                    {% endif %}
+
+                                    {% if request.user.is_superuser %}
+
+                                    <form
+                                        method="post"
+                                        action="{% url 'delete_admission' admission.id %}"
+                                        style="display:inline;"
+                                        onsubmit="return confirm('Delete this duplicate/dummy admission permanently? Existing IDs will NOT shift.');"
+                                    >
+                                        {% csrf_token %}
+
+                                        <button
+                                            type="submit"
+                                            class="delete-admission-btn"
+                                        >
+                                            Delete
+                                        </button>
+                                    </form>
 
                                     {% endif %}
 

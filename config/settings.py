@@ -47,6 +47,9 @@ INSTALLED_APPS = [
     'core',
     "lms",
     'career_tools',
+    "rest_framework",
+    "mobile_api",
+    "rest_framework.authtoken",
 ]
 
 MIDDLEWARE = [

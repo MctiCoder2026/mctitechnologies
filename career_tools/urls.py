@@ -15,6 +15,18 @@ urlpatterns = [
     path("", views.career_home, name="home"),
 
     path(
+        "free-aptitude/",
+        quick_views.public_aptitude_start,
+        name="public_aptitude_start"
+    ),
+
+    path(
+        "free-aptitude/qr/",
+        quick_views.public_aptitude_qr,
+        name="public_aptitude_qr"
+    ),
+
+    path(
         "quick-enquiry/",
         quick_views.quick_career_enquiry,
         name="quick_career_enquiry"

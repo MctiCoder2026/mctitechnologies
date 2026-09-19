@@ -17,7 +17,7 @@ from .models import (
 from .forms import JobPostForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count, Max
 from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import Enrollment
@@ -1174,6 +1174,17 @@ def branch_dashboard(request):
 
 @login_required
 def reports_dashboard(request):
+
+    # Office staff must not access reports or financial analytics.
+    if not request.user.is_superuser:
+        try:
+            viewer_profile = request.user.staff_profile
+        except StaffProfile.DoesNotExist:
+            auth_logout(request)
+            return redirect("staff_login")
+
+        if viewer_profile.designation.strip().lower() != "branch head":
+            return redirect("branch_dashboard")
 
     branches = [
         ("", "All Branches"),
@@ -3074,6 +3085,17 @@ def student_list(request):
 @login_required
 def staff_list(request):
 
+    # Office staff must not access staff performance or financial data.
+    if not request.user.is_superuser:
+        try:
+            viewer_profile = request.user.staff_profile
+        except StaffProfile.DoesNotExist:
+            auth_logout(request)
+            return redirect("staff_login")
+
+        if viewer_profile.designation.strip().lower() != "branch head":
+            return redirect("branch_dashboard")
+
     search = request.GET.get(
         "search",
         ""
@@ -3769,6 +3791,24 @@ def enquiry_dashboard(request):
             )
         )
 
+    # --------------------------------------------------------
+    # CAREER KIT STATUS
+    # --------------------------------------------------------
+
+    enquiries = enquiries.annotate(
+        career_profile_id=Max(
+            "career_profiles__id"
+        ),
+        completed_aptitude_count=Count(
+            "career_profiles__aptitude_attempts",
+            filter=Q(
+                career_profiles__aptitude_attempts__status=(
+                    "completed"
+                )
+            ),
+            distinct=True,
+        ),
+    )
     search = request.GET.get(
         "search",
         ""
@@ -4785,6 +4825,44 @@ def admission_list(request):
             "search": search,
         }
     )
+
+
+
+
+# ============================================================
+# DELETE DUPLICATE / DUMMY ADMISSION
+# ============================================================
+
+@login_required
+def delete_admission(request, admission_id):
+
+    if not request.user.is_superuser:
+        messages.error(
+            request,
+            "Only Super Admin can delete admissions."
+        )
+        return redirect("admission_list")
+
+    if request.method != "POST":
+        return redirect("admission_list")
+
+    admission = get_object_or_404(
+        Admission,
+        id=admission_id
+    )
+
+    admission_number = admission.admission_number
+    admission_db_id = admission.id
+
+    admission.delete()
+
+    messages.success(
+        request,
+        f"Admission {admission_number} "
+        f"(ID {admission_db_id}) deleted successfully."
+    )
+
+    return redirect("admission_list")
 
 
 

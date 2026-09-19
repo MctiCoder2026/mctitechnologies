@@ -25,6 +25,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("core.urls")),
     path("lms/", include("lms.urls")),
+    path("api/mobile/", include("mobile_api.urls")),
 ]
 
 

@@ -569,6 +569,10 @@ body{
             📞 Enquiries
         </a>
 
+        <a href="{% url 'career_tools:quick_career_enquiry' %}">
+            New Career Enquiry
+        </a>
+
         <a href="{% url 'business_lead_list' %}">
             🏢 Business Leads
         </a>
@@ -892,6 +896,29 @@ body{
 
                             <span>
                                 Manage leads & follow-ups
+                            </span>
+
+                        </div>
+
+                    </a>
+
+                    <a
+                        href="{% url 'career_tools:quick_career_enquiry' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            &#127919;
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Start Career Enquiry
+                            </strong>
+
+                            <span>
+                                Add details, suggest courses and generate report
                             </span>
 
                         </div>

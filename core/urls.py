@@ -178,6 +178,13 @@ urlpatterns = [
         name="admission_list"
     ),
 
+
+    path(
+        "admissions/<int:admission_id>/delete/",
+        views.delete_admission,
+        name="delete_admission"
+    ),
+
     path(
         "admissions/<int:admission_id>/edit/",
         views.edit_admission,
