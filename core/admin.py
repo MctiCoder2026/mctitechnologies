@@ -4,6 +4,11 @@ from django.utils.html import format_html
 from .models import Attendance, BranchLocation
 from django import forms
 from django.db.models import Sum
+from .models import (
+    ExpenseCategory,
+    DailyBranchExpense,
+    DailyExpenseAuditLog,
+)
 
 from .models import (
     BranchPartner,
@@ -782,3 +787,170 @@ class MonthlyPartnerShareAdmin(
         "share_percentage",
         "share_amount",
     )
+
+    # ============================================================
+# EXPENSE CATEGORY ADMIN
+# ============================================================
+
+@admin.register(ExpenseCategory)
+class ExpenseCategoryAdmin(
+    admin.ModelAdmin
+):
+
+    list_display = (
+        "display_order",
+        "name",
+        "code",
+        "is_active",
+        "updated_at",
+    )
+    list_display_links = (
+        "name",
+    )
+
+    list_editable = (
+        "display_order",
+        "is_active",
+    )
+
+    list_filter = (
+        "is_active",
+    )
+
+    search_fields = (
+        "name",
+        "code",
+    )
+
+    ordering = (
+        "display_order",
+        "name",
+    )
+
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
+
+
+# ============================================================
+# DAILY BRANCH EXPENSE ADMIN
+# ============================================================
+
+@admin.register(DailyBranchExpense)
+class DailyBranchExpenseAdmin(
+    admin.ModelAdmin
+):
+
+    list_display = (
+        "expense_date",
+        "branch",
+        "category",
+        "amount",
+        "payment_mode",
+        "remark",
+        "is_cancelled",
+        "created_by",
+        "created_at",
+    )
+
+    list_filter = (
+        "branch",
+        "category",
+        "payment_mode",
+        "is_cancelled",
+        "expense_date",
+    )
+
+    search_fields = (
+        "remark",
+        "short_notes",
+        "created_by__username",
+        "category__name",
+    )
+
+    date_hierarchy = "expense_date"
+
+    ordering = (
+        "-expense_date",
+        "-created_at",
+    )
+
+    readonly_fields = (
+        "created_by",
+        "updated_by",
+        "cancelled_by",
+        "cancelled_at",
+        "created_at",
+        "updated_at",
+    )
+
+    def has_delete_permission(
+        self,
+        request,
+        obj=None
+    ):
+
+        # Financial records must not be
+        # permanently deleted.
+        return False
+
+
+# ============================================================
+# DAILY EXPENSE AUDIT LOG ADMIN
+# ============================================================
+
+@admin.register(DailyExpenseAuditLog)
+class DailyExpenseAuditLogAdmin(
+    admin.ModelAdmin
+):
+
+    list_display = (
+        "expense",
+        "action",
+        "performed_by",
+        "performed_at",
+    )
+
+    list_filter = (
+        "action",
+        "performed_at",
+    )
+
+    search_fields = (
+        "expense__remark",
+        "performed_by__username",
+    )
+
+    readonly_fields = (
+        "expense",
+        "action",
+        "previous_data",
+        "new_data",
+        "performed_by",
+        "performed_at",
+    )
+
+    ordering = (
+        "-performed_at",
+    )
+
+    def has_add_permission(
+        self,
+        request
+    ):
+        return False
+
+    def has_change_permission(
+        self,
+        request,
+        obj=None
+    ):
+        return False
+
+    def has_delete_permission(
+        self,
+        request,
+        obj=None
+    ):
+        return False

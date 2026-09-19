@@ -1,0 +1,841 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Daily Expenses | MCTI
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f6f9;
+            color: #111827;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 18px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .brand {
+            font-size: 23px;
+            font-weight: 800;
+        }
+
+        .brand span {
+            color: #f97316;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            border: 1px solid #4b5563;
+            padding: 9px 13px;
+            border-radius: 7px;
+        }
+
+        .container {
+            max-width: 1450px;
+            margin: 24px auto;
+            padding: 0 18px 40px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin-top: 0;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 13px 15px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            background: #fff7ed;
+            border-left: 4px solid #f97316;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .summary-box {
+            background: white;
+            padding: 18px;
+            border-radius: 11px;
+            border-left: 5px solid #f97316;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+        }
+
+        .summary-label {
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 23px;
+            font-weight: 800;
+        }
+
+        .filter-grid,
+        .form-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .filter-grid {
+            grid-template-columns: repeat(5, 1fr);
+            align-items: end;
+        }
+
+        .form-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 7px;
+        }
+
+        .form-control,
+        select,
+        input,
+        textarea {
+            width: 100%;
+            padding: 10px 11px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 14px;
+        }
+
+        .form-control:focus,
+        select:focus,
+        input:focus,
+        textarea:focus {
+            border-color: #f97316;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+        }
+
+        .btn {
+            border: 0;
+            padding: 10px 15px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 800;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-orange {
+            background: #f97316;
+            color: white;
+        }
+
+        .btn-dark {
+            background: #111827;
+            color: white;
+        }
+
+        .btn-blue {
+            background: #1d4ed8;
+            color: white;
+        }
+
+        .btn-red {
+            background: #dc2626;
+            color: white;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .field-error {
+            color: #dc2626;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .locked {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            padding: 14px;
+            border-radius: 8px;
+            color: #92400e;
+            font-weight: 700;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1050px;
+        }
+
+        th,
+        td {
+            padding: 11px 10px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #111827;
+            color: white;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        td.amount {
+            text-align: right;
+            font-weight: 800;
+        }
+
+        .cancelled-row {
+            opacity: 0.6;
+            background: #fee2e2;
+            text-decoration: line-through;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #ffedd5;
+            color: #9a3412;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .cancel-tag {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .category-box {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 13px;
+        }
+
+        .category-name {
+            color: #6b7280;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .category-total {
+            font-weight: 800;
+            font-size: 18px;
+        }
+
+        .small {
+            color: #6b7280;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #6b7280;
+        }
+
+        @media (max-width: 1000px) {
+
+            .filter-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .category-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 650px) {
+
+            .summary-grid,
+            .filter-grid,
+            .form-grid,
+            .category-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 0 10px 30px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <header class="header">
+
+        <div class="brand">
+            <span>MCTI</span> Technologies
+        </div>
+
+        <div class="header-links">
+
+            <a href="{% url 'monthly_closing_list' %}">
+                Monthly Closing
+            </a>
+
+            <a href="{% url 'branch_dashboard' %}">
+                Dashboard
+            </a>
+
+        </div>
+
+    </header>
+
+    <main class="container">
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div class="message">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+        <h1>
+            {{ selected_branch_name }} Daily Expenses
+        </h1>
+
+        <div class="subtitle">
+            Daily expense register for
+            {{ selected_month|stringformat:"02d" }}/{{ selected_year }}
+        </div>
+
+        <section class="card">
+
+            <form method="get">
+
+                <div class="filter-grid">
+
+                    {% if is_admin %}
+
+                        <div>
+
+                            <label>Branch</label>
+
+                            <select name="branch">
+
+                                {% for value, name in branches.items %}
+
+                                    <option
+                                        value="{{ value }}"
+                                        {% if value == selected_branch %}selected{% endif %}
+                                    >
+                                        {{ name }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                    {% endif %}
+
+                    <div>
+
+                        <label>Year</label>
+
+                        <input
+                            type="number"
+                            name="year"
+                            value="{{ selected_year }}"
+                            min="2020"
+                            max="2100"
+                        >
+
+                    </div>
+
+                    <div>
+
+                        <label>Month</label>
+
+                        <select name="month">
+
+                            {% for number in "123456789" %}{% endfor %}
+
+                            <option value="1" {% if selected_month == 1 %}selected{% endif %}>January</option>
+                            <option value="2" {% if selected_month == 2 %}selected{% endif %}>February</option>
+                            <option value="3" {% if selected_month == 3 %}selected{% endif %}>March</option>
+                            <option value="4" {% if selected_month == 4 %}selected{% endif %}>April</option>
+                            <option value="5" {% if selected_month == 5 %}selected{% endif %}>May</option>
+                            <option value="6" {% if selected_month == 6 %}selected{% endif %}>June</option>
+                            <option value="7" {% if selected_month == 7 %}selected{% endif %}>July</option>
+                            <option value="8" {% if selected_month == 8 %}selected{% endif %}>August</option>
+                            <option value="9" {% if selected_month == 9 %}selected{% endif %}>September</option>
+                            <option value="10" {% if selected_month == 10 %}selected{% endif %}>October</option>
+                            <option value="11" {% if selected_month == 11 %}selected{% endif %}>November</option>
+                            <option value="12" {% if selected_month == 12 %}selected{% endif %}>December</option>
+
+                        </select>
+
+                    </div>
+
+                    <div>
+
+                        <label>Category</label>
+
+                        <select name="category">
+
+                            <option value="">
+                                All Categories
+                            </option>
+
+                            {% for category in categories %}
+
+                                <option
+                                    value="{{ category.id }}"
+                                    {% if category_filter == category.id|stringformat:"s" %}selected{% endif %}
+                                >
+                                    {{ category.name }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div>
+
+                        <label>Payment Mode</label>
+
+                        <select name="payment_mode">
+
+                            <option value="">
+                                All Modes
+                            </option>
+
+                            {% for value, name in payment_modes %}
+
+                                <option
+                                    value="{{ value }}"
+                                    {% if payment_filter == value %}selected{% endif %}
+                                >
+                                    {{ name }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <div class="button-row">
+
+                    <button class="btn btn-dark">
+                        Apply Filters
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+        <div class="summary-grid">
+
+            <div class="summary-box">
+
+                <div class="summary-label">
+                    Today’s Expense
+                </div>
+
+                <div class="summary-value">
+                    ₹{{ today_total|floatformat:2 }}
+                </div>
+
+            </div>
+
+            <div class="summary-box">
+
+                <div class="summary-label">
+                    Selected Month Expense
+                </div>
+
+                <div class="summary-value">
+                    ₹{{ month_total|floatformat:2 }}
+                </div>
+
+            </div>
+
+            <div class="summary-box">
+
+                <div class="summary-label">
+                    Month Status
+                </div>
+
+                <div class="summary-value">
+
+                    {% if closing %}
+                        {{ closing.get_status_display }}
+                    {% else %}
+                        Open
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <section class="card">
+
+            <h2>Add Daily Expense</h2>
+
+            {% if month_is_locked %}
+
+                <div class="locked">
+                    This month has been submitted/validated/closed.
+                    New entries and changes are locked.
+                </div>
+
+            {% else %}
+
+                <form
+                    method="post"
+                    enctype="multipart/form-data"
+                >
+
+                    {% csrf_token %}
+
+                    <div class="form-grid">
+
+                        {% for field in form %}
+
+                            <div>
+
+                                <label for="{{ field.id_for_label }}">
+                                    {{ field.label }}
+                                </label>
+
+                                {{ field }}
+
+                                {% for error in field.errors %}
+
+                                    <div class="field-error">
+                                        {{ error }}
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                    <div class="button-row">
+
+                        <button
+                            type="submit"
+                            class="btn btn-orange"
+                        >
+                            Add Expense
+                        </button>
+
+                    </div>
+
+                </form>
+
+            {% endif %}
+
+        </section>
+
+        <section class="card">
+
+            <h2>Category-wise Monthly Summary</h2>
+
+            <div class="category-grid">
+
+                {% for item in category_summary %}
+
+                    <div class="category-box">
+
+                        <div class="category-name">
+                            {{ item.category__name }}
+                        </div>
+
+                        <div class="category-total">
+                            ₹{{ item.total|floatformat:2 }}
+                        </div>
+
+                        <div class="small">
+                            {{ item.entry_count }} entries
+                        </div>
+
+                    </div>
+
+                {% empty %}
+
+                    <div class="empty">
+                        No active expenses for this month.
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <h2>Expense Register</h2>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Payment</th>
+                            <th>Remark / Notes</th>
+                            <th>Entered By</th>
+                            <th>Bill</th>
+                            <th>Status / Action</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for expense in expenses %}
+
+                            <tr class="{% if expense.is_cancelled %}cancelled-row{% endif %}">
+
+                                <td>
+                                    {{ expense.expense_date|date:"d M Y" }}
+                                </td>
+
+                                <td>
+                                    <span class="tag">
+                                        {{ expense.category.name }}
+                                    </span>
+                                </td>
+
+                                <td class="amount">
+                                    ₹{{ expense.amount|floatformat:2 }}
+                                </td>
+
+                                <td>
+                                    {{ expense.get_payment_mode_display }}
+                                </td>
+
+                                <td>
+
+                                    <strong>
+                                        {{ expense.remark }}
+                                    </strong>
+
+                                    {% if expense.short_notes %}
+
+                                        <div class="small">
+                                            {{ expense.short_notes }}
+                                        </div>
+
+                                    {% endif %}
+
+                                    {% if expense.is_cancelled %}
+
+                                        <div class="small">
+                                            Reason:
+                                            {{ expense.cancel_reason }}
+                                        </div>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+
+                                    {% if expense.created_by %}
+                                        {{ expense.created_by.username }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+
+                                    <div class="small">
+                                        {{ expense.created_at|date:"d M, h:i A" }}
+                                    </div>
+
+                                </td>
+
+                                <td>
+
+                                    {% if expense.bill_receipt %}
+
+                                        <a
+                                            href="{{ expense.bill_receipt.url }}"
+                                            target="_blank"
+                                        >
+                                            View
+                                        </a>
+
+                                    {% else %}
+                                        —
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+
+                                    {% if expense.is_cancelled %}
+
+                                        <span class="tag cancel-tag">
+                                            Cancelled
+                                        </span>
+
+                                    {% elif month_is_locked %}
+
+                                        <span class="tag">
+                                            Locked
+                                        </span>
+
+                                    {% else %}
+
+                                        <div class="actions">
+
+                                            <a
+                                                class="btn btn-blue"
+                                                href="{% url 'daily_expense_edit' expense.id %}"
+                                            >
+                                                Edit
+                                            </a>
+
+                                            <a
+                                                class="btn btn-red"
+                                                href="{% url 'daily_expense_cancel' expense.id %}"
+                                            >
+                                                Cancel
+                                            </a>
+
+                                        </div>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="8"
+                                    class="empty"
+                                >
+                                    No expense entries found.
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

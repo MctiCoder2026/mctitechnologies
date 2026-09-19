@@ -1400,7 +1400,7 @@ class StaffProfile(models.Model):
     is_active = models.BooleanField(
         default=True
     )
-    
+
     requires_location_login = models.BooleanField(
         default=False,
         help_text=(
@@ -1713,7 +1713,7 @@ class Attendance(models.Model):
         choices=SOURCE_CHOICES,
         default="auto"
     )
-    
+
     remarks = models.CharField(
         max_length=255,
         blank=True,
@@ -2161,6 +2161,11 @@ class MonthlyBranchClosing(models.Model):
         decimal_places=2,
         default=0
     )
+    reserve_fund_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
 
     # Monthly expenses entered by branch
     rent_expense = models.DecimalField(
@@ -2341,12 +2346,17 @@ class MonthlyBranchClosing(models.Model):
         )
 
     @property
+
+
     def distributable_profit(self):
+
         return max(
-            self.cash_profit,
+            (
+                self.cash_profit
+                - self.reserve_fund_amount
+            ),
             Decimal("0.00")
         )
-
     @property
     def cash_loss(self):
         return abs(
@@ -2438,4 +2448,240 @@ class MonthlyPartnerShare(models.Model):
                 ],
                 name="unique_monthly_partner_share",
             )
+        ]
+    # ============================================================
+# DAILY BRANCH EXPENSE REGISTER
+# ============================================================
+
+class ExpenseCategory(models.Model):
+
+    name = models.CharField(
+        max_length=120,
+        unique=True
+    )
+
+    code = models.SlugField(
+        max_length=80,
+        unique=True
+    )
+
+    display_order = models.PositiveIntegerField(
+        default=0
+    )
+
+    is_active = models.BooleanField(
+        default=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = [
+            "display_order",
+            "name",
+        ]
+
+        verbose_name_plural = (
+            "Expense Categories"
+        )
+
+
+class DailyBranchExpense(models.Model):
+
+    PAYMENT_MODE_CHOICES = [
+        ("cash", "Cash"),
+        ("upi", "UPI"),
+        ("bank", "Bank Transfer"),
+        ("card", "Card"),
+        ("cheque", "Cheque"),
+        ("other", "Other"),
+    ]
+
+    branch = models.CharField(
+        max_length=50,
+        choices=BRANCH_ACCOUNT_CHOICES
+    )
+
+    expense_date = models.DateField(
+        default=timezone.localdate
+    )
+
+    category = models.ForeignKey(
+        ExpenseCategory,
+        on_delete=models.PROTECT,
+        related_name="expenses"
+    )
+
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2
+    )
+
+    payment_mode = models.CharField(
+        max_length=20,
+        choices=PAYMENT_MODE_CHOICES,
+        default="cash"
+    )
+
+    remark = models.CharField(
+        max_length=250
+    )
+
+    short_notes = models.TextField(
+        blank=True
+    )
+
+    bill_receipt = models.FileField(
+        upload_to="daily_expense_bills/%Y/%m/",
+        null=True,
+        blank=True
+    )
+
+    is_cancelled = models.BooleanField(
+        default=False
+    )
+
+    cancel_reason = models.CharField(
+        max_length=250,
+        blank=True
+    )
+
+    cancelled_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cancelled_daily_expenses"
+    )
+
+    cancelled_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_daily_expenses"
+    )
+
+    updated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="updated_daily_expenses"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return (
+            f"{self.get_branch_display()} - "
+            f"{self.expense_date} - "
+            f"{self.category.name} - "
+            f"₹{self.amount}"
+        )
+
+    class Meta:
+
+        ordering = [
+            "-expense_date",
+            "-created_at",
+        ]
+
+        indexes = [
+            models.Index(
+                fields=[
+                    "branch",
+                    "expense_date",
+                ],
+                name="expense_branch_date_idx",
+            ),
+            models.Index(
+                fields=[
+                    "category",
+                    "expense_date",
+                ],
+                name="expense_category_date_idx",
+            ),
+        ]
+
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(
+                    amount__gt=0
+                ),
+                name="daily_expense_amount_gt_zero",
+            )
+        ]
+
+
+class DailyExpenseAuditLog(models.Model):
+
+    ACTION_CHOICES = [
+        ("created", "Created"),
+        ("updated", "Updated"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    expense = models.ForeignKey(
+        DailyBranchExpense,
+        on_delete=models.CASCADE,
+        related_name="audit_logs"
+    )
+
+    action = models.CharField(
+        max_length=20,
+        choices=ACTION_CHOICES
+    )
+
+    previous_data = models.JSONField(
+        default=dict,
+        blank=True
+    )
+
+    new_data = models.JSONField(
+        default=dict,
+        blank=True
+    )
+
+    performed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    performed_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return (
+            f"{self.expense_id} - "
+            f"{self.action} - "
+            f"{self.performed_at}"
+        )
+
+    class Meta:
+        ordering = [
+            "-performed_at"
         ]

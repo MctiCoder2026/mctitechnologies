@@ -402,5 +402,22 @@ urlpatterns = [
         views.monthly_closing_admin_action,
         name="monthly_closing_admin_action"
     ),
+        path(
+        "daily-expenses/",
+        views.daily_expense_list,
+        name="daily_expense_list"
+    ),
+
+    path(
+        "daily-expenses/<int:expense_id>/edit/",
+        views.daily_expense_edit,
+        name="daily_expense_edit"
+    ),
+
+    path(
+        "daily-expenses/<int:expense_id>/cancel/",
+        views.daily_expense_cancel,
+        name="daily_expense_cancel"
+    ),
 
 ]

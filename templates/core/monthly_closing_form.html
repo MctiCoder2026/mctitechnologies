@@ -427,7 +427,20 @@
 
             <section class="card">
 
-                <h2>Monthly Expenses</h2>
+            <h2>Monthly Expenses</h2>
+            <p class="info">
+                Expense totals are automatically calculated
+                from the Daily Expense Register.
+            </p>
+
+            <a
+                class="btn btn-orange"
+                href="{% url 'daily_expense_list' %}?branch={{ closing.branch }}&year={{ closing.year }}&month={{ closing.month }}"
+            >
+                Open Daily Expense Register
+            </a>
+
+            <br><br>
 
                 {% if form.non_field_errors %}
 
@@ -552,8 +565,19 @@
                 <div class="summary-box">
 
                     <div class="summary-label">
-                        Distributable Profit
+                        Profit After Reserve
                     </div>
+                    <div class="summary-box">
+
+                    <div class="summary-label">
+                        Reserve Fund
+                    </div>
+
+                    <div class="summary-value">
+                        ₹{{ closing.reserve_fund_amount|floatformat:2 }}
+                    </div>
+
+                </div>
 
                     <div class="summary-value profit">
                         ₹{{ closing.distributable_profit|floatformat:2 }}
@@ -564,9 +588,10 @@
             </div>
 
             <p class="info">
-                Partner distribution is calculated from:
-                Collection − Total Expenses.
-                If the result is a loss, distributable profit is zero.
+                Cash Profit = Collection − Total Expenses.
+                Profit After Reserve = Cash Profit − Reserve Fund.
+                Partner shares are calculated only on Profit After Reserve.
+                If there is a loss, distributable profit is zero.
             </p>
 
         </section>
