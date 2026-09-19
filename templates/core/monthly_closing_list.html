@@ -1,0 +1,467 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Monthly Branch Closing | MCTI
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f6f9;
+            color: #111827;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 18px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            font-size: 23px;
+            font-weight: 800;
+        }
+
+        .brand span {
+            color: #f97316;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            border: 1px solid #4b5563;
+            padding: 9px 14px;
+            border-radius: 7px;
+        }
+
+        .container {
+            max-width: 1450px;
+            margin: 25px auto;
+            padding: 0 20px;
+        }
+
+        .title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+        }
+
+        .action-title {
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .branch-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            border: 0;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .btn-orange {
+            background: #f97316;
+            color: white;
+        }
+
+        .btn-dark {
+            background: #111827;
+            color: white;
+        }
+
+        .filter-form {
+            display: flex;
+            align-items: end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-form label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .filter-form input {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            width: 120px;
+        }
+
+        .message {
+            padding: 13px 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background: #fff7ed;
+            border-left: 4px solid #f97316;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1050px;
+        }
+
+        th,
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #111827;
+            color: white;
+            font-size: 13px;
+        }
+
+        td.number {
+            text-align: right;
+        }
+
+        .profit {
+            color: #15803d;
+            font-weight: 800;
+        }
+
+        .loss {
+            color: #dc2626;
+            font-weight: 800;
+        }
+
+        .status {
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .status-draft {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .status-submitted {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-validated {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-closed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 35px;
+            color: #6b7280;
+        }
+
+        @media (max-width: 700px) {
+
+            .container {
+                padding: 0 12px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <header class="header">
+
+        <div class="brand">
+            <span>MCTI</span> Technologies
+        </div>
+
+        <a href="{% url 'branch_dashboard' %}">
+            Back to Dashboard
+        </a>
+
+    </header>
+
+    <main class="container">
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div class="message">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+        <div class="title-row">
+
+            <div>
+
+                <h1>
+                    Monthly Branch Closing
+                </h1>
+
+                <div class="subtitle">
+                    Admission, billing, collection,
+                    expenses and partner profit share
+                </div>
+
+            </div>
+
+            <form
+                method="get"
+                class="filter-form"
+            >
+
+                <div>
+
+                    <label for="year">
+                        Report Year
+                    </label>
+
+                    <input
+                        id="year"
+                        type="number"
+                        name="year"
+                        value="{{ selected_year }}"
+                        min="2020"
+                        max="2100"
+                    >
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="btn btn-dark"
+                >
+                    View
+                </button>
+
+            </form>
+
+        </div>
+
+        <section class="card">
+
+            <div class="action-title">
+                Create/Open Current Month Report
+            </div>
+
+            <div class="branch-actions">
+
+                {% if is_admin %}
+
+                    {% for branch_value, branch_name in branches.items %}
+
+                        <a
+                            class="btn btn-orange"
+                            href="{% url 'monthly_closing_edit' branch_value current_year current_month %}"
+                        >
+                            {{ branch_name }}
+                        </a>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <a
+                        class="btn btn-orange"
+                        href="{% url 'monthly_closing_edit' user_branch current_year current_month %}"
+                    >
+                        Open Current Month
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Branch</th>
+                            <th>Month</th>
+                            <th>Admissions</th>
+                            <th>Billing</th>
+                            <th>Collection</th>
+                            <th>Expenses</th>
+                            <th>Pending</th>
+                            <th>Cash Profit/Loss</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for closing in closings %}
+
+                            <tr>
+
+                                <td>
+                                    {{ closing.get_branch_display }}
+                                </td>
+
+                                <td>
+                                    {{ closing.month|stringformat:"02d" }}/{{ closing.year }}
+                                </td>
+
+                                <td class="number">
+                                    {{ closing.admissions_count }}
+                                </td>
+
+                                <td class="number">
+                                    ₹{{ closing.billing_amount|floatformat:2 }}
+                                </td>
+
+                                <td class="number">
+                                    ₹{{ closing.collection_amount|floatformat:2 }}
+                                </td>
+
+                                <td class="number">
+                                    ₹{{ closing.total_expenses|floatformat:2 }}
+                                </td>
+
+                                <td class="number">
+                                    ₹{{ closing.pending_collection|floatformat:2 }}
+                                </td>
+
+                                <td
+                                    class="number {% if closing.cash_profit >= 0 %}profit{% else %}loss{% endif %}"
+                                >
+                                    ₹{{ closing.cash_profit|floatformat:2 }}
+                                </td>
+
+                                <td>
+
+                                    <span
+                                        class="status status-{{ closing.status }}"
+                                    >
+                                        {{ closing.get_status_display }}
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <a
+                                        class="btn btn-dark"
+                                        href="{% url 'monthly_closing_edit' closing.branch closing.year closing.month %}"
+                                    >
+                                        Open
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="10"
+                                    class="empty"
+                                >
+                                    No monthly report found for
+                                    {{ selected_year }}.
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

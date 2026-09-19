@@ -1,0 +1,749 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {{ branch_name }} Monthly Closing | MCTI
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f6f9;
+            color: #111827;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 18px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            font-size: 23px;
+            font-weight: 800;
+        }
+
+        .brand span {
+            color: #f97316;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            border: 1px solid #4b5563;
+            padding: 9px 14px;
+            border-radius: 7px;
+        }
+
+        .container {
+            max-width: 1250px;
+            margin: 25px auto;
+            padding: 0 18px 40px;
+        }
+
+        .title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin-top: 0;
+        }
+
+        h1 {
+            font-size: 26px;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .status-draft {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .status-submitted {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-validated {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-closed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .message {
+            padding: 13px 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background: #fff7ed;
+            border-left: 4px solid #f97316;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        .summary-box {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 16px;
+            background: #f9fafb;
+        }
+
+        .summary-box.orange {
+            border-left: 5px solid #f97316;
+        }
+
+        .summary-box.green {
+            border-left: 5px solid #16a34a;
+        }
+
+        .summary-box.red {
+            border-left: 5px solid #dc2626;
+        }
+
+        .summary-label {
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+        .profit {
+            color: #15803d;
+        }
+
+        .loss {
+            color: #dc2626;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            border-color: #f97316;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+        }
+
+        .field-error {
+            color: #dc2626;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .locked-form {
+            opacity: 0.75;
+            pointer-events: none;
+        }
+
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .btn {
+            border: 0;
+            padding: 11px 17px;
+            border-radius: 7px;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-dark {
+            background: #111827;
+            color: white;
+        }
+
+        .btn-orange {
+            background: #f97316;
+            color: white;
+        }
+
+        .btn-green {
+            background: #15803d;
+            color: white;
+        }
+
+        .btn-blue {
+            background: #1d4ed8;
+            color: white;
+        }
+
+        .partner-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .partner-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+
+        .warning {
+            padding: 13px;
+            background: #fff7ed;
+            border: 1px solid #fdba74;
+            border-radius: 8px;
+            color: #9a3412;
+        }
+
+        .info {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 950px) {
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .summary-grid,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 0 11px 30px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <header class="header">
+
+        <div class="brand">
+            <span>MCTI</span> Technologies
+        </div>
+
+        <a href="{% url 'monthly_closing_list' %}">
+            Back to Monthly Reports
+        </a>
+
+    </header>
+
+    <main class="container">
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div class="message">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+        <div class="title-row">
+
+            <div>
+
+                <h1>
+                    {{ branch_name }} Monthly Closing
+                </h1>
+
+                <div class="subtitle">
+                    Month:
+                    {{ closing.month|stringformat:"02d" }}/{{ closing.year }}
+                </div>
+
+            </div>
+
+            <span class="status status-{{ closing.status }}">
+                {{ closing.get_status_display }}
+            </span>
+
+        </div>
+
+        <section class="card">
+
+            <h2>CRM Monthly Figures</h2>
+
+            <div class="summary-grid">
+
+                <div class="summary-box orange">
+
+                    <div class="summary-label">
+                        Total Admissions
+                    </div>
+
+                    <div class="summary-value">
+                        {{ closing.admissions_count }}
+                    </div>
+
+                </div>
+
+                <div class="summary-box orange">
+
+                    <div class="summary-label">
+                        Total Billing
+                    </div>
+
+                    <div class="summary-value">
+                        ₹{{ closing.billing_amount|floatformat:2 }}
+                    </div>
+
+                </div>
+
+                <div class="summary-box green">
+
+                    <div class="summary-label">
+                        Total Collection
+                    </div>
+
+                    <div class="summary-value">
+                        ₹{{ closing.collection_amount|floatformat:2 }}
+                    </div>
+
+                </div>
+
+                <div class="summary-box red">
+
+                    <div class="summary-label">
+                        Pending Collection
+                    </div>
+
+                    <div class="summary-value">
+                        ₹{{ closing.pending_collection|floatformat:2 }}
+                    </div>
+
+                </div>
+
+            </div>
+
+            <p class="info">
+                These figures are calculated automatically
+                from CRM records for the selected branch and month.
+            </p>
+
+        </section>
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <section class="card">
+
+            <h2>Monthly Expenses</h2>
+            <p class="info">
+                Expense totals are automatically calculated
+                from the Daily Expense Register.
+            </p>
+
+            <a
+                class="btn btn-orange"
+                href="{% url 'daily_expense_list' %}?branch={{ closing.branch }}&year={{ closing.year }}&month={{ closing.month }}"
+            >
+                Open Daily Expense Register
+            </a>
+
+            <br><br>
+
+                {% if form.non_field_errors %}
+
+                    <div class="warning">
+                        {{ form.non_field_errors }}
+                    </div>
+
+                {% endif %}
+
+                <div
+                    class="form-grid {% if closing.status != 'draft' %}locked-form{% endif %}"
+                >
+
+                    {% for field in form %}
+
+                        <div class="form-group">
+
+                            <label for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+
+                            {{ field }}
+
+                            {% for error in field.errors %}
+
+                                <div class="field-error">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+                {% if closing.status == "draft" %}
+
+                    <div class="button-row">
+
+                        <button
+                            type="submit"
+                            name="action"
+                            value="save"
+                            class="btn btn-dark"
+                        >
+                            Save Draft
+                        </button>
+
+                        <button
+                            type="submit"
+                            name="action"
+                            value="submit"
+                            class="btn btn-orange"
+                            onclick="return confirm('Submit this monthly report to Admin? After submission, the branch cannot edit it.');"
+                        >
+                            Submit to Admin
+                        </button>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="warning">
+                        This report has been submitted.
+                        Expense fields are locked.
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+        </form>
+
+        <section class="card">
+
+            <h2>Profit & Loss Summary</h2>
+
+            <div class="summary-grid">
+
+                <div class="summary-box">
+
+                    <div class="summary-label">
+                        Total Expenses
+                    </div>
+
+                    <div class="summary-value">
+                        ₹{{ closing.total_expenses|floatformat:2 }}
+                    </div>
+
+                </div>
+
+                <div class="summary-box">
+
+                    <div class="summary-label">
+                        Billing Profit/Loss
+                    </div>
+
+                    <div
+                        class="summary-value {% if closing.business_profit >= 0 %}profit{% else %}loss{% endif %}"
+                    >
+                        ₹{{ closing.business_profit|floatformat:2 }}
+                    </div>
+
+                </div>
+
+                <div class="summary-box">
+
+                    <div class="summary-label">
+                        Cash Profit/Loss
+                    </div>
+
+                    <div
+                        class="summary-value {% if closing.cash_profit >= 0 %}profit{% else %}loss{% endif %}"
+                    >
+                        ₹{{ closing.cash_profit|floatformat:2 }}
+                    </div>
+
+                </div>
+
+                <div class="summary-box">
+
+                    <div class="summary-label">
+                        Profit After Reserve
+                    </div>
+                    <div class="summary-box">
+
+                    <div class="summary-label">
+                        Reserve Fund
+                    </div>
+
+                    <div class="summary-value">
+                        ₹{{ closing.reserve_fund_amount|floatformat:2 }}
+                    </div>
+
+                </div>
+
+                    <div class="summary-value profit">
+                        ₹{{ closing.distributable_profit|floatformat:2 }}
+                    </div>
+
+                </div>
+
+            </div>
+
+            <p class="info">
+                Cash Profit = Collection − Total Expenses.
+                Profit After Reserve = Cash Profit − Reserve Fund.
+                Partner shares are calculated only on Profit After Reserve.
+                If there is a loss, distributable profit is zero.
+            </p>
+
+        </section>
+
+        <section class="card">
+
+            <h2>Branch Partners</h2>
+
+            {% if partners %}
+
+                <div class="partner-list">
+
+                    {% for partner in partners %}
+
+                        <div class="partner-row">
+
+                            <strong>
+                                {{ partner.partner_name }}
+                            </strong>
+
+                            <span>
+                                {{ partner.share_percentage|floatformat:2 }}%
+                            </span>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="warning">
+                    No active partners are configured
+                    for this branch. Admin must add partner
+                    names and percentages before submission.
+                </div>
+
+            {% endif %}
+
+        </section>
+
+        {% if closing.partner_shares.exists %}
+
+            <section class="card">
+
+                <h2>Calculated Partner Shares</h2>
+
+                <div class="partner-list">
+
+                    {% for share in closing.partner_shares.all %}
+
+                        <div class="partner-row">
+
+                            <div>
+
+                                <strong>
+                                    {{ share.partner_name }}
+                                </strong>
+
+                                <div class="info">
+                                    {{ share.share_percentage|floatformat:2 }}%
+                                    ·
+                                    {% if share.is_paid %}
+                                        Paid
+                                    {% else %}
+                                        Payment Pending
+                                    {% endif %}
+                                </div>
+
+                            </div>
+
+                            <strong>
+                                ₹{{ share.share_amount|floatformat:2 }}
+                            </strong>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+        {% endif %}
+
+        {% if is_admin %}
+
+            <section class="card">
+
+                <h2>Admin Validation</h2>
+
+                {% if closing.status == "submitted" %}
+
+                    <form
+                        method="post"
+                        action="{% url 'monthly_closing_admin_action' closing.id 'validate' %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="btn btn-blue"
+                            onclick="return confirm('Validate figures and calculate partner shares?');"
+                        >
+                            Validate Report
+                        </button>
+
+                    </form>
+
+                {% elif closing.status == "validated" %}
+
+                    <form
+                        method="post"
+                        action="{% url 'monthly_closing_admin_action' closing.id 'close' %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="btn btn-green"
+                            onclick="return confirm('Close and permanently lock this month?');"
+                        >
+                            Close Month
+                        </button>
+
+                    </form>
+
+                {% elif closing.status == "closed" %}
+
+                    <div class="warning">
+                        Month closed and locked on
+                        {{ closing.closed_at|date:"d M Y, h:i A" }}.
+                    </div>
+
+                {% else %}
+
+                    <div class="info">
+                        Branch must submit this report
+                        before Admin validation.
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+        {% endif %}
+
+    </main>
+
+</body>
+
+</html>

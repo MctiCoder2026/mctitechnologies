@@ -243,7 +243,6 @@
 </style>
 
 <div class="career-start-page">
-
     <div class="career-shell">
 
         <div class="career-intro">
@@ -285,22 +284,34 @@
                 </div>
 
             </div>
-
         </div>
 
         <div class="career-form-card">
 
             <h2>
-                Start Free Career Kit
+                {% if next_tool == "aptitude" %}
+                    Start Aptitude Test
+                {% else %}
+                    Start Free Career Kit
+                {% endif %}
             </h2>
 
             <div class="sub">
-                Enter your details to create your MCTI Career Profile.
+                {% if next_tool == "aptitude" %}
+                    Enter your details and continue directly to your Aptitude Test.
+                {% else %}
+                    Enter your details to create your MCTI Career Profile.
+                {% endif %}
             </div>
 
             <form method="post">
-
                 {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="next"
+                    value="{{ next_tool }}"
+                >
 
                 {{ form.as_p }}
 
@@ -308,9 +319,12 @@
                     type="submit"
                     class="career-btn career-btn-primary"
                 >
-                    Continue to Career Kit
+                    {% if next_tool == "aptitude" %}
+                        Continue to Aptitude Test
+                    {% else %}
+                        Continue to Resume Builder
+                    {% endif %}
                 </button>
-
             </form>
 
             <hr class="career-divider">
@@ -334,7 +348,6 @@
         </div>
 
     </div>
-
 </div>
 
 {% endblock %}

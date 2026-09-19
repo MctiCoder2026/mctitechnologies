@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from .models import BusinessLead
+from django.utils import timezone
 
 from .models import (
     Enquiry,
@@ -9,6 +10,9 @@ from .models import (
     JobPost,
     Course,
     Enrollment,
+    MonthlyBranchClosing,
+    DailyBranchExpense,
+    ExpenseCategory,
 )
 
 
@@ -1177,3 +1181,351 @@ class EnrollmentForm(forms.ModelForm):
             enrollment.save()
 
         return enrollment
+
+# ============================================================
+# MONTHLY BRANCH CLOSING FORM
+# ============================================================
+
+class MonthlyBranchClosingForm(
+    forms.ModelForm
+):
+
+    EXPENSE_FIELDS = [
+        "rent_expense",
+        "electricity_expense",
+        "staff_salary_expense",
+        "government_fee_expense",
+        "computer_maintenance_expense",
+        "internet_expense",
+        "mobile_recharge_expense",
+        "advertisement_expense",
+        "stationery_expense",
+        "housekeeping_expense",
+        "travelling_expense",
+        "miscellaneous_expense",
+        "other_expense",
+    ]
+
+    reserve_fund_amount = forms.DecimalField(
+        label="Reserve Fund",
+        required=False,
+        min_value=0,
+        initial=0,
+        max_digits=12,
+        decimal_places=2,
+        widget=forms.NumberInput(
+            attrs={
+                "class": "form-control",
+                "min": "0",
+                "step": "0.01",
+                "placeholder": "0.00",
+            }
+        )
+    )
+
+    class Meta:
+
+        model = MonthlyBranchClosing
+
+        fields = [
+            "rent_expense",
+            "electricity_expense",
+            "staff_salary_expense",
+            "government_fee_expense",
+            "computer_maintenance_expense",
+            "internet_expense",
+            "mobile_recharge_expense",
+            "advertisement_expense",
+            "stationery_expense",
+            "housekeeping_expense",
+            "travelling_expense",
+            "miscellaneous_expense",
+            "other_expense",
+            "other_expense_description",
+            "reserve_fund_amount",
+            "remarks",
+        ]
+
+        labels = {
+            "rent_expense": (
+                "Office Rent"
+            ),
+            "electricity_expense": (
+                "Electricity / Light Bill"
+            ),
+            "staff_salary_expense": (
+                "Staff Salary"
+            ),
+            "government_fee_expense": (
+                "Government Fee Payment"
+            ),
+            "computer_maintenance_expense": (
+                "Computer Maintenance"
+            ),
+            "internet_expense": (
+                "Internet Bill"
+            ),
+            "mobile_recharge_expense": (
+                "Mobile Recharge"
+            ),
+            "advertisement_expense": (
+                "Advertisement / Marketing"
+            ),
+            "stationery_expense": (
+                "Stationery"
+            ),
+            "housekeeping_expense": (
+                "Cleaning / Housekeeping"
+            ),
+            "travelling_expense": (
+                "Travelling / Conveyance"
+            ),
+            "miscellaneous_expense": (
+                "Miscellaneous"
+            ),
+            "other_expense": (
+                "Other Expense"
+            ),
+            "other_expense_description": (
+                "Other Expense Details"
+            ),
+            "reserve_fund_amount": (
+                "Reserve Fund"
+            ),
+            "remarks": (
+                "Monthly Remarks"
+            ),
+        }
+
+        widgets = {
+            "other_expense_description": (
+                forms.TextInput(
+                    attrs={
+                        "class": "form-control",
+                    }
+                )
+            ),
+            "remarks": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": (
+                        "Any explanation for Admin"
+                    ),
+                }
+            ),
+        }
+
+    def __init__(
+        self,
+        *args,
+        **kwargs
+    ):
+
+        super().__init__(
+            *args,
+            **kwargs
+        )
+
+        for field_name in self.EXPENSE_FIELDS:
+
+            self.fields[
+                field_name
+            ].widget = forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                }
+            )
+
+            # Expense figures come automatically
+            # from the Daily Expense Register.
+            self.fields[
+                field_name
+            ].disabled = True
+
+        self.fields[
+            "other_expense_description"
+        ].disabled = True
+
+    def clean(self):
+
+        cleaned_data = super().clean()
+
+        reserve_fund = (
+            cleaned_data.get(
+                "reserve_fund_amount"
+            )
+            or 0
+        )
+
+        available_cash_profit = max(
+            self.instance.cash_profit,
+            0
+        )
+
+        if (
+            reserve_fund
+            > available_cash_profit
+        ):
+
+            self.add_error(
+                "reserve_fund_amount",
+                (
+                    "Reserve Fund cannot exceed "
+                    "the available Cash Profit."
+                )
+            )
+
+        return cleaned_data
+# ============================================================
+# DAILY BRANCH EXPENSE FORM
+# ============================================================
+
+class DailyBranchExpenseForm(
+    forms.ModelForm
+):
+
+    class Meta:
+
+        model = DailyBranchExpense
+
+        fields = [
+            "expense_date",
+            "category",
+            "amount",
+            "payment_mode",
+            "remark",
+            "short_notes",
+            "bill_receipt",
+        ]
+
+        labels = {
+            "expense_date": "Expense Date",
+            "category": "Expense Category",
+            "amount": "Amount",
+            "payment_mode": "Payment Mode",
+            "remark": "Remark",
+            "short_notes": "Short Notes",
+            "bill_receipt": "Bill / Receipt (Optional)",
+        }
+
+        widgets = {
+            "expense_date": forms.DateInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "date",
+                }
+            ),
+            "category": forms.Select(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+            "amount": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "0.01",
+                    "step": "0.01",
+                    "placeholder": "0.00",
+                }
+            ),
+            "payment_mode": forms.Select(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+            "remark": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": (
+                        "Example: September light bill"
+                    ),
+                }
+            ),
+            "short_notes": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": (
+                        "Additional details, if any"
+                    ),
+                }
+            ),
+            "bill_receipt": forms.ClearableFileInput(
+                attrs={
+                    "class": "form-control",
+                    "accept": (
+                        ".pdf,.jpg,.jpeg,.png"
+                    ),
+                }
+            ),
+        }
+
+    def __init__(
+        self,
+        *args,
+        **kwargs
+    ):
+
+        super().__init__(
+            *args,
+            **kwargs
+        )
+
+        self.fields[
+            "category"
+        ].queryset = (
+            ExpenseCategory.objects
+            .filter(is_active=True)
+            .order_by(
+                "display_order",
+                "name"
+            )
+        )
+
+    def clean_expense_date(self):
+
+        expense_date = self.cleaned_data[
+            "expense_date"
+        ]
+
+        if expense_date > timezone.localdate():
+
+            raise forms.ValidationError(
+                "Future expense date is not allowed."
+            )
+
+        return expense_date
+
+    def clean_amount(self):
+
+        amount = self.cleaned_data[
+            "amount"
+        ]
+
+        if amount <= 0:
+
+            raise forms.ValidationError(
+                "Amount must be greater than zero."
+            )
+
+        return amount
+
+
+class DailyExpenseCancelForm(
+    forms.Form
+):
+
+    cancel_reason = forms.CharField(
+        label="Cancellation Reason",
+        max_length=250,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": (
+                    "Why is this entry being cancelled?"
+                ),
+            }
+        )
+    )

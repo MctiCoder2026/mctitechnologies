@@ -29,13 +29,12 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
+    "192.168.0.125",
     "194.238.22.82",
     "mctitechnologies.com",
     "www.mctitechnologies.com",
 ]
 
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -44,17 +43,24 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'corsheaders',
+
     'core',
-    "lms",
+    'lms',
     'career_tools',
-    "rest_framework",
-    "mobile_api",
-    "rest_framework.authtoken",
+    'rest_framework',
+    'rest_framework.authtoken',
+    'mobile_api',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+
+    'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -199,3 +205,12 @@ LOGOUT_REDIRECT_URL = "/admin/login/"
 
 
 LOGIN_URL = "/student/login/"
+
+# =========================================================
+# CORS - MCTI ONE MOBILE APP DEVELOPMENT
+# =========================================================
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8081",
+    "http://127.0.0.1:8081",
+]
