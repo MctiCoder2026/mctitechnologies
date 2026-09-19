@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+from decimal import Decimal
 
 
 # ============================================================
@@ -2060,3 +2060,382 @@ source = models.CharField(
     choices=SOURCE_CHOICES,
     default="auto"
 )
+# ============================================================
+# MONTHLY BRANCH CLOSING
+# ============================================================
+
+BRANCH_ACCOUNT_CHOICES = [
+    ("kharghar", "Kharghar"),
+    ("panvel", "Panvel"),
+    ("koperkhairane", "Koperkhairane"),
+    ("kamothe", "Kamothe"),
+    ("ghansoli", "Ghansoli"),
+    ("nerul", "Nerul"),
+    ("head_office", "Head Office"),
+]
+
+
+class BranchPartner(models.Model):
+
+    branch = models.CharField(
+        max_length=50,
+        choices=BRANCH_ACCOUNT_CHOICES
+    )
+
+    partner_name = models.CharField(
+        max_length=150
+    )
+
+    share_percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2
+    )
+
+    is_active = models.BooleanField(
+        default=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return (
+            f"{self.get_branch_display()} - "
+            f"{self.partner_name} "
+            f"({self.share_percentage}%)"
+        )
+
+    class Meta:
+        ordering = [
+            "branch",
+            "partner_name",
+        ]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "branch",
+                    "partner_name",
+                ],
+                name="unique_branch_partner",
+            )
+        ]
+
+
+class MonthlyBranchClosing(models.Model):
+
+    STATUS_CHOICES = [
+        ("draft", "Draft"),
+        ("submitted", "Submitted"),
+        ("validated", "Validated"),
+        ("closed", "Closed"),
+    ]
+
+    branch = models.CharField(
+        max_length=50,
+        choices=BRANCH_ACCOUNT_CHOICES
+    )
+
+    year = models.PositiveIntegerField()
+
+    month = models.PositiveSmallIntegerField()
+
+    # CRM figures saved as a monthly snapshot
+    admissions_count = models.PositiveIntegerField(
+        default=0
+    )
+
+    billing_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    collection_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    # Monthly expenses entered by branch
+    rent_expense = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    electricity_expense = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    staff_salary_expense = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    government_fee_expense = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    computer_maintenance_expense = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    internet_expense = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    mobile_recharge_expense = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    advertisement_expense = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    stationery_expense = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    housekeeping_expense = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    travelling_expense = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    miscellaneous_expense = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    other_expense = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    other_expense_description = models.CharField(
+        max_length=250,
+        blank=True
+    )
+
+    remarks = models.TextField(
+        blank=True
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="draft"
+    )
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_monthly_closings"
+    )
+
+    submitted_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    validated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="validated_monthly_closings"
+    )
+
+    validated_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    closed_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    @property
+    def total_expenses(self):
+
+        expense_fields = [
+            self.rent_expense,
+            self.electricity_expense,
+            self.staff_salary_expense,
+            self.government_fee_expense,
+            self.computer_maintenance_expense,
+            self.internet_expense,
+            self.mobile_recharge_expense,
+            self.advertisement_expense,
+            self.stationery_expense,
+            self.housekeeping_expense,
+            self.travelling_expense,
+            self.miscellaneous_expense,
+            self.other_expense,
+        ]
+
+        return sum(
+            expense_fields,
+            Decimal("0.00")
+        )
+
+    @property
+    def pending_collection(self):
+        return (
+            self.billing_amount
+            - self.collection_amount
+        )
+
+    @property
+    def business_profit(self):
+        return (
+            self.billing_amount
+            - self.total_expenses
+        )
+
+    @property
+    def cash_profit(self):
+        return (
+            self.collection_amount
+            - self.total_expenses
+        )
+
+    @property
+    def distributable_profit(self):
+        return max(
+            self.cash_profit,
+            Decimal("0.00")
+        )
+
+    @property
+    def cash_loss(self):
+        return abs(
+            min(
+                self.cash_profit,
+                Decimal("0.00")
+            )
+        )
+
+    def __str__(self):
+        return (
+            f"{self.get_branch_display()} - "
+            f"{self.month:02d}/{self.year}"
+        )
+
+    class Meta:
+        ordering = [
+            "-year",
+            "-month",
+            "branch",
+        ]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "branch",
+                    "year",
+                    "month",
+                ],
+                name="unique_branch_month_closing",
+            )
+        ]
+
+
+class MonthlyPartnerShare(models.Model):
+
+    closing = models.ForeignKey(
+        MonthlyBranchClosing,
+        on_delete=models.CASCADE,
+        related_name="partner_shares"
+    )
+
+    partner_name = models.CharField(
+        max_length=150
+    )
+
+    share_percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2
+    )
+
+    share_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    is_paid = models.BooleanField(
+        default=False
+    )
+
+    paid_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    remarks = models.CharField(
+        max_length=250,
+        blank=True
+    )
+
+    def __str__(self):
+        return (
+            f"{self.closing} - "
+            f"{self.partner_name}: "
+            f"₹{self.share_amount}"
+        )
+
+    class Meta:
+        ordering = [
+            "partner_name"
+        ]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "closing",
+                    "partner_name",
+                ],
+                name="unique_monthly_partner_share",
+            )
+        ]

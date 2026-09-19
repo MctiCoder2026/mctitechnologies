@@ -376,4 +376,31 @@ urlpatterns = [
     # ============================================================
     path("career/", include("career_tools.urls")),
 
+        path(
+        "monthly-closing/",
+        views.monthly_closing_list,
+        name="monthly_closing_list"
+    ),
+
+    path(
+        (
+            "monthly-closing/"
+            "<str:branch>/"
+            "<int:year>/"
+            "<int:month>/"
+        ),
+        views.monthly_closing_edit,
+        name="monthly_closing_edit"
+    ),
+
+    path(
+        (
+            "monthly-closing/action/"
+            "<int:closing_id>/"
+            "<str:action>/"
+        ),
+        views.monthly_closing_admin_action,
+        name="monthly_closing_admin_action"
+    ),
+
 ]

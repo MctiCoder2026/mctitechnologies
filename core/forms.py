@@ -9,6 +9,7 @@ from .models import (
     JobPost,
     Course,
     Enrollment,
+    MonthlyBranchClosing,
 )
 
 
@@ -1177,3 +1178,158 @@ class EnrollmentForm(forms.ModelForm):
             enrollment.save()
 
         return enrollment
+    
+    # ============================================================
+# MONTHLY BRANCH CLOSING FORM
+# ============================================================
+
+class MonthlyBranchClosingForm(
+    forms.ModelForm
+):
+
+    EXPENSE_FIELDS = [
+        "rent_expense",
+        "electricity_expense",
+        "staff_salary_expense",
+        "government_fee_expense",
+        "computer_maintenance_expense",
+        "internet_expense",
+        "mobile_recharge_expense",
+        "advertisement_expense",
+        "stationery_expense",
+        "housekeeping_expense",
+        "travelling_expense",
+        "miscellaneous_expense",
+        "other_expense",
+    ]
+
+    class Meta:
+
+        model = MonthlyBranchClosing
+
+        fields = [
+            "rent_expense",
+            "electricity_expense",
+            "staff_salary_expense",
+            "government_fee_expense",
+            "computer_maintenance_expense",
+            "internet_expense",
+            "mobile_recharge_expense",
+            "advertisement_expense",
+            "stationery_expense",
+            "housekeeping_expense",
+            "travelling_expense",
+            "miscellaneous_expense",
+            "other_expense",
+            "other_expense_description",
+            "remarks",
+        ]
+
+        labels = {
+            "rent_expense": "Office Rent",
+            "electricity_expense": "Electricity / Light Bill",
+            "staff_salary_expense": "Staff Salary",
+            "government_fee_expense": "Government Fee Payment",
+            "computer_maintenance_expense": "Computer Maintenance",
+            "internet_expense": "Internet Bill",
+            "mobile_recharge_expense": "Mobile Recharge",
+            "advertisement_expense": "Advertisement / Marketing",
+            "stationery_expense": "Stationery",
+            "housekeeping_expense": "Cleaning / Housekeeping",
+            "travelling_expense": "Travelling / Conveyance",
+            "miscellaneous_expense": "Miscellaneous",
+            "other_expense": "Other Expense",
+            "other_expense_description": "Other Expense Details",
+            "remarks": "Monthly Remarks",
+        }
+
+        widgets = {
+            "other_expense_description": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": (
+                        "Describe the other expense"
+                    ),
+                }
+            ),
+            "remarks": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": (
+                        "Any explanation for Admin"
+                    ),
+                }
+            ),
+        }
+
+    def __init__(
+        self,
+        *args,
+        **kwargs
+    ):
+
+        super().__init__(
+            *args,
+            **kwargs
+        )
+
+        for field_name in self.EXPENSE_FIELDS:
+
+            self.fields[
+                field_name
+            ].widget = forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "0",
+                    "step": "0.01",
+                    "placeholder": "0.00",
+                }
+            )
+
+    def clean(self):
+
+        cleaned_data = super().clean()
+
+        for field_name in self.EXPENSE_FIELDS:
+
+            amount = (
+                cleaned_data.get(field_name)
+                or 0
+            )
+
+            if amount < 0:
+
+                self.add_error(
+                    field_name,
+                    "Expense cannot be negative."
+                )
+
+        other_expense = (
+            cleaned_data.get(
+                "other_expense"
+            )
+            or 0
+        )
+
+        description = (
+            cleaned_data.get(
+                "other_expense_description"
+            )
+            or ""
+        ).strip()
+
+        if (
+            other_expense > 0
+            and not description
+        ):
+
+            self.add_error(
+                "other_expense_description",
+                (
+                    "Please describe the "
+                    "other expense."
+                )
+            )
+
+        return cleaned_data

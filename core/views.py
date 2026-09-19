@@ -1,3 +1,9 @@
+import calendar
+
+from decimal import Decimal
+from django.db import transaction
+
+
 from math import radians, sin, cos, sqrt, atan2
 
 from datetime import timedelta
@@ -35,6 +41,7 @@ from .forms import (
     BusinessLeadForm,
     BusinessLeadAssignmentForm,
     BusinessLeadUpdateForm,
+    MonthlyBranchClosingForm,
 )
 
 from .models import (
@@ -48,6 +55,9 @@ from .models import (
     Attendance,
     BusinessLead,
     BusinessLeadActivity,
+    BranchPartner,
+    MonthlyBranchClosing,
+    MonthlyPartnerShare,
 )
 
 def calculate_distance_meters(lat1, lon1, lat2, lon2):
@@ -6133,3 +6143,604 @@ def add_student_enrollment(
         },
     }
 )
+
+# ============================================================
+# MONTHLY BRANCH CLOSING
+# ============================================================
+
+CLOSING_BRANCHES = {
+    "kharghar": "Kharghar",
+    "panvel": "Panvel",
+    "koperkhairane": "Koperkhairane",
+    "kamothe": "Kamothe",
+    "ghansoli": "Ghansoli",
+    "nerul": "Nerul",
+    "head_office": "Head Office",
+}
+
+
+def _can_manage_branch_closing(
+    user,
+    branch
+):
+
+    if is_admin_user(user):
+        return True
+
+    user_branch = get_user_branch(user)
+
+    if not user_branch:
+        return False
+
+    if (
+        user_branch.strip().lower()
+        != branch.strip().lower()
+    ):
+        return False
+
+    try:
+        profile = user.staff_profile
+    except StaffProfile.DoesNotExist:
+        return False
+
+    return profile.is_active
+
+
+def _monthly_crm_figures(
+    branch,
+    year,
+    month
+):
+
+    start_date = datetime(
+        year,
+        month,
+        1
+    ).date()
+
+    last_day = calendar.monthrange(
+        year,
+        month
+    )[1]
+
+    end_date = datetime(
+        year,
+        month,
+        last_day
+    ).date()
+
+    admissions_count = (
+        Admission.objects.filter(
+            branch__iexact=branch,
+            admission_date__range=[
+                start_date,
+                end_date,
+            ]
+        ).count()
+    )
+
+    billing_amount = (
+        Enrollment.objects.filter(
+            branch__iexact=branch,
+            enrollment_date__range=[
+                start_date,
+                end_date,
+            ]
+        ).aggregate(
+            total=Sum("final_fee")
+        )["total"]
+        or Decimal("0.00")
+    )
+
+    payments = FeePayment.objects.filter(
+        payment_date__range=[
+            start_date,
+            end_date,
+        ]
+    ).filter(
+        Q(
+            enrollment__branch__iexact=branch
+        )
+        |
+        Q(
+            enrollment__isnull=True,
+            student__branch__iexact=branch
+        )
+    )
+
+    collection_amount = (
+        payments.aggregate(
+            total=Sum("amount")
+        )["total"]
+        or Decimal("0.00")
+    )
+
+    return {
+        "admissions_count": (
+            admissions_count
+        ),
+        "billing_amount": (
+            billing_amount
+        ),
+        "collection_amount": (
+            collection_amount
+        ),
+    }
+
+
+@login_required
+def monthly_closing_list(request):
+
+    admin_access = is_admin_user(
+        request.user
+    )
+
+    user_branch = get_user_branch(
+        request.user
+    )
+
+    if not admin_access and not user_branch:
+
+        auth_logout(request)
+
+        return redirect(
+            "staff_login"
+        )
+
+    closings = (
+        MonthlyBranchClosing.objects
+        .select_related(
+            "created_by",
+            "validated_by",
+        )
+        .prefetch_related(
+            "partner_shares"
+        )
+    )
+
+    if not admin_access:
+
+        closings = closings.filter(
+            branch__iexact=user_branch
+        )
+
+    selected_year = request.GET.get(
+        "year",
+        str(timezone.localdate().year)
+    )
+
+    try:
+        selected_year = int(
+            selected_year
+        )
+    except ValueError:
+        selected_year = (
+            timezone.localdate().year
+        )
+
+    closings = closings.filter(
+        year=selected_year
+    )
+
+    return render(
+        request,
+        "core/monthly_closing_list.html",
+        {
+            "closings": closings,
+            "selected_year": selected_year,
+            "is_admin": admin_access,
+            "user_branch": user_branch,
+            "branches": CLOSING_BRANCHES,
+            "current_year": timezone.localdate().year,
+            "current_month": timezone.localdate().month,
+        }
+    )
+
+
+@login_required
+def monthly_closing_edit(
+    request,
+    branch,
+    year,
+    month
+):
+
+    branch = branch.strip().lower()
+
+    if branch not in CLOSING_BRANCHES:
+
+        messages.error(
+            request,
+            "Invalid branch."
+        )
+
+        return redirect(
+            "monthly_closing_list"
+        )
+
+    if month < 1 or month > 12:
+
+        messages.error(
+            request,
+            "Invalid month."
+        )
+
+        return redirect(
+            "monthly_closing_list"
+        )
+
+    if not _can_manage_branch_closing(
+        request.user,
+        branch
+    ):
+
+        messages.error(
+            request,
+            "You cannot access this branch closing."
+        )
+
+        return redirect(
+            "branch_dashboard"
+        )
+
+    closing, created = (
+        MonthlyBranchClosing.objects
+        .get_or_create(
+            branch=branch,
+            year=year,
+            month=month,
+            defaults={
+                "created_by": request.user,
+            }
+        )
+    )
+
+    if closing.status == "draft":
+
+        figures = _monthly_crm_figures(
+            branch,
+            year,
+            month
+        )
+
+        closing.admissions_count = (
+            figures["admissions_count"]
+        )
+
+        closing.billing_amount = (
+            figures["billing_amount"]
+        )
+
+        closing.collection_amount = (
+            figures["collection_amount"]
+        )
+
+        closing.save(
+            update_fields=[
+                "admissions_count",
+                "billing_amount",
+                "collection_amount",
+                "updated_at",
+            ]
+        )
+
+    if request.method == "POST":
+
+        if closing.status != "draft":
+
+            messages.error(
+                request,
+                (
+                    "This report has already been "
+                    "submitted and cannot be edited."
+                )
+            )
+
+            return redirect(
+                "monthly_closing_edit",
+                branch=branch,
+                year=year,
+                month=month,
+            )
+
+        form = MonthlyBranchClosingForm(
+            request.POST,
+            instance=closing
+        )
+
+        if form.is_valid():
+
+            closing = form.save(
+                commit=False
+            )
+
+            figures = _monthly_crm_figures(
+                branch,
+                year,
+                month
+            )
+
+            closing.admissions_count = (
+                figures["admissions_count"]
+            )
+
+            closing.billing_amount = (
+                figures["billing_amount"]
+            )
+
+            closing.collection_amount = (
+                figures["collection_amount"]
+            )
+
+            action = request.POST.get(
+                "action",
+                "save"
+            )
+
+            if action == "submit":
+
+                partners = (
+                    BranchPartner.objects
+                    .filter(
+                        branch=branch,
+                        is_active=True
+                    )
+                )
+
+                partner_total = (
+                    partners.aggregate(
+                        total=Sum(
+                            "share_percentage"
+                        )
+                    )["total"]
+                    or Decimal("0.00")
+                )
+
+                if not partners.exists():
+
+                    messages.error(
+                        request,
+                        (
+                            "Branch partners are not "
+                            "configured. Contact Admin."
+                        )
+                    )
+
+                elif partner_total != Decimal(
+                    "100.00"
+                ):
+
+                    messages.error(
+                        request,
+                        (
+                            "Active partner shares must "
+                            "total exactly 100%."
+                        )
+                    )
+
+                else:
+
+                    closing.status = (
+                        "submitted"
+                    )
+
+                    closing.submitted_at = (
+                        timezone.now()
+                    )
+
+                    closing.save()
+
+                    messages.success(
+                        request,
+                        (
+                            "Monthly report submitted "
+                            "to Admin successfully."
+                        )
+                    )
+
+                    return redirect(
+                        "monthly_closing_edit",
+                        branch=branch,
+                        year=year,
+                        month=month,
+                    )
+
+            closing.save()
+
+            if action != "submit":
+
+                messages.success(
+                    request,
+                    "Draft saved successfully."
+                )
+
+                return redirect(
+                    "monthly_closing_edit",
+                    branch=branch,
+                    year=year,
+                    month=month,
+                )
+
+    else:
+
+        form = MonthlyBranchClosingForm(
+            instance=closing
+        )
+
+    partners = BranchPartner.objects.filter(
+        branch=branch,
+        is_active=True
+    )
+
+    return render(
+        request,
+        "core/monthly_closing_form.html",
+        {
+            "form": form,
+            "closing": closing,
+            "partners": partners,
+            "branch_name": (
+                CLOSING_BRANCHES[branch]
+            ),
+            "is_admin": is_admin_user(
+                request.user
+            ),
+        }
+    )
+
+
+@login_required
+def monthly_closing_admin_action(
+    request,
+    closing_id,
+    action
+):
+
+    if not is_admin_user(request.user):
+
+        messages.error(
+            request,
+            "Admin access required."
+        )
+
+        return redirect(
+            "branch_dashboard"
+        )
+
+    if request.method != "POST":
+
+        return redirect(
+            "monthly_closing_list"
+        )
+
+    closing = get_object_or_404(
+        MonthlyBranchClosing,
+        pk=closing_id
+    )
+
+    if action == "validate":
+
+        if closing.status != "submitted":
+
+            messages.error(
+                request,
+                "Only submitted reports can be validated."
+            )
+
+        else:
+
+            partners = BranchPartner.objects.filter(
+                branch=closing.branch,
+                is_active=True
+            )
+
+            total_percentage = (
+                partners.aggregate(
+                    total=Sum(
+                        "share_percentage"
+                    )
+                )["total"]
+                or Decimal("0.00")
+            )
+
+            if (
+                not partners.exists()
+                or total_percentage
+                != Decimal("100.00")
+            ):
+
+                messages.error(
+                    request,
+                    (
+                        "Active partner shares must "
+                        "total exactly 100%."
+                    )
+                )
+
+            else:
+
+                with transaction.atomic():
+
+                    closing.partner_shares.all().delete()
+
+                    for partner in partners:
+
+                        share_amount = (
+                            closing.distributable_profit
+                            * partner.share_percentage
+                            / Decimal("100.00")
+                        ).quantize(
+                            Decimal("0.01")
+                        )
+
+                        MonthlyPartnerShare.objects.create(
+                            closing=closing,
+                            partner_name=(
+                                partner.partner_name
+                            ),
+                            share_percentage=(
+                                partner.share_percentage
+                            ),
+                            share_amount=share_amount,
+                        )
+
+                    closing.status = "validated"
+
+                    closing.validated_by = (
+                        request.user
+                    )
+
+                    closing.validated_at = (
+                        timezone.now()
+                    )
+
+                    closing.save()
+
+                messages.success(
+                    request,
+                    (
+                        "Report validated and partner "
+                        "shares calculated."
+                    )
+                )
+
+    elif action == "close":
+
+        if closing.status != "validated":
+
+            messages.error(
+                request,
+                (
+                    "Validate the report before "
+                    "closing the month."
+                )
+            )
+
+        else:
+
+            closing.status = "closed"
+
+            closing.closed_at = timezone.now()
+
+            closing.save(
+                update_fields=[
+                    "status",
+                    "closed_at",
+                    "updated_at",
+                ]
+            )
+
+            messages.success(
+                request,
+                (
+                    "Month closed successfully. "
+                    "The report is now locked."
+                )
+            )
+
+    return redirect(
+        "monthly_closing_edit",
+        branch=closing.branch,
+        year=closing.year,
+        month=closing.month,
+    )
