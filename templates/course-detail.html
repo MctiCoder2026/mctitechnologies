@@ -1,9 +1,14 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load course_filters %}
 
 {% block title %}
 {{ course.title }} | MCTI Academy
 {% endblock %}
+
+{% block meta_description %}{{ course.short_description|striptags|truncatechars:160 }}{% endblock %}
+
+{% block canonical_url %}https://mctitechnologies.com{% url "course_detail" slug=course.slug %}{% endblock %}
+
 
 {% block content %}
 
@@ -38,7 +43,7 @@
         </div>
 
         <a class="premium-primary-btn" href="https://wa.me/918655556219?text=Hello%20MCTI%20Technologies%2C%20I%20am%20interested%20in%20{{ course.title|urlencode }}%20course.%20Please%20share%20fees%2C%20batch%20timings%20and%20admission%20details." target="_blank" rel="noopener">
-            Enquire Now →
+            Enquire Now â†’
         </a>
 
     </div>
@@ -203,7 +208,7 @@
                     </div>
 
                     <a class="premium-sidebar-btn" href="https://wa.me/918655556219?text=Hello%20MCTI%20Technologies%2C%20I%20am%20interested%20in%20{{ course.title|urlencode }}%20course.%20Please%20share%20fees%2C%20batch%20timings%20and%20admission%20details." target="_blank" rel="noopener">
-                        Enquire Now →
+                        Enquire Now â†’
                     </a>
 
                     <p class="premium-small-text">
@@ -240,7 +245,7 @@
             </div>
 
             <a  href="https://wa.me/918655556219?text=Hello%20MCTI%20Technologies%2C%20I%20am%20interested%20in%20{{ course.title|urlencode }}%20course.%20Please%20share%20fees%2C%20batch%20timings%20and%20admission%20details." target="_blank" rel="noopener">
-                Talk to MCTI →
+                Talk to MCTI â†’
             </a>
 
         </div>
