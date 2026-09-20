@@ -1,13 +1,15 @@
-
+﻿
 {% extends "base.html" %}
 
 {% block title %}
-Courses | MCTI Academy
-
-
-
-
+Computer Courses in Navi Mumbai | MCTI Academy
 {% endblock %}
+
+{% block meta_description %}
+Explore job-oriented computer courses in Navi Mumbai at MCTI Academy including Data Analysis, Advanced Excel, Tally, Python, Full Stack, Digital Marketing, AI and more.
+{% endblock %}
+
+{% block canonical_url %}https://mctitechnologies.com/courses/{% endblock %}
 
 {% block content %}
 
@@ -41,7 +43,7 @@ Courses | MCTI Academy
         <div class="hero-career-card">
 
             <div class="hero-career-icon">
-                🎯
+                ðŸŽ¯
             </div>
 
             <div class="hero-career-info">
@@ -60,7 +62,7 @@ Courses | MCTI Academy
                 </p>
 
                 <a href="{% url 'career_tools:public_aptitude_start' %}">
-                    Take Free Test →
+                    Take Free Test â†’
                 </a>
 
             </div>
@@ -71,7 +73,7 @@ Courses | MCTI Academy
         <div class="hero-career-card featured">
 
             <div class="hero-career-icon">
-                💼
+                ðŸ’¼
             </div>
 
             <div class="hero-career-info">
@@ -82,7 +84,7 @@ Courses | MCTI Academy
 
                 <h3>
                     MCTI Career Kit
-                    <strong>₹99</strong>
+                    <strong>â‚¹99</strong>
                 </h3>
 
                 <p>
@@ -133,7 +135,7 @@ Courses | MCTI Academy
 
         <div class="mcti-course-search">
 
-            <span class="mcti-search-icon">⌕</span>
+            <span class="mcti-search-icon">âŒ•</span>
 
             <input
                 type="search"
@@ -167,7 +169,7 @@ Courses | MCTI Academy
 
                 <div>
                     <span>TRENDING NOW</span>
-                    <h3>🔥 Popular Career Courses</h3>
+                    <h3>ðŸ”¥ Popular Career Courses</h3>
                 </div>
 
                 <p>
@@ -187,7 +189,7 @@ Courses | MCTI Academy
                     class="mcti-trending-btn"
                 >
                     {{ course.title }}
-                    <span>→</span>
+                    <span>â†’</span>
                 </a>
 
                 {% endfor %}
@@ -326,7 +328,7 @@ Courses | MCTI Academy
 
            <a href="{% url 'course_detail' course.slug %}"
             class="course-details-btn">
-            View Details →
+            View Details â†’
             </a>
 
         </div>
@@ -374,7 +376,7 @@ Courses | MCTI Academy
            target="_blank"
            rel="noopener"
            class="courses-cta-btn">
-            Talk to MCTI →
+            Talk to MCTI â†’
         </a>
 
     </div>
@@ -1009,7 +1011,7 @@ document.addEventListener(
                         </p>
 
                         <a href="{% url 'career_tools:public_aptitude_start' %}">
-                            Take Free Aptitude Test →
+                            Take Free Aptitude Test â†’
                         </a>
                     `;
 
@@ -1122,4 +1124,5 @@ document.addEventListener(
 </script>
 
 {% endblock %}
+
 
