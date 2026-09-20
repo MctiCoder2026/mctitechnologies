@@ -1,4 +1,4 @@
-import os
+﻿import os
 """
 Django settings for config project.
 
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
 
     'corsheaders',
 
@@ -214,3 +215,4 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8081",
     "http://127.0.0.1:8081",
 ]
+
