@@ -10,7 +10,50 @@ from decimal import Decimal
 # ============================================================
 # COURSE
 # ============================================================
+# ========================================
+# STREAM / STUDENT BACKGROUND
+# ========================================
 
+class Stream(models.Model):
+
+    name = models.CharField(
+        max_length=100,
+        unique=True
+    )
+
+    slug = models.SlugField(
+        max_length=120,
+        unique=True,
+        blank=True
+    )
+
+    display_order = models.PositiveIntegerField(
+        default=0
+    )
+
+    is_active = models.BooleanField(
+        default=True
+    )
+
+    def save(self, *args, **kwargs):
+
+        if not self.slug:
+
+            from django.utils.text import slugify
+
+            self.slug = slugify(
+                self.name
+            )
+
+        super().save(
+            *args,
+            **kwargs
+        )
+
+    def __str__(self):
+
+        return self.name
+    
 class Course(models.Model):
 
     title = models.CharField(
@@ -62,6 +105,29 @@ class Course(models.Model):
 
     is_active = models.BooleanField(
         default=True
+    )
+        # --------------------------------------------------------
+    # COURSE DISCOVERY / MARKETING
+    # --------------------------------------------------------
+
+    streams = models.ManyToManyField(
+        Stream,
+        blank=True,
+        related_name="courses"
+    )
+
+    is_trending = models.BooleanField(
+        default=False
+    )
+
+    display_order = models.PositiveIntegerField(
+        default=0
+    )
+
+    marketing_badge = models.CharField(
+        max_length=50,
+        blank=True,
+        default=""
     )
 
     # --------------------------------------------------------

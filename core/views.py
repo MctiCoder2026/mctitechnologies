@@ -49,6 +49,7 @@ from .forms import (
 
 from .models import (
     Course,
+    Stream,
     Enquiry,
     EnquiryActivity,
     Admission,
@@ -3634,8 +3635,38 @@ def courses(request):
         .filter(
             is_active=True
         )
+        .prefetch_related(
+            "streams"
+        )
         .order_by(
-            "-created_at"
+            "display_order",
+            "title"
+        )
+    )
+
+    trending_courses = (
+        Course.objects
+        .filter(
+            is_active=True,
+            is_trending=True
+        )
+        .prefetch_related(
+            "streams"
+        )
+        .order_by(
+            "display_order",
+            "title"
+        )
+    )
+
+    streams = (
+        Stream.objects
+        .filter(
+            is_active=True
+        )
+        .order_by(
+            "display_order",
+            "name"
         )
     )
 
@@ -3643,7 +3674,10 @@ def courses(request):
         request,
         "courses.html",
         {
-            "courses": courses
+            "courses": courses,
+            "trending_courses": trending_courses,
+            "streams": streams,
+            "total_courses": courses.count(),
         }
     )
 

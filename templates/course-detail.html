@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load course_filters %}
 
 {% block title %}
 {{ course.title }} | MCTI Academy
@@ -36,7 +37,7 @@
 
         </div>
 
-        <a href="{% url 'contact' %}" class="premium-primary-btn">
+        <a class="premium-primary-btn" href="https://wa.me/918655556219?text=Hello%20MCTI%20Technologies%2C%20I%20am%20interested%20in%20{{ course.title|urlencode }}%20course.%20Please%20share%20fees%2C%20batch%20timings%20and%20admission%20details." target="_blank" rel="noopener">
             Enquire Now →
         </a>
 
@@ -97,7 +98,27 @@
                     <h2>Course Syllabus</h2>
 
                     <div class="premium-text premium-syllabus">
-                        {{ course.syllabus|linebreaks }}
+
+                        <div class="syllabus-module-list">
+
+                            {% for item in course.syllabus|split_syllabus %}
+
+                            <div class="syllabus-module-item">
+
+                                <span class="syllabus-module-number">
+                                    Module {{ forloop.counter|stringformat:"02d" }}
+                                </span>
+
+                                <span class="syllabus-module-content">
+                                    {{ item }}
+                                </span>
+
+                            </div>
+
+                            {% endfor %}
+
+                        </div>
+
                     </div>
 
                 </div>
@@ -181,7 +202,7 @@
 
                     </div>
 
-                    <a href="{% url 'contact' %}" class="premium-sidebar-btn">
+                    <a class="premium-sidebar-btn" href="https://wa.me/918655556219?text=Hello%20MCTI%20Technologies%2C%20I%20am%20interested%20in%20{{ course.title|urlencode }}%20course.%20Please%20share%20fees%2C%20batch%20timings%20and%20admission%20details." target="_blank" rel="noopener">
                         Enquire Now →
                     </a>
 
@@ -218,7 +239,7 @@
                 </p>
             </div>
 
-            <a href="{% url 'contact' %}">
+            <a  href="https://wa.me/918655556219?text=Hello%20MCTI%20Technologies%2C%20I%20am%20interested%20in%20{{ course.title|urlencode }}%20course.%20Please%20share%20fees%2C%20batch%20timings%20and%20admission%20details." target="_blank" rel="noopener">
                 Talk to MCTI →
             </a>
 
@@ -229,3 +250,51 @@
 </section>
 
 {% endblock %}
+
+<style>
+
+.syllabus-module-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.syllabus-module-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 13px 16px;
+    background: #ffffff;
+    border: 1px solid #eeeeee;
+    border-radius: 10px;
+}
+
+.syllabus-module-number {
+    flex: 0 0 auto;
+    font-size: 12px;
+    font-weight: 800;
+    color: #ff5a00;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+}
+
+.syllabus-module-content {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #222222;
+}
+
+@media (max-width: 600px) {
+
+    .syllabus-module-item {
+        display: block;
+    }
+
+    .syllabus-module-number {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+}
+
+</style>

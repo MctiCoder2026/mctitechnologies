@@ -3,6 +3,10 @@
 
 {% block title %}
 Courses | MCTI Academy
+
+
+
+
 {% endblock %}
 
 {% block content %}
@@ -29,6 +33,73 @@ Courses | MCTI Academy
 
     </div>
 
+
+    <!-- HERO CAREER OFFERS -->
+
+    <div class="hero-career-offers">
+
+        <div class="hero-career-card">
+
+            <div class="hero-career-icon">
+                🎯
+            </div>
+
+            <div class="hero-career-info">
+
+                <span>
+                    FREE CAREER TOOL
+                </span>
+
+                <h3>
+                    Free Aptitude Test
+                </h3>
+
+                <p>
+                    Discover your strengths and find
+                    suitable career options.
+                </p>
+
+                <a href="{% url 'career_tools:public_aptitude_start' %}">
+                    Take Free Test →
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="hero-career-card featured">
+
+            <div class="hero-career-icon">
+                💼
+            </div>
+
+            <div class="hero-career-info">
+
+                <span>
+                    CAREER STARTER OFFER
+                </span>
+
+                <h3>
+                    MCTI Career Kit
+                    <strong>₹99</strong>
+                </h3>
+
+                <p>
+                    Career recommendation, resume support
+                    and personalized guidance.
+                </p>
+
+                <span class="career-coming-soon">
+                    COMING SOON
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </section>
 
 
@@ -52,13 +123,161 @@ Courses | MCTI Academy
     </div>
 
 
+    <!-- ================================================
+         COURSE SEARCH / LEAD GENERATION / FILTERS
+    ================================================= -->
+
+    <div class="mcti-course-tools">
+
+        <!-- SEARCH -->
+
+        <div class="mcti-course-search">
+
+            <span class="mcti-search-icon">⌕</span>
+
+            <input
+                type="search"
+                id="courseSearch"
+                placeholder="Search from {{ total_courses }}+ courses..."
+                autocomplete="off"
+            >
+
+            <button
+                type="button"
+                id="clearCourseSearch"
+            >
+                Clear
+            </button>
+
+        </div>
+
+
+        <!-- CAREER LEAD CARDS -->
+
+        <!-- TRENDING -->
+
+        {% if trending_courses %}
+
+        <div
+            class="mcti-trending-section"
+            id="trendingSection"
+        >
+
+            <div class="mcti-filter-heading">
+
+                <div>
+                    <span>TRENDING NOW</span>
+                    <h3>🔥 Popular Career Courses</h3>
+                </div>
+
+                <p>
+                    Explore skills students are choosing for
+                    today's career opportunities.
+                </p>
+
+            </div>
+
+
+            <div class="mcti-trending-list">
+
+                {% for course in trending_courses %}
+
+                <a
+                    href="{% url 'course_detail' course.slug %}"
+                    class="mcti-trending-btn"
+                >
+                    {{ course.title }}
+                    <span>→</span>
+                </a>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- STREAM FILTER -->
+
+        <div class="mcti-stream-section">
+
+            <div class="mcti-filter-heading">
+
+                <div>
+                    <span>FIND YOUR PATH</span>
+                    <h3>Choose Your Stream</h3>
+                </div>
+
+                <p>
+                    Select your education background to
+                    discover relevant courses.
+                </p>
+
+            </div>
+
+
+            <div class="mcti-stream-buttons">
+
+                <button
+                    type="button"
+                    class="mcti-stream-btn active"
+                    data-stream="all"
+                >
+                    All Courses
+                </button>
+
+                {% for stream in streams %}
+
+                <button
+                    type="button"
+                    class="mcti-stream-btn"
+                    data-stream="{{ stream.slug }}"
+                >
+                    {{ stream.name }}
+                </button>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+
+        <!-- RESULT COUNT -->
+
+        <div class="mcti-result-row">
+
+            <span>
+                Showing
+                <strong id="courseResultCount">
+                    {{ total_courses }}
+                </strong>
+                courses
+            </span>
+
+        </div>
+
+    </div>
+
+
     <!-- DYNAMIC COURSE CATALOGUE -->
 
-    <div class="course-catalogue-grid">
+    <div
+        class="course-catalogue-grid"
+        id="courseCatalogueGrid"
+    >
 
         {% for course in courses %}
 
-        <div class="catalogue-card">
+        <div
+            class="catalogue-card mcti-filter-course"
+            data-title="{{ course.title|lower }}"
+            data-category="{{ course.category|lower }}"
+            data-description="{{ course.short_description|lower }}"
+            data-streams="{% for stream in course.streams.all %}{{ stream.slug }} {% endfor %}"
+        >
 
             <!-- Course Icon -->
 
@@ -151,7 +370,10 @@ Courses | MCTI Academy
             Our team can help you choose the right learning program.
         </p>
 
-        <a href="#" class="courses-cta-btn">
+        <a href="https://wa.me/918655556219?text=Hello%20MCTI%20Technologies%2C%20I%20need%20help%20choosing%20the%20right%20course."
+           target="_blank"
+           rel="noopener"
+           class="courses-cta-btn">
             Talk to MCTI →
         </a>
 
@@ -159,6 +381,745 @@ Courses | MCTI Academy
 
 </section>
 
+
+
+
+<style>
+/* Move course catalogue slightly upward */
+.course-catalogue {
+    padding-top: 45px !important;
+}
+
+.course-catalogue .section-heading {
+    margin-bottom: 35px;
+}
+
+/* ==========================================================
+   MCTI COURSE DISCOVERY ADDITIONS
+   Existing course card design remains unchanged.
+========================================================== */
+
+.mcti-course-tools {
+    max-width: 1200px;
+    margin: 0 auto 34px;
+}
+
+
+/* SEARCH */
+
+.mcti-course-search {
+    max-width: 850px;
+    margin: 0 auto 35px;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    padding: 7px 8px 7px 16px;
+    box-shadow: 0 8px 25px rgba(0,0,0,.06);
+}
+
+.mcti-search-icon {
+    font-size: 24px;
+    color: #ff6600;
+    margin-right: 8px;
+}
+
+.mcti-course-search input {
+    flex: 1;
+    border: 0;
+    outline: 0;
+    padding: 13px 5px;
+    font-size: 15px;
+    background: transparent;
+    min-width: 0;
+}
+
+.mcti-course-search button {
+    border: 0;
+    background: #ff6600;
+    color: #fff;
+    border-radius: 7px;
+    padding: 12px 18px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.mcti-course-search button:hover {
+    background: #111;
+}
+
+
+/* CAREER LEAD OFFERS */
+
+.career-offer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 42px;
+}
+
+.career-offer-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: 16px;
+    padding: 25px;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    position: relative;
+}
+
+.career-offer-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 20px;
+    bottom: 20px;
+    width: 4px;
+    background: #ff6600;
+    border-radius: 0 5px 5px 0;
+}
+
+.career-offer-icon {
+    width: 52px;
+    height: 52px;
+    background: #fff1e8;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+}
+
+.career-offer-content {
+    min-width: 0;
+}
+
+.career-offer-label {
+    color: #ff6600;
+    font-size: 10px;
+    letter-spacing: 1px;
+    font-weight: 800;
+}
+
+.career-offer-card h3 {
+    margin: 6px 0 8px;
+    font-size: 21px;
+    color: #111;
+}
+
+.career-offer-card h3 strong {
+    color: #ff6600;
+}
+
+.career-offer-card p {
+    margin: 0;
+    color: #666;
+    line-height: 1.55;
+    font-size: 13px;
+}
+
+.career-offer-btn {
+    grid-column: 1 / -1;
+    display: block;
+    text-align: center;
+    background: #ff6600;
+    color: #fff;
+    text-decoration: none;
+    padding: 12px 18px;
+    border-radius: 7px;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.career-offer-btn:hover {
+    background: #111;
+    color: #fff;
+}
+
+
+/* HEADINGS */
+
+.mcti-filter-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 20px;
+    margin-bottom: 16px;
+}
+
+.mcti-filter-heading span {
+    display: block;
+    color: #ff6600;
+    font-size: 10px;
+    letter-spacing: 1.3px;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.mcti-filter-heading h3 {
+    margin: 0;
+    font-size: 21px;
+    color: #111;
+}
+
+.mcti-filter-heading p {
+    margin: 0;
+    max-width: 400px;
+    color: #777;
+    font-size: 12px;
+}
+
+
+/* TRENDING */
+
+.mcti-trending-section {
+    margin-bottom: 35px;
+}
+
+.mcti-trending-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.mcti-trending-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 14px;
+    border: 1px solid #e5e5e5;
+    border-radius: 7px;
+    background: #fff;
+    color: #222;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    transition: .2s ease;
+}
+
+.mcti-trending-btn span {
+    color: #ff6600;
+}
+
+.mcti-trending-btn:hover {
+    background: #ff6600;
+    border-color: #ff6600;
+    color: #fff;
+}
+
+.mcti-trending-btn:hover span {
+    color: #fff;
+}
+
+
+/* STREAMS */
+
+.mcti-stream-section {
+    padding: 22px;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.mcti-stream-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.mcti-stream-btn {
+    border: 1px solid #dedede;
+    background: #fff;
+    color: #333;
+    padding: 9px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.mcti-stream-btn:hover,
+.mcti-stream-btn.active {
+    background: #ff6600;
+    color: #fff;
+    border-color: #ff6600;
+}
+
+
+/* RESULT COUNT */
+
+.mcti-result-row {
+    display: flex;
+    justify-content: flex-end;
+    margin: 17px 2px 0;
+    color: #777;
+    font-size: 12px;
+}
+
+.mcti-result-row strong {
+    color: #ff6600;
+}
+
+
+/* ZERO RESULT */
+
+.mcti-no-results {
+    grid-column: 1 / -1;
+    padding: 45px 20px;
+    border: 1px dashed #ddd;
+    border-radius: 10px;
+    text-align: center;
+    background: #fff;
+}
+
+.mcti-no-results h3 {
+    margin: 0 0 8px;
+}
+
+.mcti-no-results p {
+    margin: 0 0 18px;
+    color: #666;
+}
+
+.mcti-no-results a {
+    display: inline-block;
+    background: #ff6600;
+    color: #fff;
+    padding: 11px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+
+    .career-offer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mcti-filter-heading {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .mcti-course-search {
+        margin-bottom: 25px;
+    }
+
+    .mcti-course-search button {
+        padding: 11px 12px;
+    }
+
+}
+
+
+
+/* ==========================================================
+   HERO CAREER LEAD CARDS
+========================================================== */
+
+.courses-page-hero {
+    display: flex;
+    align-items: center;
+}
+
+.courses-page-hero-content {
+    width: 50%;
+}
+
+.hero-career-offers {
+    width: 44%;
+    max-width: 590px;
+    margin-left: auto;
+    margin-right: 6%;
+    position: relative;
+    z-index: 2;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.hero-career-card {
+    background: rgba(255,255,255,.94);
+    border: 1px solid #f0ded2;
+    border-radius: 14px;
+    padding: 22px;
+
+    box-shadow:
+        0 12px 30px rgba(0,0,0,.06);
+
+    display: flex;
+    flex-direction: column;
+    min-height: 245px;
+}
+
+.hero-career-card.featured {
+    border-color: #ffb37d;
+}
+
+.hero-career-icon {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #fff0e5;
+    border-radius: 10px;
+
+    font-size: 23px;
+
+    margin-bottom: 17px;
+}
+
+.hero-career-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.hero-career-info > span {
+    color: #ff6600;
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+
+    margin-bottom: 6px;
+}
+
+.hero-career-info h3 {
+    margin: 0 0 9px;
+
+    color: #18202d;
+    font-size: 19px;
+    line-height: 1.3;
+}
+
+.hero-career-info h3 strong {
+    color: #ff6600;
+}
+
+.hero-career-info p {
+    margin: 0 0 18px;
+
+    color: #666;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.hero-career-info a {
+    display: block;
+
+    margin-top: auto;
+
+    background: #ff6600;
+    color: #fff;
+
+    text-decoration: none;
+    text-align: center;
+
+    padding: 11px 12px;
+
+    border-radius: 7px;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    transition: .2s ease;
+}
+
+.hero-career-info a:hover {
+    background: #111;
+    color: #fff;
+}
+
+
+/* TABLET */
+
+@media (max-width: 1100px) {
+
+    .hero-career-offers {
+        width: 48%;
+        margin-right: 3%;
+    }
+
+    .hero-career-card {
+        padding: 17px;
+    }
+
+}
+
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+
+    .courses-page-hero {
+        display: block;
+    }
+
+    .courses-page-hero-content {
+        width: auto;
+    }
+
+    .hero-career-offers {
+        width: auto;
+        max-width: none;
+
+        margin:
+            30px 20px
+            0;
+
+        grid-template-columns: 1fr;
+    }
+
+    .hero-career-card {
+        min-height: auto;
+    }
+
+}
+
+
+</style>
+
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const searchInput =
+            document.getElementById("courseSearch");
+
+        const clearButton =
+            document.getElementById("clearCourseSearch");
+
+        const cards =
+            Array.from(
+                document.querySelectorAll(
+                    ".mcti-filter-course"
+                )
+            );
+
+        const streamButtons =
+            document.querySelectorAll(
+                ".mcti-stream-btn"
+            );
+
+        const resultCount =
+            document.getElementById(
+                "courseResultCount"
+            );
+
+        const courseGrid =
+            document.getElementById(
+                "courseCatalogueGrid"
+            );
+
+        const trendingSection =
+            document.getElementById(
+                "trendingSection"
+            );
+
+        let activeStream = "all";
+        let noResultsBox = null;
+
+
+        function filterCourses() {
+
+            const query =
+                searchInput.value
+                    .trim()
+                    .toLowerCase();
+
+            let visible = 0;
+
+
+            cards.forEach(function (card) {
+
+                const searchableText = [
+                    card.dataset.title || "",
+                    card.dataset.category || "",
+                    card.dataset.description || ""
+                ].join(" ");
+
+
+                const streams =
+                    (card.dataset.streams || "")
+                        .trim()
+                        .split(/\s+/);
+
+
+                const searchMatch =
+                    !query ||
+                    searchableText.includes(query);
+
+
+                const streamMatch =
+                    activeStream === "all" ||
+                    streams.includes(activeStream);
+
+
+                const show =
+                    searchMatch &&
+                    streamMatch;
+
+
+                card.style.display =
+                    show ? "" : "none";
+
+
+                if (show) {
+                    visible++;
+                }
+
+            });
+
+
+            resultCount.textContent =
+                visible;
+
+
+            if (visible === 0) {
+
+                if (!noResultsBox) {
+
+                    noResultsBox =
+                        document.createElement("div");
+
+                    noResultsBox.className =
+                        "mcti-no-results";
+
+                    noResultsBox.innerHTML = `
+                        <h3>Can't find the right course?</h3>
+
+                        <p>
+                            Take our free aptitude test and
+                            get a career recommendation.
+                        </p>
+
+                        <a href="{% url 'career_tools:public_aptitude_start' %}">
+                            Take Free Aptitude Test →
+                        </a>
+                    `;
+
+                    courseGrid.appendChild(
+                        noResultsBox
+                    );
+
+                }
+
+                noResultsBox.style.display =
+                    "block";
+
+            } else if (noResultsBox) {
+
+                noResultsBox.style.display =
+                    "none";
+
+            }
+
+
+            if (trendingSection) {
+
+                trendingSection.style.display =
+                    query ||
+                    activeStream !== "all"
+                        ? "none"
+                        : "";
+
+            }
+
+        }
+
+
+        searchInput.addEventListener(
+            "input",
+            filterCourses
+        );
+
+
+        clearButton.addEventListener(
+            "click",
+            function () {
+
+                searchInput.value = "";
+                activeStream = "all";
+
+
+                streamButtons.forEach(
+                    function (button) {
+
+                        button.classList.toggle(
+                            "active",
+                            button.dataset.stream ===
+                            "all"
+                        );
+
+                    }
+                );
+
+
+                filterCourses();
+
+                searchInput.focus();
+
+            }
+        );
+
+
+        streamButtons.forEach(
+            function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        activeStream =
+                            button.dataset.stream;
+
+
+                        streamButtons.forEach(
+                            function (item) {
+
+                                item.classList.remove(
+                                    "active"
+                                );
+
+                            }
+                        );
+
+
+                        button.classList.add(
+                            "active"
+                        );
+
+
+                        filterCourses();
+
+                    }
+                );
+
+            }
+        );
+
+
+        filterCourses();
+
+    }
+);
+
+</script>
 
 {% endblock %}
 

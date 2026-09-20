@@ -273,6 +273,450 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+
+
+<!-- ======================================================
+     MCTI CAREER BENEFITS POPUP
+======================================================= -->
+
+<div id="mctiAptitudePopup" class="mcti-career-overlay">
+
+    <div class="mcti-career-popup">
+
+        <button type="button"
+                id="mctiPopupClose"
+                class="mcti-popup-close"
+                aria-label="Close">&times;</button>
+
+        <div class="mcti-popup-badge">
+            MCTI CAREER BENEFITS
+        </div>
+
+        <div class="mcti-popup-icon">🎯</div>
+
+        <h2>Confused About Which Course to Choose?</h2>
+
+        <p class="mcti-popup-intro">
+            Discover the right career path before making
+            your final course decision.
+        </p>
+
+
+        <div class="mcti-offer-row">
+
+            <div class="mcti-offer-icon">🧠</div>
+
+            <div>
+                <strong>FREE Aptitude Test</strong>
+
+                <span>
+                    Discover courses that match your
+                    skills, interests & career direction.
+                </span>
+            </div>
+
+        </div>
+
+
+        <div class="mcti-offer-row">
+
+            <div class="mcti-offer-icon">🎓</div>
+
+            <div>
+                <strong>2 Days FREE Trial Class</strong>
+
+                <span>
+                    Experience the training before
+                    finalizing your course.
+                </span>
+            </div>
+
+        </div>
+
+
+        <div class="mcti-offer-row mcti-voucher-row">
+
+            <div class="mcti-offer-icon">🎁</div>
+
+            <div>
+                <strong>₹2,500 Gift Voucher</strong>
+
+                <span>
+                    Special benefit when you confirm
+                    your course enrollment instantly.
+                </span>
+            </div>
+
+        </div>
+
+
+        <a href="{% url 'career_tools:public_aptitude_start' %}"
+           class="mcti-popup-primary">
+
+            Take FREE Aptitude Test →
+
+        </a>
+
+
+        <a href="https://wa.me/918655556219?text=Hello%20MCTI%20Technologies%2C%20I%20want%20career%20guidance.%20Please%20share%20details%20about%20the%202%20Days%20Free%20Trial%20Class%20and%20Rs.%202500%20Gift%20Voucher."
+           target="_blank"
+           rel="noopener"
+           class="mcti-popup-whatsapp">
+
+            💬 Talk to MCTI on WhatsApp
+
+        </a>
+
+
+        <div class="mcti-popup-note">
+            Free Career Guidance • Limited-period benefits
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+.mcti-career-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(0,0,0,.62);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .25s ease, visibility .25s ease;
+}
+
+.mcti-career-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.mcti-career-popup {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    padding: 30px 32px 25px;
+    background: #fff;
+    border-radius: 22px;
+    box-shadow: 0 25px 80px rgba(0,0,0,.30);
+    transform: translateY(25px) scale(.97);
+    transition: transform .25s ease;
+}
+
+.mcti-career-overlay.active .mcti-career-popup {
+    transform: translateY(0) scale(1);
+}
+
+.mcti-popup-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    background: #f3f3f3;
+    color: #222;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+.mcti-popup-badge {
+    display: table;
+    margin: 0 auto 10px;
+    padding: 6px 13px;
+    border-radius: 30px;
+    background: #fff0e7;
+    color: #f05a00;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .8px;
+}
+
+.mcti-popup-icon {
+    text-align: center;
+    font-size: 34px;
+    margin-bottom: 5px;
+}
+
+.mcti-career-popup h2 {
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: center;
+    color: #111;
+    font-size: 27px;
+    line-height: 1.18;
+    font-weight: 800;
+}
+
+.mcti-popup-intro {
+    max-width: 390px;
+    margin: 9px auto 18px;
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.mcti-offer-row {
+    display: flex;
+    gap: 13px;
+    align-items: flex-start;
+    margin-bottom: 9px;
+    padding: 11px 14px;
+    background: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 12px;
+}
+
+.mcti-voucher-row {
+    background: #fff8f3;
+    border-color: #ffd9c3;
+}
+
+.mcti-offer-icon {
+    flex: 0 0 auto;
+    font-size: 23px;
+}
+
+.mcti-offer-row strong {
+    display: block;
+    margin-bottom: 2px;
+    color: #171717;
+    font-size: 14px;
+}
+
+.mcti-offer-row span {
+    display: block;
+    color: #666;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.mcti-popup-primary,
+.mcti-popup-whatsapp {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    text-decoration: none !important;
+    border-radius: 10px;
+    font-weight: 800;
+}
+
+.mcti-popup-primary {
+    margin-top: 17px;
+    padding: 14px 18px;
+    background: #f05a00;
+    color: #fff !important;
+    font-size: 15px;
+}
+
+.mcti-popup-primary:hover {
+    background: #d94f00;
+}
+
+.mcti-popup-whatsapp {
+    margin-top: 9px;
+    padding: 12px 18px;
+    background: #fff;
+    border: 1px solid #ddd;
+    color: #222 !important;
+    font-size: 14px;
+}
+
+.mcti-popup-whatsapp:hover {
+    background: #f7f7f7;
+}
+
+.mcti-popup-note {
+    margin-top: 9px;
+    text-align: center;
+    color: #999;
+    font-size: 10px;
+}
+
+
+@media (max-width: 600px) {
+
+    .mcti-career-overlay {
+        align-items: flex-end;
+        padding: 10px;
+    }
+
+    .mcti-career-popup {
+        max-height: 92vh;
+        overflow-y: auto;
+        padding: 27px 18px 20px;
+        border-radius: 20px 20px 12px 12px;
+    }
+
+    .mcti-career-popup h2 {
+        font-size: 22px;
+    }
+
+    .mcti-popup-intro {
+        margin-bottom: 14px;
+    }
+
+    .mcti-offer-row {
+        padding: 10px 11px;
+    }
+
+}
+
+</style>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const popup =
+        document.getElementById("mctiAptitudePopup");
+
+    const closeButton =
+        document.getElementById("mctiPopupClose");
+
+    if (!popup || !closeButton) {
+        return;
+    }
+
+
+    /* Don't show on private/student/staff pages */
+
+    const privatePaths = [
+        "/admin/",
+        "/student/",
+        "/staff",
+        "/management-dashboard",
+        "/branch-dashboard",
+        "/enquiries/",
+        "/admissions/",
+        "/reports/",
+        "/attendance/",
+        "/lms/",
+        "/monthly-closing/",
+        "/daily-expenses/"
+    ];
+
+    const currentPath = window.location.pathname;
+
+    if (
+        privatePaths.some(
+            path => currentPath.startsWith(path)
+        )
+    ) {
+        return;
+    }
+
+
+    /* Once per browser session */
+
+    if (
+        sessionStorage.getItem(
+            "mctiCareerPopupSeen"
+        )
+    ) {
+        return;
+    }
+
+
+    let shown = false;
+
+
+    function openPopup() {
+
+        if (shown) {
+            return;
+        }
+
+        shown = true;
+
+        popup.classList.add("active");
+
+        sessionStorage.setItem(
+            "mctiCareerPopupSeen",
+            "1"
+        );
+
+        window.removeEventListener(
+            "scroll",
+            checkScroll
+        );
+    }
+
+
+    function checkScroll() {
+
+        const pageHeight =
+            document.documentElement.scrollHeight
+            - window.innerHeight;
+
+        if (pageHeight <= 0) {
+            return;
+        }
+
+        const percentage =
+            (window.scrollY / pageHeight) * 100;
+
+        if (percentage >= 35) {
+            openPopup();
+        }
+    }
+
+
+    window.addEventListener(
+        "scroll",
+        checkScroll,
+        { passive: true }
+    );
+
+
+    closeButton.addEventListener(
+        "click",
+        function () {
+            popup.classList.remove("active");
+        }
+    );
+
+
+    popup.addEventListener(
+        "click",
+        function (event) {
+
+            if (event.target === popup) {
+                popup.classList.remove("active");
+            }
+
+        }
+    );
+
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (event.key === "Escape") {
+                popup.classList.remove("active");
+            }
+
+        }
+    );
+
+});
+
+</script>
+
+
+
 </body>
 
 </html>
