@@ -58,10 +58,7 @@ def branch_landing(request, slug):
                 "Thank you! Your enquiry has been submitted. Our counsellor will contact you shortly."
             )
 
-            return redirect(
-                "local_site:branch_landing",
-                slug=branch.slug
-            )
+            return redirect(branch.slug)
 
     else:
         form = LocalEnquiryForm()
@@ -81,3 +78,23 @@ def branch_landing(request, slug):
     )
 
 
+
+
+def local_home(request):
+    branches = Branch.objects.filter(
+        is_active=True
+    ).order_by("name")
+
+    popular_courses = Course.objects.filter(
+        is_active=True,
+        is_trending=True
+    ).order_by("display_order")[:12]
+
+    return render(
+        request,
+        "local_site/home.html",
+        {
+            "branches": branches,
+            "popular_courses": popular_courses,
+        }
+    )

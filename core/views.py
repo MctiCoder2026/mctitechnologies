@@ -3594,6 +3594,15 @@ def student_attendance(request):
 
 def home(request):
 
+    host = request.get_host().split(":")[0].lower()
+
+    if host in {
+        "maharashtracomputer.com",
+        "www.maharashtracomputer.com",
+    }:
+        from local_site.views import local_home
+        return local_home(request)
+
     return render(
         request,
         "core/home.html"

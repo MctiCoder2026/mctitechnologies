@@ -1,0 +1,260 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Computer Training Institute in Navi Mumbai | MCTI</title>
+    <meta name="description" content="Maharashtra Computer Training Institute (MCTI) provides practical computer training, career-focused courses and skill development in Navi Mumbai.">
+
+    <link rel="canonical" href="https://maharashtracomputer.com/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Maharashtra Computer Training Institute | MCTI">
+    <meta property="og:description" content="Practical computer training and career-focused courses in Navi Mumbai.">
+    <meta property="og:url" content="https://maharashtracomputer.com/">
+    <meta property="og:site_name" content="MCTI - Maharashtra Computer Training Institute">
+
+    <link rel="stylesheet" href="{% static 'local_site/landing.css' %}">
+</head>
+
+<body>
+
+<header class="mcti-header">
+    <div class="container nav">
+        <a class="brand brand-logo" href="/">
+            <img src="{% static 'local_site/mcti-group-of-education.png' %}"
+                 alt="MCTI Group of Education - Maharashtra Computer Training Institute">
+        </a>
+
+        <button type="button" class="menu-toggle" id="menuToggle"
+                aria-label="Open navigation menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
+
+        <nav class="nav-links" id="mobileNav">
+            <a href="/">Home</a>
+            <a href="#courses">Courses</a>
+            <a href="#branches">Branches</a>
+            <a href="#why">Why MCTI</a>
+            <a href="#contact">Contact</a>
+            <a class="nav-cta" href="#branches">Find Your Branch</a>
+        </nav>
+    </div>
+</header>
+
+
+<section class="hero">
+    <div class="container hero-grid">
+
+        <div class="hero-copy">
+            <p style="font-weight:800;margin-bottom:8px;">
+                Maharashtra Computer Training Institute
+            </p>
+
+            <h1>
+                Practical Computer Training
+                <span>in Navi Mumbai</span>
+            </h1>
+
+            <p>
+                Career-focused computer courses, practical learning,
+                skill development and training support for students,
+                graduates and working professionals.
+            </p>
+
+            <div class="hero-actions">
+                <a class="btn btn-dark" href="#courses">Explore Courses</a>
+                <a class="btn btn-white" href="#branches">Find Your Branch</a>
+            </div>
+        </div>
+
+        <div class="hero-visual hero-photo">
+            <img src="{% static 'local_site/hero-kharghar.png' %}"
+                 alt="MCTI computer training students in Navi Mumbai"
+                 loading="eager">
+        </div>
+
+    </div>
+</section>
+
+
+<section class="trust">
+    <div class="container trust-grid">
+        <div class="trust-item">
+            <strong>Since 2013</strong>
+            <span>Computer Training</span>
+        </div>
+
+        <div class="trust-item">
+            <strong>13,500+</strong>
+            <span>Students Trained</span>
+        </div>
+
+        <div class="trust-item">
+            <strong>⭐ 2250+</strong>
+            <span>Reviews Across Navi Mumbai</span>
+        </div>
+
+        <div class="trust-item">
+            <strong>Career</strong>
+            <span>Guidance & Support</span>
+        </div>
+    </div>
+</section>
+
+
+<section class="section section-soft" id="courses">
+    <div class="container">
+
+        <div class="section-title">
+            <h2>Popular Computer Courses</h2>
+            <p>Explore practical, career-focused training programs.</p>
+        </div>
+
+        <div class="course-scroll">
+            {% for course in popular_courses %}
+            <article class="course-card">
+                <div class="course-icon">{{ course.icon|default:"💻" }}</div>
+                <h3>{{ course.title }}</h3>
+
+                <p>
+                    {{ course.short_description|truncatewords:16 }}
+                </p>
+
+                {% if course.duration %}
+                <p><strong>Duration:</strong> {{ course.duration }}</p>
+                {% endif %}
+
+                <div class="course-actions">
+                    <a href="{% url 'course_detail' slug=course.slug %}">
+                        View Course →
+                    </a>
+                    <a href="#branches">Enquire</a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+
+    </div>
+</section>
+
+
+<section class="section" id="branches">
+    <div class="container">
+
+        <div class="section-title">
+            <h2>MCTI Branches</h2>
+            <p>Select your nearest MCTI training centre.</p>
+        </div>
+
+        <div class="feature-grid">
+
+            {% for branch in branches %}
+            <div class="feature-card">
+                <div class="icon">📍</div>
+
+                <h3>{{ branch.name }}</h3>
+
+                <p>{{ branch.address }}</p>
+
+                <a class="btn btn-dark"
+                   href="/{{ branch.slug }}/">
+                    View {{ branch.name }} Branch
+                </a>
+            </div>
+            {% empty %}
+            <div class="feature-card">
+                <h3>Branch information coming soon.</h3>
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+</section>
+
+
+<section class="section section-soft" id="why">
+    <div class="container">
+
+        <div class="section-title">
+            <h2>Why Choose MCTI?</h2>
+            <p>Practical learning focused on skills and career development.</p>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="icon">💻</div>
+                <h3>Practical Training</h3>
+                <p>Hands-on learning with assignments and real-world practice.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon">👨‍🏫</div>
+                <h3>Trainer Guidance</h3>
+                <p>Structured learning with trainer support throughout the course.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon">🎯</div>
+                <h3>Career Focused</h3>
+                <p>Skills aligned with workplace, interview and career requirements.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon">🏆</div>
+                <h3>Since 2013</h3>
+                <p>Computer education and skill development across Navi Mumbai.</p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<section class="section" id="contact">
+    <div class="container">
+        <div class="section-title">
+            <h2>Start Learning with MCTI</h2>
+            <p>Select your nearest branch to view courses, contact details and enquiry options.</p>
+        </div>
+
+        <div style="text-align:center;">
+            <a class="btn btn-dark" href="#branches">Find Your Branch</a>
+        </div>
+    </div>
+</section>
+
+
+<footer class="footer">
+    <div class="container" style="text-align:center;">
+        <p>© 2026 Maharashtra Computer Training Institute. All Rights Reserved.</p>
+        <p>
+            Designed, Developed &amp; Powered by
+            <strong>MCTI Technologies</strong>
+        </p>
+    </div>
+</footer>
+
+
+<script>
+const menuToggle = document.getElementById("menuToggle");
+const mobileNav = document.getElementById("mobileNav");
+
+if (menuToggle && mobileNav) {
+    menuToggle.addEventListener("click", function () {
+        mobileNav.classList.toggle("open");
+        menuToggle.classList.toggle("active");
+
+        menuToggle.setAttribute(
+            "aria-expanded",
+            mobileNav.classList.contains("open") ? "true" : "false"
+        );
+    });
+}
+</script>
+
+</body>
+</html>
