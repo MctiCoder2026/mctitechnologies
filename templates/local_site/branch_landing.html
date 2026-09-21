@@ -1,0 +1,1319 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ branch.seo_title|default:branch.name }} | MCTI</title>
+    <meta name="description" content="{{ branch.meta_description }}">
+
+<link rel="canonical" href="https://mctitechnologies.com/local/{{ branch.slug }}/">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ branch.seo_title|default:branch.name }}">
+<meta property="og:description" content="{{ branch.meta_description }}">
+<meta property="og:url" content="https://mctitechnologies.com/local/{{ branch.slug }}/">
+<meta property="og:site_name" content="MCTI - Maharashtra Computer Training Institute">
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{{ branch.seo_title|default:branch.name }}">
+<meta name="twitter:description" content="{{ branch.meta_description }}">
+    <link rel="stylesheet" href="{% static 'local_site/landing.css' %}">
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "MCTI - Maharashtra Computer Training Institute {{ branch.name }}",
+    "description": "{{ branch.meta_description|escapejs }}",
+    "url": "https://mctitechnologies.com/local/{{ branch.slug }}/",
+    "logo": "https://mctitechnologies.com/static/local_site/mcti-group-of-education.png",
+    "image": "https://mctitechnologies.com/static/local_site/hero-kharghar.png",
+    "telephone": "{{ branch.phone|escapejs }}",
+    "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "{{ branch.address|escapejs }}",
+        "addressLocality": "{{ branch.name|escapejs }}",
+        "addressRegion": "Maharashtra",
+        "addressCountry": "IN"
+    }
+{% if branch.email %},
+    "email": "{{ branch.email|escapejs }}"
+{% endif %}
+{% if branch.google_map_url %},
+    "hasMap": "{{ branch.google_map_url|escapejs }}"
+{% endif %},
+    "parentOrganization": {
+        "@type": "EducationalOrganization",
+        "name": "Maharashtra Computer Training Institute",
+        "url": "https://mctitechnologies.com/"
+    }
+}
+</script>
+</head>
+<body>
+
+<header class="mcti-header">
+    <div class="container nav">
+        <a class="brand brand-logo" href="#">
+            <img src="{% static 'local_site/mcti-group-of-education.png' %}"
+                 alt="MCTI Group of Education - Maharashtra Computer Training Institute">
+        </a>
+
+        <button type="button"
+                class="menu-toggle"
+                id="menuToggle"
+                aria-label="Open navigation menu"
+                aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav class="nav-links" id="mobileNav">
+            <a href="#">Home</a>
+            <a href="#courses">Courses</a>
+            <a href="#why">Why MCTI</a>
+            <a href="#reviews">Reviews</a>
+            <a href="#contact">Contact</a>
+            <a class="nav-cta" href="#enquiry">FREE Demo</a>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="hero-copy">
+            <p style="font-weight:800;margin-bottom:8px;">MCTI {{ branch.name }}</p>
+
+            <h1>
+                Best Computer Training Institute
+                <span>in {{ branch.name }}</span>
+            </h1>
+
+            <p>
+                Practical computer training, industry-focused courses,
+                career guidance and skill development for students,
+                graduates and working professionals.
+            </p>
+
+            <div class="hero-actions">
+                <a class="btn btn-dark" href="#enquiry">Book FREE Demo</a>
+                <a class="btn btn-white" href="https://wa.me/{{ branch.whatsapp }}">WhatsApp Us</a>
+            </div>
+        </div>
+
+        <div class="hero-visual hero-photo"><img src="{% static 'local_site/hero-kharghar.png' %}" alt="MCTI Kharghar computer training students" loading="eager"></div></div></section>
+
+<section class="trust">
+    <div class="container trust-grid">
+        <div class="trust-item"><strong>Since 2013</strong><span>Trusted Training</span></div>
+        <div class="trust-item"><strong>13,500+</strong><span>Students Trained</span></div>
+        <div class="trust-item"><strong>⭐ 2250+</strong><span>Reviews Across Navi Mumbai</span></div>
+        <div class="trust-item"><strong>Career</strong><span>Guidance & Support</span></div>
+    </div>
+</section>
+
+<section class="section section-soft" id="courses">
+    <div class="container">
+        <div class="section-title">
+            <h2>Popular Courses in {{ branch.name }}</h2>
+            <p>Choose career-focused training designed for today's industry.</p>
+        </div>
+
+        <div class="course-slider-controls">
+            <span>Auto-scroll • Swipe to explore more courses</span>
+            <div class="course-nav">
+                <button type="button" class="course-prev" aria-label="Previous courses">&#8592;</button>
+                <button type="button" class="course-next" aria-label="Next courses">&#8594;</button>
+            </div>
+        </div>
+
+        <div class="course-scroll">
+            {% for course in popular_courses %}
+            <article class="course-card">
+                <div class="course-icon">{{ course.icon|default:"💻" }}</div>
+                <h3>{{ course.title }}</h3>
+                <p>{{ course.short_description|truncatewords:16 }}</p>
+                {% if course.duration %}
+                <p><strong>Duration:</strong> {{ course.duration }}</p>
+                {% endif %}
+                <div class="course-actions"><a href="{% url 'course_detail' slug=course.slug %}" target="_blank">View Course →</a><a href="#enquiry">Enquire</a></div>
+            </article>
+            {% endfor %}
+        </div>
+
+        <div class="academy-course-cta">
+            <div>
+                <span>Looking for another course?</span>
+                <h3>Explore the complete MCTI Academy course catalogue</h3>
+                <p>Programming, Data, Accounting, AI, Cloud, Cyber Security, Design and more.</p>
+            </div>
+            <a href="{% url 'courses' %}" target="_blank" class="btn btn-dark">Explore All Courses →</a>
+        </div>
+
+    </div>
+</section>
+
+<section class="section" id="why">
+    <div class="container">
+        <div class="section-title">
+            <h2>Why Choose MCTI?</h2>
+            <p>More than software training — we focus on practical career skills.</p>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card"><div class="icon">💻</div><h3>Practical Training</h3><p>Hands-on learning with assignments and real-world practice.</p></div>
+            <div class="feature-card"><div class="icon">👨‍🏫</div><h3>Expert Trainers</h3><p>Learn with structured guidance and personal support.</p></div>
+            <div class="feature-card"><div class="icon">🎯</div><h3>Career Focused</h3><p>Skills aligned with jobs, interviews and workplace requirements.</p></div>
+            <div class="feature-card"><div class="icon">🏆</div><h3>Trusted Since 2013</h3><p>Years of experience helping students build computer skills.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="section corporate-ecosystem">
+    <div class="container">
+
+        <div class="corporate-box">
+
+            <div class="corporate-content">
+                <span class="section-kicker">MORE THAN A TRAINING INSTITUTE</span>
+
+                <h2>MCTI Academy + MCTI Technologies</h2>
+
+                <p>
+                    Maharashtra Computer Training Institute has been helping students
+                    build practical computer and career skills since 2013.
+                    Today, the MCTI ecosystem also includes MCTI Technologies.
+                </p>
+
+                <div class="corporate-points">
+                    <div><strong>MCTI Academy</strong><span>Student Training & Career Skills</span></div>
+                    <div><strong>MCTI Technologies</strong><span>Technology, Business Solutions & Digital Innovation</span></div>
+                    <div><strong>Nerul Corporate Office</strong><span>Our corporate presence in Navi Mumbai</span></div>
+                </div>
+
+                <div class="corporate-actions">
+                    <a href="{% url 'academy' %}" target="_blank" class="btn btn-primary">Visit MCTI Academy</a>
+                    <a href="https://mctitechnologies.com/" target="_blank" rel="noopener" class="btn btn-dark">Explore MCTI Technologies</a>
+                </div>
+            </div>
+
+            <div class="corporate-highlight">
+                <span>MCTI</span>
+                <strong>Education + Technology</strong>
+                <p>One ecosystem for learning, career development and technology solutions.</p>
+                <div class="corporate-location">Corporate Office • Nerul, Navi Mumbai</div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+<section class="section career-support">
+    <div class="container">
+        <div class="section-title">
+            <h2>Career & Placement Support</h2>
+            <p>Training ke saath career preparation — helping students become job-ready.</p>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="icon">📄</div>
+                <h3>Resume Building</h3>
+                <p>Professional resume guidance to present your skills effectively.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon">🎯</div>
+                <h3>Aptitude & Career Guidance</h3>
+                <p>Assess your strengths and understand suitable career directions.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon">💼</div>
+                <h3>Interview Preparation</h3>
+                <p>Practice common interview questions and improve workplace readiness.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon">🤝</div>
+                <h3>Placement Assistance</h3>
+                <p>Career opportunities and placement assistance for eligible students.</p>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="enquiry-section" id="enquiry">
+    <div class="container">
+        <div class="enquiry-layout">
+
+            <div class="enquiry-content">
+                <span class="section-kicker" style="color:#fff;">START YOUR JOURNEY</span>
+                <h2>Book Your FREE Demo Class</h2>
+                <p>Visit MCTI {{ branch.name }} and experience our practical training before you enroll.</p>
+
+                <div class="enquiry-points">
+                    <div class="enquiry-point">✓ Practical Training</div>
+                    <div class="enquiry-point">✓ Career Guidance</div>
+                    <div class="enquiry-point">✓ Course Counselling</div>
+                    <div class="enquiry-point">✓ No Obligation Demo Class</div>
+                </div>
+            </div>
+
+            <div class="enquiry-form-box">
+
+                <h3>Request a FREE Demo</h3>
+                <p>Our counsellor will contact you shortly.</p>
+
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="enquiry-success">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" action="#enquiry">
+                    {% csrf_token %}
+
+                    <div class="enquiry-form-grid">
+
+                        <div class="enquiry-field">
+                            <label>Your Name *</label>
+                            {{ form.name }}
+                            {% for error in form.name.errors %}
+                            <div class="enquiry-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="enquiry-field">
+                            <label>Mobile Number *</label>
+                            {{ form.mobile }}
+                            {% for error in form.mobile.errors %}
+                            <div class="enquiry-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="enquiry-field">
+                            <label>Email</label>
+                            {{ form.email }}
+                        </div>
+
+                        <div class="enquiry-field">
+                            <label>Select Course *</label>
+                            {{ form.course }}
+                            {% for error in form.course.errors %}
+                            <div class="enquiry-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="enquiry-field full">
+                            <label>Message</label>
+                            {{ form.message }}
+                        </div>
+
+                        <div class="enquiry-field full">
+                            <button type="submit" class="btn btn-dark enquiry-submit">
+                                Book FREE Demo
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="enquiry-branch">
+                        Enquiry for MCTI {{ branch.name }} Branch
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+</section>
+<section class="section section-soft" id="reviews">
+    <div class="container">
+
+        <div class="section-title">
+            <span class="section-kicker">STUDENT SUCCESS</span>
+            <h2>What Our Students Say</h2>
+            <p>Real experiences from students of MCTI {{ branch.name }}.</p>
+        </div>
+
+        <div class="review-slider-controls">
+            <span>Real student experiences • Swipe to explore</span>
+            <div class="review-nav">
+                <button type="button" class="review-prev" aria-label="Previous review">&#8592;</button>
+                <button type="button" class="review-next" aria-label="Next review">&#8594;</button>
+            </div>
+        </div>
+
+        <div class="review-scroll">
+
+            {% for testimonial in testimonials %}
+            <article class="review-card">
+
+                <div class="review-top">
+                    {% if testimonial.photo %}
+                    <img class="review-photo"
+                         src="{{ testimonial.photo.url }}"
+                         alt="{{ testimonial.student_name }}">
+                    {% else %}
+                    <div class="review-avatar">
+                        {{ testimonial.student_name|first|upper }}
+                    </div>
+                    {% endif %}
+
+                    <div class="review-person">
+                        <h3>{{ testimonial.student_name }}</h3>
+
+                        {% if testimonial.course_name %}
+                        <span>{{ testimonial.course_name }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if testimonial.is_google_review %}
+                    <div class="google-review-badge">G</div>
+                    {% endif %}
+                </div>
+
+                <div class="review-stars">
+                    ★★★★★
+                </div>
+
+                <p class="review-text">
+                    “{{ testimonial.review }}”
+                </p>
+
+            </article>
+
+            {% empty %}
+
+            <div class="review-empty">
+                <div class="review-stars">★★★★★</div>
+                <h3>2250+ Reviews Across Navi Mumbai</h3>
+                <p>Branch-specific student reviews will appear here.</p>
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% if branch.google_review_url %}
+        <div class="review-action">
+            <a href="{{ branch.google_review_url }}"
+               target="_blank"
+               rel="noopener"
+               class="btn btn-orange">
+                Review Us on Google →
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+<section class="section section-soft" id="contact">
+    <div class="container">
+
+        <div class="section-title">
+            <span class="section-kicker">VISIT OUR BRANCH</span>
+            <h2>MCTI {{ branch.name }}</h2>
+            <p>Visit our branch, meet our counsellor and explore the right course for your career.</p>
+        </div>
+
+        <div class="contact-layout">
+
+            <div class="contact-panel">
+
+                <div class="contact-detail">
+                    <div class="contact-detail-icon">📍</div>
+                    <div>
+                        <h3>Branch Address</h3>
+                        <p>{{ branch.address }}</p>
+                    </div>
+                </div>
+
+                <div class="contact-detail">
+                    <div class="contact-detail-icon">📞</div>
+                    <div>
+                        <h3>Call Us</h3>
+                        <p>{{ branch.phone }}</p>
+                    </div>
+                </div>
+
+                <div class="contact-detail">
+                    <div class="contact-detail-icon">💬</div>
+                    <div>
+                        <h3>WhatsApp</h3>
+                        <p>{{ branch.whatsapp }}</p>
+                    </div>
+                </div>
+
+                <div class="contact-detail">
+                    <div class="contact-detail-icon">🎓</div>
+                    <div>
+                        <h3>FREE Demo Class</h3>
+                        <p>Experience our training before enrolling.</p>
+                    </div>
+                </div>
+
+                <div class="contact-buttons">
+                    <a class="btn btn-orange" href="tel:{{ branch.phone }}">Call Now</a>
+                    <a class="btn btn-dark" href="https://wa.me/{{ branch.whatsapp }}">WhatsApp</a>
+
+                    {% if branch.google_map_url %}
+                    <a class="btn btn-white"
+                       href="{{ branch.google_map_url }}"
+                       target="_blank"
+                       rel="noopener">Get Directions</a>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <div class="map-panel">
+
+                {% if branch.google_map_embed %}
+                    {{ branch.google_map_embed|safe }}
+                {% else %}
+                    <div class="map-placeholder">
+                        <span>📍</span>
+                        <h3>MCTI {{ branch.name }}</h3>
+                        <p>Google Map will appear here after branch location is added.</p>
+                    </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+    </div>
+</section>
+<section class="section faq-section" id="faq">
+    <div class="container">
+
+        <div class="section-title">
+            <span class="section-kicker">FREQUENTLY ASKED QUESTIONS</span>
+            <h2>Questions About MCTI {{ branch.name }}</h2>
+            <p>Quick answers about courses, demo classes and training at our {{ branch.name }} branch.</p>
+        </div>
+
+        <div class="faq-list">
+
+            <details class="faq-item">
+                <summary>Which computer courses are available at MCTI {{ branch.name }}?</summary>
+                <p>MCTI offers practical computer and career-focused courses. Course availability may vary by branch. You can select your preferred course in the enquiry form and our counsellor will guide you.</p>
+            </details>
+
+            <details class="faq-item">
+                <summary>Can I attend a demo class before joining?</summary>
+                <p>Yes. You can request a FREE demo class using the enquiry form on this page and our team will contact you.</p>
+            </details>
+
+            <details class="faq-item">
+                <summary>Does MCTI provide practical training?</summary>
+                <p>Yes. MCTI focuses on practical learning, exercises, assignments and skill development along with course concepts.</p>
+            </details>
+
+            <details class="faq-item">
+                <summary>Does MCTI provide career and placement support?</summary>
+                <p>MCTI provides career guidance, resume support, aptitude guidance, interview preparation and placement assistance for eligible students.</p>
+            </details>
+
+            <details class="faq-item">
+                <summary>How can I contact the MCTI {{ branch.name }} branch?</summary>
+                <p>You can call, WhatsApp or submit the FREE demo enquiry form on this page. Your enquiry will be sent directly to the MCTI enquiry system.</p>
+            </details>
+
+        </div>
+
+    </div>
+</section>
+<section class="section mcti-journey">
+    <div class="container">
+
+        <div class="journey-heading">
+            <span class="section-kicker">OUR STORY</span>
+            <h2>The MCTI Journey</h2>
+            <p class="journey-founder">Founded & Led by <strong>Sunil Sir</strong></p>
+            <p>
+                What started in 2013 as Maharashtra Computer Training Institute
+                has grown into an education and technology ecosystem focused on
+                practical skills, career development and digital innovation.
+            </p>
+        </div>
+
+        <div class="journey-timeline">
+
+            <div class="journey-step">
+                <span class="journey-year">2013</span>
+                <h3>The Beginning</h3>
+                <p>Maharashtra Computer Training Institute began its journey with a focus on practical computer education.</p>
+            </div>
+
+            <div class="journey-step">
+                <span class="journey-year">GROWTH</span>
+                <h3>Across Navi Mumbai</h3>
+                <p>MCTI expanded its presence through multiple training centres across Navi Mumbai.</p>
+            </div>
+
+            <div class="journey-step">
+                <span class="journey-year">13,500+</span>
+                <h3>Students</h3>
+                <p>Thousands of learners have been part of the MCTI learning journey.</p>
+            </div>
+
+            <div class="journey-step">
+                <span class="journey-year">2250+</span>
+                <h3>Reviews Across Navi Mumbai</h3>
+                <p>Student feedback across the MCTI branch network continues to strengthen our learning community.</p>
+            </div>
+
+            <div class="journey-step">
+                <span class="journey-year">TODAY</span>
+                <h3>MCTI Academy</h3>
+                <p>A growing learning platform for practical training, career skills and student development.</p>
+            </div>
+
+            <div class="journey-step journey-step-highlight">
+                <span class="journey-year">NEXT CHAPTER</span>
+                <h3>MCTI Technologies</h3>
+                <p>Technology, business solutions and digital innovation — with our corporate presence in Nerul, Navi Mumbai.</p>
+            </div>
+
+        </div>
+
+        <div class="journey-quote">
+            <span>2013 → Today</span>
+            <h3>Education. Skills. Careers. Technology.</h3>
+            <p>The journey continues.</p>
+        </div>
+
+    </div>
+</section>
+<footer class="mcti-footer">
+    <div class="container">
+
+        <div class="footer-main">
+
+            <div class="footer-brand">
+                <h2>MCTI</h2>
+                <h3>Maharashtra Computer Training Institute</h3>
+                <p>
+                    Practical computer education, career-focused training
+                    and skill development since 2013.
+                </p>
+
+                <div class="footer-trust">
+                    <span>Since 2013</span>
+                    <span>13,500+ Students</span>
+                    <span>2250+ Reviews</span>
+                </div>
+            </div>
+
+            <div class="footer-column">
+                <h4>Quick Links</h4>
+                <a href="#courses">Popular Courses</a>
+                <a href="#enquiry">Free Demo</a>
+                <a href="#reviews">Student Reviews</a>
+                <a href="#contact">Contact Branch</a>
+                <a href="{% url 'academy' %}" target="_blank">MCTI Academy</a>
+            </div>
+
+            <div class="footer-column">
+                <h4>Popular Courses</h4>
+                <a href="{% url 'courses' %}" target="_blank">Data Analysis with AI</a>
+                <a href="{% url 'courses' %}" target="_blank">Advanced Excel</a>
+                <a href="{% url 'courses' %}" target="_blank">Tally Prime with GST</a>
+                <a href="{% url 'courses' %}" target="_blank">Digital Marketing with AI</a>
+                <a href="{% url 'courses' %}" target="_blank">Full Stack Development</a>
+                <a href="{% url 'courses' %}" target="_blank">View All Courses →</a>
+            </div>
+
+            <div class="footer-column">
+                <h4>Our Branches</h4>
+                <a href="{% url 'local_site:branch_landing' slug='kharghar' %}">Kharghar</a>
+                <a href="{% url 'local_site:branch_landing' slug='panvel' %}">Panvel</a>
+                <a href="{% url 'local_site:branch_landing' slug='koperkhairane' %}">Koperkhairane</a>
+                <a href="{% url 'local_site:branch_landing' slug='kamothe' %}">Kamothe</a>
+                <a href="{% url 'local_site:branch_landing' slug='ghansoli' %}">Ghansoli</a>
+                <a href="{% url 'local_site:branch_landing' slug='nerul' %}">Nerul</a>
+            </div>
+
+        </div>
+
+        <div class="footer-tech">
+            <div>
+                <span>EDUCATION + TECHNOLOGY</span>
+                <strong>MCTI Technologies</strong>
+                <p>
+                    Technology, Business Solutions & Digital Innovation
+                    • Corporate Presence: Nerul, Navi Mumbai
+                </p>
+            </div>
+
+            <a href="https://mctitechnologies.com/"
+               target="_blank"
+               rel="noopener">
+                Visit MCTI Technologies →
+            </a>
+        </div>
+
+        <div class="footer-legal">
+            <div class="footer-policy-links">
+                <a href="{% url 'privacy_policy' %}">Privacy Policy</a>
+                <span>•</span>
+                <a href="{% url 'terms_and_conditions' %}">Terms & Conditions</a>
+                <span>•</span>
+                <a href="{% url 'refund_policy' %}">Refund & Cancellation Policy</a>
+            </div>
+
+            <p>
+                © {% now "Y" %} Maharashtra Computer Training Institute.
+                All Rights Reserved.
+            </p>
+
+            <p class="footer-powered">
+                Designed, Developed & Powered by
+                <a href="https://mctitechnologies.com/"
+                   target="_blank"
+                   rel="noopener">
+                    MCTI Technologies
+                </a>
+            </p>
+        </div>
+
+    </div>
+</footer>
+
+<a href="https://wa.me/918655556219?text=Hello%20MCTI%20Kharghar%2C%20I%20want%20information%20about%20computer%20courses%20and%20a%20FREE%20Demo."
+   class="floating-whatsapp"
+   target="_blank"
+   rel="noopener"
+   aria-label="Chat with MCTI on WhatsApp">
+    <span class="floating-whatsapp-icon"><i class="fa-brands fa-whatsapp"></i></span>
+    <span class="floating-whatsapp-text">WhatsApp</span>
+</a>
+
+<style>
+.floating-whatsapp{
+    position:fixed;
+    right:22px;
+    bottom:24px;
+    z-index:9990;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 17px;
+    border-radius:50px;
+    background:#25D366;
+    color:#fff !important;
+    text-decoration:none !important;
+    font-size:14px;
+    font-weight:800;
+    box-shadow:0 8px 25px rgba(0,0,0,.22);
+    transition:.25s ease;
+}
+
+.floating-whatsapp:hover{
+    transform:translateY(-3px) scale(1.02);
+    box-shadow:0 12px 30px rgba(0,0,0,.28);
+}
+
+.floating-whatsapp-icon{
+    font-size:20px;
+    line-height:1;
+}
+
+.floating-whatsapp-text{
+    line-height:1;
+}
+
+@media(max-width:600px){
+    .floating-whatsapp{
+        right:15px;
+        bottom:78px;
+        width:50px;
+        height:50px;
+        padding:0;
+        justify-content:center;
+        border-radius:50%;
+    }
+
+    .floating-whatsapp-icon{
+        font-size:22px;
+    }
+
+    .floating-whatsapp-text{
+        display:none;
+    }
+}
+</style>
+
+<div class="mobile-actions">
+    <a href="tel:{{ branch.phone }}">📞 Call</a>
+    <a href="https://wa.me/{{ branch.whatsapp }}">💬 WhatsApp</a>
+    <a href="#enquiry">🎓 Free Demo</a>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const slider = document.querySelector(".course-scroll");
+    if (!slider) return;
+
+    let timer;
+    let paused = false;
+
+    function getStep() {
+        const card = slider.querySelector(".course-card");
+        if (!card) return 320;
+
+        const style = window.getComputedStyle(slider);
+        const gap = parseFloat(style.gap) || 20;
+
+        return card.getBoundingClientRect().width + gap;
+    }
+
+    function nextCourse() {
+        if (paused) return;
+
+        const maxScroll = slider.scrollWidth - slider.clientWidth;
+
+        if (slider.scrollLeft >= maxScroll - 10) {
+            slider.scrollTo({
+                left: 0,
+                behavior: "smooth"
+            });
+        } else {
+            slider.scrollBy({
+                left: getStep(),
+                behavior: "smooth"
+            });
+        }
+    }
+
+    function startSlider() {
+        clearInterval(timer);
+        timer = setInterval(nextCourse, 2800);
+    }
+
+    slider.addEventListener("mouseenter", function () {
+        paused = true;
+    });
+
+    slider.addEventListener("mouseleave", function () {
+        paused = false;
+        startSlider();
+    });
+
+    slider.addEventListener("touchstart", function () {
+        paused = true;
+    }, {passive:true});
+
+    slider.addEventListener("touchend", function () {
+        paused = false;
+        startSlider();
+    }, {passive:true});
+
+    const prevButton = document.querySelector(".course-prev");
+    const nextButton = document.querySelector(".course-next");
+
+    if (prevButton) {
+        prevButton.addEventListener("click", function () {
+            if (slider.scrollLeft <= 10) {
+                slider.scrollTo({
+                    left: slider.scrollWidth,
+                    behavior: "smooth"
+                });
+            } else {
+                slider.scrollBy({
+                    left: -getStep(),
+                    behavior: "smooth"
+                });
+            }
+
+            startSlider();
+        });
+    }
+
+    if (nextButton) {
+        nextButton.addEventListener("click", function () {
+            nextCourse();
+            startSlider();
+        });
+    }
+
+    startSlider();
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const reviewSlider = document.querySelector(".review-scroll");
+    if (!reviewSlider) return;
+
+    const prev = document.querySelector(".review-prev");
+    const next = document.querySelector(".review-next");
+
+    let reviewTimer;
+    let reviewPaused = false;
+
+    function reviewStep() {
+        const card = reviewSlider.querySelector(".review-card");
+        if (!card) return 320;
+
+        const style = window.getComputedStyle(reviewSlider);
+        const gap = parseFloat(style.gap) || 20;
+
+        return card.getBoundingClientRect().width + gap;
+    }
+
+    function nextReview() {
+        if (reviewPaused) return;
+
+        const maxScroll =
+            reviewSlider.scrollWidth - reviewSlider.clientWidth;
+
+        if (reviewSlider.scrollLeft >= maxScroll - 10) {
+            reviewSlider.scrollTo({
+                left: 0,
+                behavior: "smooth"
+            });
+        } else {
+            reviewSlider.scrollBy({
+                left: reviewStep(),
+                behavior: "smooth"
+            });
+        }
+    }
+
+    function startReviews() {
+        clearInterval(reviewTimer);
+        reviewTimer = setInterval(nextReview, 4000);
+    }
+
+    if (prev) {
+        prev.addEventListener("click", function () {
+            if (reviewSlider.scrollLeft <= 10) {
+                reviewSlider.scrollTo({
+                    left: reviewSlider.scrollWidth,
+                    behavior: "smooth"
+                });
+            } else {
+                reviewSlider.scrollBy({
+                    left: -reviewStep(),
+                    behavior: "smooth"
+                });
+            }
+
+            startReviews();
+        });
+    }
+
+    if (next) {
+        next.addEventListener("click", function () {
+            reviewPaused = false;
+            nextReview();
+            startReviews();
+        });
+    }
+
+    reviewSlider.addEventListener("mouseenter", function () {
+        reviewPaused = true;
+    });
+
+    reviewSlider.addEventListener("mouseleave", function () {
+        reviewPaused = false;
+        startReviews();
+    });
+
+    reviewSlider.addEventListener("touchstart", function () {
+        reviewPaused = true;
+    }, {passive:true});
+
+    reviewSlider.addEventListener("touchend", function () {
+        reviewPaused = false;
+        startReviews();
+    }, {passive:true});
+
+    startReviews();
+});
+</script>
+
+<!-- =========================================
+     MCTI LOCAL CAREER BENEFITS POPUP
+========================================= -->
+
+<div id="mctiLocalCareerPopup" class="mcti-career-overlay">
+
+    <div class="mcti-career-popup">
+
+        <button type="button"
+                id="mctiLocalPopupClose"
+                class="mcti-popup-close"
+                aria-label="Close">&times;</button>
+
+        <div class="mcti-popup-badge">
+            MCTI CAREER BENEFITS
+        </div>
+
+        <div class="mcti-popup-icon">🎯</div>
+
+        <h2>Confused About Which Course to Choose?</h2>
+
+        <p class="mcti-popup-intro">
+            Discover the right career path before making your final course decision.
+        </p>
+
+        <div class="mcti-offer-row">
+            <div class="mcti-offer-icon">🧠</div>
+            <div>
+                <strong>FREE Aptitude Test</strong>
+                <span>
+                    Discover courses that match your skills, interests &amp; career direction.
+                </span>
+            </div>
+        </div>
+
+        <div class="mcti-offer-row">
+            <div class="mcti-offer-icon">🎓</div>
+            <div>
+                <strong>2 Days FREE Trial Class</strong>
+                <span>
+                    Experience the training before finalizing your course.
+                </span>
+            </div>
+        </div>
+
+        <div class="mcti-offer-row mcti-voucher-row">
+            <div class="mcti-offer-icon">🎁</div>
+            <div>
+                <strong>Rs. 2,500 Gift Voucher</strong>
+                <span>
+                    Special benefit when you confirm your course enrollment instantly.
+                </span>
+            </div>
+        </div>
+
+        <a href="{% url 'career_tools:public_aptitude_start' %}"
+           class="mcti-popup-primary">
+            Take FREE Aptitude Test →
+        </a>
+
+        <a href="https://wa.me/{{ branch.whatsapp }}?text=Hello%20MCTI%20{{ branch.name|urlencode }}%2C%20I%20want%20career%20guidance.%20Please%20share%20details%20about%20the%202%20Days%20Free%20Trial%20Class%20and%20Rs.%202500%20Gift%20Voucher."
+           target="_blank"
+           rel="noopener"
+           class="mcti-popup-whatsapp">
+            WhatsApp MCTI {{ branch.name }}
+        </a>
+
+        <div class="mcti-popup-note">
+            Free Career Guidance | Limited-period benefits
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+.mcti-career-overlay{
+    position:fixed;
+    inset:0;
+    z-index:99999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    background:rgba(0,0,0,.62);
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .25s ease,visibility .25s ease;
+}
+
+.mcti-career-overlay.active{
+    opacity:1;
+    visibility:visible;
+}
+
+.mcti-career-popup{
+    position:relative;
+    width:100%;
+    max-width:500px;
+    padding:30px 32px 25px;
+    background:#fff;
+    border-radius:22px;
+    border-top:5px solid #FF6600;
+    box-shadow:0 25px 80px rgba(0,0,0,.30);
+    transform:translateY(25px) scale(.97);
+    transition:transform .25s ease;
+}
+
+.mcti-career-overlay.active .mcti-career-popup{
+    transform:translateY(0) scale(1);
+}
+
+.mcti-popup-close{
+    position:absolute;
+    top:12px;
+    right:14px;
+    width:36px;
+    height:36px;
+    border:0;
+    border-radius:50%;
+    background:#f3f3f3;
+    color:#222;
+    font-size:25px;
+    cursor:pointer;
+}
+
+.mcti-popup-badge{
+    display:table;
+    margin:0 auto 10px;
+    padding:6px 13px;
+    border-radius:30px;
+    background:#FFF0E6;
+    color:#FF6600;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.8px;
+}
+
+.mcti-popup-icon{
+    text-align:center;
+    font-size:34px;
+    margin-bottom:5px;
+}
+
+.mcti-career-popup h2{
+    max-width:400px;
+    margin:0 auto;
+    text-align:center;
+    color:#111;
+    font-size:27px;
+    line-height:1.18;
+    font-weight:800;
+}
+
+.mcti-popup-intro{
+    max-width:390px;
+    margin:9px auto 18px;
+    text-align:center;
+    color:#666;
+    font-size:14px;
+    line-height:1.5;
+}
+
+.mcti-offer-row{
+    display:flex;
+    gap:13px;
+    align-items:flex-start;
+    margin-bottom:9px;
+    padding:11px 14px;
+    background:#fafafa;
+    border:1px solid #eee;
+    border-radius:12px;
+}
+
+.mcti-voucher-row{
+    background:#FFF7F2;
+    border-color:#FFD2B8;
+}
+
+.mcti-offer-icon{
+    flex:0 0 auto;
+    font-size:23px;
+}
+
+.mcti-offer-row strong{
+    display:block;
+    margin-bottom:2px;
+    color:#171717;
+    font-size:14px;
+}
+
+.mcti-offer-row span{
+    display:block;
+    color:#666;
+    font-size:12px;
+    line-height:1.4;
+}
+
+.mcti-popup-primary,
+.mcti-popup-whatsapp{
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    text-align:center;
+    text-decoration:none !important;
+    border-radius:10px;
+    font-weight:800;
+}
+
+.mcti-popup-primary{
+    margin-top:17px;
+    padding:14px 18px;
+    background:#FF6600;
+    color:#fff !important;
+    font-size:15px;
+}
+
+.mcti-popup-primary:hover{
+    background:#E65C00;
+}
+
+.mcti-popup-whatsapp{
+    margin-top:9px;
+    padding:12px 18px;
+    background:#fff;
+    border:1px solid #ddd;
+    color:#222 !important;
+    font-size:14px;
+}
+
+.mcti-popup-whatsapp:hover{
+    background:#f7f7f7;
+}
+
+.mcti-popup-note{
+    margin-top:9px;
+    text-align:center;
+    color:#999;
+    font-size:10px;
+}
+
+@media(max-width:600px){
+    .mcti-career-overlay{
+        align-items:flex-end;
+        padding:10px;
+    }
+
+    .mcti-career-popup{
+        max-height:92vh;
+        overflow-y:auto;
+        padding:27px 18px 20px;
+        border-radius:20px 20px 12px 12px;
+    }
+
+    .mcti-career-popup h2{
+        font-size:22px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const popup = document.getElementById("mctiLocalCareerPopup");
+    const closeButton = document.getElementById("mctiLocalPopupClose");
+
+    if (!popup || !closeButton) return;
+
+    if (sessionStorage.getItem("mctiLocalCareerPopupSeen")) return;
+
+    let shown = false;
+
+    function openPopup() {
+        if (shown) return;
+
+        shown = true;
+        popup.classList.add("active");
+
+        sessionStorage.setItem(
+            "mctiLocalCareerPopupSeen",
+            "1"
+        );
+
+        window.removeEventListener("scroll", checkScroll);
+    }
+
+    function checkScroll() {
+        const pageHeight =
+            document.documentElement.scrollHeight - window.innerHeight;
+
+        if (pageHeight <= 0) return;
+
+        const percentage =
+            (window.scrollY / pageHeight) * 100;
+
+        if (percentage >= 35) {
+            openPopup();
+        }
+    }
+
+    window.addEventListener(
+        "scroll",
+        checkScroll,
+        {passive:true}
+    );
+
+    closeButton.addEventListener("click", function () {
+        popup.classList.remove("active");
+    });
+
+    popup.addEventListener("click", function (event) {
+        if (event.target === popup) {
+            popup.classList.remove("active");
+        }
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            popup.classList.remove("active");
+        }
+    });
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const menuToggle = document.getElementById("menuToggle");
+    const mobileNav = document.getElementById("mobileNav");
+
+    if (!menuToggle || !mobileNav) return;
+
+    menuToggle.addEventListener("click", function () {
+        const isOpen = mobileNav.classList.toggle("active");
+
+        menuToggle.classList.toggle("active", isOpen);
+        menuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+
+    mobileNav.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function () {
+            mobileNav.classList.remove("active");
+            menuToggle.classList.remove("active");
+            menuToggle.setAttribute("aria-expanded", "false");
+        });
+    });
+
+});
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
