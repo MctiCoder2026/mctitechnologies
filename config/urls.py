@@ -21,6 +21,7 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from django.contrib.sitemaps.views import sitemap
 from core.sitemaps import StaticViewSitemap, CourseSitemap, BranchSitemap
+from local_site.views import branch_landing
 
 sitemaps = {
     "static": StaticViewSitemap,
@@ -28,6 +29,12 @@ sitemaps = {
     "branches": BranchSitemap,
 }
 urlpatterns = [
+    path('kharghar/', branch_landing, {'slug': 'kharghar'}, name='kharghar'),
+    path('panvel/', branch_landing, {'slug': 'panvel'}, name='panvel'),
+    path('nerul/', branch_landing, {'slug': 'nerul'}, name='nerul'),
+    path('ghansoli/', branch_landing, {'slug': 'ghansoli'}, name='ghansoli'),
+    path('kamothe/', branch_landing, {'slug': 'kamothe'}, name='kamothe'),
+    path('koperkhairane/', branch_landing, {'slug': 'koperkhairane'}, name='koperkhairane'),
     path('local/', include('local_site.urls')),
     path("admin/", admin.site.urls),
     path("", include("core.urls")),

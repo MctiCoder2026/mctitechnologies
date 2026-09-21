@@ -56,7 +56,4 @@ class BranchSitemap(Sitemap):
         )
 
     def location(self, obj):
-        return reverse(
-            "local_site:branch_landing",
-            kwargs={"slug": obj.slug}
-        )
+        return reverse(obj.slug)
