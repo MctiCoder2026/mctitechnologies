@@ -14,6 +14,9 @@ def branch_landing(request, slug):
         is_active=True
     )
 
+    if branch.slug == "nerul":
+        return redirect("https://mctitechnologies.com/")
+
     testimonials = branch.testimonials.filter(
         is_active=True
     )
@@ -81,9 +84,27 @@ def branch_landing(request, slug):
 
 
 def local_home(request):
+    branch_order = [
+        "Kharghar",
+        "Panvel",
+        "Koperkhairane",
+        "Kamothe",
+        "Ghansoli",
+        "Nerul",
+    ]
+
     branches = Branch.objects.filter(
         is_active=True
-    ).order_by("name")
+    )
+
+    branches = sorted(
+        branches,
+        key=lambda branch: (
+            branch_order.index(branch.name)
+            if branch.name in branch_order
+            else len(branch_order)
+        )
+    )
 
     popular_courses = Course.objects.filter(
         is_active=True,
