@@ -20,7 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 from django.contrib.sitemaps.views import sitemap
-from core.sitemaps import StaticViewSitemap, CourseSitemap, BranchSitemap
+from core.sitemaps import StaticViewSitemap, CourseSitemap, BranchSitemap, LocalStaticViewSitemap
 from local_site.views import branch_landing
 
 sitemaps = {
@@ -28,6 +28,26 @@ sitemaps = {
     "courses": CourseSitemap,
     "branches": BranchSitemap,
 }
+
+local_sitemaps = {
+    "static": LocalStaticViewSitemap,
+    "courses": CourseSitemap,
+    "branches": BranchSitemap,
+}
+def domain_sitemap(request):
+    host = request.get_host().split(":")[0].lower()
+
+    if host in {
+        "maharashtracomputer.com",
+        "www.maharashtracomputer.com",
+    }:
+        selected_sitemaps = local_sitemaps
+    else:
+        selected_sitemaps = sitemaps
+
+    return sitemap(request, sitemaps=selected_sitemaps)
+
+
 urlpatterns = [
     path('kharghar/', branch_landing, {'slug': 'kharghar'}, name='kharghar'),
     path('panvel/', branch_landing, {'slug': 'panvel'}, name='panvel'),
@@ -41,10 +61,9 @@ urlpatterns = [
     path("lms/", include("lms.urls")),
     path("api/mobile/", include("mobile_api.urls")),
     path(
-    "sitemap.xml",
-    sitemap,
-    {"sitemaps": sitemaps},
-    name="django.contrib.sitemaps.views.sitemap",
+        "sitemap.xml",
+        domain_sitemap,
+        name="django.contrib.sitemaps.views.sitemap",
     ),
 ]
 

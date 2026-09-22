@@ -23,6 +23,7 @@ from .models import (
 )
 from .forms import JobPostForm
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
 from django.urls import reverse
 from django.db.models import Q, Sum, Count, Max
 from django.utils import timezone
@@ -3591,6 +3592,26 @@ def student_attendance(request):
 # ============================================================
 # HOME
 # ============================================================
+
+def robots_txt(request):
+    host = request.get_host().split(":")[0].lower()
+
+    if host in {
+        "maharashtracomputer.com",
+        "www.maharashtracomputer.com",
+    }:
+        sitemap_url = "https://maharashtracomputer.com/sitemap.xml"
+    else:
+        sitemap_url = "https://mctitechnologies.com/sitemap.xml"
+
+    content = (
+        "User-agent: *\n"
+        "Allow: /\n\n"
+        f"Sitemap: {sitemap_url}\n"
+    )
+
+    return HttpResponse(content, content_type="text/plain")
+
 
 def home(request):
 

@@ -57,3 +57,14 @@ class BranchSitemap(Sitemap):
 
     def location(self, obj):
         return reverse(obj.slug)
+
+
+class LocalStaticViewSitemap(Sitemap):
+    changefreq = "weekly"
+    priority = 0.8
+
+    def items(self):
+        return ["home"]
+
+    def location(self, item):
+        return reverse(item)
