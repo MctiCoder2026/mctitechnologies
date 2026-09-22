@@ -268,6 +268,15 @@
                 {% if messages %}
                     {% for message in messages %}
                     <div class="enquiry-success">{{ message }}</div>
+                    {% if message.tags == 'success' %}
+                    <script>
+                      gtag('event', 'conversion', {
+                          'send_to': 'AW-927843434/BWReCNLzrYEdEOqIt7oD',
+                          'value': 1.0,
+                          'currency': 'INR'
+                      });
+                    </script>
+                    {% endif %}
                     {% endfor %}
                 {% endif %}
 
