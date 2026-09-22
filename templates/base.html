@@ -434,9 +434,22 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 .mcti-popup-icon {
-    text-align: center;
-    font-size: 34px;
-    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 12px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #ff7a18 0%, #f05a00 100%);
+    color: #ffffff;
+    font-size: 30px;
+    box-shadow: 0 10px 24px rgba(240, 90, 0, 0.28);
+    transform: rotate(-3deg);
+}
+
+.mcti-popup-icon i {
+    transform: rotate(3deg);
 }
 
 .mcti-career-popup h2 {
@@ -475,8 +488,17 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 .mcti-offer-icon {
-    flex: 0 0 auto;
-    font-size: 23px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    background: linear-gradient(135deg, #ff7a18 0%, #f05a00 100%);
+    color: #ffffff;
+    font-size: 19px;
+    box-shadow: 0 6px 14px rgba(240, 90, 0, 0.22);
 }
 
 .mcti-offer-row strong {
