@@ -37,7 +37,7 @@ class CourseSitemap(Sitemap):
             is_active=True
         ).exclude(
             slug=""
-        )
+        ).order_by("id")
 
     def location(self, obj):
         return reverse(
