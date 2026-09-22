@@ -37,9 +37,10 @@
             <a href="/">Home</a>
             <a href="#courses">Courses</a>
             <a href="#branches">Branches</a>
+            <a href="{% url 'career_tools:public_aptitude_start' %}">Career Tools</a>
             <a href="#why">Why MCTI</a>
             <a href="#contact">Contact</a>
-            <a class="nav-cta" href="#branches">Find Your Branch</a>
+            <a class="nav-cta" href="{% url 'career_tools:public_aptitude_start' %}">FREE Aptitude Test</a>
         </nav>
     </div>
 </header>
@@ -67,6 +68,7 @@
             <div class="hero-actions">
                 <a class="btn btn-dark" href="#courses">Explore Courses</a>
                 <a class="btn btn-white" href="#branches">Find Your Branch</a>
+                <a class="btn btn-dark" href="{% url 'career_tools:public_aptitude_start' %}">Free Aptitude Test</a>
             </div>
         </div>
 
@@ -135,6 +137,35 @@
                 </div>
             </article>
             {% endfor %}
+        </div>
+
+    </div>
+</section>
+
+
+<section class="section" id="career-tools">
+    <div class="container">
+
+        <div class="section-title">
+            <span class="section-kicker">MCTI CAREER TOOLS</span>
+            <h2>Not Sure Which Career is Right for You?</h2>
+            <p>Take our free aptitude test and understand your strengths before choosing a course.</p>
+        </div>
+
+        <div class="academy-course-cta">
+            <div>
+                <span>100% FREE</span>
+                <h3>Free Aptitude & Career Assessment</h3>
+                <p>
+                    Assess your aptitude, discover your strengths and get better direction
+                    for your learning and career journey.
+                </p>
+            </div>
+
+            <a href="{% url 'career_tools:public_aptitude_start' %}"
+               class="btn btn-dark">
+                Start Free Test →
+            </a>
         </div>
 
     </div>

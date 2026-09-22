@@ -33,6 +33,8 @@ ALLOWED_HOSTS = [
     "194.238.22.82",
     "mctitechnologies.com",
     "www.mctitechnologies.com",
+    "maharashtracomputer.com",
+    "www.maharashtracomputer.com",
 ]
 
 
@@ -74,6 +76,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "https://mctitechnologies.com",
     "https://www.mctitechnologies.com",
+    "https://maharashtracomputer.com",
+    "https://www.maharashtracomputer.com",
 ]
 # ========================================
 # PRODUCTION HTTPS / SECURITY
