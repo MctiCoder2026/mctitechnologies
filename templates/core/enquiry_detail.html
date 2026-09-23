@@ -660,6 +660,10 @@ Lead Details | MCTI Technologies
                     🆕 New Enquiry
                 </option>
 
+                <option value="specialOffer">
+                    Special Offer + Career Kit
+                </option>
+
                 <option value="followup1">
                     1️⃣ Follow-up 1 — Purpose
                 </option>
@@ -935,6 +939,16 @@ document.addEventListener(
                 : "www.maharashthracomputer.com";
 
 
+        const demoOffer =
+            branch.toLowerCase() === "nerul"
+                ? "7 Days FREE Trial Classes"
+                : "2 Days FREE Demo Classes";
+
+
+        const careerKitUrl =
+            "https://mctitechnologies.com{% url 'career_tools:public_aptitude_start' %}";
+
+
         const mapSection =
             branchMap
                 ? "*Map:*\n" + branchMap + "\n\n"
@@ -954,6 +968,18 @@ document.addEventListener(
 Thank you for contacting us.
 
 We have received your enquiry for the *${course}* course.
+
+*Special Welcome Offer*
+${demoOffer}
+FREE Aptitude Test through MCTI Career Kit
+Personal Career Guidance
+Special On-Spot Admission Benefit Available
+
+*Start Your Free Aptitude Test:*
+${careerKitUrl}
+
+Reply *DEMO* to book your free class.
+Reply *VISIT* to schedule your centre visit.
 
 *${branch} Branch*
 
@@ -977,6 +1003,33 @@ ${branchAddress || `${branch} Branch, Navi Mumbai`}
 4. Kamothe
 5. Ghansoli
 6. Nerul`,
+
+
+            specialOffer:
+            `Hello ${name} Ji,
+
+A special offer is available for your *${course}* enquiry.
+
+*${branch} Branch Welcome Offer*
+${demoOffer}
+
+*Career Benefit*
+FREE Aptitude Test through MCTI Career Kit
+Personal Career Guidance
+Special On-Spot Admission Benefit Available
+
+*Start Your Free Aptitude Test:*
+${careerKitUrl}
+
+Reply *DEMO* to book your free class.
+Reply *VISIT* to schedule your centre visit.
+Reply *ADMISSION* to know the admission benefit.
+
+*Mobile:* 8655556219
+*Website:* ${website}
+
+*MCTI Technologies*
+(An Initiative by Maharashtra Computer Training Institute)`,
 
 
             followup1:
