@@ -80,8 +80,13 @@ content="width=device-width, initial-scale=1.0"
 
 </div>
 
-<button class="menu-toggle" id="menuToggle" aria-label="Open Menu">
-    <i class="fa-solid fa-bars"></i>
+<button type="button"
+        class="menu-toggle"
+        id="menuToggle"
+        aria-label="Open navigation menu"
+        aria-controls="primaryNavigation"
+        aria-expanded="false">
+    <i class="fa-solid fa-bars" aria-hidden="true"></i>
 </button>
 
 
@@ -90,7 +95,7 @@ content="width=device-width, initial-scale=1.0"
      NAVIGATION
 ================================================== -->
 
-<ul class="nav-links">
+<ul class="nav-links" id="primaryNavigation">
 
 
     <!-- HOME -->
@@ -207,6 +212,9 @@ content="width=device-width, initial-scale=1.0"
 
   
 
+</ul>
+
+
 <!-- =================================================
      ENQUIRE NOW
 ================================================== -->
@@ -274,19 +282,77 @@ content="width=device-width, initial-scale=1.0"
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const menuToggle = document.getElementById("menuToggle");
-    const navLinks = document.querySelector(".nav-links");
+    const navLinks = document.getElementById("primaryNavigation");
 
-    menuToggle.addEventListener("click", function () {
-        navLinks.classList.toggle("active");
+    if (!menuToggle || !navLinks) {
+        return;
+    }
 
-        const icon = menuToggle.querySelector("i");
+    const icon = menuToggle.querySelector("i");
 
-        if (navLinks.classList.contains("active")) {
-            icon.classList.remove("fa-bars");
-            icon.classList.add("fa-xmark");
-        } else {
+    function closeMenu() {
+        navLinks.classList.remove("active");
+        document.body.classList.remove("nav-menu-open");
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.setAttribute(
+            "aria-label",
+            "Open navigation menu"
+        );
+
+        if (icon) {
             icon.classList.remove("fa-xmark");
             icon.classList.add("fa-bars");
+        }
+    }
+
+    function openMenu() {
+        navLinks.classList.add("active");
+        document.body.classList.add("nav-menu-open");
+        menuToggle.setAttribute("aria-expanded", "true");
+        menuToggle.setAttribute(
+            "aria-label",
+            "Close navigation menu"
+        );
+
+        if (icon) {
+            icon.classList.remove("fa-bars");
+            icon.classList.add("fa-xmark");
+        }
+    }
+
+    menuToggle.addEventListener("click", function (event) {
+        event.stopPropagation();
+
+        if (navLinks.classList.contains("active")) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+
+    navLinks.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", closeMenu);
+    });
+
+    document.addEventListener("click", function (event) {
+        if (
+            navLinks.classList.contains("active")
+            && !navLinks.contains(event.target)
+            && !menuToggle.contains(event.target)
+        ) {
+            closeMenu();
+        }
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            closeMenu();
+        }
+    });
+
+    window.addEventListener("resize", function () {
+        if (window.innerWidth > 900) {
+            closeMenu();
         }
     });
 });
