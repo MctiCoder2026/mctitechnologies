@@ -30,6 +30,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import Enrollment
 from .forms import EnrollmentForm
+from local_site.models import Branch as LocalBranch
 
 
 from .forms import (
@@ -4423,6 +4424,45 @@ def enquiry_detail(
 
         assignment_form = None
 
+    career_profile = (
+        enquiry.career_profiles
+        .order_by("-created_at")
+        .first()
+    )
+
+    aptitude_attempt = None
+    career_recommendation = None
+
+    if career_profile:
+
+        aptitude_attempt = (
+            career_profile.aptitude_attempts
+            .filter(status="completed")
+            .order_by(
+                "-completed_at",
+                "-id"
+            )
+            .first()
+        )
+
+        career_recommendation = (
+            career_profile.career_recommendations
+            .prefetch_related("items")
+            .order_by("-created_at")
+            .first()
+        )
+
+    branch_details = (
+        LocalBranch.objects
+        .filter(
+            name__iexact=(
+                enquiry.branch or ""
+            ).strip(),
+            is_active=True
+        )
+        .first()
+    )
+
     activities = (
         EnquiryActivity.objects
         .select_related(
@@ -4441,6 +4481,10 @@ def enquiry_detail(
         "core/enquiry_detail.html",
         {
             "enquiry": enquiry,
+            "branch_details": branch_details,
+            "career_profile": career_profile,
+            "aptitude_attempt": aptitude_attempt,
+            "career_recommendation": career_recommendation,
             "form": form,
             "assignment_form": assignment_form,
             "activities": activities,
@@ -4449,6 +4493,59 @@ def enquiry_detail(
             ),
         }
     )
+
+
+# ============================================================
+# DELETE DUMMY / DUPLICATE ENQUIRY
+# ============================================================
+
+@login_required
+def delete_enquiry(request, enquiry_id):
+
+    if not request.user.is_superuser:
+        messages.error(
+            request,
+            "Only Power User can delete enquiries."
+        )
+        return redirect(
+            "enquiry_detail",
+            enquiry_id=enquiry_id
+        )
+
+    enquiry = get_object_or_404(
+        Enquiry,
+        id=enquiry_id
+    )
+
+    if request.method != "POST":
+        return redirect(
+            "enquiry_detail",
+            enquiry_id=enquiry.id
+        )
+
+    if enquiry.status == "converted":
+        messages.error(
+            request,
+            "Converted enquiries cannot be deleted."
+        )
+        return redirect(
+            "enquiry_detail",
+            enquiry_id=enquiry.id
+        )
+
+    enquiry_name = enquiry.name
+    enquiry_mobile = enquiry.mobile
+    enquiry_db_id = enquiry.id
+
+    enquiry.delete()
+
+    messages.success(
+        request,
+        f"Enquiry {enquiry_name} - {enquiry_mobile} "
+        f"(ID {enquiry_db_id}) deleted successfully."
+    )
+
+    return redirect("enquiry_dashboard")
 
 
 # ============================================================

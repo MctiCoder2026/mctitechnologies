@@ -137,6 +137,12 @@ urlpatterns = [
     ),
 
     path(
+        "enquiry/<int:enquiry_id>/delete/",
+        views.delete_enquiry,
+        name="delete_enquiry"
+    ),
+
+    path(
         "enquiry/<int:enquiry_id>/status/",
         views.update_enquiry_status,
         name="update_enquiry_status"

@@ -8,7 +8,6 @@ Lead Details | MCTI Technologies
 
 <section class="mcti-dashboard">
 
-```
 <div class="mcti-dashboard-container">
 
     <!-- ========================================
@@ -167,6 +166,239 @@ Lead Details | MCTI Technologies
             </div>
 
 
+            <!-- ORIGINAL ENQUIRY / WALK-IN NOTES -->
+
+            <div class="mcti-assignment-box">
+
+                <div class="mcti-detail-card-header">
+                    <span>ENQUIRY NOTES</span>
+                    <h2>Call / Walk-in Information</h2>
+                </div>
+
+                <div style="color:#475467; line-height:1.7; overflow-wrap:anywhere;">
+                    {% if enquiry.message %}
+                        {{ enquiry.message|linebreaksbr }}
+                    {% else %}
+                        No notes added.
+                    {% endif %}
+                </div>
+
+            </div>
+
+
+            {% if career_profile %}
+
+                <div class="mcti-assignment-box">
+
+                    <div class="mcti-detail-card-header">
+                        <span>CAREER KIT</span>
+                        <h2>Aptitude Test & Career Profile</h2>
+                    </div>
+
+                    <div class="mcti-detail-info">
+
+                        <div>
+                            <span>Qualification</span>
+                            <strong>
+                                {{ career_profile.highest_qualification|default:"—" }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Stream</span>
+                            <strong>
+                                {{ career_profile.stream|default:"—" }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Current Status</span>
+                            <strong>
+                                {{ career_profile.current_status|default:"—" }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Career Interest</span>
+                            <strong>
+                                {{ career_profile.career_interest|default:"—" }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Preferred Branch</span>
+                            <strong>
+                                {{ career_profile.preferred_branch|default:"—" }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Source</span>
+                            <strong>
+                                {{ career_profile.source|default:"MCTI Career Kit" }}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                    {% if aptitude_attempt %}
+
+                        <div style="
+                            margin-top:20px;
+                            padding:18px;
+                            border-radius:12px;
+                            background:#fff7ed;
+                            border:1px solid #fed7aa;
+                        ">
+
+                            <div class="mcti-detail-card-header">
+                                <span>APTITUDE COMPLETED</span>
+                                <h2>
+                                    Score: {{ aptitude_attempt.score_percentage }}%
+                                </h2>
+                            </div>
+
+                            <div class="mcti-detail-info">
+
+                                <div>
+                                    <span>Correct Answers</span>
+                                    <strong>
+                                        {{ aptitude_attempt.correct_answers }}
+                                        /
+                                        {{ aptitude_attempt.total_questions }}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>Numerical</span>
+                                    <strong>{{ aptitude_attempt.numerical_score }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Logical</span>
+                                    <strong>{{ aptitude_attempt.logical_score }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Verbal</span>
+                                    <strong>{{ aptitude_attempt.verbal_score }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Computer</span>
+                                    <strong>{{ aptitude_attempt.computer_score }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Career</span>
+                                    <strong>{{ aptitude_attempt.career_score }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Completed</span>
+                                    <strong>
+                                        {{ aptitude_attempt.completed_at|date:"d M Y, h:i A" }}
+                                    </strong>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% else %}
+
+                        <div style="
+                            margin-top:18px;
+                            padding:14px;
+                            border-radius:10px;
+                            background:#fff7ed;
+                            color:#c2410c;
+                            font-weight:700;
+                        ">
+                            Aptitude Test started but not completed.
+                        </div>
+
+                    {% endif %}
+
+                    {% if career_recommendation %}
+
+                        <div style="margin-top:20px;">
+
+                            <div class="mcti-detail-card-header">
+                                <span>CAREER RECOMMENDATION</span>
+                                <h2>
+                                    {{ career_recommendation.strongest_area|default:"Recommended Careers" }}
+                                </h2>
+                                {% if career_recommendation.improvement_area %}
+                                    <p>
+                                        Improvement Area:
+                                        {{ career_recommendation.improvement_area }}
+                                    </p>
+                                {% endif %}
+                            </div>
+
+                            {% for item in career_recommendation.items.all %}
+
+                                <div style="
+                                    display:flex;
+                                    justify-content:space-between;
+                                    gap:15px;
+                                    margin-top:10px;
+                                    padding:12px 14px;
+                                    border:1px solid #eaecf0;
+                                    border-radius:10px;
+                                    background:#fff;
+                                ">
+
+                                    <strong>
+                                        {{ item.rank }}. {{ item.career_title }}
+                                    </strong>
+
+                                    <span style="
+                                        color:#15803d;
+                                        font-weight:800;
+                                        white-space:nowrap;
+                                    ">
+                                        {{ item.match_percentage }}% Match
+                                    </span>
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% endif %}
+
+                    <div style="
+                        display:flex;
+                        flex-wrap:wrap;
+                        gap:10px;
+                        margin-top:20px;
+                    ">
+
+                        <a href="{% url 'career_tools:quick_enquiry_result' career_profile.id %}"
+                           class="mcti-save-btn"
+                           style="text-decoration:none;">
+                            Open Career Kit
+                        </a>
+
+                        <a href="{% url 'career_tools:career_report_pdf' career_profile.id %}"
+                           class="mcti-save-btn"
+                           style="
+                               text-decoration:none;
+                               background:#111827;
+                           ">
+                            Download Career Report PDF
+                        </a>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
             <!-- ========================================
                  STAFF ASSIGNMENT
             ======================================== -->
@@ -261,7 +493,7 @@ Lead Details | MCTI Technologies
                             title="Call"
                             onclick="setTimeout(function(){ window.location.href='tel:{{ enquiry.mobile }}'; }, 150);">
 
-                        📞
+                        <i class="fa-solid fa-phone"></i>
 
                     </button>
 
@@ -310,6 +542,45 @@ Lead Details | MCTI Technologies
             </div>
 
         </div>
+
+
+        {% if request.user.is_superuser and enquiry.status != "converted" %}
+
+            <div class="mcti-detail-card"
+                 style="border:1px solid #fecaca; background:#fff7f7;">
+
+                <div class="mcti-detail-card-header">
+                    <span style="color:#b42318;">POWER USER</span>
+                    <h2>Delete Dummy Enquiry</h2>
+                    <p>
+                        Use this only for test, dummy or duplicate enquiries.
+                    </p>
+                </div>
+
+                <form method="POST"
+                      action="{% url 'delete_enquiry' enquiry.id %}"
+                      onsubmit="return confirm('Delete enquiry for {{ enquiry.name|escapejs }} ({{ enquiry.mobile|escapejs }})? This action cannot be undone.');">
+
+                    {% csrf_token %}
+
+                    <button type="submit"
+                            style="
+                                border:0;
+                                border-radius:8px;
+                                padding:11px 18px;
+                                background:#b42318;
+                                color:#fff;
+                                font-weight:800;
+                                cursor:pointer;
+                            ">
+                        Delete Enquiry
+                    </button>
+
+                </form>
+
+            </div>
+
+        {% endif %}
 
 
         <!-- ========================================
@@ -389,8 +660,16 @@ Lead Details | MCTI Technologies
                     🆕 New Enquiry
                 </option>
 
-                <option value="followup">
-                    📞 Follow-up
+                <option value="followup1">
+                    1️⃣ Follow-up 1 — Purpose
+                </option>
+
+                <option value="followup2">
+                    2️⃣ Follow-up 2 — Visit / Call
+                </option>
+
+                <option value="finalDecision">
+                    3️⃣ Follow-up 3 — Final Decision
                 </option>
 
                 <option value="course">
@@ -584,7 +863,6 @@ Lead Details | MCTI Technologies
 
 
 </div>
-```
 
 </section>
 
@@ -631,8 +909,36 @@ document.addEventListener(
             "{% if enquiry.course %}{{ enquiry.course.title|escapejs }}{% else %}our courses{% endif %}";
 
 
+        const courseUrl =
+            "{% if enquiry.course %}https://mctitechnologies.com{% url 'course_detail' slug=enquiry.course.slug %}{% else %}https://mctitechnologies.com/courses/{% endif %}";
+
+
         const mobile =
             "{{ enquiry.mobile|escapejs }}";
+
+
+        const branch =
+            "{% if branch_details %}{{ branch_details.name|escapejs }}{% else %}{{ enquiry.branch|default:'MCTI'|title|escapejs }}{% endif %}";
+
+
+        const branchAddress =
+            "{{ branch_details.address|default:''|escapejs }}";
+
+
+        const branchMap =
+            "{{ branch_details.google_map_url|default:''|escapejs }}";
+
+
+        const website =
+            branch.toLowerCase() === "nerul"
+                ? "www.mctitechnologies.com"
+                : "www.maharashthracomputer.com";
+
+
+        const mapSection =
+            branchMap
+                ? "*Map:*\n" + branchMap + "\n\n"
+                : "";
 
 
         /* ========================================
@@ -643,33 +949,123 @@ document.addEventListener(
 
 
             new:
-            `Hello ${name},
+            `Hello ${name} Ji,
 
-Thank you for contacting MCTI Technologies.
+Thank you for contacting us.
 
-We have received your enquiry regarding ${course}.
+We have received your enquiry for the *${course}* course.
 
-How can we help you today?`,
+*${branch} Branch*
+
+${mapSection}*Address:*
+${branchAddress || `${branch} Branch, Navi Mumbai`}
+
+*Please Visit:*
+10:00 AM to 8:30 PM (Mon–Sun)
+
+*Mobile:* 8655556219
+
+*MCTI Technologies*
+(An Initiative by Maharashtra Computer Training Institute)
+
+*Website:* ${website}
+
+*Our Locations*
+1. Kharghar
+2. Panvel
+3. Koperkhairane
+4. Kamothe
+5. Ghansoli
+6. Nerul`,
 
 
-            followup:
-            `Hello ${name},
+            followup1:
+            `Hello ${name} Ji 👋
 
-This is MCTI Technologies.
+You had enquired about the *${course}* course.
 
-We are following up regarding your enquiry for ${course}.
+Please tell us the main purpose for choosing this course:
 
-Please let us know a convenient time to connect with you.`,
+1️⃣ Job
+2️⃣ Career Growth
+3️⃣ Business
+4️⃣ Only Course Details
+
+Please reply with the option number so our Career Counsellor can guide you correctly.
+
+📍 *MCTI – ${branch} Branch*
+📞 8655556219
+🌐 www.maharashthracomputer.com
+
+*MCTI Technologies*
+_An Initiative by Maharashtra Computer Training Institute_`,
+
+
+            followup2:
+            `Hello ${name} Ji,
+
+We can arrange *Free Career Counselling* to explain the syllabus, fees, duration and career opportunities for the *${course}* course.
+
+What would be convenient for you?
+
+1️⃣ Visit Centre Today
+2️⃣ Visit Centre Tomorrow
+3️⃣ Phone Call First
+4️⃣ Not Interested Right Now
+
+Please reply with the option number.
+
+📍 *MCTI – ${branch} Branch*
+📞 8655556219
+🌐 www.maharashthracomputer.com
+
+*MCTI Technologies*
+_An Initiative by Maharashtra Computer Training Institute_`,
+
+
+            finalDecision:
+            `Hello ${name} Ji,
+
+This is our final follow-up regarding your enquiry for the *${course}* course.
+
+Please share your decision:
+
+1️⃣ Want to Take Admission
+2️⃣ Need Demo/Counselling
+3️⃣ Contact Me Next Month
+4️⃣ No Plan Right Now
+
+Your reply will help us update your enquiry correctly.
+
+📍 *MCTI – ${branch} Branch*
+📞 8655556219
+🌐 www.maharashthracomputer.com
+
+*MCTI Technologies*
+_An Initiative by Maharashtra Computer Training Institute_`,
 
 
             course:
-            `Hello ${name},
+            `Hello ${name} Ji,
 
-Thank you for your interest in ${course} at MCTI Technologies.
+Thank you for your interest in the *${course}* course.
 
-We would be happy to share the course details, fees and batch information with you.
+You can view the complete course overview, syllabus and career information here:
 
-Please let us know when we can connect.`,
+*View Course Details:*
+${courseUrl}
+
+Please reply with your preferred option:
+
+1. Course Fees
+2. Batch Timing
+3. Free Counselling
+4. Admission Process
+
+*Mobile:* 8655556219
+
+*MCTI Technologies*
+(An Initiative by Maharashtra Computer Training Institute)`,
 
 
             admission:

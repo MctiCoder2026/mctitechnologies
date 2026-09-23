@@ -685,22 +685,15 @@ Enquiry Dashboard | MCTI Technologies
                 <table class="mcti-enquiry-table">
 
                     <thead>
-
                         <tr>
-
                             <th>Name</th>
-                            <th>Mobile</th>
                             <th>Course</th>
                             <th>Branch</th>
-                            <th>Call / Walk-in Notes</th>
                             <th>Status</th>
                             <th>Date</th>
-                            <th>Action</th>
-
+                            <th style="text-align:center;">View</th>
                         </tr>
-
                     </thead>
-
 
                     <tbody>
 
@@ -708,75 +701,25 @@ Enquiry Dashboard | MCTI Technologies
 
                             <tr>
 
-
-                                <!-- NAME -->
-
                                 <td>
-
-                                    <strong>
-                                        {{ enquiry.name }}
-                                    </strong>
-
+                                    <strong>{{ enquiry.name }}</strong>
                                 </td>
 
-
-                                <!-- MOBILE -->
-
                                 <td>
-                                    {{ enquiry.mobile }}
-                                </td>
-
-
-                                <!-- COURSE -->
-
-                                <td>
-
                                     {% if enquiry.course %}
-
                                         {{ enquiry.course.title }}
-
                                     {% else %}
-
                                         —
-
                                     {% endif %}
-
                                 </td>
-
-
-                                <!-- BRANCH -->
 
                                 <td>
-                                    {{ enquiry.branch|default:"—" }}
+                                    {{ enquiry.branch|default:"—"|title }}
                                 </td>
-
-
-                                <!-- CALL / WALK-IN NOTES -->
-
-                                <td style="min-width:260px; max-width:420px; white-space:normal; overflow-wrap:anywhere; line-height:1.45;">
-
-                                    {% if enquiry.message %}
-
-                                        {{ enquiry.message|linebreaksbr }}
-
-                                    {% else %}
-
-                                        <span style="color:#94a3b8;">
-                                            No notes
-                                        </span>
-
-                                    {% endif %}
-
-                                </td>
-
-
-                                <!-- STATUS -->
 
                                 <td>
-
                                     <form method="POST"
                                           action="{% url 'update_enquiry_status' enquiry.id %}">
-
                                         {% csrf_token %}
 
                                         <select name="status"
@@ -809,105 +752,20 @@ Enquiry Dashboard | MCTI Technologies
                                             </option>
 
                                         </select>
-
                                     </form>
-
                                 </td>
-
-
-                                <!-- DATE -->
 
                                 <td>
-
                                     {{ enquiry.created_at|date:"d M Y" }}
-
                                 </td>
 
-
-                                <!-- ACTION -->
-
-                                <td class="mcti-lead-actions">
-
-                                    {% if enquiry.career_profile_id %}
-
-                                        <div style="display:flex; flex-direction:column; gap:4px; width:100px; flex:0 0 100px; margin-right:4px;">
-
-                                            {% if enquiry.completed_aptitude_count %}
-                                                <span style="color:#15803d; font-size:10px; font-weight:800; white-space:nowrap;">
-                                                    Aptitude Done
-                                                </span>
-                                            {% else %}
-                                                <span style="color:#c2410c; font-size:10px; font-weight:800; white-space:nowrap;">
-                                                    Aptitude Pending
-                                                </span>
-                                            {% endif %}
-
-                                            <div style="display:flex; gap:4px;">
-                                                <a
-                                                    href="{% url 'career_tools:quick_enquiry_result' enquiry.career_profile_id %}"
-                                                    style="padding:4px 6px; border-radius:6px; background:#111; color:#fff; text-decoration:none; font-size:10px; font-weight:800;"
-                                                    title="Open Career Kit"
-                                                >
-                                                    Kit
-                                                </a>
-
-                                                <a
-                                                    href="{% url 'career_tools:career_report_pdf' enquiry.career_profile_id %}"
-                                                    style="padding:4px 6px; border-radius:6px; background:#f36a21; color:#fff; text-decoration:none; font-size:10px; font-weight:800;"
-                                                    title="Download Career Report"
-                                                >
-                                                    PDF
-                                                </a>
-                                            </div>
-
-                                        </div>
-
-                                    {% else %}
-
-                                        <div style="width:100px; flex:0 0 100px; margin-right:4px;">
-                                            <span style="color:#888; font-size:10px; white-space:nowrap;">
-                                                Standard Enquiry
-                                            </span>
-                                        </div>
-
-                                    {% endif %}
-
-
-                                    <!-- VIEW -->
-
+                                <td style="text-align:center;">
                                     <a href="{% url 'enquiry_detail' enquiry.id %}"
                                        class="mcti-view-btn"
-                                       title="View Details">
-
-                                        👁️
-
+                                       title="View Complete Details"
+                                       aria-label="View {{ enquiry.name }} details">
+                                        <i class="fa-solid fa-eye"></i>
                                     </a>
-
-
-                                    <!-- CALL -->
-
-                                    <button type="button"
-                                            class="mcti-call-btn"
-                                            title="Call"
-                                            onclick="logCallAndOpen('{{ enquiry.id }}', '{{ enquiry.mobile }}')">
-
-                                        📞
-
-                                    </button>
-
-
-                                    <!-- WHATSAPP -->
-
-                                    <button type="button"
-                                            class="mcti-whatsapp-btn"
-                                            title="WhatsApp"
-                                            onclick="logWhatsAppAndOpen('{{ enquiry.id }}', '{{ enquiry.mobile }}', '{{ enquiry.name|escapejs }}')">
-
-                                        <i class="fa-brands fa-whatsapp"></i>
-
-                                    </button>
-
-
                                 </td>
 
                             </tr>
