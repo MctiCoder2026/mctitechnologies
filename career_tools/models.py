@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.hashers import check_password, make_password
 from core.models import Student, Enquiry
 
 
@@ -45,6 +46,10 @@ class CareerProfile(models.Model):
     is_guest = models.BooleanField(default=False)
     consent_given = models.BooleanField(default=False)
 
+    career_pin = models.CharField(max_length=128, blank=True)
+    career_pin_created_at = models.DateTimeField(null=True, blank=True)
+    last_career_login_at = models.DateTimeField(null=True, blank=True)
+
     source = models.CharField(
         max_length=100,
         default="MCTI Career Kit"
@@ -52,6 +57,21 @@ class CareerProfile(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def has_career_pin(self):
+        return bool(self.career_pin)
+
+    def set_career_pin(self, raw_pin):
+        raw_pin = str(raw_pin).strip()
+        if not raw_pin.isdigit() or len(raw_pin) != 4:
+            raise ValueError("Career PIN must contain exactly 4 digits.")
+        self.career_pin = make_password(raw_pin)
+
+    def check_career_pin(self, raw_pin):
+        if not self.career_pin:
+            return False
+        return check_password(str(raw_pin).strip(), self.career_pin)
 
     def __str__(self):
         return self.full_name

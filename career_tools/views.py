@@ -1,3 +1,5 @@
+import secrets
+
 from io import BytesIO
 from xml.sax.saxutils import escape
 
@@ -37,6 +39,7 @@ from .forms import (
     CareerProfileForm,
     ResumeForm,
     GuestCareerStartForm,
+    CareerLoginForm,
     EducationFormSet,
     ExperienceFormSet,
     ProjectFormSet,
@@ -399,6 +402,173 @@ def guest_start(request):
             "next_tool": next_tool,
         }
     )
+# =========================================================
+# MCTI CAREER ACCOUNT
+# =========================================================
+
+def _career_guest_profile(request):
+    profile_id = request.session.get("career_guest_profile_id")
+    if not profile_id:
+        return None
+    return CareerProfile.objects.filter(
+        id=profile_id,
+        is_guest=True,
+        student__isnull=True,
+    ).first()
+
+
+def career_account_created(request):
+    profile = _career_guest_profile(request)
+    if not profile:
+        return redirect("career_tools:career_login")
+
+    career_pin = request.session.pop("career_new_pin", None)
+    if not career_pin:
+        return redirect("career_tools:career_dashboard")
+
+    return render(
+        request,
+        "career_tools/career_account_created.html",
+        {
+            "profile": profile,
+            "career_pin": career_pin,
+            "next_tool": request.session.get(
+                "career_login_next",
+                "resume",
+            ),
+        },
+    )
+
+
+def career_login(request):
+    if _career_guest_profile(request):
+        return redirect("career_tools:career_dashboard")
+
+    error = ""
+    locked_until = request.session.get(
+        "career_login_locked_until",
+        0,
+    )
+
+    if request.method == "POST":
+        form = CareerLoginForm(request.POST)
+        now_timestamp = timezone.now().timestamp()
+
+        if locked_until and now_timestamp < locked_until:
+            error = (
+                "Too many incorrect attempts. "
+                "Please try again after 15 minutes."
+            )
+        elif form.is_valid():
+            mobile = form.cleaned_data["mobile"]
+            pin = form.cleaned_data["pin"]
+
+            profile = (
+                CareerProfile.objects.filter(
+                    mobile=mobile,
+                    is_guest=True,
+                    student__isnull=True,
+                )
+                .order_by("-updated_at")
+                .first()
+            )
+
+            if (
+                profile
+                and profile.has_career_pin
+                and profile.check_career_pin(pin)
+            ):
+                request.session.cycle_key()
+                request.session["career_guest_profile_id"] = profile.id
+                request.session.pop("career_login_attempts", None)
+                request.session.pop("career_login_locked_until", None)
+
+                profile.last_career_login_at = timezone.now()
+                profile.save(update_fields=[
+                    "last_career_login_at",
+                    "updated_at",
+                ])
+
+                next_tool = request.session.pop(
+                    "career_login_next",
+                    "dashboard",
+                )
+                if next_tool == "aptitude":
+                    return redirect("career_tools:aptitude_test")
+                if next_tool == "resume":
+                    return redirect("career_tools:guest_resume_builder")
+                return redirect("career_tools:career_dashboard")
+
+            attempts = request.session.get(
+                "career_login_attempts",
+                0,
+            ) + 1
+            request.session["career_login_attempts"] = attempts
+
+            if attempts >= 5:
+                request.session["career_login_locked_until"] = (
+                    now_timestamp + 900
+                )
+                request.session["career_login_attempts"] = 0
+                error = (
+                    "Too many incorrect attempts. "
+                    "Login locked for 15 minutes."
+                )
+            else:
+                error = "Invalid mobile number or Career PIN."
+    else:
+        form = CareerLoginForm()
+
+    return render(
+        request,
+        "career_tools/career_login.html",
+        {
+            "form": form,
+            "error": error,
+        },
+    )
+
+
+def career_dashboard(request):
+    profile = _career_guest_profile(request)
+    if not profile:
+        return redirect("career_tools:career_login")
+
+    attempts = AptitudeAttempt.objects.filter(
+        profile=profile,
+        status="completed",
+    ).order_by("-completed_at", "-id")
+
+    resumes = Resume.objects.filter(
+        profile=profile,
+    ).order_by("-updated_at")
+
+    return render(
+        request,
+        "career_tools/career_dashboard.html",
+        {
+            "profile": profile,
+            "attempts": attempts,
+            "latest_attempt": attempts.first(),
+            "resumes": resumes,
+        },
+    )
+
+
+def career_logout(request):
+    for key in [
+        "career_guest_profile_id",
+        "career_new_pin",
+        "career_login_next",
+        "career_login_attempts",
+        "career_login_locked_until",
+    ]:
+        request.session.pop(key, None)
+
+    request.session.cycle_key()
+    return redirect("career_tools:career_login")
+
+
 # =========================================================
 # GUEST RESUME BUILDER
 # =========================================================

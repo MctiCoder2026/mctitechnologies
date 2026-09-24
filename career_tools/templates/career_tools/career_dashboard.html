@@ -243,123 +243,51 @@
 </style>
 
 <div class="career-start-page">
-    <div class="career-shell">
-
-        <div class="career-intro">
-
-            <div class="career-label">
-                MCTI CAREER KIT
-            </div>
-
-            <h1>
-                Start Building Your
-                <span>Career Profile</span>
-            </h1>
-
-            <p>
-                Create your career profile once and use it across
-                Resume Builder, Aptitude Test and Career Recommendation.
-            </p>
-
-            <div class="career-points">
-
-                <div class="career-point">
-                    <span class="career-dot"></span>
-                    <span>Create a professional resume and download PDF.</span>
-                </div>
-
-                <div class="career-point">
-                    <span class="career-dot"></span>
-                    <span>Take a practical 20-question aptitude test.</span>
-                </div>
-
-                <div class="career-point">
-                    <span class="career-dot"></span>
-                    <span>Get Top 3 personalized career recommendations.</span>
-                </div>
-
-                <div class="career-point">
-                    <span class="career-dot"></span>
-                    <span>Get better guidance from an MCTI counsellor.</span>
-                </div>
-
-            </div>
+    <div style="max-width:1100px;margin:0 auto;">
+        <div class="career-intro" style="margin-bottom:24px;">
+            <div class="career-label">MCTI CAREER ACCOUNT</div>
+            <h1>Welcome, <span>{{ profile.full_name }}</span></h1>
+            <p>Manage your aptitude reports, career recommendations and resume from one place.</p>
+            <a href="{% url 'career_tools:career_logout' %}" style="display:inline-block;margin-top:12px;color:#fff;border:1px solid #555;border-radius:8px;padding:9px 14px;text-decoration:none;">Logout</a>
         </div>
 
-        <div class="career-form-card">
+        <div class="career-shell">
+            <div class="career-form-card">
+                <h2>Your Career Tools</h2>
+                <div class="sub">Continue your career journey.</div>
 
-            <h2>
-                {% if next_tool == "aptitude" %}
-                    Start Aptitude Test
-                {% else %}
-                    Start Free Career Kit
-                {% endif %}
-            </h2>
+                <a href="{% url 'career_tools:aptitude_test' %}" class="career-btn career-btn-primary">Take Aptitude Test</a>
+                <div style="height:12px;"></div>
+                <a href="{% url 'career_tools:guest_resume_builder' %}" class="career-btn career-btn-secondary">Open Resume Builder</a>
 
-            <div class="sub">
-                {% if next_tool == "aptitude" %}
-                    Enter your details and continue directly to your Aptitude Test.
-                {% else %}
-                    Enter your details to create your MCTI Career Profile.
-                {% endif %}
+                <hr class="career-divider">
+                <div style="font-size:14px;line-height:1.8;color:#555;">
+                    <strong>Registered Mobile:</strong> {{ profile.mobile }}<br>
+                    <strong>Career Interest:</strong> {{ profile.career_interest|default:"Not added yet" }}<br>
+                    <strong>Preferred Branch:</strong> {{ profile.preferred_branch|default:"Not selected" }}
+                </div>
             </div>
 
-            <form method="post">
-                {% csrf_token %}
+            <div class="career-form-card">
+                <h2>Aptitude Reports</h2>
+                <div class="sub">Your completed test history.</div>
 
-                <input
-                    type="hidden"
-                    name="next"
-                    value="{{ next_tool }}"
-                >
-
-                {{ form.as_p }}
-
-                <button
-                    type="submit"
-                    class="career-btn career-btn-primary"
-                >
-                    {% if next_tool == "aptitude" %}
-                        Continue to Aptitude Test
-                    {% else %}
-                        Continue to Resume Builder
-                    {% endif %}
-                </button>
-            </form>
-
-            <hr class="career-divider">
-
-            <div class="career-login-text">
-                Already created your Career Account?
+                {% for attempt in attempts %}
+                    <div style="border:1px solid #ececec;border-radius:12px;padding:15px;margin-bottom:12px;">
+                        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;">
+                            <div>
+                                <strong>Score: {{ attempt.score_percentage }}%</strong><br>
+                                <small style="color:#777;">{{ attempt.completed_at|date:"d M Y, h:i A" }}</small>
+                            </div>
+                            <a href="{% url 'career_tools:aptitude_result' attempt.id %}" style="color:#f36a21;font-weight:800;text-decoration:none;">View Report</a>
+                        </div>
+                        <a href="{% url 'career_tools:career_recommendation' attempt.id %}" style="display:inline-block;margin-top:9px;color:#111;font-weight:700;text-decoration:none;">Career Recommendations →</a>
+                    </div>
+                {% empty %}
+                    <div style="background:#f7f7f7;border-radius:12px;padding:18px;color:#666;">No completed aptitude report yet. Start your first free test.</div>
+                {% endfor %}
             </div>
-
-            <a
-                href="{% url 'career_tools:career_login' %}"
-                class="career-btn career-btn-primary"
-            >
-                Career Account Login
-            </a>
-
-            <hr class="career-divider">
-
-            <div class="career-login-text">
-                Already an MCTI student?
-            </div>
-
-            <a
-                href="{% url 'student_login' %}"
-                class="career-btn career-btn-secondary"
-            >
-                Student Login
-            </a>
-
-            <div class="privacy-note">
-                Your details are used only for MCTI career guidance,
-                counselling and related career services.
-            </div>
-
         </div>
-
     </div>
 </div>
 

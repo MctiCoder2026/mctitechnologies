@@ -147,6 +147,51 @@ class GuestCareerStartForm(forms.Form):
 
 
 
+class CareerLoginForm(forms.Form):
+    mobile = forms.CharField(
+        max_length=15,
+        min_length=10,
+        label="Registered Mobile Number",
+        widget=forms.TextInput(attrs={
+            "class": "form-control",
+            "placeholder": "10 digit mobile number",
+            "inputmode": "numeric",
+            "autocomplete": "tel",
+        })
+    )
+
+    pin = forms.CharField(
+        min_length=4,
+        max_length=4,
+        label="4-digit Career PIN",
+        widget=forms.PasswordInput(attrs={
+            "class": "form-control",
+            "placeholder": "Enter 4-digit PIN",
+            "inputmode": "numeric",
+            "autocomplete": "current-password",
+        })
+    )
+
+    def clean_mobile(self):
+        mobile = self.cleaned_data["mobile"].strip()
+        digits = "".join(filter(str.isdigit, mobile))
+        if len(digits) == 12 and digits.startswith("91"):
+            digits = digits[2:]
+        if len(digits) != 10:
+            raise forms.ValidationError(
+                "Please enter a valid 10 digit mobile number."
+            )
+        return digits
+
+    def clean_pin(self):
+        pin = self.cleaned_data["pin"].strip()
+        if not pin.isdigit() or len(pin) != 4:
+            raise forms.ValidationError(
+                "Please enter a valid 4-digit PIN."
+            )
+        return pin
+
+
 class QuickCareerEnquiryForm(GuestCareerStartForm):
 
     highest_qualification = forms.ChoiceField(

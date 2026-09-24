@@ -63,6 +63,30 @@ urlpatterns = [
     ),
 
     path(
+        "career-account/created/",
+        views.career_account_created,
+        name="career_account_created"
+    ),
+
+    path(
+        "career-account/login/",
+        views.career_login,
+        name="career_login"
+    ),
+
+    path(
+        "career-account/",
+        views.career_dashboard,
+        name="career_dashboard"
+    ),
+
+    path(
+        "career-account/logout/",
+        views.career_logout,
+        name="career_logout"
+    ),
+
+    path(
         "guest/",
         views.guest_start,
         name="guest_start"
