@@ -344,6 +344,11 @@ def guest_start(request):
                 .first()
             )
 
+            if profile and profile.has_career_pin:
+                request.session.pop("career_guest_profile_id", None)
+                request.session["career_login_next"] = next_tool
+                return redirect("career_tools:career_login")
+
             if profile:
 
                 profile.full_name = full_name
@@ -371,6 +376,22 @@ def guest_start(request):
                 )
 
             # ---------------------------------------------
+            # CREATE SECURE CAREER PIN
+            # ---------------------------------------------
+
+            career_pin = f"{secrets.randbelow(10000):04d}"
+            profile.set_career_pin(career_pin)
+            profile.career_pin_created_at = timezone.now()
+            profile.save(update_fields=[
+                "career_pin",
+                "career_pin_created_at",
+                "updated_at",
+            ])
+
+            request.session["career_new_pin"] = career_pin
+            request.session["career_login_next"] = next_tool
+
+            # ---------------------------------------------
             # SAVE SAME GUEST PROFILE IN SESSION
             # ---------------------------------------------
 
@@ -382,13 +403,8 @@ def guest_start(request):
             # OPEN SELECTED CAREER TOOL
             # ---------------------------------------------
 
-            if next_tool == "aptitude":
-                return redirect(
-                    "career_tools:aptitude_test"
-                )
-
             return redirect(
-                "career_tools:guest_resume_builder"
+                "career_tools:career_account_created"
             )
 
     else:
