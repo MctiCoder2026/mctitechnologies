@@ -77,6 +77,37 @@ class CareerProfile(models.Model):
         return self.full_name
 
 
+class CareerPinResetLog(models.Model):
+    profile = models.ForeignKey(
+        CareerProfile,
+        on_delete=models.CASCADE,
+        related_name="pin_reset_logs"
+    )
+
+    reset_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="career_pin_resets"
+    )
+
+    reason = models.CharField(
+        max_length=255,
+        blank=True,
+        default="Student forgot Career PIN"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+
+    def __str__(self):
+        staff_name = self.reset_by.username if self.reset_by else "Unknown Staff"
+        return f"{self.profile.full_name} - reset by {staff_name}"
+
+
 class Resume(models.Model):
     profile = models.ForeignKey(
         CareerProfile,

@@ -408,6 +408,58 @@
 
     </div>
 
+    {% if profile.is_guest %}
+    <div class="section">
+        <div class="section-title">Career Account PIN</div>
+
+        {% if new_reset_pin %}
+            <div style="background:#111;color:#fff;border-radius:14px;padding:20px;margin-bottom:18px;text-align:center;">
+                <div style="font-size:13px;color:#f36a21;font-weight:bold;margin-bottom:8px;">NEW PIN — SHOW ONLY ONCE</div>
+                <div style="font-size:40px;font-weight:900;letter-spacing:12px;">{{ new_reset_pin }}</div>
+                <div style="font-size:12px;color:#ccc;margin-top:9px;">Give this PIN privately to {{ profile.full_name }} and ask them to save it.</div>
+            </div>
+        {% endif %}
+
+        <div class="info-box" style="margin-bottom:16px;">
+            <div class="label">Career Account Status</div>
+            <div class="value">
+                {% if profile.has_career_pin %}
+                    Active — PIN is securely encrypted
+                {% else %}
+                    PIN not created yet
+                {% endif %}
+            </div>
+        </div>
+
+        {% if can_reset_pin %}
+            <form method="post" action="{% url 'career_tools:counsellor_reset_career_pin' profile.id %}" onsubmit="return confirm('Generate a new Career PIN? The old PIN will stop working immediately.');">
+                {% csrf_token %}
+                <label for="reset-reason" style="display:block;font-size:13px;font-weight:bold;margin-bottom:7px;">Reset Reason</label>
+                <input id="reset-reason" type="text" name="reason" value="Student forgot Career PIN" maxlength="255" required style="width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;margin-bottom:12px;">
+                <button type="submit" style="border:0;background:#f36a21;color:#fff;padding:12px 18px;border-radius:9px;font-weight:bold;cursor:pointer;">Generate New 4-digit PIN</button>
+            </form>
+        {% else %}
+            <div class="empty">You do not have branch permission to reset this PIN.</div>
+        {% endif %}
+
+        {% if pin_reset_logs %}
+            <div style="margin-top:22px;font-weight:bold;">Recent Reset History</div>
+            <table class="history-table" style="margin-top:10px;">
+                <thead><tr><th>Date</th><th>Reset By</th><th>Reason</th></tr></thead>
+                <tbody>
+                    {% for log in pin_reset_logs %}
+                    <tr>
+                        <td>{{ log.created_at|date:"d M Y, h:i A" }}</td>
+                        <td>{% if log.reset_by %}{{ log.reset_by.get_full_name|default:log.reset_by.username }}{% else %}Unknown Staff{% endif %}</td>
+                        <td>{{ log.reason }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+    {% endif %}
+
     <div class="section">
 
         <div class="section-title">

@@ -21,12 +21,14 @@ from reportlab.platypus import (
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.http import require_POST
 from django.utils import timezone
 
 from core.models import Student, Enquiry, Admission
 
 from .models import (
     CareerProfile,
+    CareerPinResetLog,
     Resume,
     AptitudeQuestion,
     AptitudeAttempt,
@@ -2239,6 +2241,81 @@ def counsellor_dashboard(request):
     )
 
 
+def _staff_can_reset_career_pin(user, profile):
+    if user.is_superuser:
+        return True
+
+    try:
+        staff_profile = user.staff_profile
+    except Exception:
+        return False
+
+    if not staff_profile.is_active:
+        return False
+
+    if staff_profile.branch == "head_office":
+        return True
+
+    profile_branch = (profile.preferred_branch or "").strip().lower()
+
+    if not profile_branch and profile.enquiry:
+        profile_branch = (profile.enquiry.branch or "").strip().lower()
+
+    return profile_branch == staff_profile.branch.strip().lower()
+
+
+@staff_member_required(login_url="/admin/login/")
+@require_POST
+def counsellor_reset_career_pin(request, profile_id):
+    profile = (
+        CareerProfile.objects
+        .select_related("enquiry")
+        .filter(id=profile_id, is_guest=True)
+        .first()
+    )
+
+    if profile is None:
+        return HttpResponse(
+            "Guest Career Account not found.",
+            status=404,
+        )
+
+    if not _staff_can_reset_career_pin(request.user, profile):
+        return HttpResponse(
+            "You do not have permission to reset this Career PIN.",
+            status=403,
+        )
+
+    new_pin = f"{secrets.randbelow(10000):04d}"
+    profile.set_career_pin(new_pin)
+    profile.career_pin_created_at = timezone.now()
+    profile.save(update_fields=[
+        "career_pin",
+        "career_pin_created_at",
+        "updated_at",
+    ])
+
+    reason = (
+        request.POST.get("reason", "")
+        .strip()[:255]
+        or "Student forgot Career PIN"
+    )
+
+    CareerPinResetLog.objects.create(
+        profile=profile,
+        reset_by=request.user,
+        reason=reason,
+    )
+
+    request.session["career_reset_profile_id"] = profile.id
+    request.session["career_reset_new_pin"] = new_pin
+
+    return redirect(
+        "career_tools:counsellor_profile_detail",
+        profile_id=profile.id,
+    )
+
+
 @staff_member_required(login_url="/admin/login/")
 def counsellor_profile_detail(request, profile_id):
     """
@@ -2285,9 +2362,27 @@ def counsellor_profile_detail(request, profile_id):
             .order_by("rank", "id")[:3]
         )
 
+    can_reset_pin = (
+        profile.is_guest
+        and _staff_can_reset_career_pin(request.user, profile)
+    )
+
+    new_reset_pin = None
+    reset_profile_id = request.session.get("career_reset_profile_id")
+
+    if reset_profile_id == profile.id:
+        new_reset_pin = request.session.pop(
+            "career_reset_new_pin",
+            None,
+        )
+        request.session.pop("career_reset_profile_id", None)
+
     context = {
         "profile": profile,
         "enquiry": profile.enquiry,
+        "can_reset_pin": can_reset_pin,
+        "new_reset_pin": new_reset_pin,
+        "pin_reset_logs": profile.pin_reset_logs.select_related("reset_by")[:10],
         "latest_attempt": latest_attempt,
         "latest_recommendation": latest_recommendation,
         "top_recommendations": top_recommendations,

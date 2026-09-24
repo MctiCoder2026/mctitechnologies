@@ -129,6 +129,12 @@ urlpatterns = [
     ),
 
     path(
+        "counsellor/profile/<int:profile_id>/reset-pin/",
+        views.counsellor_reset_career_pin,
+        name="counsellor_reset_career_pin"
+    ),
+
+    path(
         "counsellor/profile/<int:profile_id>/",
         views.counsellor_profile_detail,
         name="counsellor_profile_detail"
