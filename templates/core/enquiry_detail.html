@@ -960,6 +960,32 @@ document.addEventListener(
 
 
         /* ========================================
+           INTERNAL INDICATIVE FEE RANGES
+           CRM / WhatsApp guidance only
+        ======================================== */
+
+        const indicativeFeeRanges = {
+            "Advanced MS Office": "₹6,000 – ₹12,000",
+            "Advanced Excel": "₹7,000 – ₹15,000",
+            "Tally Prime with GST": "₹8,000 – ₹15,000",
+            "Power BI": "₹10,000 – ₹20,000",
+            "Data Analysis with AI": "₹20,000 – ₹40,000",
+            "Digital Marketing with AI": "₹15,000 – ₹30,000",
+            "Python Development": "₹15,000 – ₹30,000",
+            "Full Stack Development": "₹25,000 – ₹45,000",
+            "Cyber Security & Ethical Hacking": "₹25,000 – ₹45,000",
+            "Cloud Computing": "₹20,000 – ₹40,000",
+            "SAP FICO": "₹25,000 – ₹45,000",
+            "Artificial Intelligence & Machine Learning": "₹30,000 – ₹60,000",
+            "Graphic Design": "₹15,000 – ₹30,000",
+            "AI Tools & ChatGPT for Office Productivity": "₹5,000 – ₹10,000"
+        };
+
+        const indicativeFee =
+            indicativeFeeRanges[course] || "₹____ – ₹____";
+
+
+        /* ========================================
            MESSAGE TEMPLATES
         ======================================== */
 
@@ -1086,9 +1112,9 @@ Please reply with your preferred option:
 
 
             approxFee:
-            `\u{1F4B0} *Approx. Fee – ${course}*
+            `*Approx. Fee – ${course}*
 
-₹____ – ₹____
+${indicativeFee}
 
 This is an approximate fee range for initial guidance.
 
