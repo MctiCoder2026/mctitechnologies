@@ -680,6 +680,10 @@ Lead Details | MCTI Technologies
                     📚 Course Information
                 </option>
 
+                <option value="approxFee">
+                    💰 Approx. Course Fee
+                </option>
+
                 <option value="admission">
                     🎓 Admission
                 </option>
@@ -1006,9 +1010,7 @@ ${branchAddress || `${branch} Branch, Navi Mumbai`}
 
 
             specialOffer:
-            `Hello ${name} Ji,
-
-A special offer is available for your *${course}* enquiry.
+            `A special offer is available for your *${course}* enquiry.
 
 *${branch} Branch Welcome Offer*
 ${demoOffer}
@@ -1025,17 +1027,11 @@ Reply *DEMO* to book your free class.
 Reply *VISIT* to schedule your centre visit.
 Reply *ADMISSION* to know the admission benefit.
 
-*Mobile:* 8655556219
-*Website:* ${website}
-
-*MCTI Technologies*
-(An Initiative by Maharashtra Computer Training Institute)`,
+`,
 
 
             followup1:
-            `Hello ${name} Ji 👋
-
-You had enquired about the *${course}* course.
+            `You had enquired about the *${course}* course.
 
 Please tell us the main purpose for choosing this course:
 
@@ -1044,20 +1040,11 @@ Please tell us the main purpose for choosing this course:
 3️⃣ Business
 4️⃣ Only Course Details
 
-Please reply with the option number so our Career Counsellor can guide you correctly.
-
-📍 *MCTI – ${branch} Branch*
-📞 8655556219
-🌐 www.maharashthracomputer.com
-
-*MCTI Technologies*
-_An Initiative by Maharashtra Computer Training Institute_`,
+Please reply with the option number so our Career Counsellor can guide you correctly.`,
 
 
             followup2:
-            `Hello ${name} Ji,
-
-We can arrange *Free Career Counselling* to explain the syllabus, fees, duration and career opportunities for the *${course}* course.
+            `We can arrange *Free Career Counselling* to explain the syllabus, fees, duration and career opportunities for the *${course}* course.
 
 What would be convenient for you?
 
@@ -1066,20 +1053,11 @@ What would be convenient for you?
 3️⃣ Phone Call First
 4️⃣ Not Interested Right Now
 
-Please reply with the option number.
-
-📍 *MCTI – ${branch} Branch*
-📞 8655556219
-🌐 www.maharashthracomputer.com
-
-*MCTI Technologies*
-_An Initiative by Maharashtra Computer Training Institute_`,
+Please reply with the option number.`,
 
 
             finalDecision:
-            `Hello ${name} Ji,
-
-This is our final follow-up regarding your enquiry for the *${course}* course.
+            `This is our final follow-up regarding your enquiry for the *${course}* course.
 
 Please share your decision:
 
@@ -1088,20 +1066,11 @@ Please share your decision:
 3️⃣ Contact Me Next Month
 4️⃣ No Plan Right Now
 
-Your reply will help us update your enquiry correctly.
-
-📍 *MCTI – ${branch} Branch*
-📞 8655556219
-🌐 www.maharashthracomputer.com
-
-*MCTI Technologies*
-_An Initiative by Maharashtra Computer Training Institute_`,
+Your reply will help us update your enquiry correctly.`,
 
 
             course:
-            `Hello ${name} Ji,
-
-Thank you for your interest in the *${course}* course.
+            `Here are the details for the *${course}* course.
 
 You can view the complete course overview, syllabus and career information here:
 
@@ -1113,12 +1082,21 @@ Please reply with your preferred option:
 1. Course Fees
 2. Batch Timing
 3. Free Counselling
-4. Admission Process
+4. Admission Process`,
 
-*Mobile:* 8655556219
 
-*MCTI Technologies*
-(An Initiative by Maharashtra Computer Training Institute)`,
+            approxFee:
+            `\u{1F4B0} *Approx. Fee – ${course}*
+
+₹____ – ₹____
+
+This is an approximate fee range for initial guidance.
+
+Final applicable fee may vary depending on the selected training plan, course duration, batch type and currently available offer.
+
+_Disclaimer: This is an indicative fee range only and is not a final quotation._
+
+For the current offer / exact applicable fee, reply *YES*.`,
 
 
             admission:
