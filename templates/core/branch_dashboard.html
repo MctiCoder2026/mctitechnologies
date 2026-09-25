@@ -38,6 +38,9 @@
             background: #111827;
             color: white;
             padding: 25px 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
         }
 
         .logo {
@@ -398,6 +401,10 @@
             New Career Enquiry
         </a>
 
+        <a href="{% url 'career_tools:counsellor_dashboard' %}">
+            Career Counsellor Dashboard
+        </a>
+
         <a href="{% url 'business_lead_list' %}">
             Business Leads
         </a>
@@ -408,6 +415,10 @@
 
         <a href="{% url 'student_list' %}">
             Students
+        </a>
+
+        <a href="{% url 'lms:staff_training' %}">
+            🎯 My Training
         </a>
 
         <a href="{% url 'fee_payment_list' %}">
