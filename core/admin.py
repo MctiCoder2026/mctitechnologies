@@ -453,6 +453,17 @@ class FeePaymentAdmin(admin.ModelAdmin):
 
     date_hierarchy = "payment_date"
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return tuple(
+                field.name for field in self.model._meta.fields
+                if field.name != "id"
+            )
+        return super().get_readonly_fields(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
     @admin.display(description="Print Receipt")
     def print_receipt(self, obj):
 

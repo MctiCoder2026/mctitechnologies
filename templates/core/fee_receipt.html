@@ -647,6 +647,13 @@ body {
         <div class="receipt-date">
             Date: {{ payment.payment_date }}
         </div>
+        {% for correction in approved_corrections %}
+        <div style="margin-top:9px;padding:9px;background:#fff2e8;border-radius:6px">
+            CORRECTED RECEIPT · Original ₹{{ correction.original_amount }} →
+            Corrected ₹{{ correction.requested_amount }} ·
+            Approved {{ correction.reviewed_at|date:"d M Y" }}
+        </div>
+        {% endfor %}
 
     </div>
 
@@ -872,7 +879,7 @@ body {
             </span>
 
             <span>
-                ₹{{ payment.previous_paid|add:payment.amount }}
+                ₹{{ current_total_paid }}
             </span>
 
         </div>
@@ -885,7 +892,7 @@ body {
             </span>
 
             <span>
-                ₹{{ payment.balance_after_payment }}
+                ₹{{ current_balance }}
             </span>
 
         </div>

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Request Receipt Correction | MCTI{% endblock %}
+{% block content %}
+<main style="max-width:760px;margin:28px auto;padding:18px">
+  <a href="{% url 'fee_payment_list' %}">← Fee payments</a>
+  <section style="background:white;border:1px solid #ddd;border-left:5px solid #ff7200;border-radius:12px;padding:22px;margin-top:16px">
+    <h1>Request receipt correction</h1>
+    <p><strong>Receipt:</strong> {{ payment.receipt_number }}</p>
+    <p><strong>Student:</strong> {{ payment.student.name }}</p>
+    <p><strong>Current amount:</strong> ₹{{ payment.amount }}</p>
+    {% if payment.enrollment %}
+      <p><strong>Course:</strong> {{ payment.enrollment.course.title }}</p>
+    {% endif %}
+    {% if pending %}
+      <p style="color:#9a3412"><strong>Awaiting approval:</strong> ₹{{ pending.requested_amount }}
+        (requested by {{ pending.requested_by_name }})</p>
+    {% else %}
+      <p>The receipt stays unchanged until HO/admin approves this request.</p>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <p><label>{{ form.requested_amount.label }}<br>{{ form.requested_amount }}</label>
+          {{ form.requested_amount.errors }}</p>
+        <p><label>{{ form.reason.label }}<br>{{ form.reason }}</label>
+          {{ form.reason.errors }}</p>
+        <button type="submit" style="background:#ff7200;color:white;border:0;padding:12px 18px;border-radius:8px">
+          Submit correction request
+        </button>
+      </form>
+    {% endif %}
+    <p style="margin-top:18px"><a href="{% url 'fee_correction_queue' %}">View correction requests</a></p>
+  </section>
+</main>
+{% endblock %}

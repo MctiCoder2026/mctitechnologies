@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Receipt Correction Requests | MCTI{% endblock %}
+{% block content %}
+<main style="max-width:1100px;margin:28px auto;padding:18px">
+  <a href="{% url 'fee_payment_list' %}">← Fee payments</a>
+  <h1 style="margin:18px 0">Receipt correction requests</h1>
+  <p><strong>{{ pending_count }}</strong> awaiting HO/admin review.</p>
+  {% for item in records %}
+    <section style="background:white;border:1px solid #ddd;border-left:5px solid #ff7200;border-radius:10px;padding:18px;margin:12px 0">
+      <strong>{{ item.payment.receipt_number }}</strong> · {{ item.payment.student.name }}
+      {% if item.payment.enrollment %} · {{ item.payment.enrollment.course.title }}{% endif %}
+      <p>₹{{ item.original_amount }} → <strong>₹{{ item.requested_amount }}</strong>
+        · {{ item.get_status_display }}</p>
+      <p><strong>Reason:</strong> {{ item.reason }}</p>
+      <small>Requested by {{ item.requested_by_name }} · {{ item.requested_at|date:"d M Y, g:i A" }}</small>
+      {% if item.reviewed_at %}
+        <p>Reviewed by {{ item.reviewed_by_name }} · {{ item.reviewed_at|date:"d M Y, g:i A" }}
+          {% if item.review_note %} · {{ item.review_note }}{% endif %}</p>
+      {% endif %}
+      {% if can_review and item.status == "pending" %}
+        <form method="post" action="{% url 'review_fee_correction' item.id %}" style="margin-top:12px">
+          {% csrf_token %}
+          <input name="review_note" maxlength="2000" placeholder="Note (required if rejecting)"
+                 style="padding:10px;width:min(100%,550px)">
+          <button name="decision" value="approved" type="submit"
+                  style="background:#166534;color:white;border:0;padding:11px">Approve correction</button>
+          <button name="decision" value="rejected" type="submit"
+                  style="background:#991b1b;color:white;border:0;padding:11px">Reject</button>
+        </form>
+      {% endif %}
+      <p><a href="{% url 'fee_receipt' item.payment.receipt_number %}">View receipt</a></p>
+    </section>
+  {% empty %}
+    <p>No correction requests yet.</p>
+  {% endfor %}
+</main>
+{% endblock %}

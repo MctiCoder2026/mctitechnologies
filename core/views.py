@@ -17,6 +17,7 @@ from .models import (
     JobPost,
     StaffProfile,
     StaffLoginLog,
+    StaffAttendance,
     Attendance,
     BranchLocation,
 
@@ -2683,120 +2684,16 @@ def staff_login(request):
                 },
             )
 
-        login_latitude = None
-        login_longitude = None
-        login_distance = None
-
-        if profile.requires_location_login:
-            if not latitude_value or not longitude_value:
-                create_staff_login_log(
-                    request=request,
-                    entered_username=username,
-                    status="denied",
-                    reason="Location permission was not provided.",
-                    user=user,
-                    branch=profile.branch,
-                )
-                return render(
-                    request,
-                    "core/staff_login.html",
-                    {
-                        "error": "Location permission is required. Please allow location and login again.",
-                        "entered_username": username,
-                    },
-                )
-
-            try:
-                login_latitude = float(latitude_value)
-                login_longitude = float(longitude_value)
-                if not (
-                    -90 <= login_latitude <= 90
-                    and -180 <= login_longitude <= 180
-                ):
-                    raise ValueError
-            except (TypeError, ValueError):
-                create_staff_login_log(
-                    request=request,
-                    entered_username=username,
-                    status="denied",
-                    reason="Invalid GPS coordinates received.",
-                    user=user,
-                    branch=profile.branch,
-                )
-                return render(
-                    request,
-                    "core/staff_login.html",
-                    {
-                        "error": "Invalid location received. Please refresh and try again.",
-                        "entered_username": username,
-                    },
-                )
-
-            branch_location = (
-                BranchLocation.objects.filter(is_active=True)
-                .filter(
-                    Q(branch_name__iexact=profile.branch)
-                    | Q(branch_name__iexact=profile.get_branch_display())
-                )
-                .first()
-            )
-
-            if not branch_location:
-                create_staff_login_log(
-                    request=request,
-                    entered_username=username,
-                    status="denied",
-                    reason="Assigned branch GPS location is not configured.",
-                    user=user,
-                    branch=profile.branch,
-                    latitude=login_latitude,
-                    longitude=login_longitude,
-                )
-                return render(
-                    request,
-                    "core/staff_login.html",
-                    {
-                        "error": "Branch location is not configured. Please contact the administrator.",
-                        "entered_username": username,
-                    },
-                )
-
-            login_distance = calculate_distance_meters(
-                login_latitude,
-                login_longitude,
-                branch_location.latitude,
-                branch_location.longitude,
-            )
-
-            if login_distance > branch_location.radius_meters:
-                create_staff_login_log(
-                    request=request,
-                    entered_username=username,
-                    status="denied",
-                    reason="Login attempted outside assigned branch radius.",
-                    user=user,
-                    branch=profile.branch,
-                    latitude=login_latitude,
-                    longitude=login_longitude,
-                    distance_meters=round(login_distance, 2),
-                )
-                return render(
-                    request,
-                    "core/staff_login.html",
-                    {
-                        "error": "Login is allowed only from your assigned branch location.",
-                        "entered_username": username,
-                    },
-                )
+        # --------------------------------------------------------
+        # SUCCESSFUL STAFF LOGIN
+        # Location restriction intentionally disabled.
+        # Staff usage is tracked through login history and
+        # one attendance record per staff member per day.
+        # --------------------------------------------------------
 
         login(request, user)
-        request.session["staff_location_verified"] = bool(
-            profile.requires_location_login
-        )
-        request.session["staff_verified_branch"] = profile.branch
 
-        if profile.requires_location_login:
-            request.session.set_expiry(60 * 60 * 8)
+        request.session["staff_verified_branch"] = profile.branch
 
         create_staff_login_log(
             request=request,
@@ -2805,13 +2702,18 @@ def staff_login(request):
             reason="Staff login successful.",
             user=user,
             branch=profile.branch,
-            latitude=login_latitude,
-            longitude=login_longitude,
-            distance_meters=(
-                round(login_distance, 2)
-                if login_distance is not None
-                else None
-            ),
+        )
+
+        StaffAttendance.objects.get_or_create(
+            staff=profile,
+            attendance_date=timezone.localdate(),
+            defaults={
+                "first_login_time": timezone.now(),
+                "status": "present",
+                "branch": profile.branch,
+                "ip_address": get_client_ip(request),
+                "source": "staff_login",
+            },
         )
 
         return redirect("branch_dashboard")
@@ -2987,6 +2889,25 @@ def student_login(request):
                 "ModelBackend"
             )
         )
+
+        # ----------------------------------------------------
+        # CAREER KIT RETURN ROUTING
+        # ----------------------------------------------------
+
+        career_next = request.session.pop(
+            "career_login_next",
+            None,
+        )
+
+        if career_next == "aptitude":
+            return redirect(
+                "career_tools:aptitude_test"
+            )
+
+        if career_next == "resume":
+            return redirect(
+                "career_tools:resume_builder"
+            )
 
         return redirect(
             "student_dashboard"
@@ -5216,11 +5137,46 @@ def fee_receipt(
             "fee_payment_list"
         )
 
+    # Current fee position for this course/enrollment.
+    # This intentionally uses all payments, so an older receipt also shows
+    # the student's latest total paid and outstanding balance.
+    if payment.enrollment_id:
+        current_total_paid = (
+            FeePayment.objects.filter(
+                enrollment_id=payment.enrollment_id
+            ).aggregate(total=Sum("amount"))["total"]
+            or Decimal("0")
+        )
+        course_total_fee = payment.enrollment.final_fee
+    else:
+        current_total_paid = (
+            FeePayment.objects.filter(
+                student=payment.student,
+                enrollment__isnull=True
+            ).aggregate(total=Sum("amount"))["total"]
+            or Decimal("0")
+        )
+        course_total_fee = (
+            payment.student.admission.total_fee
+            if payment.student.admission
+            else Decimal("0")
+        )
+
+    current_balance = max(
+        course_total_fee - current_total_paid,
+        Decimal("0")
+    )
+
     return render(
         request,
         "core/fee_receipt.html",
         {
-            "payment": payment
+            "payment": payment,
+            "current_total_paid": current_total_paid,
+            "current_balance": current_balance,
+            "approved_corrections": payment.correction_requests.filter(
+                status="approved"
+            ).order_by("reviewed_at"),
         }
     )
 
@@ -7800,4 +7756,151 @@ def daily_expense_cancel(
             "form": form,
             "expense": expense,
         }
+    )
+
+# ============================================================
+# STAFF USAGE & ATTENDANCE REPORT
+# Power User / Head Office only
+# ============================================================
+
+@login_required
+def staff_usage_report(request):
+
+    if not is_admin_user(request.user):
+        return redirect("branch_dashboard")
+
+    today = timezone.localdate()
+    month_start = today.replace(day=1)
+
+    staff_profiles = (
+        StaffProfile.objects
+        .filter(is_active=True)
+        .select_related("user")
+        .order_by("branch", "user__first_name", "user__username")
+    )
+
+    staff_rows = []
+
+    for profile in staff_profiles:
+
+        success_logins = StaffLoginLog.objects.filter(
+            user=profile.user,
+            status="success"
+        )
+
+        today_logins = success_logins.filter(
+            created_at__date=today
+        ).count()
+
+        last_login_log = success_logins.order_by(
+            "-created_at"
+        ).first()
+
+        attendance_today = StaffAttendance.objects.filter(
+            staff=profile,
+            attendance_date=today
+        ).first()
+
+        monthly_active_days = StaffAttendance.objects.filter(
+            staff=profile,
+            attendance_date__gte=month_start,
+            attendance_date__lte=today,
+            status="present"
+        ).count()
+
+        staff_rows.append({
+            "profile": profile,
+            "today_logins": today_logins,
+            "last_login": (
+                last_login_log.created_at
+                if last_login_log else None
+            ),
+            "attendance_today": attendance_today,
+            "monthly_active_days": monthly_active_days,
+        })
+
+    context = {
+        "today": today,
+        "month_start": month_start,
+        "staff_rows": staff_rows,
+    }
+
+    return render(
+        request,
+        "core/staff_usage_report.html",
+        context
+    )
+
+
+# ============================================================
+# STAFF USAGE & ATTENDANCE REPORT
+# Power User / Head Office only
+# ============================================================
+
+@login_required
+def staff_usage_report(request):
+
+    if not is_admin_user(request.user):
+        return redirect("branch_dashboard")
+
+    today = timezone.localdate()
+    month_start = today.replace(day=1)
+
+    staff_profiles = (
+        StaffProfile.objects
+        .filter(is_active=True)
+        .select_related("user")
+        .order_by("branch", "user__first_name", "user__username")
+    )
+
+    staff_rows = []
+
+    for profile in staff_profiles:
+
+        success_logins = StaffLoginLog.objects.filter(
+            user=profile.user,
+            status="success"
+        )
+
+        today_logins = success_logins.filter(
+            created_at__date=today
+        ).count()
+
+        last_login_log = success_logins.order_by(
+            "-created_at"
+        ).first()
+
+        attendance_today = StaffAttendance.objects.filter(
+            staff=profile,
+            attendance_date=today
+        ).first()
+
+        monthly_active_days = StaffAttendance.objects.filter(
+            staff=profile,
+            attendance_date__gte=month_start,
+            attendance_date__lte=today,
+            status="present"
+        ).count()
+
+        staff_rows.append({
+            "profile": profile,
+            "today_logins": today_logins,
+            "last_login": (
+                last_login_log.created_at
+                if last_login_log else None
+            ),
+            "attendance_today": attendance_today,
+            "monthly_active_days": monthly_active_days,
+        })
+
+    context = {
+        "today": today,
+        "month_start": month_start,
+        "staff_rows": staff_rows,
+    }
+
+    return render(
+        request,
+        "core/staff_usage_report.html",
+        context
     )

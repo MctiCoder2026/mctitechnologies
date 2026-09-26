@@ -1563,6 +1563,101 @@ class StaffLoginLog(models.Model):
     class Meta:
         ordering = ["-created_at"]
 # ============================================================
+# STAFF ATTENDANCE
+# One successful staff login = one attendance per day
+# ============================================================
+
+class StaffAttendance(models.Model):
+
+    STATUS_CHOICES = [
+        ("present", "Present"),
+        ("absent", "Absent"),
+        ("leave", "Leave"),
+    ]
+
+    staff = models.ForeignKey(
+        StaffProfile,
+        on_delete=models.CASCADE,
+        related_name="attendance_records"
+    )
+
+    attendance_date = models.DateField(
+        default=timezone.localdate
+    )
+
+    first_login_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="present"
+    )
+
+    branch = models.CharField(
+        max_length=50,
+        blank=True
+    )
+
+    latitude = models.DecimalField(
+        max_digits=10,
+        decimal_places=7,
+        null=True,
+        blank=True
+    )
+
+    longitude = models.DecimalField(
+        max_digits=10,
+        decimal_places=7,
+        null=True,
+        blank=True
+    )
+
+    distance_meters = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    ip_address = models.GenericIPAddressField(
+        null=True,
+        blank=True
+    )
+
+    source = models.CharField(
+        max_length=50,
+        default="staff_login"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return (
+            f"{self.staff.user.username} - "
+            f"{self.attendance_date} - "
+            f"{self.status}"
+        )
+
+    class Meta:
+        ordering = ["-attendance_date", "-first_login_time"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["staff", "attendance_date"],
+                name="unique_staff_attendance_per_day"
+            )
+        ]
+
+
+# ============================================================
 # AUTO UPDATE ADMISSION FEES AFTER PAYMENT
 # ============================================================
 
@@ -2751,3 +2846,48 @@ class DailyExpenseAuditLog(models.Model):
         ordering = [
             "-performed_at"
         ]
+
+class FeePaymentCorrection(models.Model):
+    """Audited request to correct an issued fee receipt."""
+    STATUS_CHOICES = (
+        ("pending", "Pending review"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+    )
+
+    payment = models.ForeignKey(
+        FeePayment, on_delete=models.PROTECT,
+        related_name="correction_requests",
+    )
+    original_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    requested_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    reason = models.TextField()
+    requested_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True,
+        related_name="payment_corrections_requested",
+    )
+    requested_by_name = models.CharField(max_length=150)
+    requested_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(
+        max_length=12, choices=STATUS_CHOICES, default="pending",
+    )
+    reviewed_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="payment_corrections_reviewed",
+    )
+    reviewed_by_name = models.CharField(max_length=150, blank=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    review_note = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ("-requested_at", "-id")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("payment",),
+                condition=models.Q(status="pending"),
+                name="one_pending_payment_correction",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.payment.receipt_number}: {self.original_amount} to {self.requested_amount}"

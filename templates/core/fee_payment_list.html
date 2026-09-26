@@ -955,6 +955,8 @@ tbody tr:last-child td {
         <span class="payment-count">
 
             {{ payments|length }} Records
+            &nbsp; · &nbsp;
+            <a href="{% url 'fee_correction_queue' %}">Correction requests</a>
 
         </span>
 
@@ -1156,6 +1158,10 @@ tbody tr:last-child td {
 
                                 🧾 Receipt
 
+                            </a>
+                            <a href="{% url 'request_fee_correction' payment.id %}"
+                               style="display:block;margin-top:7px;color:#9a3412">
+                                Request correction
                             </a>
 
                         </td>

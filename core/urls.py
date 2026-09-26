@@ -1,7 +1,7 @@
 ﻿from django.urls import path, include
 from django.views.generic import TemplateView
 
-from . import views
+from . import views, fee_corrections
 
 
 urlpatterns = [
@@ -215,6 +215,21 @@ urlpatterns = [
     ),
 
     path(
+        "fee-payments/corrections/",
+        fee_corrections.correction_queue,
+        name="fee_correction_queue",
+    ),
+    path(
+        "fee-payments/<int:payment_id>/correction/",
+        fee_corrections.request_correction,
+        name="request_fee_correction",
+    ),
+    path(
+        "fee-payments/corrections/<int:correction_id>/review/",
+        fee_corrections.review_correction,
+        name="review_fee_correction",
+    ),
+    path(
         "fee-payments/",
         views.fee_payment_list,
         name="fee_payment_list"
@@ -245,6 +260,12 @@ urlpatterns = [
         "branch-dashboard/",
         views.branch_dashboard,
         name="branch_dashboard"
+    ),
+
+    path(
+        "staff-usage-report/",
+        views.staff_usage_report,
+        name="staff_usage_report"
     ),
 
     path(
