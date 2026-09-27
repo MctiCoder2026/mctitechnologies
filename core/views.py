@@ -62,6 +62,7 @@ from .models import (
     Attendance,
     BusinessLead,
     BusinessLeadActivity,
+    OutreachContact,
     BranchPartner,
     MonthlyBranchClosing,
     MonthlyPartnerShare,
@@ -797,6 +798,984 @@ def management_dashboard(request):
         context
     )
 
+# ============================================================
+# OUTREACH DASHBOARD
+# Kharghar / Panvel / Koperkhairane only
+# ============================================================
+
+def _normalize_outreach_mobile(value):
+    """
+    Normalize Indian mobile numbers for duplicate detection.
+    Keeps the last 10 digits when country code 91 is present.
+    """
+    digits = "".join(
+        ch for ch in str(value or "")
+        if ch.isdigit()
+    )
+
+    if len(digits) == 12 and digits.startswith("91"):
+        digits = digits[-10:]
+
+    return digits
+
+
+def _get_outreach_import_branch(request):
+    """
+    Branch staff: automatically locked to own branch.
+    Admin/HO: branch must be explicitly selected.
+    """
+    allowed_branches = {
+        "kharghar",
+        "panvel",
+        "koperkhairane",
+    }
+
+    if is_admin_user(request.user):
+        branch = request.POST.get(
+            "branch",
+            ""
+        ).strip().lower()
+
+        if branch in allowed_branches:
+            return branch
+
+        return None
+
+    branch = get_user_branch(request.user)
+
+    if branch in allowed_branches:
+        return branch
+
+    return None
+
+
+@login_required
+def outreach_download_template(request):
+
+    allowed_branches = {
+        "kharghar",
+        "panvel",
+        "koperkhairane",
+    }
+
+    if (
+        not is_admin_user(request.user)
+        and get_user_branch(request.user) not in allowed_branches
+    ):
+        return redirect("branch_dashboard")
+
+    from openpyxl import Workbook
+
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Outreach Contacts"
+
+    headers = [
+        "Name",
+        "Mobile",
+        "Contact Type",
+        "Old Course",
+        "Admission Year",
+        "Organization",
+        "Permission",
+        "Notes",
+    ]
+
+    sheet.append(headers)
+
+    # Example row
+    sheet.append([
+        "Example Student",
+        "9876543210",
+        "Old Student",
+        "Advanced Excel",
+        "2025",
+        "",
+        "Unknown",
+        "Example only - delete before import",
+    ])
+
+    for column in sheet.columns:
+        max_length = max(
+            len(str(cell.value or ""))
+            for cell in column
+        )
+
+        sheet.column_dimensions[
+            column[0].column_letter
+        ].width = min(max_length + 4, 35)
+
+    response = HttpResponse(
+        content_type=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        )
+    )
+
+    response[
+        "Content-Disposition"
+    ] = 'attachment; filename="MCTI_Outreach_Import_Template.xlsx"'
+
+    workbook.save(response)
+
+    return response
+
+
+@login_required
+def outreach_import_preview(request):
+
+    if request.method != "POST":
+        return redirect("outreach_dashboard")
+
+    branch = _get_outreach_import_branch(request)
+
+    if not branch:
+        messages.error(
+            request,
+            "Please select an allowed outreach branch."
+        )
+        return redirect("outreach_dashboard")
+
+    upload = request.FILES.get("outreach_file")
+
+    if not upload:
+        messages.error(
+            request,
+            "Please select an Excel file."
+        )
+        return redirect("outreach_dashboard")
+
+    if not upload.name.lower().endswith(".xlsx"):
+        messages.error(
+            request,
+            "Only .xlsx Excel files are supported."
+        )
+        return redirect("outreach_dashboard")
+
+    from openpyxl import load_workbook
+    from datetime import datetime, date
+    from django.core.files.storage import default_storage
+    from django.core.files.base import ContentFile
+    import uuid
+
+    # Save uploaded Excel temporarily so it survives
+    # the Preview -> Confirm Import flow.
+    temp_name = (
+        "outreach_temp/"
+        + str(request.user.id)
+        + "_"
+        + uuid.uuid4().hex
+        + ".xlsx"
+    )
+
+    temp_path = default_storage.save(
+        temp_name,
+        ContentFile(upload.read())
+    )
+
+    try:
+        workbook = load_workbook(
+            default_storage.open(
+                temp_path,
+                "rb"
+            ),
+            read_only=True,
+            data_only=True
+        )
+    except Exception:
+        if default_storage.exists(temp_path):
+            default_storage.delete(temp_path)
+
+        messages.error(
+            request,
+            "The Excel file could not be read."
+        )
+        return redirect("outreach_dashboard")
+
+    if "ADMISSION" in workbook.sheetnames:
+        sheet = workbook["ADMISSION"]
+    else:
+        sheet = workbook.active
+
+    rows = sheet.iter_rows(values_only=True)
+
+    try:
+        raw_headers = next(rows)
+    except StopIteration:
+        workbook.close()
+
+        if default_storage.exists(temp_path):
+            default_storage.delete(temp_path)
+
+        messages.error(
+            request,
+            "The Excel file is empty."
+        )
+        return redirect("outreach_dashboard")
+
+    def clean_header(value):
+        return " ".join(
+            str(value or "")
+            .strip()
+            .lower()
+            .split()
+        )
+
+    headers = [
+        clean_header(value)
+        for value in raw_headers
+    ]
+
+    header_map = {
+        header: index
+        for index, header in enumerate(headers)
+        if header
+    }
+
+    def first_header(*names):
+        for name in names:
+            name = clean_header(name)
+            if name in header_map:
+                return name
+        return None
+
+    name_header = first_header(
+        "Name",
+        "Candidate Name"
+    )
+
+    mobile_header = first_header(
+        "Mobile",
+        "Contact No.",
+        "Contact No",
+        "Contact Number"
+    )
+
+    date_header = first_header(
+        "Date",
+        "Admission Date"
+    )
+
+    year_header = first_header(
+        "Admission Year"
+    )
+
+    if not name_header or not mobile_header:
+        workbook.close()
+
+        if default_storage.exists(temp_path):
+            default_storage.delete(temp_path)
+
+        messages.error(
+            request,
+            "Excel format not recognized."
+        )
+
+        return redirect("outreach_dashboard")
+
+    def raw_cell(row, header_name):
+
+        if not header_name:
+            return None
+
+        index = header_map.get(header_name)
+
+        if index is None or index >= len(row):
+            return None
+
+        return row[index]
+
+    total_rows = 0
+    ready_rows = 0
+    invalid_rows = 0
+    duplicate_rows = 0
+
+    year_counts = {}
+
+    # Detect duplicates inside the Excel itself too.
+    seen_in_file = set()
+
+    for row in rows:
+
+        # Ignore completely blank rows.
+        if not any(
+            value not in (None, "")
+            for value in row
+        ):
+            continue
+
+        total_rows += 1
+
+        name_value = raw_cell(
+            row,
+            name_header
+        )
+
+        name = str(
+            name_value or ""
+        ).strip()
+
+        mobile_value = raw_cell(
+            row,
+            mobile_header
+        )
+
+        if mobile_value is None:
+            raw_mobile = ""
+
+        elif isinstance(mobile_value, float):
+            raw_mobile = str(
+                int(mobile_value)
+            )
+
+        else:
+            raw_mobile = str(
+                mobile_value
+            ).strip()
+
+        normalized_mobile = (
+            _normalize_outreach_mobile(
+                raw_mobile
+            )
+        )
+
+        if (
+            not name
+            or len(normalized_mobile) != 10
+        ):
+            invalid_rows += 1
+            continue
+
+        duplicate_in_db = (
+            OutreachContact.objects
+            .filter(
+                normalized_mobile=normalized_mobile
+            )
+            .exists()
+        )
+
+        duplicate_in_file = (
+            normalized_mobile in seen_in_file
+        )
+
+        if duplicate_in_db or duplicate_in_file:
+            duplicate_rows += 1
+
+        seen_in_file.add(
+            normalized_mobile
+        )
+
+        ready_rows += 1
+
+        admission_year = None
+
+        if year_header:
+
+            value = raw_cell(
+                row,
+                year_header
+            )
+
+            if value not in (None, ""):
+                try:
+                    admission_year = int(
+                        float(value)
+                    )
+                except (ValueError, TypeError):
+                    pass
+
+        elif date_header:
+
+            value = raw_cell(
+                row,
+                date_header
+            )
+
+            if isinstance(
+                value,
+                (datetime, date)
+            ):
+                admission_year = value.year
+
+            elif value:
+
+                value = str(value).strip()
+
+                for fmt in (
+                    "%d/%m/%Y",
+                    "%d-%m-%Y",
+                    "%Y-%m-%d",
+                    "%d/%m/%y",
+                    "%d-%m-%y",
+                ):
+                    try:
+                        admission_year = (
+                            datetime.strptime(
+                                value,
+                                fmt
+                            ).year
+                        )
+                        break
+                    except ValueError:
+                        continue
+
+        year_key = (
+            str(admission_year)
+            if admission_year
+            else "Unknown"
+        )
+
+        year_counts[year_key] = (
+            year_counts.get(
+                year_key,
+                0
+            )
+            + 1
+        )
+
+    workbook.close()
+
+    branch_names = {
+        "kharghar": "Kharghar",
+        "panvel": "Panvel",
+        "koperkhairane": "Koperkhairane",
+    }
+
+    year_counts = sorted(
+        year_counts.items(),
+        key=lambda item: (
+            item[0] == "Unknown",
+            item[0]
+        )
+    )
+
+    context = {
+        "filename": upload.name,
+        "temp_path": temp_path,
+        "branch": branch,
+        "branch_name": branch_names.get(
+            branch,
+            branch
+        ),
+        "total_rows": total_rows,
+        "ready_rows": ready_rows,
+        "invalid_rows": invalid_rows,
+        "duplicate_rows": duplicate_rows,
+        "year_counts": year_counts,
+    }
+
+    return render(
+        request,
+        "core/outreach_import_preview.html",
+        context
+    )
+
+
+@login_required
+def outreach_import(request):
+
+    if request.method != "POST":
+        return redirect("outreach_dashboard")
+
+    branch = _get_outreach_import_branch(request)
+
+    if not branch:
+        messages.error(
+            request,
+            "Please select an allowed outreach branch."
+        )
+        return redirect("outreach_dashboard")
+
+    from django.core.files.storage import default_storage
+    from openpyxl import load_workbook
+    from datetime import datetime, date
+
+    temp_path = request.POST.get(
+        "temp_path",
+        ""
+    ).strip()
+
+    # Security:
+    # Only allow this user's temporary outreach upload.
+    expected_prefix = (
+        "outreach_temp/"
+        + str(request.user.id)
+        + "_"
+    )
+
+    if (
+        not temp_path
+        or not temp_path.startswith(expected_prefix)
+        or not temp_path.lower().endswith(".xlsx")
+        or not default_storage.exists(temp_path)
+    ):
+        messages.error(
+            request,
+            "Preview file expired or is invalid. Please upload the Excel again."
+        )
+        return redirect("outreach_dashboard")
+
+    try:
+        file_handle = default_storage.open(
+            temp_path,
+            "rb"
+        )
+
+        workbook = load_workbook(
+            file_handle,
+            read_only=True,
+            data_only=True
+        )
+
+    except Exception:
+
+        if default_storage.exists(temp_path):
+            default_storage.delete(temp_path)
+
+        messages.error(
+            request,
+            "The Excel file could not be read."
+        )
+
+        return redirect("outreach_dashboard")
+
+    if "ADMISSION" in workbook.sheetnames:
+        sheet = workbook["ADMISSION"]
+    else:
+        sheet = workbook.active
+
+    rows = sheet.iter_rows(
+        values_only=True
+    )
+
+    try:
+        raw_headers = next(rows)
+
+    except StopIteration:
+
+        workbook.close()
+        file_handle.close()
+
+        if default_storage.exists(temp_path):
+            default_storage.delete(temp_path)
+
+        messages.error(
+            request,
+            "The Excel file is empty."
+        )
+
+        return redirect("outreach_dashboard")
+
+    def clean_header(value):
+        return " ".join(
+            str(value or "")
+            .strip()
+            .lower()
+            .split()
+        )
+
+    headers = [
+        clean_header(value)
+        for value in raw_headers
+    ]
+
+    header_map = {
+        header: index
+        for index, header in enumerate(headers)
+        if header
+    }
+
+    def first_header(*names):
+
+        for name in names:
+
+            normalized = clean_header(
+                name
+            )
+
+            if normalized in header_map:
+                return normalized
+
+        return None
+
+    name_header = first_header(
+        "Name",
+        "Candidate Name"
+    )
+
+    mobile_header = first_header(
+        "Mobile",
+        "Contact No.",
+        "Contact No",
+        "Contact Number"
+    )
+
+    course_header = first_header(
+        "Old Course",
+        "Admission for Course(s)",
+        "Admission for Course",
+        "Course"
+    )
+
+    year_header = first_header(
+        "Admission Year"
+    )
+
+    date_header = first_header(
+        "Date",
+        "Admission Date"
+    )
+
+    notes_header = first_header(
+        "Notes",
+        "Address"
+    )
+
+    if not name_header or not mobile_header:
+
+        workbook.close()
+        file_handle.close()
+
+        if default_storage.exists(temp_path):
+            default_storage.delete(temp_path)
+
+        messages.error(
+            request,
+            "Excel format not recognized."
+        )
+
+        return redirect("outreach_dashboard")
+
+    def raw_cell(row, header_name):
+
+        if not header_name:
+            return None
+
+        index = header_map.get(
+            header_name
+        )
+
+        if (
+            index is None
+            or index >= len(row)
+        ):
+            return None
+
+        return row[index]
+
+    def text_cell(row, header_name):
+
+        value = raw_cell(
+            row,
+            header_name
+        )
+
+        if value is None:
+            return ""
+
+        return str(value).strip()
+
+    imported = 0
+    duplicates = 0
+    skipped = 0
+
+    for row in rows:
+
+        # Ignore completely blank rows.
+        if not any(
+            value not in (None, "")
+            for value in row
+        ):
+            continue
+
+        name = text_cell(
+            row,
+            name_header
+        )
+
+        mobile_value = raw_cell(
+            row,
+            mobile_header
+        )
+
+        if mobile_value is None:
+            raw_mobile = ""
+
+        elif isinstance(
+            mobile_value,
+            float
+        ):
+            raw_mobile = str(
+                int(mobile_value)
+            )
+
+        else:
+            raw_mobile = str(
+                mobile_value
+            ).strip()
+
+        normalized_mobile = (
+            _normalize_outreach_mobile(
+                raw_mobile
+            )
+        )
+
+        if (
+            not name
+            or len(normalized_mobile) != 10
+        ):
+            skipped += 1
+            continue
+
+        duplicate_exists = (
+            OutreachContact.objects
+            .filter(
+                normalized_mobile=normalized_mobile
+            )
+            .exists()
+        )
+
+        if duplicate_exists:
+            duplicates += 1
+
+        admission_year = None
+
+        if year_header:
+
+            value = raw_cell(
+                row,
+                year_header
+            )
+
+            if value not in (
+                None,
+                ""
+            ):
+                try:
+                    admission_year = int(
+                        float(value)
+                    )
+                except (
+                    ValueError,
+                    TypeError
+                ):
+                    pass
+
+        elif date_header:
+
+            value = raw_cell(
+                row,
+                date_header
+            )
+
+            if isinstance(
+                value,
+                (datetime, date)
+            ):
+                admission_year = value.year
+
+            elif value:
+
+                value = str(
+                    value
+                ).strip()
+
+                for fmt in (
+                    "%d/%m/%Y",
+                    "%d-%m-%Y",
+                    "%Y-%m-%d",
+                    "%d/%m/%y",
+                    "%d-%m-%y",
+                ):
+
+                    try:
+                        admission_year = (
+                            datetime.strptime(
+                                value,
+                                fmt
+                            ).year
+                        )
+                        break
+
+                    except ValueError:
+                        continue
+
+        OutreachContact.objects.create(
+            name=name,
+            mobile=raw_mobile,
+            normalized_mobile=normalized_mobile,
+            branch=branch,
+            contact_type="old_student",
+
+            old_course=text_cell(
+                row,
+                course_header
+            ),
+
+            old_admission_year=admission_year,
+
+            permission_status="unknown",
+
+            notes=text_cell(
+                row,
+                notes_header
+            ),
+
+            created_by=request.user,
+        )
+
+        imported += 1
+
+    workbook.close()
+    file_handle.close()
+
+    # Import successful: remove temporary Excel.
+    if default_storage.exists(temp_path):
+        default_storage.delete(temp_path)
+
+    messages.success(
+        request,
+        (
+            f"Old student import completed: "
+            f"{imported} imported, "
+            f"{duplicates} duplicate mobile(s) detected, "
+            f"{skipped} skipped."
+        )
+    )
+
+    return redirect(
+        "outreach_dashboard"
+    )
+
+
+@login_required
+def outreach_dashboard(request):
+
+    allowed_branches = [
+        "kharghar",
+        "panvel",
+        "koperkhairane",
+    ]
+
+    user_branch = get_user_branch(request.user)
+
+    # HO/Admin can view all three outreach branches.
+    if is_admin_user(request.user):
+        contacts = OutreachContact.objects.filter(
+            branch__in=allowed_branches
+        )
+
+        selected_branch = request.GET.get(
+            "branch",
+            ""
+        ).strip().lower()
+
+        if selected_branch in allowed_branches:
+            contacts = contacts.filter(
+                branch=selected_branch
+            )
+
+    else:
+        # Branch staff can only access their own outreach data.
+        if user_branch not in allowed_branches:
+            messages.error(
+                request,
+                "Outreach is currently available only for "
+                "Kharghar, Panvel and Koperkhairane."
+            )
+            return redirect("branch_dashboard")
+
+        selected_branch = user_branch
+
+        contacts = OutreachContact.objects.filter(
+            branch=user_branch
+        )
+
+    search = request.GET.get(
+        "search",
+        ""
+    ).strip()
+
+    status = request.GET.get(
+        "status",
+        ""
+    ).strip()
+
+    contact_type = request.GET.get(
+        "contact_type",
+        ""
+    ).strip()
+
+    if search:
+        contacts = contacts.filter(
+            Q(name__icontains=search)
+            | Q(mobile__icontains=search)
+            | Q(email__icontains=search)
+            | Q(old_course__icontains=search)
+            | Q(organization_name__icontains=search)
+        )
+
+    valid_statuses = {
+        value
+        for value, label in OutreachContact.STATUS_CHOICES
+    }
+
+    if status in valid_statuses:
+        contacts = contacts.filter(
+            status=status
+        )
+
+    valid_types = {
+        value
+        for value, label in OutreachContact.CONTACT_TYPE_CHOICES
+    }
+
+    if contact_type in valid_types:
+        contacts = contacts.filter(
+            contact_type=contact_type
+        )
+
+    # Counts respect branch access but intentionally ignore
+    # search/status/type filters for dashboard summary cards.
+    if is_admin_user(request.user):
+        summary_qs = OutreachContact.objects.filter(
+            branch__in=allowed_branches
+        )
+
+        if selected_branch in allowed_branches:
+            summary_qs = summary_qs.filter(
+                branch=selected_branch
+            )
+    else:
+        summary_qs = OutreachContact.objects.filter(
+            branch=user_branch
+        )
+
+    context = {
+        "contacts": contacts.order_by("-created_at"),
+        "search": search,
+        "selected_status": status,
+        "selected_type": contact_type,
+        "selected_branch": selected_branch,
+        "allowed_branches": allowed_branches,
+        "status_choices": OutreachContact.STATUS_CHOICES,
+        "contact_type_choices": OutreachContact.CONTACT_TYPE_CHOICES,
+        "total_contacts": summary_qs.count(),
+        "new_count": summary_qs.filter(status="new").count(),
+        "contacted_count": summary_qs.filter(status="contacted").count(),
+        "followup_count": summary_qs.filter(status="followup").count(),
+        "interested_count": summary_qs.filter(status="interested").count(),
+        "converted_count": summary_qs.filter(status="converted").count(),
+        "is_outreach_admin": is_admin_user(request.user),
+    }
+
+    return render(
+        request,
+        "core/outreach_dashboard.html",
+        context
+    )
+
+
 @login_required
 def branch_dashboard(request):
 
@@ -1171,6 +2150,14 @@ def branch_dashboard(request):
         "custom_end": custom_end,
         "is_admin": admin_access,
         "can_view_financials": can_view_financials,
+        "can_access_outreach": (
+            admin_access
+            or user_branch in {
+                "kharghar",
+                "panvel",
+                "koperkhairane",
+            }
+        ),
     }
 
     if can_view_financials:
@@ -3694,6 +4681,63 @@ def saas(request):
 # CONTACT
 # ============================================================
 
+
+def franchise(request):
+    from .models import FranchiseEnquiry
+
+    success = False
+
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        mobile = request.POST.get("mobile", "").strip()
+        email = request.POST.get("email", "").strip()
+        city = request.POST.get("city", "").strip()
+        state = request.POST.get("state", "").strip()
+        profession_business = request.POST.get(
+            "profession_business", ""
+        ).strip()
+        has_existing_institute = (
+            request.POST.get("has_existing_institute") == "yes"
+        )
+        investment_range = request.POST.get(
+            "investment_range",
+            "undecided"
+        )
+        message = request.POST.get("message", "").strip()
+
+        valid_investments = {
+            choice[0]
+            for choice in FranchiseEnquiry.INVESTMENT_CHOICES
+        }
+
+        if investment_range not in valid_investments:
+            investment_range = "undecided"
+
+        if name and mobile and city:
+            FranchiseEnquiry.objects.create(
+                name=name,
+                mobile=mobile,
+                email=email or None,
+                city=city,
+                state=state or None,
+                profession_business=profession_business or None,
+                has_existing_institute=has_existing_institute,
+                investment_range=investment_range,
+                message=message or None,
+            )
+
+            success = True
+
+    return render(
+        request,
+        "core/franchise.html",
+        {
+            "success": success,
+            "investment_choices": FranchiseEnquiry.INVESTMENT_CHOICES,
+        },
+    )
+
+
 def contact(request):
 
     if request.method == "POST":
@@ -4536,12 +5580,46 @@ def log_enquiry_whatsapp(
 
     if request.method == "POST":
 
+        whatsapp_message = (
+            request.POST.get("message", "").strip()
+        )
+
         EnquiryActivity.objects.create(
             enquiry=enquiry,
             activity_type="whatsapp",
             message=(
-                "WhatsApp conversation initiated "
-                "with this lead."
+                whatsapp_message
+                or "WhatsApp conversation initiated with this lead."
+            ),
+            created_by=request.user
+        )
+
+        # ----------------------------------------------------
+        # AUTO FOLLOW-UP AFTER WHATSAPP
+        # Next contact after 2 days to avoid daily messaging
+        # ----------------------------------------------------
+        from datetime import timedelta
+        from django.utils import timezone
+
+        next_followup = timezone.localdate() + timedelta(days=2)
+
+        Enquiry.objects.filter(
+            pk=enquiry.pk
+        ).update(
+            followup_date=next_followup,
+            followup_notes=(
+                "Auto follow-up scheduled 2 days after "
+                "WhatsApp communication."
+            )
+        )
+
+        EnquiryActivity.objects.create(
+            enquiry=enquiry,
+            activity_type="followup",
+            message=(
+                f"Next follow-up automatically scheduled for "
+                f"{next_followup.strftime('%d %b %Y')} "
+                f"after WhatsApp communication."
             ),
             created_by=request.user
         )
@@ -6224,6 +7302,9 @@ def business_lead_list(request):
 
 def privacy_policy(request):
     return render(request, "core/privacy_policy.html")
+
+def account_deletion(request):
+    return render(request, "core/account_deletion.html")
 
 def terms_and_conditions(request):
     return render(request, "core/terms_and_conditions.html")
@@ -7953,4 +9034,130 @@ def staff_usage_report(request):
         request,
         "core/staff_usage_report.html",
         context
+    )
+
+# ============================================================
+# FRANCHISE ENQUIRY MANAGEMENT
+# Separate from Student Enquiry CRM
+# ============================================================
+
+@login_required
+def franchise_enquiry_list(request):
+    from .models import FranchiseEnquiry
+
+    # Franchise pipeline is management/admin only.
+    if not is_admin_user(request.user):
+        return redirect("management_dashboard")
+
+    enquiries = FranchiseEnquiry.objects.all()
+
+    status = request.GET.get("status", "").strip()
+    search = request.GET.get("q", "").strip()
+
+    if status:
+        enquiries = enquiries.filter(status=status)
+
+    if search:
+        enquiries = enquiries.filter(
+            Q(name__icontains=search)
+            | Q(mobile__icontains=search)
+            | Q(city__icontains=search)
+            | Q(state__icontains=search)
+        )
+
+    context = {
+        "enquiries": enquiries,
+        "status_choices": FranchiseEnquiry.STATUS_CHOICES,
+        "selected_status": status,
+        "search": search,
+        "total_count": FranchiseEnquiry.objects.count(),
+        "new_count": FranchiseEnquiry.objects.filter(
+            status="new"
+        ).count(),
+        "interested_count": FranchiseEnquiry.objects.filter(
+            status="interested"
+        ).count(),
+        "qualified_count": FranchiseEnquiry.objects.filter(
+            status="qualified"
+        ).count(),
+    }
+
+    return render(
+        request,
+        "core/franchise_enquiry_list.html",
+        context
+    )
+
+# ============================================================
+# FRANCHISE ENQUIRY DETAIL / FOLLOW-UP
+# ============================================================
+
+@login_required
+def franchise_enquiry_detail(request, enquiry_id):
+    from .models import FranchiseEnquiry
+    from django.shortcuts import get_object_or_404
+
+    # Franchise pipeline is management/admin only.
+    if not is_admin_user(request.user):
+        return redirect("management_dashboard")
+
+    enquiry = get_object_or_404(
+        FranchiseEnquiry,
+        id=enquiry_id
+    )
+
+    if request.method == "POST":
+
+        status = request.POST.get(
+            "status",
+            enquiry.status
+        ).strip()
+
+        followup_date = request.POST.get(
+            "followup_date",
+            ""
+        ).strip()
+
+        followup_notes = request.POST.get(
+            "followup_notes",
+            ""
+        ).strip()
+
+        valid_statuses = {
+            choice[0]
+            for choice in FranchiseEnquiry.STATUS_CHOICES
+        }
+
+        if status in valid_statuses:
+            enquiry.status = status
+
+        enquiry.followup_date = (
+            followup_date or None
+        )
+
+        enquiry.followup_notes = (
+            followup_notes or None
+        )
+
+        enquiry.save(
+            update_fields=[
+                "status",
+                "followup_date",
+                "followup_notes",
+                "updated_at",
+            ]
+        )
+
+        return redirect(
+            "franchise_enquiry_detail",
+            enquiry_id=enquiry.id
+        )
+
+    return render(
+        request,
+        "core/franchise_enquiry_detail.html",
+        {
+            "enquiry": enquiry,
+            "status_choices": FranchiseEnquiry.STATUS_CHOICES,
+        }
     )

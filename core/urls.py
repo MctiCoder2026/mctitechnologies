@@ -71,6 +71,24 @@ urlpatterns = [
     ),
 
     path(
+        "franchise/",
+        views.franchise,
+        name="franchise"
+    ),
+
+    path(
+        "management/franchise-enquiries/",
+        views.franchise_enquiry_list,
+        name="franchise_enquiry_list"
+    ),
+
+    path(
+        "management/franchise-enquiries/<int:enquiry_id>/",
+        views.franchise_enquiry_detail,
+        name="franchise_enquiry_detail"
+    ),
+
+    path(
         "contact/",
         views.contact,
         name="contact"
@@ -268,6 +286,32 @@ urlpatterns = [
         name="branch_dashboard"
     ),
 
+
+    path(
+        "outreach/",
+        views.outreach_dashboard,
+        name="outreach_dashboard"
+    ),
+
+
+    path(
+        "outreach/import-preview/",
+        views.outreach_import_preview,
+        name="outreach_import_preview"
+    ),
+
+    path(
+        "outreach/import/",
+        views.outreach_import,
+        name="outreach_import"
+    ),
+
+    path(
+        "outreach/template/",
+        views.outreach_download_template,
+        name="outreach_download_template"
+    ),
+
     path(
         "staff-usage-report/",
         views.staff_usage_report,
@@ -406,6 +450,11 @@ urlpatterns = [
         "privacy-policy/",
         views.privacy_policy,
         name="privacy_policy"
+    ),
+    path(
+        "account-deletion/",
+        views.account_deletion,
+        name="account_deletion"
     ),
     path(
     "terms-and-conditions/",
