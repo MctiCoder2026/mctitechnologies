@@ -499,6 +499,17 @@ class Admission(models.Model):
     )
 
     # --------------------------------------------------------
+    # REPORTING / ADMISSION YEAR
+    # --------------------------------------------------------
+
+    admission_year = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="Reporting year, e.g. 2025 or 2026"
+    )
+
+    # --------------------------------------------------------
     # FEES
     # --------------------------------------------------------
 

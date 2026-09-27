@@ -28,6 +28,15 @@ BRANCH_CHOICES = [
 ]
 
 
+def get_admission_year_choices():
+    current_year = timezone.localdate().year
+    return [
+        (year, str(year))
+        for year in range(2025, current_year + 3)
+    ]
+
+
+
 
 # ============================================================
 # ENQUIRY FORM
@@ -199,6 +208,17 @@ class EnquiryAssignmentForm(forms.ModelForm):
 
 class AdmissionForm(forms.ModelForm):
 
+    admission_year = forms.TypedChoiceField(
+        label="Admission Year",
+        choices=get_admission_year_choices,
+        required=False,
+        coerce=int,
+        empty_value=None,
+        widget=forms.Select(
+            attrs={"class": "form-control"}
+        ),
+    )
+
     class Meta:
         model = Admission
 
@@ -213,6 +233,7 @@ class AdmissionForm(forms.ModelForm):
             "course",
             "branch",
             "admission_date",
+            "admission_year",
             "total_fee",
             "paid_fee",
             "initial_payment_mode",
@@ -331,6 +352,11 @@ class AdmissionForm(forms.ModelForm):
         self.fields["branch"].required = True
         self.fields["branch"].choices = BRANCH_CHOICES
 
+        # New admissions default to the current reporting year.
+        # Old/imported admissions can be manually marked as 2025, etc.
+        if not self.instance.pk:
+            self.fields["admission_year"].initial = timezone.localdate().year
+
         if enquiry and not self.instance.pk:
 
             self.fields["student_name"].initial = enquiry.name
@@ -394,6 +420,17 @@ class FeePaymentForm(forms.ModelForm):
 
 class AdmissionEditForm(forms.ModelForm):
 
+    admission_year = forms.TypedChoiceField(
+        label="Admission Year",
+        choices=get_admission_year_choices,
+        required=False,
+        coerce=int,
+        empty_value=None,
+        widget=forms.Select(
+            attrs={"class": "form-control"}
+        ),
+    )
+
     class Meta:
         model = Admission
 
@@ -408,6 +445,7 @@ class AdmissionEditForm(forms.ModelForm):
             "course",
             "branch",
             "admission_date",
+            "admission_year",
             "total_fee",
             "notes",
         ]

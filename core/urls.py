@@ -191,6 +191,12 @@ urlpatterns = [
         name="admission_list"
     ),
 
+    path(
+        "admissions/<int:admission_id>/mark-year/",
+        views.mark_admission_year,
+        name="mark_admission_year"
+    ),
+
 
     path(
         "admissions/<int:admission_id>/delete/",

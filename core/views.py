@@ -4850,6 +4850,43 @@ def create_admission(
 
 
 # ============================================================
+# MARK ADMISSION REPORTING YEAR
+# ============================================================
+
+@login_required
+def mark_admission_year(request, admission_id):
+
+    if request.method != "POST":
+        return redirect("admission_list")
+
+    # Reporting-year correction is a management-only action.
+    if not request.user.is_superuser:
+        return redirect("admission_list")
+
+    year = request.POST.get("admission_year", "").strip()
+
+    if not year.isdigit():
+        return redirect("admission_list")
+
+    year = int(year)
+
+    if year < 2000 or year > 2100:
+        return redirect("admission_list")
+
+    # IMPORTANT:
+    # QuerySet.update() intentionally bypasses Admission.save()
+    # and post_save signals. Fees, receipts, enrollment and dates
+    # remain completely untouched.
+    Admission.objects.filter(
+        pk=admission_id
+    ).update(
+        admission_year=year
+    )
+
+    return redirect("admission_list")
+
+
+# ============================================================
 # ADMISSION LIST
 # ============================================================
 
@@ -4858,6 +4895,11 @@ def admission_list(request):
 
     search = request.GET.get(
         "search",
+        ""
+    ).strip()
+
+    admission_year = request.GET.get(
+        "year",
         ""
     ).strip()
 
@@ -4892,6 +4934,12 @@ def admission_list(request):
             branch__iexact=user_branch
         )
 
+    if admission_year.isdigit():
+
+        admissions = admissions.filter(
+            admission_year=int(admission_year)
+        )
+
     if search:
 
         admissions = admissions.filter(
@@ -4922,6 +4970,8 @@ def admission_list(request):
         {
             "admissions": admissions,
             "search": search,
+            "admission_year": admission_year,
+            "admission_years": [2022, 2024, 2025, 2026],
         }
     )
 
