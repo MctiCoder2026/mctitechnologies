@@ -1,0 +1,84 @@
+{% extends "lms/delivery_staff_base.html" %}
+{% block title %}Teaching History | MCTI{% endblock %}
+{% block page_title %}Teaching History{% endblock %}
+{% block page_subtitle %}{{ enrollment.student.name }} · {{ course.title }}{% endblock %}
+
+{% block delivery_content %}
+<a href="{% url 'lms:delivery_report' %}" class="btn"
+   style="background:#111;margin-bottom:16px">← Back to Delivery Report</a>
+
+<div class="panel">
+  <h2 class="panel-title">Weekly assignments and trainer submissions</h2>
+  {% for report in new_reports %}
+  <div style="padding:12px 0;border-top:1px solid #ddd">
+    <strong>{{ report.assignment.topic.title }}</strong> · {{ report.taught_on|date:"d M Y" }}
+    <br>Assigned: {{ report.assignment.trainer.name }} · Actually taught by: <strong>{{ report.submitted_by.name }}</strong>
+    {% if report.coverage_reason %}
+      <br><strong>Substitute reason:</strong> {{ report.coverage_reason }}
+    {% endif %}
+    {% if report.review_status == "approved" %}
+      <br><strong>Trainer attendance:</strong> {{ report.submitted_by.name }} credited for {{ report.taught_on|date:"d M Y" }}
+    {% endif %}
+    <br>Teaching: {{ report.teaching_note }}
+    <br>Lab: {% if report.lab_completed %}Completed — {{ report.lab_evidence }}{% else %}Pending{% endif %}
+    <br>Staff: {{ report.get_review_status_display }}
+    {% if report.reviewed_by %}by {{ report.reviewed_by.user.get_full_name|default:report.reviewed_by.user.username }}{% endif %}
+    <br>Student: {{ report.get_student_response_display }}
+    {% if report.student_note %}— {{ report.student_note }}{% endif %}
+    {% if report.closed_at %}
+      <br><strong style="color:#166534">Final closed {{ report.closed_at|date:"d M Y" }} by {{ report.closed_by.user.get_full_name|default:report.closed_by.user.username }}</strong>
+    {% endif %}
+  </div>
+  {% empty %}
+    <p>No weekly trainer submissions yet.</p>
+  {% endfor %}
+</div>
+
+<div class="panel">
+  <h2 class="panel-title">{{ enrollment.student.name }} · {{ course.title }}</h2>
+  <p style="margin-bottom:14px">Student ID: {{ enrollment.student.student_id }} · Branch: {{ enrollment.branch|default:enrollment.student.branch }}</p>
+  <div style="overflow:auto;max-height:70vh">
+    <table style="width:100%;border-collapse:collapse;min-width:760px;text-align:left">
+      <thead>
+        <tr style="background:#f1f5f9;position:sticky;top:0;z-index:2">
+          <th style="padding:10px">Class date</th>
+          <th style="padding:10px">Fixed topic</th>
+          <th style="padding:10px">Class type</th>
+          <th style="padding:10px">Actually taught by</th>
+          <th style="padding:10px">Assigned trainer then</th>
+          <th style="padding:10px">Class notes</th>
+          <th style="padding:10px">Lab practice</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in records %}
+        <tr style="border-bottom:1px solid #e5e7eb">
+          <td style="padding:10px">{{ record.session.session_date|date:"d M Y" }}</td>
+          <td style="padding:10px">{{ record.session.topic.title }}</td>
+          <td style="padding:10px">{{ record.session.get_session_type_display }}</td>
+          <td style="padding:10px"><strong>{{ record.session.taught_by.user.get_full_name|default:record.session.taught_by.user.username }}</strong></td>
+          <td style="padding:10px">
+            {% if record.session.assigned_trainer %}
+              {{ record.session.assigned_trainer.user.get_full_name|default:record.session.assigned_trainer.user.username }}
+            {% else %}Not recorded{% endif %}
+          </td>
+          <td style="padding:10px">{{ record.session.notes|default:"—" }}</td>
+          <td style="padding:10px">
+            {% if record.practice_verified_at %}
+              <strong style="color:#166534">Verified</strong>
+              <br>{{ record.practice_verified_at|date:"d M Y" }}
+              <br>By {{ record.practice_verified_by.user.get_full_name|default:record.practice_verified_by.user.username }}
+              <br>{{ record.practice_evidence }}
+            {% else %}
+              Pending
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" style="padding:14px">No classroom teaching has been recorded for this student and course yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

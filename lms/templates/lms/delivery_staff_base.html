@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.delivery-wrap{max-width:1200px;margin:28px auto;padding:18px;color:#172033}
+.delivery-head{background:#151515;border-left:6px solid #ff7200;color:white;padding:22px;border-radius:12px;margin-bottom:20px}
+.delivery-head h1{font-size:27px;margin:0 0 7px}
+.delivery-head p{margin:0;color:#e5e7eb}
+.delivery-links{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.delivery-links a{color:#ad4700;text-decoration:none;font-weight:700}
+.delivery-wrap .panel{background:white;padding:22px;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:18px}
+.delivery-wrap .panel-title{font-size:20px;margin-bottom:12px}
+.delivery-wrap .btn{background:#ff7200;color:white;border:0;border-radius:7px;padding:10px 16px;cursor:pointer;text-decoration:none;display:inline-block}
+@media(max-width:700px){.delivery-wrap{padding:12px;margin:12px auto}.delivery-wrap .panel{padding:14px}}
+</style>
+<div class="delivery-wrap">
+  <div class="delivery-head">
+    <h1>{% block page_title %}Classroom{% endblock %}</h1>
+    <p>{% block page_subtitle %}{% endblock %}</p>
+  </div>
+  <nav class="delivery-links" aria-label="Classroom navigation">
+    <a href="{% url 'lms:staff_classroom' %}">Staff assignments</a>
+    {% if request.user.is_superuser %}
+      <a href="{% url 'lms:delivery_report' %}">Management report</a>
+      <a href="/admin/lms/trainingchecklistitem/">Review checklist</a>
+      <a href="/admin/lms/trainingdeliveryplan/">Student plans</a>
+    {% endif %}
+  </nav>
+  {% block delivery_content %}{% endblock %}
+</div>
+{% endblock %}

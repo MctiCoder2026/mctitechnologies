@@ -1,0 +1,64 @@
+{% extends "lms/base.html" %}
+{% block title %}My Classroom Progress | MCTI{% endblock %}
+{% block page_title %}My Classroom Progress{% endblock %}
+{% block page_subtitle %}What has been taught, who taught it, and your doubts{% endblock %}
+
+{% block content %}
+{% for row in rows %}
+<div class="panel">
+  <h2 class="panel-title">{{ row.course.title }}</h2>
+  <p style="margin:8px 0 16px">
+    <strong>{{ row.taught }}/{{ row.total }} published checklist topics taught</strong>
+    · Open doubts: {{ row.open_doubts }}
+    {% if row.plan.target_completion_date %}
+      · Planned completion: {{ row.plan.target_completion_date|date:"d M Y" }}
+    {% endif %}
+    {% if row.plan.revised_completion_date %}
+      · Revised completion: {{ row.plan.revised_completion_date|date:"d M Y" }}
+    {% endif %}
+  </p>
+  {% for item in row.items %}
+    <div style="border-top:1px solid #e5e7eb;padding:15px 0">
+      <small>{{ item.module_title }}</small>
+      <h3 style="font-size:16px;margin:4px 0">{{ item.title }}</h3>
+      {% if item.learning_outcome %}
+        <p style="margin:6px 0">{{ item.learning_outcome }}</p>
+      {% endif %}
+      {% if item.class_record %}
+        {% for record in item.class_history %}
+          <p style="color:#166534;margin:7px 0">
+            ✓ {{ record.session.get_session_type_display }} on {{ record.session.session_date|date:"d M Y" }}
+            by {{ record.session.taught_by.user.get_full_name|default:record.session.taught_by.user.username }}
+            <br>
+            {% if record.practice_verified_at %}
+              Lab practice verified {{ record.practice_verified_at|date:"d M Y" }}
+              by {{ record.practice_verified_by.user.get_full_name|default:record.practice_verified_by.user.username }}
+            {% else %}
+              Lab practice pending verification
+            {% endif %}
+          </p>
+        {% endfor %}
+        {% if item.has_open_doubt %}
+          <p style="color:#b45309">Your doubt is open. Trainer will explain this topic again.</p>
+        {% else %}
+          <form method="post" action="{% url 'lms:raise_delivery_doubt' %}" style="margin:10px 0">
+            {% csrf_token %}
+            <input type="hidden" name="enrollment_id" value="{{ row.enrollment.id }}">
+            <input type="hidden" name="item_id" value="{{ item.id }}">
+            <label for="doubt-{{ row.enrollment.id }}-{{ item.id }}">Still have a doubt?</label>
+            <input id="doubt-{{ row.enrollment.id }}-{{ item.id }}" type="text" name="question" maxlength="1000" required placeholder="Write what you did not understand" style="padding:9px;width:min(100%,430px);display:block;margin:8px 0">
+            <button class="btn" type="submit">Send doubt to trainer</button>
+          </form>
+        {% endif %}
+      {% else %}
+        <p style="color:#64748b;margin:7px 0">Classroom teaching pending</p>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+{% empty %}
+<div class="panel">
+  <p>Your active courses do not have a published classroom checklist yet.</p>
+</div>
+{% endfor %}
+{% endblock %}

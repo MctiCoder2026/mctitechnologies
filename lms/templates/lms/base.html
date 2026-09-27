@@ -986,7 +986,13 @@
 
                 <div class="course-name">
 
-                    {% if student.course %}
+                    {% if course_data|length > 1 and not is_package %}
+
+                        {% for course_item in course_data %}
+                            <div>{{ course_item.course.title }}</div>
+                        {% endfor %}
+
+                    {% elif student.course %}
 
                         {{ student.course.title }}
 
@@ -1031,6 +1037,10 @@
             📊 My Progress
         </a>
 
+        <a class="nav-link" href="{% url 'lms:student_delivery' %}">
+            📋 Classroom Progress & Doubts
+        </a>
+
 
         <a
             class="nav-link"
@@ -1050,7 +1060,7 @@
 
         <a
             class="nav-link"
-            href="#"
+            href="{% url 'student_jobs' %}"
         >
             💼 Placement Support
         </a>

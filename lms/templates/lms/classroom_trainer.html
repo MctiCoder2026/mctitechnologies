@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Trainer Dashboard | MCTI{% endblock %}
+{% block content %}
+<div style="max-width:1050px;margin:25px auto;padding:16px">
+  <div style="background:#191919;color:white;border-left:6px solid #ff7200;padding:22px;border-radius:12px;margin-bottom:18px">
+    <h1>Trainer Dashboard</h1>
+    <p>{{ trainer.name }} · {{ trainer.branch }} · Your assigned students and topics · up to 3 different topics per day</p>
+  </div>
+  <form method="post" action="{% url 'lms:trainer_logout' %}" style="text-align:right;margin-bottom:15px">
+    {% csrf_token %}<button type="submit" style="padding:9px;background:#111;color:#fff;border:0;border-radius:7px">Logout trainer</button>
+  </form>
+  {% for assignment in assignments %}
+    {% include "lms/classroom_assignment_card.html" with assignment=assignment is_coverage=False %}
+  {% empty %}
+  <div style="background:white;padding:20px;border-radius:10px">No student/topic assignment yet. Ask branch staff to assign one.</div>
+  {% endfor %}
+
+  {% if coverage_assignments %}
+  <h2 style="margin:25px 0 12px">Cover today's class for another trainer</h2>
+  <p style="margin-bottom:14px">Only assignments in your branch are shown. Your own login and name will be recorded.</p>
+  {% for assignment in coverage_assignments %}
+    {% include "lms/classroom_assignment_card.html" with assignment=assignment is_coverage=True %}
+  {% endfor %}
+  {% endif %}
+</div>
+
+<style>
+  .trainer-practical-toast {
+    position:fixed; top:20px; right:20px; z-index:9999;
+    max-width:min(420px, calc(100vw - 30px));
+    padding:14px 16px; border-radius:12px;
+    background:#fff; color:#172033;
+    border:1px solid #ffd4aa; border-left:5px solid #ff7200;
+    box-shadow:0 10px 30px rgba(0,0,0,.18);
+    display:flex; gap:12px; align-items:flex-start;
+    font-size:14px; line-height:1.45;
+  }
+  .trainer-practical-toast[hidden] { display:none; }
+  .trainer-practical-toast .icon { font-size:25px; line-height:1; }
+</style>
+<div id="trainer-practical-toast" class="trainer-practical-toast" role="alert" hidden>
+  <span class="icon" aria-hidden="true">��</span>
+  <span id="trainer-practical-message"></span>
+</div>
+{% if messages %}
+  {% for message in messages %}
+    {% if message.tags == "error" %}
+      <div class="trainer-practical-toast" role="alert">
+        <span class="icon" aria-hidden="true">📝</span>
+        <span>{{ message }}</span>
+      </div>
+    {% endif %}
+  {% endfor %}
+{% endif %}
+<script>
+(function () {
+  const toast = document.getElementById("trainer-practical-toast");
+  const label = document.getElementById("trainer-practical-message");
+  let timer;
+  document.querySelectorAll('form[action*="/submit/"]').forEach(function (form) {
+    form.addEventListener("submit", function (event) {
+      const checked = form.querySelector('input[name="lab_completed"]');
+      const evidence = form.querySelector('input[name="lab_evidence"]');
+      if (checked && checked.checked && evidence && evidence.value.trim().length < 5) {
+        event.preventDefault();
+        label.textContent = "Lab practice tick kiya hai. Student ne kya practical complete kiya, likhiye.";
+        toast.hidden = false;
+        evidence.focus();
+        clearTimeout(timer);
+        timer = setTimeout(function () { toast.hidden = true; }, 6000);
+      }
+    });
+  });
+})();
+</script>
+{% endblock %}

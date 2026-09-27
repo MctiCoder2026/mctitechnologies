@@ -31,24 +31,24 @@ Your MCTI learning, course progress and quiz overview
 </div>
 
 
-{% if is_package %}
+{% if show_course_list %}
 
     <div class="stats-grid">
 
         <div class="stat-card">
             <div class="stat-label">
-                📦 MY PACKAGE
+                {% if is_package %}📦 MY PACKAGE{% else %}📚 MY COURSES{% endif %}
             </div>
 
             <div class="stat-value">
-                {{ enrolled_course.title }}
+                {% if is_package %}{{ enrolled_course.title }}{% else %}{{ course_data|length }} enrolled{% endif %}
             </div>
         </div>
 
 
         <div class="stat-card green">
             <div class="stat-label">
-                📚 INCLUDED COURSES
+                {% if is_package %}📚 INCLUDED COURSES{% else %}📚 ACTIVE COURSES{% endif %}
             </div>
 
             <div class="stat-value">
@@ -89,7 +89,7 @@ Your MCTI learning, course progress and quiz overview
 
 
     <h2 class="section-title">
-        My Included Courses
+        {% if is_package %}My Included Courses{% else %}My Courses{% endif %}
     </h2>
 
 
@@ -326,8 +326,7 @@ Your MCTI learning, course progress and quiz overview
     {% empty %}
 
         <div class="panel">
-            No learning courses are assigned
-            to this package yet.
+            No active learning courses are assigned yet.
         </div>
 
     {% endfor %}

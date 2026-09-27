@@ -1,0 +1,120 @@
+{% extends "lms/delivery_staff_base.html" %}
+{% block title %}Classroom Delivery | MCTI{% endblock %}
+{% block page_title %}Trainer Classroom Checklist{% endblock %}
+{% block page_subtitle %}Fixed topics, actual teaching record, and student doubts{% endblock %}
+
+{% block delivery_content %}
+<a href="{% url 'branch_dashboard' %}" class="btn"
+   style="margin-bottom:16px;background:#111;display:inline-block">
+  ← Back to Branch Dashboard
+</a>
+<div class="panel">
+  <h2 class="panel-title">Choose course</h2>
+  <form method="get">
+    <select name="course" required style="padding:10px;max-width:420px;width:100%">
+      <option value="">Select course</option>
+      {% for option in courses %}
+        <option value="{{ option.id }}" {% if course.id == option.id %}selected{% endif %}>{{ option.title }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn" type="submit">View checklist</button>
+  </form>
+</div>
+
+{% if course %}
+<div class="panel">
+  <h2 class="panel-title">{{ course.title }} — Teaching checklist</h2>
+  {% if not enrollments %}
+    <p>Is course ke active students aapki branch mein nahi mile.</p>
+  {% else %}
+    <p style="margin-bottom:14px">Class padhane ke baad topic aur us class mein present students select karke record save karein. Login kiya hua trainer automatically record hoga.</p>
+    <form method="post" action="{% url 'lms:record_delivery' %}">
+      {% csrf_token %}
+      <label for="item_id">Topic</label>
+      <select id="item_id" name="item_id" required style="display:block;padding:10px;width:100%;margin:8px 0 16px">
+        <option value="">Select fixed topic</option>
+        {% for item in items %}
+          <option value="{{ item.id }}">{{ item.module_title }} → {{ item.title }} (v{{ item.version }})</option>
+        {% endfor %}
+      </select>
+      <label for="session_date">Class date</label>
+      <input id="session_date" type="date" name="session_date" value="{{ today|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}" required style="display:block;padding:10px;margin:8px 0 16px">
+      <label for="session_type">Class type</label>
+      <select id="session_type" name="session_type" style="display:block;padding:10px;margin:8px 0 16px">
+        <option value="regular">Regular teaching</option>
+        <option value="doubt_reteach">Doubt explained again</option>
+        <option value="revision">Revision</option>
+      </select>
+      <p><strong>Students present in this class</strong></p>
+      <div style="max-height:230px;overflow-y:auto;border:1px solid #ddd;padding:12px;margin:8px 0 16px">
+        {% for enrollment in enrollments %}
+          <label style="display:block;padding:7px 0">
+            <input type="checkbox" name="enrollment_ids" value="{{ enrollment.id }}">
+            {{ enrollment.student.name }} ({{ enrollment.student.student_id }}) · {{ enrollment.branch|default:enrollment.student.branch }}
+            <span style="margin-left:15px">
+              <input type="checkbox" name="practice_verified_ids" value="{{ enrollment.id }}">
+              Lab practice completed and checked
+            </span>
+          </label>
+        {% endfor %}
+      </div>
+      <label for="notes">Class / doubt explanation notes</label>
+      <textarea id="notes" name="notes" rows="3" maxlength="2000" style="display:block;padding:10px;width:100%;margin:8px 0 16px"></textarea>
+      <label for="practice_evidence">Lab exercise completed (required if marking practice complete)</label>
+      <input id="practice_evidence" type="text" name="practice_evidence" maxlength="1000"
+             placeholder="e.g. Created and saved a formatted document independently"
+             style="display:block;padding:10px;width:100%;margin:8px 0 16px">
+      <button type="submit" class="btn">Save class record</button>
+    </form>
+  {% endif %}
+</div>
+
+<div class="panel">
+  <h2 class="panel-title">Fixed teaching checklist and practice standard</h2>
+  {% for item in items %}
+    <details style="padding:12px 0;border-top:1px solid #e5e7eb">
+      <summary style="cursor:pointer;font-weight:700">
+        {{ item.module_title }} → {{ item.title }} · v{{ item.version }}
+      </summary>
+      <p style="margin:10px 0"><strong>Student should learn:</strong> {{ item.learning_outcome }}</p>
+      <p style="margin:10px 0"><strong>Trainer teaches:</strong> {{ item.trainer_steps }}</p>
+      <p style="margin:10px 0"><strong>Student practice:</strong> {{ item.student_practice }}</p>
+      <p style="margin:10px 0"><strong>Completion check:</strong> {{ item.completion_check }}</p>
+    </details>
+  {% endfor %}
+</div>
+
+<div class="panel">
+  <h2 class="panel-title">Lab practice pending ({{ pending_practice|length }})</h2>
+  {% for record in pending_practice %}
+    <div style="border-top:1px solid #e5e7eb;padding:12px 0">
+      <strong>{{ record.enrollment.student.name }}</strong> · {{ record.session.topic.title }}
+      <br><small>Taught: {{ record.session.session_date|date:"d M Y" }}</small>
+      <form method="post" action="{% url 'lms:verify_lab_practice' record.id %}" style="margin-top:8px">
+        {% csrf_token %}
+        <input type="text" name="practice_evidence" maxlength="1000" required minlength="5"
+               placeholder="What did the student complete independently?"
+               style="padding:9px;width:min(100%,450px)">
+        <button class="btn" type="submit">Verify practice</button>
+      </form>
+    </div>
+  {% empty %}
+    <p>No pending lab practice recorded for students in this course and branch.</p>
+  {% endfor %}
+</div>
+
+<div class="panel">
+  <h2 class="panel-title">Open student doubts ({{ doubts|length }})</h2>
+  {% for doubt in doubts %}
+    <p style="padding:12px 0;border-bottom:1px solid #eee">
+      <strong>{{ doubt.enrollment.student.name }}</strong> · {{ doubt.topic.title }}<br>
+      {{ doubt.question }}<br>
+      <small>Raised: {{ doubt.opened_at|date:"d M Y, g:i A" }}</small>
+    </p>
+  {% empty %}
+    <p>No open doubts in this course and branch.</p>
+  {% endfor %}
+  <p style="margin-top:12px">Doubt clear karne ke liye isi topic ko “Doubt explained again” ke roop mein student ke naam ke saath save karein.</p>
+</div>
+{% endif %}
+{% endblock %}

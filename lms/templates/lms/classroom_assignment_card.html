@@ -1,0 +1,69 @@
+  <div style="background:white;border:1px solid #ddd;border-radius:10px;padding:19px;margin-bottom:16px">
+    <h2 style="font-size:19px;margin-bottom:8px">{{ assignment.enrollment.student.name }} · {{ assignment.topic.title }}</h2>
+    <p>Course: {{ assignment.topic.course.title }} · Assigned: {{ assignment.created_at|date:"d M Y" }}</p>
+    {% if is_coverage %}
+    <p style="color:#9a3412"><strong>Covering for:</strong> {{ assignment.trainer.name }}.
+      Submit only if you taught this class today.</p>
+    {% endif %}
+    {% if assignment.instructions %}<p><strong>Staff instruction:</strong> {{ assignment.instructions }}</p>{% endif %}
+    <details style="margin:10px 0">
+      <summary>Fixed topic teaching standard</summary>
+      <p><strong>Explain:</strong> {{ assignment.topic.trainer_steps }}</p>
+      <p><strong>Practice:</strong> {{ assignment.topic.student_practice }}</p>
+      <p><strong>Check:</strong> {{ assignment.topic.completion_check }}</p>
+    </details>
+    {% if assignment.latest_report %}
+      <p style="margin:10px 0"><strong>Latest submission:</strong> {{ assignment.latest_report.get_review_status_display }}
+        · Student: {{ assignment.latest_report.get_student_response_display }}</p>
+      {% if assignment.latest_report.review_note %}
+        <p style="color:#991b1b">Staff feedback: {{ assignment.latest_report.review_note }}</p>
+      {% endif %}
+
+      {% if assignment.latest_report.student_response == "satisfied" and not assignment.latest_report.trainer_approved_at %}
+        <form method="post"
+              action="{% url 'lms:trainer_approve_completion' assignment.latest_report.id %}"
+              style="margin:12px 0">
+          {% csrf_token %}
+          <button type="submit"
+                  style="background:#166534;color:white;border:0;padding:12px 16px;border-radius:8px;cursor:pointer">
+            ✓ Approve Student Completion & Continue
+          </button>
+        </form>
+      {% elif assignment.latest_report.trainer_approved_at %}
+        <p style="color:#166534;margin:10px 0">
+          <strong>✓ Student completion approved by trainer.</strong>
+          Next training can continue.
+        </p>
+      {% endif %}
+      {% if assignment.latest_report.closed_at %}
+        <p style="color:#166534"><strong>Final topic closed.</strong></p>
+      {% endif %}
+    {% endif %}
+    {% if not assignment.latest_report or assignment.latest_report.review_status == "rejected" or assignment.latest_report.student_response == "doubt" and not assignment.latest_report.closed_at %}
+    <form method="post" action="{% url 'lms:submit_class' assignment.id %}" style="margin-top:14px">
+      {% csrf_token %}
+      {% if is_coverage %}
+      <label>Class date (today only)</label>
+      {% else %}
+      <label>Actual class date</label>
+      {% endif %}
+      <input type="date" name="taught_on" value="{{ today|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}" required
+             style="display:block;padding:10px;margin:7px 0 12px">
+      <label>What did you teach this student?</label>
+      <textarea name="teaching_note" minlength="10" maxlength="2000" rows="3" required
+                style="display:block;padding:10px;width:100%;margin:7px 0 12px"></textarea>
+      <label><input type="checkbox" name="lab_completed"> Student completed the lab practice; I checked it</label>
+      <input name="lab_evidence" maxlength="1000"
+             placeholder="If completed, what did the student make or demonstrate?"
+             style="display:block;padding:10px;width:100%;margin:9px 0 12px">
+      {% if is_coverage %}
+      <label>Why are you covering for the assigned trainer?</label>
+      <textarea name="coverage_reason" minlength="5" maxlength="1000" rows="2" required
+                style="display:block;padding:10px;width:100%;margin:7px 0 12px"></textarea>
+      {% endif %}
+      <button type="submit" style="background:#ff7200;color:white;border:0;padding:12px;border-radius:8px">
+        ✓ Training Done
+      </button>
+    </form>
+    {% endif %}
+  </div>

@@ -1,0 +1,49 @@
+{% extends "lms/base.html" %}
+{% block title %}Classroom Progress | MCTI{% endblock %}
+{% block page_title %}My Classroom Progress{% endblock %}
+{% block page_subtitle %}Training completed, practice and your feedback{% endblock %}
+{% block content %}
+{% for row in rows %}
+<div class="panel">
+  <h2 class="panel-title">{{ row.assignment.topic.course.title }} → {{ row.assignment.topic.title }}</h2>
+  {% if row.report %}
+    <p style="margin:8px 0">Taught on {{ row.report.taught_on|date:"d M Y" }}
+      by <strong>{{ row.report.submitted_by.name }}</strong>
+      {% if row.report.reviewed_at %}
+      · Staff reviewed {{ row.report.reviewed_at|date:"d M Y" }}
+      {% else %}
+      · Training completed
+      {% endif %}</p>
+    <p style="margin:8px 0"><strong>Class:</strong> {{ row.report.teaching_note }}</p>
+    <p style="margin:8px 0"><strong>Lab practice:</strong>
+      {% if row.report.lab_completed %}
+        Completed — {{ row.report.lab_evidence }}
+      {% else %}
+        Pending
+      {% endif %}
+    </p>
+    {% if row.report.closed_at %}
+      <p style="color:#166534"><strong>✓ Topic final verified and closed by staff</strong></p>
+    {% elif row.report.student_response == "pending" %}
+      <form method="post" action="{% url 'lms:student_feedback' row.report.id %}">
+        {% csrf_token %}
+        <label for="note-{{ row.report.id }}">Your feedback or doubt</label>
+        <textarea id="note-{{ row.report.id }}" name="student_note" rows="2" maxlength="1000"
+                  style="display:block;width:100%;padding:10px;margin:8px 0"
+                  placeholder="Describe your doubt if anything is unclear"></textarea>
+        <button type="submit" name="response" value="satisfied" class="btn">I understood / Satisfied</button>
+        <button type="submit" name="response" value="doubt" class="btn" style="background:#b45309">I have a doubt</button>
+      </form>
+    {% elif row.report.student_response == "doubt" %}
+      <p style="color:#b45309"><strong>Your doubt is open:</strong> {{ row.report.student_note }}. Your trainer will explain this topic again.</p>
+    {% else %}
+      <p style="color:#166534"><strong>✓ You marked this topic satisfied.</strong> Your training can continue to the next topic.</p>
+    {% endif %}
+  {% else %}
+    <p style="color:#64748b">Topic assigned to your trainer. Training details will appear after the trainer completes the class.</p>
+  {% endif %}
+</div>
+{% empty %}
+<div class="panel"><p>No weekly classroom topics assigned yet.</p></div>
+{% endfor %}
+{% endblock %}

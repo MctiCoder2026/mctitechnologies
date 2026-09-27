@@ -1,0 +1,99 @@
+{% extends "lms/delivery_staff_base.html" %}
+{% block title %}Classroom Delivery Report | MCTI{% endblock %}
+{% block page_title %}Classroom Delivery Report{% endblock %}
+{% block page_subtitle %}Branch, student, course, trainer, doubts and committed dates{% endblock %}
+
+{% block delivery_content %}
+<a href="{% url 'management_dashboard' %}" class="btn"
+   style="margin-bottom:16px;background:#111;display:inline-block">
+  ← Back to Management Dashboard
+</a>
+<div class="panel">
+  <p style="margin-bottom:12px">
+    <strong>{{ rows|length }}</strong> active course enrollments ·
+    <strong>{{ missing_targets }}</strong> without target date ·
+    <strong>{{ overdue_count }}</strong> overdue ·
+    <strong>{{ open_doubt_count }}</strong> open doubts ·
+    <strong>{{ pending_reviews }}</strong> trainer submissions awaiting staff approval
+  </p>
+  <p style="margin-bottom:15px">Report date: {{ today|date:"d M Y" }}. Counts cover published checklist items only; a pilot module does not mean the full course is complete. Planned dates can be set in the Training Delivery Plans section of Django admin.</p>
+  <div style="overflow:auto;max-height:68vh;border:1px solid #e5e7eb;border-radius:8px">
+    <table style="width:100%;border-collapse:collapse;text-align:left;min-width:850px">
+      <thead>
+        <tr style="background:#f1f5f9;position:sticky;top:0;z-index:2">
+          <th style="padding:10px">Branch</th>
+          <th style="padding:10px">Student</th>
+          <th style="padding:10px">Course</th>
+          <th style="padding:10px">Published topics taught</th>
+          <th style="padding:10px">Lab verified</th>
+          <th style="padding:10px">Awaiting staff approval</th>
+          <th style="padding:10px">Open doubts</th>
+          <th style="padding:10px">Assigned trainer</th>
+          <th style="padding:10px">Last actual trainer</th>
+          <th style="padding:10px">Completion date</th>
+          <th style="padding:10px">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for row in rows %}
+        <tr style="border-bottom:1px solid #e5e7eb">
+          <td style="padding:10px">{{ row.branch|default:"—" }}</td>
+          <td style="padding:10px">
+            <a href="{% url 'lms:delivery_student_history' row.enrollment_id row.course.id %}">
+              {{ row.student.name }}
+            </a>
+            <br><small>{{ row.student.student_id }}</small>
+          </td>
+          <td style="padding:10px">{{ row.course.title }}</td>
+          <td style="padding:10px">
+            {{ row.taught }}/{{ row.total }} published
+            <br><small>{{ row.course_total }} topics in full draft syllabus</small>
+          </td>
+          <td style="padding:10px">{{ row.lab_verified }}/{{ row.total }}</td>
+          <td style="padding:10px">{{ row.pending_reviews }}</td>
+          <td style="padding:10px">{{ row.doubts }}</td>
+          <td style="padding:10px">
+            {% if row.plan.assigned_trainer %}
+              {{ row.plan.assigned_trainer.user.get_full_name|default:row.plan.assigned_trainer.user.username }}
+            {% else %}
+              {{ row.weekly_trainer|default:"Not set" }}
+            {% endif %}
+          </td>
+          <td style="padding:10px">
+            {{ row.last_teacher|default:"No class yet" }}
+            {% if row.substitute_sessions %}
+              <br><small>{{ row.substitute_sessions }} substitute class(es)</small>
+            {% endif %}
+          </td>
+          <td style="padding:10px">
+            {{ row.due_date|date:"d M Y"|default:"Not set" }}
+            {% if row.plan.revised_completion_date %}
+              <br><small>Revised: {{ row.plan.revision_reason|truncatechars:80 }}</small>
+            {% endif %}
+          </td>
+          <td style="padding:10px">
+            {% if not row.due_date %}
+              <strong style="color:#b45309">Set target date</strong>
+            {% elif row.overdue %}
+              <strong style="color:#b91c1c">Overdue</strong>
+            {% elif row.doubts %}
+              <strong style="color:#b45309">Student doubt open</strong>
+            {% elif row.closed == row.total %}
+              <strong style="color:#166534">All topics staff closed</strong>
+            {% elif row.taught == row.total and row.lab_verified == row.total %}
+              <strong style="color:#b45309">Awaiting student or staff close</strong>
+            {% elif row.taught == row.total %}
+              <strong style="color:#b45309">Lab practice pending</strong>
+            {% else %}
+              In progress
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="11" style="padding:15px">No active enrollments with published checklists yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

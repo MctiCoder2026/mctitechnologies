@@ -1,0 +1,140 @@
+{% extends "lms/delivery_staff_base.html" %}
+{% block title %}Staff Classroom Control | MCTI{% endblock %}
+{% block page_title %}Weekly Classroom Control{% endblock %}
+{% block page_subtitle %}Assign topics, monitor training and perform weekly quality review{% endblock %}
+{% block delivery_content %}
+<a href="{% url 'branch_dashboard' %}" class="btn" style="background:#111;margin-bottom:16px">← Back to Staff Dashboard</a>
+
+<div class="panel">
+  <h2 class="panel-title">1. Create a trainer login</h2>
+  <p style="margin-bottom:12px">Each trainer gets a separate username and password. Staff login is never shared.</p>
+  <form method="post" action="{% url 'lms:create_classroom_trainer' %}">
+    {% csrf_token %}
+    <input name="name" required maxlength="120" placeholder="Trainer's full name" style="padding:10px;margin:5px">
+    <input name="username" required maxlength="150" placeholder="Unique trainer username" style="padding:10px;margin:5px">
+    <input name="password" required minlength="10" type="password" autocomplete="new-password" placeholder="Trainer password (10+ characters)" style="padding:10px;margin:5px">
+    {% if is_head_office %}
+    <select name="branch" required style="padding:10px;margin:5px">
+      <option value="">Trainer branch</option>
+      <option value="kharghar">Kharghar</option><option value="panvel">Panvel</option>
+      <option value="koperkhairane">Koperkhairane</option><option value="kamothe">Kamothe</option>
+      <option value="ghansoli">Ghansoli</option><option value="nerul">Nerul</option>
+    </select>
+    {% endif %}
+    <button class="btn" type="submit">Create trainer account</button>
+  </form>
+  <p style="margin-top:10px">Trainer login: <a href="{% url 'lms:trainer_login' %}">Open Trainer Login</a></p>
+  <div style="margin-top:14px">
+    <strong>Active trainers</strong>
+    {% for trainer in trainers %}
+      <div style="border-top:1px solid #ddd;padding:7px 0">
+        {{ trainer.name }} · {{ trainer.branch }} · Login {{ trainer.user.username }}
+        <form method="post" action="{% url 'lms:deactivate_classroom_trainer' trainer.id %}" style="display:inline;margin-left:12px">
+          {% csrf_token %}
+          <button type="submit" style="background:#991b1b;color:#fff;border:0;padding:5px 8px;cursor:pointer">
+            Deactivate access
+          </button>
+        </form>
+      </div>
+    {% empty %}<p>No trainer accounts yet.</p>{% endfor %}
+  </div>
+</div>
+
+<div class="panel">
+  <h2 class="panel-title">2. Select course and assign this week's topic</h2>
+  <form method="get">
+    <select name="course" required style="padding:10px;width:min(100%,440px)">
+      <option value="">Choose course</option>
+      {% for option in courses %}
+      <option value="{{ option.id }}" {% if course.id == option.id %}selected{% endif %}>{{ option.title }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn" type="submit">Show students and topics</button>
+  </form>
+  {% if course %}
+  <form method="post" action="{% url 'lms:assign_weekly_topic' %}" style="margin-top:18px">
+    {% csrf_token %}
+    <label>Student and enrollment</label>
+    <select name="enrollment_id" required style="display:block;padding:10px;width:100%;margin:7px 0 14px">
+      <option value="">Choose student</option>
+      {% for enrollment in enrollments %}
+      <option value="{{ enrollment.id }}">{{ enrollment.student.name }} · {{ enrollment.student.student_id }} · {{ enrollment.branch|default:enrollment.student.branch }}</option>
+      {% endfor %}
+    </select>
+    <label>Fixed topic</label>
+    <select name="topic_id" required style="display:block;padding:10px;width:100%;margin:7px 0 14px">
+      <option value="">Choose topic</option>
+      {% for topic in topics %}
+      <option value="{{ topic.id }}">{{ topic.module_title }} → {{ topic.title }}</option>
+      {% endfor %}
+    </select>
+    <label>Trainer</label>
+    <select name="trainer_id" required style="display:block;padding:10px;width:100%;margin:7px 0 14px">
+      <option value="">Choose trainer in the student's branch</option>
+      {% for trainer in trainers %}
+      <option value="{{ trainer.id }}">{{ trainer.name }} · {{ trainer.branch }}</option>
+      {% endfor %}
+    </select>
+    <label>Instructions for trainer (optional)</label>
+    <input name="instructions" maxlength="2000" placeholder="Practice file or specific learning goal" style="display:block;padding:10px;width:100%;margin:7px 0 14px">
+    <button class="btn" type="submit">Assign student and topic</button>
+  </form>
+  {% endif %}
+</div>
+
+<div class="panel">
+  <h2 class="panel-title">Assigned students and topics</h2>
+  {% for assignment in assignments %}
+    <p style="border-top:1px solid #ddd;padding:9px 0">
+      <strong>{{ assignment.enrollment.student.name }}</strong> ·
+      {{ assignment.topic.course.title }} → {{ assignment.topic.title }} ·
+      Assigned {{ assignment.created_at|date:"d M Y" }} ·
+      Trainer <strong>{{ assignment.trainer.name }}</strong>
+    </p>
+  {% empty %}
+    <p>No topic assignments yet.</p>
+  {% endfor %}
+</div>
+
+<div class="panel">
+  <h2 class="panel-title">3. Weekly Training Quality Review</h2>
+  {% for report in reports %}
+  <div style="border-top:1px solid #ddd;padding:14px 0">
+    <strong>{{ report.assignment.enrollment.student.name }}</strong> · {{ report.assignment.topic.title }}
+    <br>Assigned: {{ report.assignment.trainer.name }} · Actually taught by: <strong>{{ report.submitted_by.name }}</strong>
+    {% if report.coverage_reason %}
+      <br><strong>Substitute reason:</strong> {{ report.coverage_reason }}
+    {% endif %}
+    {% if report.review_status == "approved" %}
+      <br><strong>Trainer attendance:</strong> {{ report.submitted_by.name }} credited for {{ report.taught_on|date:"d M Y" }}
+    {% endif %}
+    · {{ report.taught_on|date:"d M Y" }}
+    <br>Teaching: {{ report.teaching_note }}
+    <br>Lab: {% if report.lab_completed %}Completed — {{ report.lab_evidence }}{% else %}Pending{% endif %}
+    <br>Staff review: <strong>{{ report.get_review_status_display }}</strong>
+    · Student: <strong>{{ report.get_student_response_display }}</strong>
+    {% if report.student_note %}<br>Student message: {{ report.student_note }}{% endif %}
+    {% if report.review_note %}<br>Staff note: {{ report.review_note }}{% endif %}
+    {% if report.closed_at %}<br><strong style="color:#166534">Closed {{ report.closed_at|date:"d M Y" }}</strong>{% endif %}
+
+    {% if report.review_status == "submitted" %}
+    <form method="post" action="{% url 'lms:review_class' report.id %}" style="margin-top:10px">
+      {% csrf_token %}
+      <input name="review_note" maxlength="2000" placeholder="Reason if rejecting" style="padding:9px;width:min(100%,400px)">
+      <button class="btn" type="submit" name="decision" value="approved">✓ Quality Reviewed</button>
+      <button class="btn" type="submit" name="decision" value="rejected" style="background:#991b1b">Needs Correction</button>
+    </form>
+    {% elif report.review_status == "approved" and report.student_response == "satisfied" and report.lab_completed and not report.closed_at %}
+    <form method="post" action="{% url 'lms:close_topic' report.id %}" style="margin-top:10px">
+      {% csrf_token %}
+      <button class="btn" type="submit">✓ Audit & Close Record</button>
+    </form>
+    {% elif report.student_response == "doubt" %}
+      <p style="color:#b45309;margin-top:8px">Doubt open. Trainer can teach again and submit a new report.</p>
+    {% endif %}
+  </div>
+  {% empty %}
+    <p>No training records available for review yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

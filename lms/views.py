@@ -18,7 +18,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.utils import timezone
 from django.db.models import Max
 
-from core.models import Student, Enrollment
+from core.models import Student, Enrollment, StaffProfile, Course
 
 from .models import (
     LMSModule,
@@ -27,6 +27,8 @@ from .models import (
     QuizQuestion,
     QuizAttempt,
     StudentTopicProgress,
+    StaffTopicProgress,
+    StaffQuizAttempt,
     Certificate,
 )
 
@@ -440,6 +442,9 @@ def my_courses(request):
         ),
         "courses": courses,
         "course_data": course_data,
+        "show_course_list": len(course_data) > 1 or bool(
+            enrolled_course and enrolled_course.is_package
+        ),
 
         "course": (
             first_course_data["course"]
@@ -2256,3 +2261,404 @@ def verify_certificate(request, verification_token):
         context
     )
 
+
+
+
+# =========================================================
+# STAFF TRAINING LMS
+# =========================================================
+
+@login_required
+def staff_training(request):
+
+    staff = get_object_or_404(
+        StaffProfile,
+        user=request.user,
+        is_active=True
+    )
+
+    course = get_object_or_404(
+        Course,
+        id=232
+    )
+
+    modules = (
+        LMSModule.objects
+        .filter(
+            course=course,
+            is_active=True
+        )
+        .prefetch_related("topics")
+        .order_by("order")
+    )
+
+    # Ensure very first topic is available.
+    first_module = modules.first()
+
+    if first_module:
+
+        first_topic = (
+            LMSTopic.objects
+            .filter(
+                module=first_module,
+                is_active=True
+            )
+            .order_by("order")
+            .first()
+        )
+
+        if first_topic:
+
+            progress, created = (
+                StaffTopicProgress.objects.get_or_create(
+                    staff=staff,
+                    topic=first_topic,
+                    defaults={
+                        "is_unlocked": True
+                    }
+                )
+            )
+
+            if not progress.is_unlocked:
+                progress.is_unlocked = True
+                progress.save(
+                    update_fields=["is_unlocked"]
+                )
+
+    total_topics = LMSTopic.objects.filter(
+        module__course=course,
+        is_active=True
+    ).count()
+
+    completed_topics = StaffTopicProgress.objects.filter(
+        staff=staff,
+        topic__module__course=course,
+        is_completed=True
+    ).count()
+
+    progress_percent = (
+        round(
+            completed_topics
+            / total_topics
+            * 100
+        )
+        if total_topics
+        else 0
+    )
+
+    context = {
+        "staff": staff,
+        "course": course,
+        "modules": modules,
+        "total_topics": total_topics,
+        "completed_topics": completed_topics,
+        "progress_percent": progress_percent,
+    }
+
+    return render(
+        request,
+        "lms/staff_training.html",
+        context
+    )
+
+
+# =========================================================
+# STAFF TRAINING MODULE
+# =========================================================
+
+@login_required
+def staff_training_module(request, module_id):
+
+    staff = get_object_or_404(
+        StaffProfile,
+        user=request.user,
+        is_active=True
+    )
+
+    module = get_object_or_404(
+        LMSModule,
+        id=module_id,
+        course_id=232,
+        is_active=True
+    )
+
+    topics = list(
+        LMSTopic.objects.filter(
+            module=module,
+            is_active=True
+        ).order_by("order")
+    )
+
+    progress_map = {
+        p.topic_id: p
+        for p in StaffTopicProgress.objects.filter(
+            staff=staff,
+            topic__in=topics
+        )
+    }
+
+    for topic in topics:
+        topic.staff_progress_item = progress_map.get(
+            topic.id
+        )
+
+    context = {
+        "staff": staff,
+        "module": module,
+        "course": module.course,
+        "topics": topics,
+    }
+
+    return render(
+        request,
+        "lms/staff_training_module.html",
+        context
+    )
+
+
+# =========================================================
+# STAFF TRAINING TOPIC
+# =========================================================
+
+@login_required
+def staff_training_topic(request, topic_id):
+
+    staff = get_object_or_404(
+        StaffProfile,
+        user=request.user,
+        is_active=True
+    )
+
+    topic = get_object_or_404(
+        LMSTopic,
+        id=topic_id,
+        module__course_id=232,
+        is_active=True
+    )
+
+    progress = StaffTopicProgress.objects.filter(
+        staff=staff,
+        topic=topic
+    ).first()
+
+    if not progress or not progress.is_unlocked:
+
+        return HttpResponseForbidden(
+            "This training topic is locked. "
+            "Complete the previous topic first."
+        )
+
+    context = {
+        "staff": staff,
+        "topic": topic,
+        "progress": progress,
+    }
+
+    return render(
+        request,
+        "lms/staff_training_topic.html",
+        context
+    )
+
+
+# =========================================================
+# STAFF TRAINING QUIZ
+# =========================================================
+
+@login_required
+def staff_training_quiz(request, topic_id):
+
+    staff = get_object_or_404(
+        StaffProfile,
+        user=request.user,
+        is_active=True
+    )
+
+    topic = get_object_or_404(
+        LMSTopic,
+        id=topic_id,
+        module__course_id=232,
+        is_active=True
+    )
+
+    progress = StaffTopicProgress.objects.filter(
+        staff=staff,
+        topic=topic
+    ).first()
+
+    if not progress or not progress.is_unlocked:
+
+        return HttpResponseForbidden(
+            "This training topic is locked."
+        )
+
+    questions = list(
+        QuizQuestion.objects.filter(
+            topic=topic,
+            language="en",
+            is_active=True
+        ).order_by("order")[:5]
+    )
+
+    total_questions = len(questions)
+
+    # Shuffle visible choices while preserving A/B/C/D keys.
+    for question in questions:
+
+        options = [
+            {
+                "key": "A",
+                "text": question.option_a
+            },
+            {
+                "key": "B",
+                "text": question.option_b
+            },
+            {
+                "key": "C",
+                "text": question.option_c
+            },
+            {
+                "key": "D",
+                "text": question.option_d
+            },
+        ]
+
+        random.shuffle(options)
+        question.shuffled_options = options
+
+    if request.method == "POST":
+
+        score = 0
+
+        for question in questions:
+
+            answer = request.POST.get(
+                f"question_{question.id}"
+            )
+
+            if answer == question.correct_answer:
+                score += 1
+
+        # Staff topic pass rule = minimum 3/5.
+        passed = (
+            total_questions > 0
+            and score >= 3
+        )
+
+        StaffQuizAttempt.objects.create(
+            staff=staff,
+            topic=topic,
+            score=score,
+            total_questions=total_questions,
+            passed=passed
+        )
+
+        progress.is_unlocked = True
+        progress.attempts += 1
+        progress.total_questions = total_questions
+        progress.last_attempt_at = timezone.now()
+
+        if score > progress.best_score:
+            progress.best_score = score
+
+        if passed:
+
+            progress.is_completed = True
+
+            if not progress.completed_at:
+                progress.completed_at = timezone.now()
+
+        progress.save()
+
+        # ---------------------------------------------
+        # UNLOCK NEXT TOPIC - NO STAFF FEE GATE
+        # ---------------------------------------------
+
+        if passed:
+
+            next_topic = (
+                LMSTopic.objects
+                .filter(
+                    module=topic.module,
+                    is_active=True,
+                    order__gt=topic.order
+                )
+                .order_by("order")
+                .first()
+            )
+
+            if not next_topic:
+
+                next_module = (
+                    LMSModule.objects
+                    .filter(
+                        course=topic.module.course,
+                        is_active=True,
+                        order__gt=topic.module.order
+                    )
+                    .order_by("order")
+                    .first()
+                )
+
+                if next_module:
+
+                    next_topic = (
+                        LMSTopic.objects
+                        .filter(
+                            module=next_module,
+                            is_active=True
+                        )
+                        .order_by("order")
+                        .first()
+                    )
+
+            if next_topic:
+
+                next_progress, created = (
+                    StaffTopicProgress.objects
+                    .get_or_create(
+                        staff=staff,
+                        topic=next_topic,
+                        defaults={
+                            "is_unlocked": True
+                        }
+                    )
+                )
+
+                if not next_progress.is_unlocked:
+
+                    next_progress.is_unlocked = True
+                    next_progress.save(
+                        update_fields=[
+                            "is_unlocked"
+                        ]
+                    )
+
+        context = {
+            "staff": staff,
+            "topic": topic,
+            "score": score,
+            "total_questions": total_questions,
+            "passed": passed,
+            "progress": progress,
+        }
+
+        return render(
+            request,
+            "lms/staff_training_result.html",
+            context
+        )
+
+    context = {
+        "staff": staff,
+        "topic": topic,
+        "questions": questions,
+        "total_questions": total_questions,
+    }
+
+    return render(
+        request,
+        "lms/staff_training_quiz.html",
+        context
+    )
