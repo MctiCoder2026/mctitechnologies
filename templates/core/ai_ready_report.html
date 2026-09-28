@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+.ai-report-page{
+    padding:28px 18px 50px;
+    background:#f5f5f5;
+    min-height:calc(100vh - 80px);
+}
+.ai-report-shell{
+    max-width:1400px;
+    margin:auto;
+}
+.ai-report-head{
+    background:#111;
+    color:#fff;
+    border-radius:18px;
+    padding:25px 28px;
+    margin-bottom:20px;
+}
+.ai-report-brand{
+    color:#f36a21;
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:1.2px;
+}
+.ai-report-head h1{
+    margin:7px 0 5px;
+    font-size:30px;
+}
+.ai-report-head p{
+    margin:0;
+    color:#ccc;
+}
+.ai-summary{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+.ai-summary-card{
+    background:#fff;
+    border:1px solid #e5e5e5;
+    border-radius:14px;
+    padding:20px;
+}
+.ai-summary-card strong{
+    display:block;
+    font-size:27px;
+    color:#111;
+}
+.ai-summary-card span{
+    color:#777;
+    font-size:12px;
+    font-weight:700;
+}
+.ai-filter{
+    background:#fff;
+    padding:18px;
+    border-radius:14px;
+    margin-bottom:20px;
+    border:1px solid #e5e5e5;
+}
+.ai-filter form{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+.ai-filter input,
+.ai-filter select{
+    padding:11px 12px;
+    border:1px solid #d5d5d5;
+    border-radius:9px;
+    min-width:190px;
+}
+.ai-filter button{
+    border:0;
+    border-radius:9px;
+    padding:11px 20px;
+    background:#f36a21;
+    color:#fff;
+    font-weight:800;
+    cursor:pointer;
+}
+.ai-table-wrap{
+    background:#fff;
+    border:1px solid #e5e5e5;
+    border-radius:14px;
+    overflow:auto;
+}
+.ai-table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1100px;
+}
+.ai-table th{
+    background:#111;
+    color:#fff;
+    padding:12px;
+    text-align:left;
+    font-size:12px;
+}
+.ai-table td{
+    padding:12px;
+    border-bottom:1px solid #eee;
+    font-size:13px;
+    vertical-align:top;
+}
+.ai-name{
+    font-weight:800;
+    color:#111;
+}
+.ai-muted{
+    color:#777;
+    font-size:11px;
+}
+.ai-band{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:20px;
+    background:#fff1e8;
+    color:#d95c16;
+    font-weight:800;
+    font-size:11px;
+}
+.ai-wa{
+    display:inline-block;
+    margin-top:7px;
+    padding:7px 10px;
+    border-radius:7px;
+    background:#25D366;
+    color:#fff;
+    text-decoration:none;
+    font-size:11px;
+    font-weight:800;
+}
+.ai-cert{
+    color:#111;
+    font-weight:700;
+    font-size:11px;
+}
+@media(max-width:800px){
+    .ai-summary{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+</style>
+
+<div class="ai-report-page">
+<div class="ai-report-shell">
+
+    <div class="ai-report-head">
+        <div class="ai-report-brand">
+            MCTI TECHNOLOGIES
+        </div>
+        <h1>AI Ready Maharashtra Report</h1>
+        <p>
+            Super User / Head Office master report —
+            review participants before assigning follow-up leads.
+        </p>
+    </div>
+
+    <div class="ai-summary">
+        <div class="ai-summary-card">
+            <strong>{{ total }}</strong>
+            <span>TOTAL REGISTRATIONS</span>
+        </div>
+        <div class="ai-summary-card">
+            <strong>{{ completed }}</strong>
+            <span>COMPLETED</span>
+        </div>
+        <div class="ai-summary-card">
+            <strong>{{ started }}</strong>
+            <span>IN PROGRESS</span>
+        </div>
+        <div class="ai-summary-card">
+            <strong>{{ certificates }}</strong>
+            <span>VALID CERTIFICATES</span>
+        </div>
+    </div>
+
+    <div class="ai-filter">
+        <form method="get">
+            <input
+                type="text"
+                name="search"
+                value="{{ search }}"
+                placeholder="Search name, mobile, college, city..."
+            >
+
+            <select name="status">
+                <option value="">All Status</option>
+                <option value="started" {% if status_filter == "started" %}selected{% endif %}>
+                    Started
+                </option>
+                <option value="completed" {% if status_filter == "completed" %}selected{% endif %}>
+                    Completed
+                </option>
+            </select>
+
+            <select name="band">
+                <option value="">All AI Categories</option>
+                <option value="AI Explorer" {% if band_filter == "AI Explorer" %}selected{% endif %}>AI Explorer</option>
+                <option value="AI Learner" {% if band_filter == "AI Learner" %}selected{% endif %}>AI Learner</option>
+                <option value="AI Ready" {% if band_filter == "AI Ready" %}selected{% endif %}>AI Ready</option>
+                <option value="AI Champion" {% if band_filter == "AI Champion" %}selected{% endif %}>AI Champion</option>
+            </select>
+
+            <button type="submit">Filter</button>
+        </form>
+    </div>
+
+    <div class="ai-table-wrap">
+        <table class="ai-table">
+            <thead>
+                <tr>
+                    <th>Participant</th>
+                    <th>Education</th>
+                    <th>Location</th>
+                    <th>Career Interest</th>
+                    <th>Result</th>
+                    <th>Certificate</th>
+                    <th>Promotion</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for attempt in attempts %}
+                <tr>
+
+                    <td>
+                        <div class="ai-name">
+                            {{ attempt.participant_name }}
+                        </div>
+                        <div class="ai-muted">
+                            {{ attempt.participant_mobile }}
+                        </div>
+                        {% if attempt.participant_email %}
+                            <div class="ai-muted">
+                                {{ attempt.participant_email }}
+                            </div>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ attempt.participant_profile.qualification|default:"—" }}
+                        <br>
+                        <span class="ai-muted">
+                            {{ attempt.participant_profile.institution_name|default:"" }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ attempt.participant_profile.city|default:"—" }}
+                        <br>
+                        <span class="ai-muted">
+                            {{ attempt.participant_profile.district|default:"" }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ attempt.participant_profile.career_interest|default:"—" }}
+                    </td>
+
+                    <td>
+                        {% if attempt.result %}
+                            <span class="ai-band">
+                                {{ attempt.result.result_band }}
+                            </span>
+                            <br><br>
+                            <strong>
+                                {{ attempt.score }}/{{ attempt.total_marks }}
+                            </strong>
+                            <span class="ai-muted">
+                                ({{ attempt.percentage }}%)
+                            </span>
+                        {% else %}
+                            <span class="ai-muted">
+                                Not completed
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if attempt.certificate %}
+                            <div class="ai-cert">
+                                {{ attempt.certificate.certificate_id }}
+                            </div>
+                            {% if attempt.certificate.is_valid %}
+                                <a
+                                    href="{% url 'assessments:verify_assessment_certificate' attempt.certificate.verification_token %}"
+                                    target="_blank"
+                                >
+                                    Verify
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <span class="ai-muted">—</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% with msg="Hello "|add:attempt.participant_name|add:" 👋 You recently completed the MCTI AI Ready Maharashtra – AI Awareness Quiz 2026. We would like to invite you to explore practical AI learning opportunities with MCTI Technologies. Reply AI and our career team will guide you." %}
+                            <a
+                                class="ai-wa"
+                                target="_blank"
+                                href="https://wa.me/{{ attempt.participant_mobile }}?text={{ msg|urlencode }}"
+                            >
+                                WhatsApp
+                            </a>
+                        {% endwith %}
+                    </td>
+
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align:center;padding:35px;">
+                        No AI Ready participants found.
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</div>
+
+{% endblock %}

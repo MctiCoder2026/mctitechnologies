@@ -516,5 +516,10 @@ urlpatterns = [
         name="daily_expense_cancel"
     ),
 
+    path(
+        "ai-ready-report/",
+        views.ai_ready_report,
+        name="ai_ready_report",
+    ),
 ]
 

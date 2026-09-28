@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+.ai-quiz-page {
+    min-height: 100vh;
+    padding: 25px 14px 60px;
+    background: #f4f4f4;
+}
+
+.ai-quiz-shell {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.ai-quiz-header {
+    margin-bottom: 22px;
+    padding: 26px;
+    border-radius: 20px;
+    background: #111;
+    color: #fff;
+}
+
+.ai-quiz-brand {
+    color: #f36a21;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1.3px;
+}
+
+.ai-quiz-header h1 {
+    margin: 10px 0 8px;
+    font-size: 28px;
+}
+
+.ai-quiz-header p {
+    margin: 0;
+    color: #ccc;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.ai-progress-wrap {
+    margin-top: 20px;
+}
+
+.ai-progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 7px;
+    color: #ccc;
+    font-size: 12px;
+}
+
+.ai-progress-track {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #333;
+}
+
+.ai-progress-bar {
+    width: 0;
+    height: 100%;
+    border-radius: 20px;
+    background: #f36a21;
+    transition: width .25s ease;
+}
+
+.ai-question {
+    margin-bottom: 17px;
+    padding: 23px;
+    border: 1px solid #e2e2e2;
+    border-radius: 16px;
+    background: #fff;
+}
+
+.ai-question-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.ai-q-number {
+    color: #f36a21;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.ai-q-category {
+    padding: 5px 9px;
+    border-radius: 30px;
+    background: #f5f5f5;
+    color: #666;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.ai-question h3 {
+    margin: 0 0 17px;
+    color: #161616;
+    font-size: 17px;
+    line-height: 1.5;
+}
+
+.ai-option {
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    margin-bottom: 9px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: .15s ease;
+}
+
+.ai-option:hover {
+    border-color: #f36a21;
+    background: #fff8f4;
+}
+
+.ai-option:has(input:checked) {
+    border-color: #f36a21;
+    background: #fff4ed;
+}
+
+.ai-option input {
+    margin-top: 3px;
+    accent-color: #f36a21;
+}
+
+.ai-option span {
+    color: #333;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.ai-submit-card {
+    position: sticky;
+    bottom: 12px;
+    margin-top: 25px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    background: rgba(255,255,255,.96);
+    box-shadow: 0 8px 30px rgba(0,0,0,.12);
+}
+
+.ai-submit-btn {
+    width: 100%;
+    padding: 15px;
+    border: 0;
+    border-radius: 10px;
+    background: #f36a21;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.ai-submit-btn:hover {
+    background: #d95c16;
+}
+
+.ai-answer-status {
+    margin-bottom: 9px;
+    color: #666;
+    text-align: center;
+    font-size: 12px;
+}
+
+.ai-error {
+    margin-bottom: 18px;
+    padding: 12px 15px;
+    border-radius: 10px;
+    background: #fff0f0;
+    color: #b42318;
+    font-size: 13px;
+}
+
+@media (max-width: 600px) {
+    .ai-quiz-page {
+        padding: 15px 10px 45px;
+    }
+
+    .ai-quiz-header {
+        padding: 21px 18px;
+    }
+
+    .ai-quiz-header h1 {
+        font-size: 23px;
+    }
+
+    .ai-question {
+        padding: 18px 15px;
+    }
+
+    .ai-question h3 {
+        font-size: 16px;
+    }
+}
+</style>
+
+<div class="ai-quiz-page">
+    <div class="ai-quiz-shell">
+
+        <section class="ai-quiz-header">
+            <div class="ai-quiz-brand">
+                MCTI AI READY MAHARASHTRA
+            </div>
+
+            <h1>AI Awareness Quiz 2026</h1>
+
+            <p>
+                Hello {{ attempt.participant_name }}.
+                Answer all {{ questions|length }} questions and submit
+                to discover your AI readiness category.
+            </p>
+
+            <div class="ai-progress-wrap">
+                <div class="ai-progress-info">
+                    <span>Quiz Progress</span>
+                    <span id="progressText">0 / {{ questions|length }}</span>
+                </div>
+
+                <div class="ai-progress-track">
+                    <div
+                        class="ai-progress-bar"
+                        id="progressBar"
+                    ></div>
+                </div>
+            </div>
+        </section>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="ai-error">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" id="aiQuizForm">
+            {% csrf_token %}
+
+            {% for question in questions %}
+                <section
+                    class="ai-question"
+                    data-question="{{ question.id }}"
+                >
+                    <div class="ai-question-top">
+                        <div class="ai-q-number">
+                            QUESTION {{ forloop.counter }}
+                        </div>
+
+                        {% if question.category %}
+                            <div class="ai-q-category">
+                                {{ question.category }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <h3>{{ question.question_text }}</h3>
+
+                    {% for option in question.options.all %}
+                        <label class="ai-option">
+                            <input
+                                type="radio"
+                                name="question_{{ question.id }}"
+                                value="{{ option.id }}"
+                                required
+                            >
+                            <span>{{ option.option_text }}</span>
+                        </label>
+                    {% endfor %}
+                </section>
+            {% endfor %}
+
+            <div class="ai-submit-card">
+                <div
+                    class="ai-answer-status"
+                    id="answerStatus"
+                >
+                    Answer all questions to complete your assessment.
+                </div>
+
+                <button
+                    type="submit"
+                    class="ai-submit-btn"
+                    id="submitButton"
+                >
+                    Submit & See My AI Readiness
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<script>
+(function () {
+    const form = document.getElementById("aiQuizForm");
+    const questions = document.querySelectorAll(".ai-question");
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
+    const answerStatus = document.getElementById("answerStatus");
+    const submitButton = document.getElementById("submitButton");
+
+    function updateProgress() {
+        let answered = 0;
+
+        questions.forEach(function (question) {
+            if (question.querySelector("input[type='radio']:checked")) {
+                answered++;
+            }
+        });
+
+        const total = questions.length;
+        const percentage = total ? (answered / total) * 100 : 0;
+
+        progressBar.style.width = percentage + "%";
+        progressText.textContent = answered + " / " + total;
+
+        if (answered === total) {
+            answerStatus.textContent =
+                "All questions answered. You can submit your assessment.";
+        } else {
+            answerStatus.textContent =
+                (total - answered) + " question(s) remaining.";
+        }
+    }
+
+    form.addEventListener("change", updateProgress);
+
+    form.addEventListener("submit", function () {
+        submitButton.disabled = true;
+        submitButton.textContent = "Calculating Your Result...";
+    });
+
+    updateProgress();
+})();
+</script>
+
+{% endblock %}

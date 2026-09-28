@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+.ai-result-page {
+    min-height: calc(100vh - 80px);
+    padding: 35px 15px 60px;
+    background:
+        radial-gradient(circle at top right, rgba(243,106,33,.16), transparent 30%),
+        #f4f4f4;
+}
+
+.ai-result-card {
+    max-width: 720px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 15px 45px rgba(0,0,0,.10);
+}
+
+.ai-result-head {
+    padding: 35px 28px;
+    background: #111;
+    color: #fff;
+    text-align: center;
+}
+
+.ai-result-brand {
+    color: #f36a21;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1.3px;
+}
+
+.ai-result-head h1 {
+    margin: 12px 0 5px;
+    font-size: 30px;
+}
+
+.ai-result-head p {
+    margin: 0;
+    color: #bbb;
+    font-size: 14px;
+}
+
+.ai-result-body {
+    padding: 32px;
+    text-align: center;
+}
+
+.ai-score {
+    display: flex;
+    width: 135px;
+    height: 135px;
+    margin: 0 auto 22px;
+    border: 8px solid #f36a21;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.ai-score strong {
+    color: #111;
+    font-size: 35px;
+    line-height: 1;
+}
+
+.ai-score span {
+    margin-top: 5px;
+    color: #777;
+    font-size: 12px;
+}
+
+.ai-band {
+    display: inline-block;
+    margin-bottom: 13px;
+    padding: 8px 17px;
+    border-radius: 50px;
+    background: #fff1e8;
+    color: #d95c16;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.ai-result-body h2 {
+    margin: 4px 0 12px;
+    color: #111;
+    font-size: 25px;
+}
+
+.ai-message {
+    max-width: 570px;
+    margin: 0 auto;
+    color: #555;
+    line-height: 1.7;
+    font-size: 14px;
+}
+
+.ai-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 28px 0;
+}
+
+.ai-stat {
+    padding: 18px;
+    border-radius: 13px;
+    background: #f7f7f7;
+}
+
+.ai-stat strong {
+    display: block;
+    color: #111;
+    font-size: 22px;
+}
+
+.ai-stat span {
+    color: #777;
+    font-size: 11px;
+}
+
+.ai-recommendation {
+    padding: 20px;
+    border-left: 4px solid #f36a21;
+    border-radius: 10px;
+    background: #fff8f3;
+    color: #444;
+    text-align: left;
+    line-height: 1.65;
+    font-size: 14px;
+}
+
+.ai-next {
+    margin-top: 26px;
+    padding: 23px;
+    border-radius: 14px;
+    background: #111;
+    color: #fff;
+}
+
+.ai-next h3 {
+    margin: 0 0 8px;
+    font-size: 19px;
+}
+
+.ai-next p {
+    margin: 0;
+    color: #ccc;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.ai-certificate-note {
+    margin-top: 18px;
+    color: #777;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.ai-footer {
+    margin-top: 25px;
+    color: #999;
+    font-size: 11px;
+}
+
+@media (max-width: 520px) {
+    .ai-result-body {
+        padding: 25px 18px;
+    }
+
+    .ai-result-head {
+        padding: 28px 18px;
+    }
+
+    .ai-result-head h1 {
+        font-size: 25px;
+    }
+}
+</style>
+
+<div class="ai-result-page">
+
+    <div class="ai-result-card">
+
+        <section class="ai-result-head">
+            <div class="ai-result-brand">
+                MCTI AI READY MAHARASHTRA
+            </div>
+
+            <h1>Assessment Completed</h1>
+
+            <p>
+                Congratulations {{ attempt.participant_name }}!
+            </p>
+        </section>
+
+        <section class="ai-result-body">
+
+            <div class="ai-score">
+                <strong>
+                    {{ attempt.score }}/{{ attempt.total_marks }}
+                </strong>
+                <span>YOUR SCORE</span>
+            </div>
+
+            <div class="ai-band">
+                {{ result.result_band }}
+            </div>
+
+            <h2>
+                {{ result.result_title }}
+            </h2>
+
+            <div class="ai-message">
+                {{ result.result_message }}
+            </div>
+
+            <div class="ai-stats">
+
+                <div class="ai-stat">
+                    <strong>
+                        {{ attempt.percentage }}%
+                    </strong>
+                    <span>AI READINESS</span>
+                </div>
+
+                <div class="ai-stat">
+                    <strong>
+                        {{ attempt.score }}
+                    </strong>
+                    <span>CORRECT ANSWERS</span>
+                </div>
+
+            </div>
+
+            <div class="ai-recommendation">
+                <strong>Recommended Next Step</strong><br>
+                {{ result.recommendation }}
+            </div>
+
+            <div class="ai-next">
+                <h3>Free AI Masterclass</h3>
+                <p>
+                    Build practical AI skills for study, work,
+                    productivity and future careers with MCTI Technologies.
+                </p>
+            </div>
+
+            <div class="ai-certificate-note">
+                <strong>🎓 Your Certificate of Participation is Ready</strong>
+                <br><br>
+                <a href="{% url 'assessments:ai_ready_certificate' attempt.id %}"
+                   style="
+                       display:inline-block;
+                       background:#ff6b00;
+                       color:#ffffff;
+                       padding:13px 22px;
+                       border-radius:9px;
+                       text-decoration:none;
+                       font-weight:800;
+                   ">
+                    Download My Certificate
+                </a>
+                <br><br>
+                <small>
+                    Your certificate includes a unique Certificate ID
+                    and QR verification.
+                </small>
+            </div>
+
+            <div class="ai-footer">
+                MCTI Technologies<br>
+                An Initiative by Maharashtra Computer Training Institute
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'core',
     'lms',
     'career_tools',
+    'assessments',
     'rest_framework',
     'rest_framework.authtoken',
     'mobile_api',

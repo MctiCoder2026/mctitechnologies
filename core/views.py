@@ -9161,3 +9161,109 @@ def franchise_enquiry_detail(request, enquiry_id):
             "status_choices": FranchiseEnquiry.STATUS_CHOICES,
         }
     )
+
+
+# ============================================================
+# AI READY MAHARASHTRA REPORT — HO / SUPERUSER ONLY
+# ============================================================
+
+def ai_ready_report(request):
+
+    if not is_admin_user(request.user):
+        messages.error(
+            request,
+            "You do not have permission to access the AI Ready Maharashtra report."
+        )
+        return redirect("branch_dashboard")
+
+    from assessments.models import (
+        Assessment,
+        AssessmentAttempt,
+    )
+
+    assessment = get_object_or_404(
+        Assessment,
+        slug="ai-ready-maharashtra-2026",
+    )
+
+    attempts = (
+        AssessmentAttempt.objects
+        .filter(
+            assessment=assessment,
+        )
+        .select_related(
+            "participant_profile",
+            "result",
+            "certificate",
+        )
+        .order_by("-started_at")
+    )
+
+    search = request.GET.get("search", "").strip()
+
+    if search:
+        attempts = attempts.filter(
+            Q(participant_name__icontains=search)
+            |
+            Q(participant_mobile__icontains=search)
+            |
+            Q(participant_email__icontains=search)
+            |
+            Q(participant_profile__institution_name__icontains=search)
+            |
+            Q(participant_profile__district__icontains=search)
+            |
+            Q(participant_profile__city__icontains=search)
+            |
+            Q(participant_profile__career_interest__icontains=search)
+        )
+
+    status_filter = request.GET.get("status", "").strip()
+
+    if status_filter:
+        attempts = attempts.filter(
+            status=status_filter
+        )
+
+    band_filter = request.GET.get("band", "").strip()
+
+    if band_filter:
+        attempts = attempts.filter(
+            result__result_band=band_filter
+        )
+
+    total = AssessmentAttempt.objects.filter(
+        assessment=assessment
+    ).count()
+
+    completed = AssessmentAttempt.objects.filter(
+        assessment=assessment,
+        status="completed",
+    ).count()
+
+    started = AssessmentAttempt.objects.filter(
+        assessment=assessment,
+        status="started",
+    ).count()
+
+    certificates = AssessmentAttempt.objects.filter(
+        assessment=assessment,
+        status="completed",
+        certificate__is_valid=True,
+    ).count()
+
+    return render(
+        request,
+        "core/ai_ready_report.html",
+        {
+            "assessment": assessment,
+            "attempts": attempts[:200],
+            "total": total,
+            "completed": completed,
+            "started": started,
+            "certificates": certificates,
+            "search": search,
+            "status_filter": status_filter,
+            "band_filter": band_filter,
+        },
+    )
