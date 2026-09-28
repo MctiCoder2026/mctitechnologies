@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCTI Careers | Hiring Assessment</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f6f8;font-family:Arial,sans-serif;color:#171717}
+.top{background:#111;color:#fff;padding:18px 20px;text-align:center;border-bottom:4px solid #ff6b00}
+.top h1{margin:0;font-size:25px}.top p{margin:6px 0 0;color:#ddd}
+.wrap{max-width:760px;margin:35px auto;padding:0 16px}
+.card{background:#fff;border-radius:14px;padding:28px;box-shadow:0 5px 24px #00000012}
+.badge{display:inline-block;background:#fff1e8;color:#d95800;padding:7px 12px;border-radius:20px;font-weight:bold;font-size:13px}
+h2{margin:14px 0 6px}.intro{color:#666;line-height:1.5;margin-bottom:24px}
+label{font-weight:bold;display:block;margin-bottom:6px}
+input,select{width:100%;padding:12px;border:1px solid #d6d6d6;border-radius:8px;font-size:15px}
+p{margin:0 0 17px}.errorlist{color:#b91c1c;margin:4px 0;padding-left:20px}
+button{width:100%;border:0;background:#ff6b00;color:white;padding:14px;border-radius:9px;font-weight:bold;font-size:16px;cursor:pointer}
+.note{text-align:center;color:#777;font-size:12px;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="top">
+<h1>MCTI TECHNOLOGIES</h1>
+<p>Career & Trainer Hiring Assessment</p>
+</div>
+<div class="wrap">
+<div class="card">
+<span class="badge">MCTI CAREERS</span>
+<h2>Apply & Take Your Assessment</h2>
+<p class="intro">Select the role you are applying for. Your assessment will be assigned automatically according to the selected job role.</p>
+
+{% if messages %}
+{% for message in messages %}<p class="errorlist">{{ message }}</p>{% endfor %}
+{% endif %}
+
+<form method="post">
+{% csrf_token %}
+{{ form.as_p }}
+<button type="submit">Start Hiring Assessment →</button>
+</form>
+<div class="note">MCTI Technologies — An Initiative by Maharashtra Computer Training Institute</div>
+</div>
+</div>
+</body>
+</html>

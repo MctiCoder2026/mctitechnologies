@@ -1,0 +1,221 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCTI Scholarship Dashboard</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f5f7;font-family:Arial,sans-serif;color:#171717}
+.header{background:#111;color:#fff;padding:18px 24px;border-bottom:4px solid #f58220}
+.header h2{margin:0}.orange{color:#f58220}
+.header p{margin:5px 0 0;color:#bbb;font-size:13px}
+.wrap{max-width:1450px;margin:25px auto;padding:0 18px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}
+.stat{background:#fff;border-radius:12px;padding:20px;box-shadow:0 3px 15px rgba(0,0,0,.06)}
+.stat .num{font-size:30px;font-weight:900;color:#f58220}
+.stat .label{color:#666;margin-top:4px}
+.toolbar{background:#fff;padding:15px;border-radius:12px;margin-bottom:18px;display:flex;gap:10px;align-items:center}
+select{padding:9px;border:1px solid #ccc;border-radius:7px}
+.btn{border:0;border-radius:7px;padding:9px 13px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;font-size:13px}
+.orangebtn{background:#f58220;color:#fff}
+.darkbtn{background:#111;color:#fff}
+.greenbtn{background:#188038;color:#fff}
+.bluebtn{background:#1769aa;color:#fff}
+.graybtn{background:#eee;color:#222}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 15px rgba(0,0,0,.06)}
+th{background:#171717;color:#fff;text-align:left;padding:12px;font-size:13px}
+td{padding:12px;border-bottom:1px solid #eee;vertical-align:top;font-size:13px}
+.name{font-weight:800;font-size:14px}
+.mobile{color:#666;margin-top:4px}
+.score{font-weight:900;font-size:18px}
+.scholarship{color:#f58220;font-weight:900;font-size:18px}
+.badge{display:inline-block;background:#fff2e7;color:#c85d00;padding:5px 8px;border-radius:20px;font-weight:700;font-size:11px}
+.actions{display:flex;flex-wrap:wrap;gap:6px}
+.statusform{display:flex;gap:5px;margin-top:8px}
+.msg{background:#eaf7ed;color:#176b2c;padding:12px;border-radius:8px;margin-bottom:15px}
+.empty{text-align:center;padding:50px;color:#777}
+@media(max-width:900px){
+ .stats{grid-template-columns:1fr 1fr}
+ .tablewrap{overflow-x:auto}
+ table{min-width:1100px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+ <h2><span class="orange">MCTI</span> Scholarship Dashboard</h2>
+ <p>Scholarship Leads • Review • Contact • Send selected candidates to CRM</p>
+</div>
+
+<div class="wrap">
+
+{% if messages %}
+ {% for message in messages %}
+  <div class="msg">{{ message }}</div>
+ {% endfor %}
+{% endif %}
+
+<div class="stats">
+ <div class="stat">
+  <div class="num">{{ stats.total }}</div>
+  <div class="label">Total Registrations</div>
+ </div>
+ <div class="stat">
+  <div class="num">{{ stats.completed }}</div>
+  <div class="label">Test Completed</div>
+ </div>
+ <div class="stat">
+  <div class="num">{{ stats.interested }}</div>
+  <div class="label">Interested</div>
+ </div>
+ <div class="stat">
+  <div class="num">{{ stats.sent_to_enquiry }}</div>
+  <div class="label">Sent to CRM</div>
+ </div>
+</div>
+
+<div class="toolbar">
+ <strong>Filter:</strong>
+ <form method="get">
+  <select name="status" onchange="this.form.submit()">
+   <option value="">All Status</option>
+   {% for value,label in status_choices %}
+    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>
+     {{ label }}
+    </option>
+   {% endfor %}
+  </select>
+ </form>
+
+ {% if status_filter %}
+  <a class="btn graybtn" href="{% url 'assessments:scholarship_dashboard' %}">Clear</a>
+ {% endif %}
+</div>
+
+<div class="tablewrap">
+<table>
+<thead>
+<tr>
+ <th>Candidate</th>
+ <th>Score</th>
+ <th>Scholarship</th>
+ <th>Course / Branch</th>
+ <th>Status</th>
+ <th>Contact</th>
+ <th>CRM Action</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for s in scholarship_results %}
+
+<tr>
+<td>
+ <div class="name">{{ s.attempt.participant_profile.full_name }}</div>
+ <div class="mobile">{{ s.attempt.participant_profile.mobile }}</div>
+ {% if s.attempt.participant_profile.email %}
+  <div class="mobile">{{ s.attempt.participant_profile.email }}</div>
+ {% endif %}
+ <div class="mobile">{{ s.created_at|date:"d M Y, h:i A" }}</div>
+</td>
+
+<td>
+ <div class="score">{{ s.attempt.percentage|floatformat:0 }}%</div>
+ <small>{{ s.attempt.score }}/{{ s.attempt.total_marks }}</small>
+</td>
+
+<td>
+ <div class="scholarship">{{ s.scholarship_percentage }}%</div>
+ <span class="badge">{{ s.scholarship_band }}</span>
+</td>
+
+<td>
+ <strong>{{ s.selected_course }}</strong><br>
+ <span class="mobile">{{ s.preferred_branch }}</span>
+</td>
+
+<td>
+ <span class="badge">{{ s.get_claim_status_display }}</span>
+
+ <form method="post"
+       action="{% url 'assessments:scholarship_update_status' s.id %}"
+       class="statusform">
+  {% csrf_token %}
+
+  <select name="status">
+   {% for value,label in status_choices %}
+    {% if value != "sent_to_enquiry" %}
+     <option value="{{ value }}" {% if s.claim_status == value %}selected{% endif %}>
+      {{ label }}
+     </option>
+    {% endif %}
+   {% endfor %}
+  </select>
+
+  <button class="btn darkbtn" type="submit">Update</button>
+ </form>
+</td>
+
+<td>
+ <div class="actions">
+  <a class="btn bluebtn"
+     href="tel:{{ s.attempt.participant_profile.mobile }}">
+     Call
+  </a>
+
+  <a class="btn greenbtn"
+     target="_blank"
+     href="https://wa.me/91{{ s.attempt.participant_profile.mobile }}?text=Hello%20{{ s.attempt.participant_profile.full_name|urlencode }}%2C%20this%20is%20MCTI%20regarding%20your%20Scholarship%20Test%20result.">
+     WhatsApp
+  </a>
+ </div>
+</td>
+
+<td>
+
+ {% if s.attempt.participant_profile.enquiry_id %}
+
+  <span class="badge">✓ CRM Linked</span><br>
+  <small>Enquiry #{{ s.attempt.participant_profile.enquiry_id }}</small>
+
+ {% else %}
+
+  <form method="post"
+        action="{% url 'assessments:scholarship_send_to_enquiry' s.id %}"
+        onsubmit="return confirm('Send this scholarship candidate to normal CRM Enquiry?');">
+
+   {% csrf_token %}
+
+   <button class="btn orangebtn" type="submit">
+    Send to Enquiry →
+   </button>
+
+  </form>
+
+ {% endif %}
+
+</td>
+</tr>
+
+{% empty %}
+
+<tr>
+ <td colspan="7" class="empty">
+  No scholarship registrations found.
+ </td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+</div>
+
+</div>
+</body>
+</html>

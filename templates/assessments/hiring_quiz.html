@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ application.job_role.name }} | MCTI Hiring</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f5f7;font-family:Arial,sans-serif;color:#181818}
+.head{background:#111;color:#fff;padding:20px;border-bottom:4px solid #ff6b00}
+.headin{max-width:900px;margin:auto}.head h1{margin:0;font-size:22px}.head p{margin:6px 0 0;color:#ccc}
+.wrap{max-width:900px;margin:28px auto;padding:0 15px}
+.info{background:#fff3e9;border-left:4px solid #ff6b00;padding:13px 16px;margin-bottom:20px;border-radius:7px}
+.q{background:#fff;padding:22px;margin-bottom:15px;border-radius:12px;box-shadow:0 3px 14px #0000000d}
+.q h3{font-size:16px;line-height:1.5;margin:0 0 15px}
+.opt{display:block;padding:10px 12px;margin:7px 0;background:#f8f8f8;border-radius:7px;cursor:pointer;font-weight:normal}
+.opt input{margin-right:8px}
+button{width:100%;padding:15px;background:#ff6b00;color:#fff;border:0;border-radius:9px;font-size:16px;font-weight:bold;cursor:pointer;margin:10px 0 35px}
+.err{background:#fee2e2;color:#991b1b;padding:12px;border-radius:8px;margin-bottom:15px}
+</style>
+</head>
+<body>
+<div class="head"><div class="headin">
+<h1>{{ application.job_role.name }}</h1>
+<p>MCTI Hiring Assessment • {{ application.candidate.full_name }}</p>
+{% if stage_title %}
+<p style="color:#ffb27a;font-weight:bold">
+Stage {{ stage_number }} of {{ stage_total }} • {{ stage_title }}
+</p>
+{% endif %}
+</div></div>
+
+<div class="wrap">
+<div class="info">
+{% if stage_title %}
+<strong>Stage {{ stage_number }}/{{ stage_total }} — {{ stage_title }}</strong><br>
+{% endif %}
+<strong>{{ questions|length }} Questions</strong> — Answer all questions before continuing.
+</div>
+
+{% if messages %}
+{% for message in messages %}<div class="err">{{ message }}</div>{% endfor %}
+{% endif %}
+
+<form method="post">
+{% csrf_token %}
+{% for question in questions %}
+<div class="q">
+<h3>{{ forloop.counter }}. {{ question.question_text }}</h3>
+{% for option in question.options.all %}
+<label class="opt">
+<input type="radio" name="question_{{ question.id }}" value="{{ option.id }}" required>
+{{ option.option_text }}
+</label>
+{% endfor %}
+</div>
+{% endfor %}
+<button type="submit">{{ submit_label|default:"Submit Assessment" }}</button>
+</form>
+</div>
+</body>
+</html>

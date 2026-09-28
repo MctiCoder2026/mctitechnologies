@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Assessment Completed | MCTI Careers</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    background:#f5f6f8;
+    font-family:Arial,sans-serif;
+    color:#171717
+}
+.top{height:7px;background:#ff6b00}
+.wrap{max-width:760px;margin:45px auto;padding:0 16px}
+
+.card{
+    background:#fff;
+    text-align:center;
+    padding:38px 28px;
+    border-radius:15px;
+    box-shadow:0 5px 25px #00000012
+}
+
+.tick{
+    width:65px;
+    height:65px;
+    margin:auto;
+    background:#111;
+    color:#fff;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:30px
+}
+
+h1{font-size:25px;margin:18px 0 5px}
+.role{color:#ff6b00;font-weight:bold}
+
+.final-label{
+    margin-top:25px;
+    color:#666;
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:.5px
+}
+
+.score{
+    font-size:52px;
+    font-weight:bold;
+    margin:5px 0
+}
+
+.band{
+    font-weight:bold;
+    color:#ff6b00;
+    margin-bottom:24px
+}
+
+.breakdown{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin:22px 0
+}
+
+.score-box{
+    background:#f7f7f7;
+    border-radius:10px;
+    padding:16px 8px
+}
+
+.score-box strong{
+    display:block;
+    font-size:24px;
+    margin-bottom:5px
+}
+
+.score-box span{
+    color:#666;
+    font-size:13px
+}
+
+.box{
+    background:#f7f7f7;
+    padding:17px;
+    border-radius:10px;
+    margin:22px 0;
+    text-align:left;
+    line-height:1.8
+}
+
+.notice{
+    background:#fff4e8;
+    padding:16px;
+    border-radius:9px;
+    line-height:1.5
+}
+
+.footer{
+    font-size:12px;
+    color:#888;
+    margin-top:25px
+}
+
+@media(max-width:600px){
+    .wrap{margin:20px auto}
+    .card{padding:28px 16px}
+    .breakdown{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<div class="top"></div>
+
+<div class="wrap">
+<div class="card">
+
+<div class="tick">✓</div>
+
+<h1>Assessment Completed</h1>
+
+<div class="role">
+    {{ application.job_role.name }}
+</div>
+
+<div class="final-label">
+    Final Weighted Score
+</div>
+
+<div class="score">
+    {{ evaluation.final_score|floatformat:0 }}%
+</div>
+
+{% if evaluation.performance_band %}
+<div class="band">
+    {{ evaluation.get_performance_band_display }}
+</div>
+{% endif %}
+
+
+<div class="breakdown">
+
+    <div class="score-box">
+        <strong>
+            {{ evaluation.technical_score|floatformat:0 }}%
+        </strong>
+        <span>Technical</span>
+    </div>
+
+    <div class="score-box">
+        <strong>
+            {{ evaluation.practical_score|floatformat:0 }}%
+        </strong>
+        <span>Practical / Scenario</span>
+    </div>
+
+    <div class="score-box">
+        <strong>
+            {{ evaluation.communication_score|floatformat:0 }}%
+        </strong>
+        <span>Teaching / Communication</span>
+    </div>
+
+</div>
+
+
+<div class="box">
+
+<strong>Candidate:</strong>
+{{ application.candidate.full_name }}
+<br>
+
+<strong>Employment Preference:</strong>
+{{ application.get_employment_type_display }}
+<br>
+
+{% if evaluation.performance_band %}
+<strong>Performance Band:</strong>
+{{ evaluation.get_performance_band_display }}
+<br>
+{% endif %}
+
+<strong>Application Status:</strong>
+{{ application.get_status_display }}
+
+</div>
+
+
+<div class="notice">
+
+<strong>What happens next?</strong>
+<br>
+
+Your assessment has been successfully recorded.
+
+MCTI HR will review your complete assessment profile and application before making the final hiring decision.
+
+</div>
+
+
+<div class="footer">
+MCTI Technologies — An Initiative by Maharashtra Computer Training Institute
+</div>
+
+</div>
+</div>
+
+</body>
+</html>

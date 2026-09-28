@@ -1,0 +1,91 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCTI Scholarship Test</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f5f5;color:#171717;font-family:Arial,sans-serif}
+.topbar{background:#111;color:#fff;padding:14px 20px;text-align:center;border-bottom:4px solid #f58220}
+.brand{font-size:24px;font-weight:800}.brand span{color:#f58220}
+.subbrand{font-size:12px;color:#ccc;margin-top:3px}
+.wrap{max-width:900px;margin:28px auto;padding:0 15px}
+.card{background:#fff;border-radius:16px;padding:28px;box-shadow:0 8px 28px rgba(0,0,0,.08)}
+h1,h2{margin-top:0}.orange{color:#f58220}
+.badge{display:inline-block;background:#fff3e8;color:#d96500;border:1px solid #ffd4ad;padding:7px 12px;border-radius:30px;font-weight:700;font-size:13px}
+.info{background:#fff8f2;border-left:4px solid #f58220;padding:13px 15px;margin:18px 0;border-radius:6px}
+label{display:block;font-weight:700;margin:14px 0 6px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:15px;background:#fff}
+input[type=radio],input[type=checkbox]{width:auto}
+button,.btn{display:inline-block;border:0;background:#f58220;color:#fff;padding:13px 22px;border-radius:8px;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none}
+button:hover,.btn:hover{background:#df6e0b}
+.errors,.errorlist{color:#b42318}
+.footer{text-align:center;color:#777;font-size:12px;padding:25px 10px}
+.question{border:1px solid #e5e5e5;border-radius:12px;padding:18px;margin:15px 0}
+.option{display:block;padding:10px 12px;margin:7px 0;background:#fafafa;border-radius:8px;font-weight:400;cursor:pointer}
+.option:hover{background:#fff3e8}
+.score{font-size:58px;font-weight:900;color:#f58220;line-height:1}
+.scholarship{font-size:32px;font-weight:900;margin:10px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.stat{background:#fafafa;padding:16px;border-radius:10px}
+.center{text-align:center}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.card{padding:20px}.brand{font-size:20px}.score{font-size:48px}}
+</style>
+</head><body>
+<div class="topbar">
+  <div class="brand"><span>MCTI</span> | Group of Education</div>
+  <div class="subbrand">An Initiative by Maharashtra Computer Training Institute</div>
+</div>
+
+<div class="wrap">
+ <div class="card">
+   <span class="badge">MCTI Scholarship Test 2026</span>
+   <h2 style="margin-top:15px">Answer all <span class="orange">{{ questions|length }}</span> questions</h2>
+   <div class="info">
+     Complete the test independently. Your scholarship eligibility will be calculated automatically after submission.
+   </div>
+
+   {% if messages %}
+     {% for message in messages %}
+       <div class="info">{{ message }}</div>
+     {% endfor %}
+   {% endif %}
+
+   <form method="post" id="scholarship-form">
+     {% csrf_token %}
+     {% for question in questions %}
+       <div class="question">
+         <strong>Q{{ forloop.counter }}. {{ question.question_text }}</strong>
+
+         <div style="margin-top:10px">
+           {% for option in question.options.all %}
+             <label class="option">
+               <input type="radio"
+                      name="question_{{ question.id }}"
+                      value="{{ option.id }}"
+                      required>
+               &nbsp;{{ option.option_text }}
+             </label>
+           {% endfor %}
+         </div>
+       </div>
+     {% endfor %}
+
+     <div class="center" style="margin-top:25px">
+       <button type="submit" id="submit-btn">Submit Test & View Result →</button>
+     </div>
+   </form>
+ </div>
+</div>
+
+<div class="footer">
+  Powered by <strong>MCTI Technologies</strong><br>
+  mctitechnologies.com
+</div>
+
+<script>
+document.getElementById('scholarship-form').addEventListener('submit', function(){
+  var b=document.getElementById('submit-btn');
+  b.disabled=true;
+  b.innerText='Calculating Result...';
+});
+</script>
+</body></html>

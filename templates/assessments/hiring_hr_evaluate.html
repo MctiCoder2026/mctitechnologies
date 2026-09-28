@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HR Candidate Review | MCTI Technologies</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f5f7;color:#171717}
+.header{background:#111;color:#fff;padding:20px;border-bottom:5px solid #f58220}
+.header h1{margin:0;font-size:25px}
+.header p{margin:6px 0 0;color:#ccc}
+.container{max-width:1100px;margin:30px auto;padding:0 18px}
+.card{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 3px 14px #00000014}
+.card h2{margin-top:0;border-bottom:2px solid #f58220;padding-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.scores{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.item{background:#f8f8f8;padding:14px;border-radius:8px}
+.label{font-size:12px;color:#666;text-transform:uppercase;margin-bottom:6px}
+.value{font-weight:bold;line-height:1.5}
+.score{font-size:29px;font-weight:bold;color:#f58220}
+.final{background:#fff4e9;border:2px solid #f58220}
+.weights{margin-top:15px;background:#f8f8f8;padding:14px;border-radius:8px;line-height:1.7}
+.salary{font-size:21px;font-weight:bold;color:#f58220}
+.pending{color:#777}
+.message{background:#e9f7ef;border-left:5px solid #28a745;padding:12px;margin-bottom:20px}
+.profile{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.profile .item{min-height:80px}
+form p{margin-bottom:17px}
+form label{display:block;font-weight:bold;margin-bottom:7px}
+select,textarea{width:100%;padding:12px;border:1px solid #ccc;border-radius:7px;font-size:15px;background:#fff}
+button{background:#f58220;color:#fff;border:0;padding:14px 25px;border-radius:7px;font-weight:bold;font-size:16px;cursor:pointer}
+.note{color:#666;font-size:13px;line-height:1.5}
+@media(max-width:760px){
+.grid,.profile,.scores{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+<div class="header">
+<h1>MCTI Technologies — HR Candidate Review</h1>
+<p>An Initiative by Maharashtra Computer Training Institute</p>
+</div>
+
+<div class="container">
+
+{% for message in messages %}
+<div class="message">{{ message }}</div>
+{% endfor %}
+
+<div class="card">
+<h2>Candidate Profile</h2>
+<div class="grid">
+<div class="item"><div class="label">Name</div><div class="value">{{ application.candidate.full_name }}</div></div>
+<div class="item"><div class="label">Mobile</div><div class="value">{{ application.candidate.mobile }}</div></div>
+<div class="item"><div class="label">Job Role</div><div class="value">{{ application.job_role.name }}</div></div>
+<div class="item"><div class="label">Employment Preference</div><div class="value">{{ application.get_employment_type_display }}</div></div>
+<div class="item"><div class="label">Qualification</div><div class="value">{{ application.candidate.qualification|default:"-" }}</div></div>
+<div class="item"><div class="label">Experience</div><div class="value">{{ application.candidate.experience|default:"Fresher" }}</div></div>
+</div>
+</div>
+
+<div class="card">
+<h2>Automatic Assessment</h2>
+
+<div class="scores">
+<div class="item">
+<div class="label">Technical</div>
+<div class="score">{{ evaluation.technical_score|floatformat:0 }}%</div>
+</div>
+
+<div class="item">
+<div class="label">Practical / Scenario</div>
+<div class="score">{{ evaluation.practical_score|floatformat:0 }}%</div>
+</div>
+
+<div class="item">
+<div class="label">Teaching / Communication</div>
+<div class="score">{{ evaluation.communication_score|floatformat:0 }}%</div>
+</div>
+
+<div class="item final">
+<div class="label">Final Weighted Score</div>
+<div class="score">{{ evaluation.final_score|floatformat:0 }}%</div>
+<div class="value">{{ evaluation.get_performance_band_display }}</div>
+</div>
+</div>
+
+<div class="weights">
+<strong>Role Weightage:</strong>
+Technical {{ application.job_role.technical_weight }}% ·
+Practical {{ application.job_role.practical_weight }}% ·
+Communication {{ application.job_role.communication_weight }}%
+</div>
+</div>
+
+<div class="card">
+<h2>Standard Interview Profile</h2>
+
+{% if application.interview_profile %}
+{% with p=application.interview_profile %}
+<div class="profile">
+
+<div class="item"><div class="label">About Candidate</div><div class="value">{{ p.about_yourself }}</div></div>
+<div class="item"><div class="label">Why MCTI</div><div class="value">{{ p.why_mcti }}</div></div>
+
+<div class="item"><div class="label">Why Select Candidate</div><div class="value">{{ p.why_select_you }}</div></div>
+<div class="item"><div class="label">Strengths</div><div class="value">{{ p.strengths }}</div></div>
+
+<div class="item"><div class="label">Area Being Improved</div><div class="value">{{ p.weakness_improving }}</div></div>
+<div class="item"><div class="label">Role Interest</div><div class="value">{{ p.role_interest }}</div></div>
+
+<div class="item"><div class="label">Career Goals</div><div class="value">{{ p.career_goals }}</div></div>
+<div class="item"><div class="label">Currently Learning</div><div class="value">{{ p.current_learning|default:"-" }}</div></div>
+
+<div class="item"><div class="label">Why Train Students</div><div class="value">{{ p.why_train_students|default:"-" }}</div></div>
+<div class="item"><div class="label">Job Source</div><div class="value">{{ p.job_source|default:"-" }}</div></div>
+
+<div class="item"><div class="label">Expected Salary</div>
+<div class="value">
+{% if p.expected_salary %}₹{{ p.expected_salary|floatformat:0 }}{% else %}-{% endif %}
+</div></div>
+
+<div class="item"><div class="label">Joining Availability</div><div class="value">{{ p.joining_availability|default:"-" }}</div></div>
+
+</div>
+{% endwith %}
+{% else %}
+<div class="pending">Interview profile is not available for this application.</div>
+{% endif %}
+</div>
+
+<div class="card">
+<h2>Salary Guidance</h2>
+<div class="grid">
+
+<div class="item">
+<div class="label">Performance Band</div>
+<div class="value">{{ evaluation.get_performance_band_display }}</div>
+</div>
+
+<div class="item">
+<div class="label">System Salary Recommendation</div>
+{% if evaluation.suggested_salary_min != None %}
+<div class="salary">
+₹{{ evaluation.suggested_salary_min|floatformat:0 }}
+–
+₹{{ evaluation.suggested_salary_max|floatformat:0 }}
+</div>
+{% else %}
+<div class="pending">Salary matrix not configured for this combination.</div>
+{% endif %}
+</div>
+
+</div>
+
+<p class="note">
+Salary guidance is internal only. Final salary remains subject to authorized HR / Main User approval.
+</p>
+</div>
+
+<div class="card">
+<h2>Final HR Decision</h2>
+
+<p>
+Current Status:
+<strong>{{ application.get_status_display }}</strong>
+</p>
+
+<form method="post">
+{% csrf_token %}
+{{ form.as_p }}
+
+<button type="submit">Save Hiring Decision</button>
+</form>
+
+<p class="note">
+Assessment scores are system-generated and cannot be manually changed from this screen.
+</p>
+</div>
+
+</div>
+</body>
+</html>

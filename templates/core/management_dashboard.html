@@ -65,6 +65,12 @@ body{
     top:0;
     left:0;
     bottom:0;
+
+    /* Allow full menu access on desktop */
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+    scrollbar-width:thin;
 }
 
 .logo{
@@ -486,7 +492,15 @@ body{
 @media(max-width:900px){
 
     .sidebar{
-        display:none;
+        /*
+         * Keep sidebar rendered.
+         * staff_mobile.css moves it off-screen and
+         * .mobile-open slides it into view.
+         */
+        display:block;
+        overflow-y:auto;
+        overflow-x:hidden;
+        -webkit-overflow-scrolling:touch;
     }
 
     .main{
@@ -500,6 +514,90 @@ body{
 
     .main-grid{
         grid-template-columns:1fr;
+    }
+}
+
+
+/* ==============================
+   MANAGEMENT TOPBAR - MOBILE FIX
+============================== */
+
+@media(max-width:900px){
+
+    .topbar{
+        height:auto;
+        min-height:118px;
+        padding:12px 14px 12px 68px !important;
+
+        display:grid;
+        grid-template-columns:1fr;
+        align-items:start;
+        gap:10px;
+    }
+
+    .topbar-left{
+        width:100%;
+        min-width:0;
+    }
+
+    .topbar-left h1{
+        font-size:20px;
+        line-height:1.2;
+        margin:0 0 4px;
+        white-space:normal;
+    }
+
+    .topbar-left p{
+        margin:0;
+        font-size:12px;
+        line-height:1.3;
+    }
+
+    .user-box{
+        width:100%;
+        min-width:0;
+
+        display:grid;
+        grid-template-columns:40px minmax(0,1fr) auto;
+        align-items:center;
+        gap:10px;
+    }
+
+    .user-avatar{
+        width:40px;
+        height:40px;
+        flex:none;
+    }
+
+    .user-info{
+        min-width:0;
+    }
+
+    .user-info strong{
+        display:block;
+        font-size:13px;
+
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+    }
+
+    .user-info span{
+        display:block;
+        margin-top:2px;
+        font-size:11px;
+    }
+
+    .logout-btn{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+
+        padding:9px 12px;
+        margin:0;
+
+        white-space:nowrap;
+        flex:none;
     }
 }
 
@@ -557,83 +655,117 @@ body{
 
     <div class="menu">
 
-        <div class="menu-title">
-            MAIN
-        </div>
+        <div class="menu-title">MAIN</div>
 
         <a href="{% url 'management_dashboard' %}" class="active">
             🏠 Dashboard
         </a>
+
         <a href="{% url 'branch_dashboard' %}">
-         Branch Performance
-        </a>
-        <a href="{% url 'daily_expense_list' %}">
-            Daily Expenses
+            📊 Branch Performance
         </a>
 
-        <a href="{% url 'monthly_closing_list' %}">
-            Monthly Closing
-        </a>
+
+        <div class="menu-title">SALES & CRM</div>
+
         <a href="{% url 'enquiry_dashboard' %}">
             📞 Enquiries
         </a>
 
         <a href="{% url 'career_tools:quick_career_enquiry' %}">
-            New Career Enquiry
+            ➕ New Career Enquiry
+        </a>
+
+        <a href="{% url 'career_tools:counsellor_dashboard' %}">
+            🎯 Career Counsellor
         </a>
 
         <a href="{% url 'business_lead_list' %}">
             🏢 Business Leads
         </a>
 
-        <a href="{% url 'fee_payment_list' %}">
-            💳 Fee Payments
+        <a href="{% url 'ai_ready_report' %}">
+            🤖 AI Ready Maharashtra
+        </a>
+
+        <a href="{% url 'assessments:scholarship_dashboard' %}">
+            🎓 Scholarship Leads
         </a>
 
 
-        <div class="menu-title">
-            MANAGEMENT
-        </div>
+        <div class="menu-title">STUDENTS & TRAINING</div>
 
         <a href="{% url 'admission_list' %}">
-        🎓 Admissions
+            🎓 Admissions
         </a>
 
         <a href="{% url 'student_list' %}">
-        👨‍🎓 Students
+            👨‍🎓 Students
         </a>
+
         <a href="{% url 'student_quick_view' %}">
-        🔎 Student Quick View
+            🔎 Student Quick View
         </a>
-        <a href="{% url 'staff_list' %}">
-        👥 Staff
+
+        <a href="{% url 'lms:delivery_report' %}">
+            📚 Classroom Delivery
         </a>
 
         <a href="{% url 'attendance_dashboard' %}">
-            📋 Attendance
+            ✅ Attendance
         </a>
 
         <a href="{% url 'attendance_report' %}">
             📊 Attendance Report
         </a>
-        
-        <a href="{% url 'reports_dashboard' %}">
-            📊 Reports
+
+
+        <div class="menu-title">HR & TEAM</div>
+
+        <a href="{% url 'assessments:hiring_hr_dashboard' %}">
+            👥 HR & Hiring
+        </a>
+
+        <a href="{% url 'staff_list' %}">
+            🧑‍💼 Staff
+        </a>
+
+        <a href="{% url 'staff_usage_report' %}">
+            📈 Staff Usage & Attendance
+        </a>
+
+
+        <div class="menu-title">FINANCE & REPORTS</div>
+
+        <a href="{% url 'fee_payment_list' %}">
+            💳 Fee Payments
         </a>
 
         <a href="{% url 'fee_due_report' %}">
             📅 Fee Due Report
         </a>
 
-        
+        <a href="{% url 'daily_expense_list' %}">
+            💰 Daily Expenses
+        </a>
+
+        <a href="{% url 'monthly_closing_list' %}">
+            🧾 Monthly Closing
+        </a>
+
+        <a href="{% url 'reports_dashboard' %}">
+            📊 Reports
+        </a>
+
+
         {% if request.user.is_superuser %}
 
-        <div class="admin-link">
+        <div class="menu-title">SYSTEM</div>
 
+        <div class="admin-link">
             <a href="/admin/">
                 ⚙️ Django Backend
             </a>
-
         </div>
 
         {% endif %}
@@ -912,6 +1044,53 @@ body{
                     </a>
 
                     <a
+                        href="{% url 'ai_ready_report' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            🤖
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                AI Ready Maharashtra
+                            </strong>
+
+                            <span>
+                                Review AI quiz participants & decide lead distribution
+                            </span>
+
+                        </div>
+
+                    </a>
+
+                    <a
+                        href="{% url 'assessments:hiring_hr_dashboard' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            👥
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                HR & Hiring
+                            </strong>
+
+                            <span>
+                                Review candidates, assessments & hiring decisions
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    <a
                         href="{% url 'career_tools:quick_career_enquiry' %}"
                         class="action-card"
                     >
@@ -957,6 +1136,32 @@ body{
                         </div>
 
                     </a>
+
+
+                    {% if request.user.is_superuser %}
+                    <a
+                        href="{% url 'franchise_enquiry_list' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            🤝
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Franchise Enquiries
+                            </strong>
+
+                            <span>
+                                Review potential MCTI franchise partners
+                            </span>
+
+                        </div>
+
+                    </a>
+                    {% endif %}
 
 
                     <a

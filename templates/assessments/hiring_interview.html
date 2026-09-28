@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Candidate Interview Profile | MCTI Technologies</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    background:#f5f5f5;
+    font-family:Arial,sans-serif;
+    color:#171717;
+}
+.header{
+    background:#111;
+    color:#fff;
+    padding:22px;
+    border-bottom:5px solid #f58220;
+}
+.header-inner{
+    max-width:900px;
+    margin:auto;
+}
+.header h1{margin:0;font-size:26px}
+.header p{margin:7px 0 0;color:#ccc}
+
+.container{
+    max-width:900px;
+    margin:28px auto;
+    padding:0 16px;
+}
+.card{
+    background:#fff;
+    padding:28px;
+    border-radius:12px;
+    box-shadow:0 3px 15px rgba(0,0,0,.08);
+}
+.role{
+    background:#fff4e9;
+    border-left:5px solid #f58220;
+    padding:15px;
+    margin-bottom:25px;
+    line-height:1.7;
+}
+.intro{
+    margin-bottom:25px;
+    color:#555;
+    line-height:1.6;
+}
+form p{
+    margin:0 0 22px;
+}
+label{
+    display:block;
+    font-weight:bold;
+    margin-bottom:8px;
+    line-height:1.4;
+}
+textarea,input,select{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:7px;
+    font-family:Arial,sans-serif;
+    font-size:15px;
+}
+textarea:focus,input:focus,select:focus{
+    outline:none;
+    border-color:#f58220;
+}
+.help{
+    background:#f7f7f7;
+    padding:14px;
+    border-radius:7px;
+    margin-bottom:22px;
+    font-size:13px;
+    color:#666;
+    line-height:1.5;
+}
+button{
+    width:100%;
+    border:0;
+    border-radius:7px;
+    background:#f58220;
+    color:#fff;
+    padding:15px;
+    font-size:17px;
+    font-weight:bold;
+    cursor:pointer;
+}
+button:hover{background:#db6d0d}
+
+.footer{
+    text-align:center;
+    color:#777;
+    font-size:12px;
+    margin-top:22px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<div class="header-inner">
+<h1>Before You Start Your Assessment</h1>
+<p>MCTI Technologies — Standard Candidate Interview Profile</p>
+</div>
+</div>
+
+<div class="container">
+
+<div class="card">
+
+<div class="role">
+<strong>{{ application.candidate.full_name }}</strong><br>
+Role: <strong>{{ application.job_role.name }}</strong><br>
+Employment Preference:
+<strong>{{ application.get_employment_type_display }}</strong>
+</div>
+
+<div class="intro">
+Please answer the following questions in your own words.
+Your responses help our hiring team understand your goals,
+experience and suitability for the role.
+</div>
+
+<div class="help">
+<strong>Important:</strong>
+These written responses are part of your candidate profile.
+They are not automatically converted into marks.
+Your role assessment will begin after this form.
+</div>
+
+<form method="post">
+{% csrf_token %}
+
+{{ form.as_p }}
+
+<button type="submit">
+Save & Start Role Assessment →
+</button>
+
+</form>
+
+</div>
+
+<div class="footer">
+MCTI Technologies — An Initiative by Maharashtra Computer Training Institute
+</div>
+
+</div>
+
+</body>
+</html>

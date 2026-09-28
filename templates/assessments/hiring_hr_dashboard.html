@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>HR Hiring Dashboard | MCTI Technologies</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f4f5f7;
+    color:#171717;
+}
+
+.header{
+    background:#111;
+    color:white;
+    padding:20px 25px;
+    border-bottom:5px solid #f58220;
+}
+
+.header h1{
+    margin:0;
+    font-size:25px;
+}
+
+.header p{
+    margin:6px 0 0;
+    color:#ccc;
+}
+
+.container{
+    max-width:1450px;
+    margin:25px auto;
+    padding:0 18px;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:12px;
+    margin-bottom:20px;
+}
+
+.stat{
+    background:white;
+    padding:18px;
+    border-radius:10px;
+    box-shadow:0 2px 10px rgba(0,0,0,.07);
+}
+
+.stat .number{
+    font-size:28px;
+    font-weight:bold;
+    color:#f58220;
+}
+
+.stat .label{
+    color:#666;
+    font-size:13px;
+    margin-top:5px;
+}
+
+.filters{
+    background:white;
+    padding:18px;
+    border-radius:10px;
+    margin-bottom:20px;
+    box-shadow:0 2px 10px rgba(0,0,0,.07);
+}
+
+.filter-grid{
+    display:grid;
+    grid-template-columns:2fr 1.4fr 1.4fr 1.4fr auto;
+    gap:10px;
+}
+
+input,select{
+    width:100%;
+    padding:11px;
+    border:1px solid #ccc;
+    border-radius:6px;
+}
+
+button,.btn{
+    display:inline-block;
+    border:0;
+    background:#f58220;
+    color:white;
+    padding:11px 15px;
+    border-radius:6px;
+    font-weight:bold;
+    text-decoration:none;
+    cursor:pointer;
+}
+
+.btn-dark{
+    background:#111;
+}
+
+.table-card{
+    background:white;
+    border-radius:10px;
+    overflow:auto;
+    box-shadow:0 2px 10px rgba(0,0,0,.07);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1150px;
+}
+
+th{
+    background:#111;
+    color:white;
+    padding:13px 10px;
+    text-align:left;
+    font-size:13px;
+}
+
+td{
+    padding:13px 10px;
+    border-bottom:1px solid #eee;
+    font-size:14px;
+}
+
+.name{
+    font-weight:bold;
+}
+
+.score{
+    font-weight:bold;
+    color:#f58220;
+}
+
+.pending{
+    color:#777;
+}
+
+.status{
+    display:inline-block;
+    background:#eee;
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.empty{
+    padding:40px;
+    text-align:center;
+    color:#777;
+}
+
+.footer{
+    text-align:center;
+    padding:25px;
+    color:#777;
+    font-size:12px;
+}
+
+@media(max-width:900px){
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .filter-grid{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>HR Hiring Dashboard</h1>
+    <p>MCTI Technologies — Standardized Hiring & Performance Evaluation</p>
+</div>
+
+<div class="container">
+
+<div class="stats">
+
+<div class="stat">
+<div class="number">{{ summary.total }}</div>
+<div class="label">Total Applications</div>
+</div>
+
+<div class="stat">
+<div class="number">{{ summary.test_pending }}</div>
+<div class="label">Test Pending</div>
+</div>
+
+<div class="stat">
+<div class="number">{{ summary.test_completed }}</div>
+<div class="label">Awaiting Evaluation</div>
+</div>
+
+<div class="stat">
+<div class="number">{{ summary.shortlisted }}</div>
+<div class="label">Shortlisted</div>
+</div>
+
+<div class="stat">
+<div class="number">{{ summary.selected }}</div>
+<div class="label">Selected</div>
+</div>
+
+<div class="stat">
+<div class="number">{{ summary.joined }}</div>
+<div class="label">Joined</div>
+</div>
+
+</div>
+
+
+<div class="filters">
+
+<form method="get">
+
+<div class="filter-grid">
+
+<input
+    type="text"
+    name="q"
+    value="{{ search }}"
+    placeholder="Search name, mobile or email"
+>
+
+<select name="role">
+<option value="">All Job Roles</option>
+{% for role in roles %}
+<option
+    value="{{ role.id }}"
+    {% if selected_role == role.id|stringformat:"s" %}selected{% endif %}
+>
+{{ role.name }}
+</option>
+{% endfor %}
+</select>
+
+<select name="employment_type">
+<option value="">All Employment Types</option>
+{% for value,label in employment_choices %}
+<option
+    value="{{ value }}"
+    {% if selected_employment == value %}selected{% endif %}
+>
+{{ label }}
+</option>
+{% endfor %}
+</select>
+
+<select name="status">
+<option value="">All Status</option>
+{% for value,label in status_choices %}
+<option
+    value="{{ value }}"
+    {% if selected_status == value %}selected{% endif %}
+>
+{{ label }}
+</option>
+{% endfor %}
+</select>
+
+<button type="submit">Filter</button>
+
+</div>
+
+</form>
+
+</div>
+
+
+<div class="table-card">
+
+{% if applications %}
+
+<table>
+
+<thead>
+<tr>
+<th>Candidate</th>
+<th>Role</th>
+<th>Employment</th>
+<th>Technical</th>
+<th>Final Score</th>
+<th>Band</th>
+<th>Status</th>
+<th>Applied</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for application in applications %}
+
+<tr>
+
+<td>
+<div class="name">
+{{ application.candidate.full_name }}
+</div>
+<div class="pending">
+{{ application.candidate.mobile }}
+</div>
+</td>
+
+<td>
+{{ application.job_role.name }}
+</td>
+
+<td>
+{{ application.get_employment_type_display }}
+</td>
+
+<td>
+{% if application.assessment_attempt and application.assessment_attempt.status == "completed" %}
+<span class="score">
+{{ application.evaluation.technical_score|floatformat:0 }}%
+</span>
+{% else %}
+<span class="pending">Pending</span>
+{% endif %}
+</td>
+
+<td>
+{% if application.evaluation.performance_band %}
+<span class="score">
+{{ application.evaluation.final_score|floatformat:0 }}%
+</span>
+{% else %}
+<span class="pending">Pending</span>
+{% endif %}
+</td>
+
+<td>
+{% if application.evaluation.performance_band %}
+{{ application.evaluation.get_performance_band_display }}
+{% else %}
+<span class="pending">—</span>
+{% endif %}
+</td>
+
+<td>
+<span class="status">
+{{ application.get_status_display }}
+</span>
+</td>
+
+<td>
+{{ application.created_at|date:"d M Y" }}
+</td>
+
+<td>
+
+{% if application.assessment_attempt and application.assessment_attempt.status == "completed" %}
+
+<a
+class="btn"
+href="{% url 'assessments:hiring_hr_evaluate' application.id %}"
+>
+{% if application.evaluation.performance_band %}
+Review
+{% else %}
+Evaluate
+{% endif %}
+</a>
+
+{% else %}
+
+<span class="pending">
+Waiting for Test
+</span>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
+{% else %}
+
+<div class="empty">
+No hiring applications found.
+</div>
+
+{% endif %}
+
+</div>
+
+<div class="footer">
+MCTI Technologies — An Initiative by Maharashtra Computer Training Institute
+</div>
+
+</div>
+
+</body>
+</html>
