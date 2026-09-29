@@ -13,9 +13,28 @@ def ssc_exam_preparation(request):
         student = SSCStudent.objects.filter(id=student_id).first()
 
     if student:
+        # Medium selected from dashboard has priority.
+        selected_medium = (
+            request.GET.get("medium")
+            or request.session.get("ssc_selected_medium")
+            or student.medium
+            or "marathi"
+        ).strip().lower()
+
+        if selected_medium not in ("marathi", "english"):
+            selected_medium = "marathi"
+
+        # Remember selection for refresh/login flow.
+        request.session["ssc_selected_medium"] = selected_medium
+
+        # Keep student profile in sync with selected medium.
+        if student.medium != selected_medium:
+            student.medium = selected_medium
+            student.save(update_fields=["medium"])
+
         resources = SSCResource.objects.filter(
             is_active=True,
-            medium=student.medium,
+            medium=selected_medium,
         )
 
         subject = request.GET.get("subject", "").strip()
@@ -37,6 +56,7 @@ def ssc_exam_preparation(request):
             {
                 "student": student,
                 "resources": resources,
+                "selected_medium": selected_medium,
             },
         )
 
@@ -67,6 +87,7 @@ def ssc_exam_preparation(request):
                 student = form.save()
 
             request.session["ssc_student_id"] = student.id
+            request.session["ssc_selected_medium"] = student.medium
 
             return redirect("exam_preparation:ssc_exam_preparation")
 
@@ -118,13 +139,12 @@ def ssc_resource_open(request, resource_id):
 
 
 def ssc_management_dashboard(request):
-    from django.contrib.auth.decorators import login_required
-    from django.db.models import Count
+    from django.db.models import Count, Avg, Max
+    from assessments.models import AssessmentAttempt
+    from core.views import is_admin_user
 
     if not request.user.is_authenticated:
         return redirect("staff_login")
-
-    from core.views import is_admin_user
 
     if not (request.user.is_superuser or is_admin_user(request.user)):
         return redirect("branch_dashboard")
@@ -145,6 +165,45 @@ def ssc_management_dashboard(request):
         "semi_english": students.filter(medium="semi_english").count(),
     }
 
+    ssc_attempts = (
+        AssessmentAttempt.objects
+        .filter(assessment__assessment_type="exam_preparation")
+        .select_related("assessment")
+    )
+
+    total_attempts = ssc_attempts.count()
+    completed_attempts = ssc_attempts.filter(status="completed")
+    total_completed = completed_attempts.count()
+
+    avg_score = completed_attempts.aggregate(
+        avg=Avg("percentage")
+    )["avg"] or 0
+
+    crm_leads = students.exclude(enquiry_id=None).count()
+
+    subject_performance = (
+        completed_attempts
+        .values("assessment__title")
+        .annotate(
+            attempts=Count("id"),
+            average=Avg("percentage"),
+            best=Max("percentage"),
+        )
+        .order_by("-attempts", "assessment__title")
+    )
+
+    top_performers = (
+        completed_attempts
+        .order_by("-percentage", "-completed_at")[:15]
+    )
+
+    branch_counts = (
+        students
+        .values("preferred_branch__name")
+        .annotate(total=Count("id"))
+        .order_by("-total")
+    )
+
     recent_downloads = (
         SSCDownload.objects
         .select_related("student", "resource")
@@ -160,6 +219,13 @@ def ssc_management_dashboard(request):
             "total_resource_opens": total_resource_opens,
             "medium_counts": medium_counts,
             "recent_downloads": recent_downloads,
+            "total_attempts": total_attempts,
+            "total_completed": total_completed,
+            "avg_score": avg_score,
+            "crm_leads": crm_leads,
+            "subject_performance": subject_performance,
+            "top_performers": top_performers,
+            "branch_counts": branch_counts,
         },
     )
 
@@ -254,7 +320,7 @@ def ssc_send_to_enquiry(request, student_id):
     return redirect("exam_preparation:ssc_management_dashboard")
 
 
-def ssc_mock_start(request):
+def ssc_mock_start(request, practice_key="math1"):
     import random
     from django.shortcuts import get_object_or_404
     from assessments.models import Assessment, AssessmentAttempt
@@ -266,9 +332,33 @@ def ssc_mock_start(request):
 
     student = get_object_or_404(SSCStudent, id=student_id)
 
+    practice_slugs = {
+        "math1": "ssc-marathi-mathematics-part-1-practice",
+        "math2": "ssc-marathi-mathematics-part-2-practice",
+        "marathi": "ssc-marathi-first-language-practice",
+        "social1": "ssc-marathi-social-science-paper-1-practice",
+        "geography": "ssc-marathi-geography-paper-2-practice",
+        "science2": "ssc-marathi-science-technology-part-2-practice",
+        "science1": "ssc-marathi-science-technology-part-1-practice",
+        "english": "ssc-english-first-language-practice",
+        "hindi": "ssc-hindi-second-third-language-practice",
+
+        # English Medium
+        "em_math1": "ssc-english-medium-mathematics-part-1-practice",
+        "em_math2": "ssc-english-medium-mathematics-part-2-practice",
+        "em_science1": "ssc-english-medium-science-technology-part-1-practice",
+        "em_science2": "ssc-english-medium-science-technology-part-2-practice",
+        "em_social1": "ssc-english-medium-social-science-paper-1-practice",
+        "em_geography": "ssc-english-medium-geography-paper-2-practice",
+        "em_english": "ssc-english-first-language-practice",
+    }
+    assessment_slug = practice_slugs.get(practice_key)
+    if not assessment_slug:
+        raise Http404("Invalid SSC practice test.")
+
     assessment = get_object_or_404(
         Assessment,
-        slug="ssc-marathi-mathematics-part-1-practice",
+        slug=assessment_slug,
         assessment_type="exam_preparation",
         is_active=True,
     )
@@ -279,8 +369,20 @@ def ssc_mock_start(request):
         .values_list("id", flat=True)
     )
 
-    if not question_ids:
-        raise ValueError("No active questions available for SSC practice test.")
+    if len(question_ids) < 25:
+        from django.contrib import messages
+
+        messages.info(
+            request,
+            "This subject question bank is being prepared. "
+            "Please try another subject for now."
+        )
+
+        medium = "english" if practice_key.startswith("em_") else "marathi"
+
+        return redirect(
+            f"/ssc-exam-preparation/?medium={medium}"
+        )
 
     selected_ids = random.sample(
         question_ids,
@@ -323,7 +425,25 @@ def ssc_mock_quiz(request, attempt_id):
         AssessmentAttempt.objects.select_related("assessment"),
         id=attempt_id,
         assessment__assessment_type="exam_preparation",
-        assessment__slug="ssc-marathi-mathematics-part-1-practice",
+        assessment__slug__in=[
+            "ssc-marathi-mathematics-part-1-practice",
+            "ssc-marathi-mathematics-part-2-practice",
+            "ssc-marathi-first-language-practice",
+            "ssc-marathi-social-science-paper-1-practice",
+            "ssc-marathi-geography-paper-2-practice",
+            "ssc-marathi-science-technology-part-2-practice",
+            "ssc-marathi-science-technology-part-1-practice",
+            "ssc-english-first-language-practice",
+            "ssc-hindi-second-third-language-practice",
+
+            # English Medium
+            "ssc-english-medium-mathematics-part-1-practice",
+            "ssc-english-medium-mathematics-part-2-practice",
+            "ssc-english-medium-science-technology-part-1-practice",
+            "ssc-english-medium-science-technology-part-2-practice",
+            "ssc-english-medium-social-science-paper-1-practice",
+            "ssc-english-medium-geography-paper-2-practice",
+        ],
         participant_mobile=student.mobile,
         status="started",
     )

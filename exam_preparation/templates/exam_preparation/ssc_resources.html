@@ -30,6 +30,167 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#171717}
 @media(max-width:850px){.grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.grid{grid-template-columns:1fr}}
 </style>
+
+<style id="mcti-ssc-mock-ui-fix">
+
+/* ==============================
+   MCTI SSC MOCK TEST UI
+   ============================== */
+
+.mcti-mock-section{
+    margin:26px 0 32px;
+}
+
+.mcti-mock-heading{
+    margin-bottom:18px;
+}
+
+.mcti-mock-heading h2{
+    margin:0 0 6px;
+    font-size:24px;
+    color:#111827;
+}
+
+.mcti-mock-heading p{
+    margin:0;
+    color:#6b7280;
+    line-height:1.55;
+}
+
+.mcti-mock-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:16px;
+}
+
+.mcti-mock-grid > .card,
+.mcti-mock-grid > div{
+    box-sizing:border-box;
+}
+
+/* Normalize all mock cards */
+.mcti-mock-card{
+    background:#fff !important;
+    border:1px solid #e5e7eb !important;
+    border-radius:16px !important;
+    padding:20px !important;
+    margin:0 !important;
+    display:flex !important;
+    flex-direction:column !important;
+    min-height:255px;
+    box-shadow:0 4px 16px rgba(0,0,0,.045);
+}
+
+.mcti-mock-card:hover{
+    border-color:#f97316 !important;
+    box-shadow:0 8px 24px rgba(249,115,22,.10);
+}
+
+.mcti-mock-card .mcti-label{
+    font-size:12px;
+    line-height:1.4;
+    font-weight:800;
+    color:#f97316;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    margin-bottom:8px;
+}
+
+.mcti-mock-card h2,
+.mcti-mock-card h3{
+    margin:0 0 9px !important;
+    color:#111827 !important;
+    font-size:20px !important;
+    line-height:1.3 !important;
+}
+
+.mcti-mock-card p{
+    margin:0 0 16px !important;
+    color:#6b7280 !important;
+    line-height:1.55 !important;
+    flex-grow:1;
+}
+
+.mcti-mock-meta{
+    display:flex;
+    gap:7px;
+    flex-wrap:wrap;
+    margin:0 0 16px;
+}
+
+.mcti-mock-meta span{
+    display:inline-flex;
+    align-items:center;
+    padding:7px 11px;
+    border:1px solid #e5e7eb;
+    border-radius:999px;
+    font-size:12px;
+    background:#fff;
+    color:#111827;
+}
+
+/* ALL mock CTA buttons */
+.mcti-mock-card a,
+.mcti-mock-card a.btn{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:100% !important;
+    min-height:46px !important;
+    box-sizing:border-box !important;
+    margin-top:auto !important;
+    padding:11px 14px !important;
+    border-radius:10px !important;
+    border:0 !important;
+    background:#ff7900 !important;
+    color:#fff !important;
+    text-decoration:none !important;
+    font-size:14px !important;
+    line-height:1.25 !important;
+    font-weight:800 !important;
+    text-align:center !important;
+    box-shadow:none !important;
+}
+
+.mcti-mock-card a:hover,
+.mcti-mock-card a.btn:hover{
+    background:#111 !important;
+    color:#fff !important;
+}
+
+/* Tablet */
+@media(max-width:850px){
+    .mcti-mock-grid{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+/* Mobile */
+@media(max-width:650px){
+    .mcti-mock-grid{
+        grid-template-columns:1fr;
+        gap:13px;
+    }
+
+    .mcti-mock-card{
+        min-height:auto;
+        padding:17px !important;
+    }
+
+    .mcti-mock-card h2,
+    .mcti-mock-card h3{
+        font-size:18px !important;
+    }
+
+    .mcti-mock-card a,
+    .mcti-mock-card a.btn{
+        min-height:48px !important;
+        font-size:14px !important;
+    }
+}
+
+</style>
+
 </head>
 
 <body>
@@ -137,34 +298,237 @@ Reset
 </div>
 
 
-<!-- MCTI SSC MOCK TEST -->
-<div class="card" style="margin-bottom:22px;border:2px solid #f58220;">
-    <div style="font-size:13px;font-weight:bold;color:#f58220;margin-bottom:6px;">
-        📝 FREE PRACTICE TEST
+
+
+<!-- SSC MEDIUM SELECTOR START -->
+<div class="ssc-medium-selector"
+     style="margin:22px 0;padding:20px;border:1px solid #e5e7eb;
+            border-radius:16px;background:#fff;">
+
+    <div style="font-size:12px;font-weight:800;color:#f97316;
+                text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;">
+        SSC 2026–27
     </div>
 
-    <h2 style="margin:0 0 8px;">
-        Mathematics Part 1 – Mock Test
+    <h2 style="margin:0 0 7px;color:#111827;">
+        Choose Your Medium
     </h2>
 
-    <p style="margin:0 0 15px;color:#666;line-height:1.5;">
-        Test your preparation with 25 MCQs and get an instant
-        topic-wise performance analysis.
+    <p style="margin:0 0 15px;color:#6b7280;">
+        तुमचे माध्यम निवडा / Select your study medium
     </p>
 
-    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px;">
-        <span class="subject">25 Questions</span>
-        <span class="subject">25 Marks</span>
-        <span class="subject">25 Minutes</span>
-        <span class="subject">Instant Result</span>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+
+        <a href="?medium=marathi"
+           style="display:inline-flex;align-items:center;justify-content:center;
+                  min-width:145px;padding:12px 18px;border-radius:10px;
+                  font-weight:800;text-decoration:none;
+                  {% if selected_medium != 'english' %}
+                  background:#f97316;color:#fff;
+                  {% else %}
+                  background:#f3f4f6;color:#111827;
+                  {% endif %}">
+            मराठी माध्यम
+        </a>
+
+        <a href="?medium=english"
+           style="display:inline-flex;align-items:center;justify-content:center;
+                  min-width:145px;padding:12px 18px;border-radius:10px;
+                  font-weight:800;text-decoration:none;
+                  {% if selected_medium == 'english' %}
+                  background:#f97316;color:#fff;
+                  {% else %}
+                  background:#f3f4f6;color:#111827;
+                  {% endif %}">
+            English Medium
+        </a>
+
+    </div>
+</div>
+<!-- SSC MEDIUM SELECTOR END -->
+
+
+<!-- MCTI SSC MOCK TEST -->
+<section class="mcti-mock-section">
+
+{% if selected_medium == "english" %}
+
+    <div class="mcti-mock-heading">
+        <h2>📝 SSC English Medium Practice Tests</h2>
+        <p>
+            Subject-wise Board practice. Each test uses 25 questions from
+            the selected subject question bank.
+        </p>
     </div>
 
-    <a class="btn"
-       href="{% url 'exam_preparation:ssc_mock_start' %}">
-        Start Free Mock Test →
-    </a>
-</div>
+    <div class="mcti-mock-grid">
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC 2026–27 • English Medium</div>
+            <h3>Mathematics Part I</h3>
+            <p>English-medium Mathematics Part I Board practice.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'em_math1' %}">
+                Start Mathematics Part I Test →
+            </a>
+        </div>
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC 2026–27 • English Medium</div>
+            <h3>Mathematics Part II – Geometry</h3>
+            <p>English-medium Mathematics Part II Board practice.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'em_math2' %}">
+                Start Mathematics Part II Test →
+            </a>
+        </div>
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC 2026–27 • English Medium</div>
+            <h3>Science &amp; Technology Part I</h3>
+            <p>English-medium Science &amp; Technology Part I practice.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'em_science1' %}">
+                Start Science &amp; Technology Part I Test →
+            </a>
+        </div>
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC 2026–27 • English Medium</div>
+            <h3>Science &amp; Technology Part II</h3>
+            <p>English-medium Science &amp; Technology Part II practice.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'em_science2' %}">
+                Start Science &amp; Technology Part II Test →
+            </a>
+        </div>
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC 2026–27 • English Medium</div>
+            <h3>History &amp; Political Science</h3>
+            <p>English-medium Social Science Paper I practice.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'em_social1' %}">
+                Start History &amp; Political Science Test →
+            </a>
+        </div>
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC 2026–27 • English Medium</div>
+            <h3>Geography</h3>
+            <p>English-medium Social Science Paper II practice.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'em_geography' %}">
+                Start Geography Test →
+            </a>
+        </div>
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC • English Medium</div>
+            <h3>English</h3>
+            <p>English language and Board-based objective practice.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'em_english' %}">
+                Start English Practice Test →
+            </a>
+        </div>
+
+    </div>
+
+{% else %}
+
+    <div class="mcti-mock-heading">
+        <h2>📝 SSC मराठी माध्यम Practice Tests</h2>
+        <p>
+            विषयानुसार 25 random questions आणि instant performance result.
+        </p>
+    </div>
+
+    <div class="mcti-mock-grid">
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC 2026–27 • Marathi Medium</div>
+            <h3>Mathematics Part I</h3>
+            <p>Board-based Mathematics Part I practice.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'math1' %}">
+                Start Mathematics Part I Test →
+            </a>
+        </div>
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC 2026–27 • Marathi Medium</div>
+            <h3>Mathematics Part II – Geometry</h3>
+            <p>2024, 2025 आणि 2026 Board papers वर आधारित practice.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'math2' %}">
+                Start Mathematics Part II Test →
+            </a>
+        </div>
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC 2026–27 • Marathi Medium</div>
+            <h3>Science &amp; Technology Part I</h3>
+            <p>Board-based Science &amp; Technology Part I practice.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'science1' %}">
+                Start Science &amp; Technology Part I Test →
+            </a>
+        </div>
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC 2026–27 • Marathi Medium</div>
+            <h3>Science &amp; Technology Part II</h3>
+            <p>Board-based Science &amp; Technology Part II practice.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'science2' %}">
+                Start Science &amp; Technology Part II Test →
+            </a>
+        </div>
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC 2026–27 • Marathi Medium</div>
+            <h3>History &amp; Political Science</h3>
+            <p>Social Science Paper I Board-based practice.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'social1' %}">
+                Start History &amp; Political Science Test →
+            </a>
+        </div>
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC 2026–27 • Marathi Medium</div>
+            <h3>Geography</h3>
+            <p>Social Science Paper II Board-based practice.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'geography' %}">
+                Start Geography Test →
+            </a>
+        </div>
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC • First Language</div>
+            <h3>English</h3>
+            <p>English Board practice with random questions.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'english' %}">
+                Start English Practice Test →
+            </a>
+        </div>
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC • Marathi Medium</div>
+            <h3>Marathi – First Language</h3>
+            <p>मराठी Board-based objective practice.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'marathi' %}">
+                Start Marathi Practice Test →
+            </a>
+        </div>
+
+        <div class="mcti-mock-card">
+            <div class="mcti-label">SSC • Second / Third Language</div>
+            <h3>Hindi</h3>
+            <p>Hindi Board-based objective practice.</p>
+            <a href="{% url 'exam_preparation:ssc_mock_start_subject' 'hindi' %}">
+                Start Hindi Practice Test →
+            </a>
+        </div>
+
+    </div>
+
+{% endif %}
+
+</section>
 <!-- /MCTI SSC MOCK TEST -->
+
+
 
 {% if resources %}
 

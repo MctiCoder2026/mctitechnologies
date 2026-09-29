@@ -21,6 +21,15 @@ th{background:#111;color:#fff}
 .badge{background:#fff1e5;color:#b64f00;padding:5px 9px;border-radius:20px;font-weight:700}
 .back{color:#ff7a00;text-decoration:none;font-weight:700}
 .empty{text-align:center;color:#777;padding:25px}
+.analytics-title{margin:28px 0 8px;font-size:22px}
+.stat-sub{font-size:12px;color:#777;margin-top:5px}
+.progress{height:8px;background:#eee;border-radius:10px;overflow:hidden;min-width:100px}
+.progress span{display:block;height:100%;background:#ff7a00;border-radius:10px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.score{font-weight:800;color:#ff7a00}
+.crm-number{color:#138a36}
+@media(max-width:900px){.two-col{grid-template-columns:1fr}}
+
 @media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:500px){.cards{grid-template-columns:1fr}}
 </style>
@@ -64,6 +73,143 @@ Semi-English
 Resource Opens
 <div class="number">{{ total_resource_opens }}</div>
 </div>
+
+</div>
+
+<h2 class="analytics-title">📈 Practice Test Analytics</h2>
+
+<div class="cards">
+
+<div class="card">
+Total Test Attempts
+<div class="number">{{ total_attempts }}</div>
+<div class="stat-sub">All SSC practice tests</div>
+</div>
+
+<div class="card">
+Completed Tests
+<div class="number">{{ total_completed }}</div>
+<div class="stat-sub">Successfully submitted</div>
+</div>
+
+<div class="card">
+Average Score
+<div class="number">{{ avg_score|floatformat:1 }}%</div>
+<div class="stat-sub">Completed attempts</div>
+</div>
+
+<div class="card">
+CRM Leads
+<div class="number crm-number">{{ crm_leads }}</div>
+<div class="stat-sub">SSC students linked to CRM</div>
+</div>
+
+<div class="card">
+Resource Opens
+<div class="number">{{ total_resource_opens }}</div>
+<div class="stat-sub">Study-resource activity</div>
+</div>
+
+</div>
+
+
+<div class="two-col">
+
+<div class="panel">
+<h2>📚 Subject Performance</h2>
+
+{% if subject_performance %}
+<table style="min-width:600px">
+<thead>
+<tr>
+<th>Subject / Test</th>
+<th>Attempts</th>
+<th>Average</th>
+<th>Best</th>
+</tr>
+</thead>
+<tbody>
+{% for item in subject_performance %}
+<tr>
+<td><strong>{{ item.assessment__title }}</strong></td>
+<td>{{ item.attempts }}</td>
+<td><span class="score">{{ item.average|floatformat:1 }}%</span></td>
+<td>{{ item.best|floatformat:1 }}%</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% else %}
+<div class="empty">No completed practice tests yet.</div>
+{% endif %}
+</div>
+
+
+<div class="panel">
+<h2>🏢 Branch-wise Registrations</h2>
+
+{% if branch_counts %}
+<table style="min-width:400px">
+<thead>
+<tr>
+<th>Preferred Centre</th>
+<th>Students</th>
+</tr>
+</thead>
+<tbody>
+{% for item in branch_counts %}
+<tr>
+<td>
+{% if item.preferred_branch__name %}
+{{ item.preferred_branch__name }}
+{% else %}
+Not Selected
+{% endif %}
+</td>
+<td><strong>{{ item.total }}</strong></td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% else %}
+<div class="empty">No branch data yet.</div>
+{% endif %}
+</div>
+
+</div>
+
+
+<div class="panel">
+<h2>🏆 Top Performers</h2>
+
+{% if top_performers %}
+<table>
+<thead>
+<tr>
+<th>Student</th>
+<th>Mobile</th>
+<th>Subject / Test</th>
+<th>Score</th>
+<th>Marks</th>
+<th>Completed</th>
+</tr>
+</thead>
+<tbody>
+{% for attempt in top_performers %}
+<tr>
+<td><strong>{{ attempt.participant_name }}</strong></td>
+<td>{{ attempt.participant_mobile }}</td>
+<td>{{ attempt.assessment.title }}</td>
+<td><span class="score">{{ attempt.percentage|floatformat:1 }}%</span></td>
+<td>{{ attempt.score }} / {{ attempt.total_marks }}</td>
+<td>{{ attempt.completed_at|date:"d M Y, h:i A" }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% else %}
+<div class="empty">No completed practice tests yet.</div>
+{% endif %}
 
 </div>
 
