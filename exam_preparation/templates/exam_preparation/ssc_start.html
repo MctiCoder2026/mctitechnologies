@@ -1,0 +1,298 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MCTI SSC Exam Preparation 2026–27</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f5f5f5;
+    color:#171717;
+}
+.hero{
+    background:linear-gradient(135deg,#111,#292929);
+    color:white;
+    padding:45px 20px;
+    text-align:center;
+}
+.hero .brand{
+    color:#ff7a00;
+    font-size:22px;
+    font-weight:800;
+}
+.hero h1{
+    font-size:34px;
+    margin:12px 0;
+}
+.hero h1 span{color:#ff7a00}
+.hero p{
+    max-width:700px;
+    margin:10px auto;
+    line-height:1.6;
+}
+.badges{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:20px;
+}
+.badge{
+    background:#fff;
+    color:#111;
+    padding:9px 14px;
+    border-radius:30px;
+    font-weight:700;
+    font-size:14px;
+}
+.container{
+    max-width:1050px;
+    margin:30px auto;
+    padding:0 18px;
+}
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:25px;
+}
+.card{
+    background:white;
+    padding:28px;
+    border-radius:18px;
+    box-shadow:0 8px 30px rgba(0,0,0,.07);
+}
+.card h2{margin-top:0}
+.features{
+    line-height:2;
+    font-size:16px;
+}
+.highlight{
+    background:#fff4e9;
+    border-left:5px solid #ff7a00;
+    padding:15px;
+    margin-top:18px;
+    border-radius:8px;
+}
+label{
+    display:block;
+    font-weight:700;
+    margin:14px 0 6px;
+}
+input,select{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:15px;
+}
+input[type=checkbox]{
+    width:auto;
+    margin-right:7px;
+}
+button{
+    width:100%;
+    background:#ff7a00;
+    color:white;
+    border:0;
+    padding:15px;
+    border-radius:9px;
+    font-weight:800;
+    font-size:17px;
+    cursor:pointer;
+    margin-top:18px;
+}
+button:hover{background:#e76e00}
+.errors{
+    color:#b00020;
+    font-size:13px;
+}
+.disclaimer{
+    margin:30px 0;
+    background:#fff;
+    border:1px solid #ddd;
+    padding:20px;
+    border-radius:12px;
+    font-size:12px;
+    color:#666;
+    line-height:1.7;
+}
+.footer{
+    text-align:center;
+    padding:25px;
+    background:#111;
+    color:#fff;
+}
+.footer strong{color:#ff7a00}
+@media(max-width:760px){
+    .grid{grid-template-columns:1fr}
+    .hero h1{font-size:27px}
+}
+</style>
+</head>
+
+<body>
+
+<section class="hero">
+
+<div class="brand">MCTI Technologies</div>
+
+<h1>🎓 SSC Exam Preparation <span>2026–27</span></h1>
+
+<p>
+Free learning initiative for Maharashtra SSC students.
+Access previous examination resources, practice and prepare
+with better direction.
+</p>
+
+<div class="badges">
+    <div class="badge">📄 Previous Papers</div>
+    <div class="badge">📝 Free Mock Tests</div>
+    <div class="badge">📊 Performance Analysis</div>
+    <div class="badge">🎯 Practice & Improve</div>
+</div>
+
+</section>
+
+<div class="container">
+
+<div class="grid">
+
+<div class="card">
+
+<h2>📚 Study. Practice. Improve.</h2>
+
+<div class="features">
+✓ Subject-wise previous examination resources<br>
+✓ Mathematics & Science preparation<br>
+✓ English / Marathi resources<br>
+✓ History & Political Science<br>
+✓ Geography<br>
+✓ Free practice tests – coming progressively<br>
+✓ Identify areas that need more practice
+</div>
+
+<div class="highlight">
+<strong>विद्यार्थ्यांसाठी मोफत उपक्रम ❤️</strong><br><br>
+योग्य सराव, मागील प्रश्नपत्रिकांचा अभ्यास आणि नियमित
+self-assessment यामुळे परीक्षेची तयारी अधिक नियोजनबद्ध करता येते.
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>🔓 Get Free Access</h2>
+
+<p>
+Register once to access available SSC preparation resources.
+</p>
+
+
+<div style="
+    background:#fff7ef;
+    border:2px solid #f58220;
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:20px;
+    text-align:center;
+">
+    <strong style="font-size:17px;">Already Registered?</strong>
+
+    <div style="color:#666;font-size:13px;margin:6px 0 12px;">
+        No password required. Continue using your registered mobile number.
+    </div>
+
+    <a href="{% url 'exam_preparation:ssc_student_login' %}"
+       style="
+           display:inline-block;
+           background:#111;
+           color:#fff;
+           text-decoration:none;
+           padding:12px 20px;
+           border-radius:8px;
+           font-weight:bold;
+       ">
+        📱 Login with Mobile →
+    </a>
+</div>
+
+<form method="post">
+{% csrf_token %}
+
+{% for field in form %}
+
+{% if field.name == "consent_given" %}
+
+<label style="font-weight:normal">
+{{ field }}
+{{ field.label }}
+</label>
+
+{% else %}
+
+<label>{{ field.label }}</label>
+{{ field }}
+
+{% endif %}
+
+{% if field.errors %}
+<div class="errors">{{ field.errors }}</div>
+{% endif %}
+
+{% endfor %}
+
+<button type="submit">
+Start Free SSC Preparation →
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+
+<div class="disclaimer">
+
+<strong>Important Disclaimer:</strong><br>
+
+MCTI SSC Exam Preparation is an independent educational initiative
+of MCTI Technologies, an initiative of Maharashtra Computer Training
+Institute.
+
+MCTI is not affiliated with, endorsed by, or officially connected
+with the Maharashtra State Board of Secondary and Higher Secondary
+Education, any government department, school, examination authority
+or other public authority unless specifically stated.
+
+Previous-year question papers or official educational resources,
+where referenced, will be identified with their respective source.
+All trademarks, examination papers and official materials remain
+the property of their respective authorities/rightsholders.
+
+MCTI-created mock tests, practice questions, performance analysis
+and educational guidance are provided only for learning and practice.
+
+Practice scores, important topics, analysis or preparation resources
+do not guarantee examination marks or results. Students should
+verify the latest syllabus, examination pattern, timetable and
+official information from the relevant examination authority.
+
+</div>
+
+</div>
+
+<footer class="footer">
+<strong>MCTI Technologies</strong><br>
+An Initiative of Maharashtra Computer Training Institute
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSC Preparation Library | MCTI</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#171717}
+.header{background:#111;color:#fff;padding:28px 18px}
+.header-inner{max-width:1100px;margin:auto}
+.brand{color:#ff7a00;font-weight:800;font-size:20px}
+.header h1{margin:8px 0}
+.container{max-width:1100px;margin:25px auto;padding:0 18px}
+.welcome{background:#fff;padding:20px;border-radius:14px;margin-bottom:22px}
+.subjects{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0 25px}
+.subject{background:#fff;border:1px solid #ddd;padding:9px 13px;border-radius:30px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 5px 20px rgba(0,0,0,.06)}
+.year{color:#ff7a00;font-weight:800}
+.card h3{margin:8px 0}
+.meta{font-size:13px;color:#666;line-height:1.6}
+.btn{display:block;text-align:center;margin-top:16px;padding:11px;background:#ff7a00;color:#fff;text-decoration:none;border-radius:8px;font-weight:700}
+.empty{background:#fff;text-align:center;padding:50px 20px;border-radius:14px}
+.empty .icon{font-size:45px}
+.note{margin-top:25px;background:#fff4e9;border-left:4px solid #ff7a00;padding:15px;border-radius:8px;font-size:13px;line-height:1.6}
+.footer{text-align:center;background:#111;color:#fff;padding:24px;margin-top:35px}
+.footer strong{color:#ff7a00}
+@media(max-width:850px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<div class="header-inner">
+<div class="brand">MCTI Technologies</div>
+<h1>🎓 SSC Exam Preparation Library</h1>
+<div>Previous Papers • Practice • Mock Tests • Performance Analysis</div>
+</div>
+</div>
+
+<div class="container">
+
+<div class="welcome">
+<strong>Welcome, {{ student.full_name }} 👋</strong><br>
+Your preparation access is active.
+<br><small>Medium: {{ student.get_medium_display }}</small>
+</div>
+
+
+<div style="background:#fff;padding:18px;border-radius:14px;margin-bottom:20px;">
+<form method="get" style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;">
+
+<div style="flex:1;min-width:220px;">
+<label style="display:block;font-weight:700;margin-bottom:6px;">Subject</label>
+<select name="subject" style="width:100%;padding:11px;border:1px solid #ccc;border-radius:8px;">
+<option value="">All Subjects</option>
+<option value="maths_1" {% if request.GET.subject == "maths_1" %}selected{% endif %}>Mathematics Part 1</option>
+<option value="maths_2" {% if request.GET.subject == "maths_2" %}selected{% endif %}>Mathematics Part 2</option>
+<option value="science_1" {% if request.GET.subject == "science_1" %}selected{% endif %}>Science & Technology Part 1</option>
+<option value="science_2" {% if request.GET.subject == "science_2" %}selected{% endif %}>Science & Technology Part 2</option>
+<option value="english" {% if request.GET.subject == "english" %}selected{% endif %}>English</option>
+<option value="marathi" {% if request.GET.subject == "marathi" %}selected{% endif %}>Marathi</option>
+<option value="history" {% if request.GET.subject == "history" %}selected{% endif %}>History & Political Science</option>
+<option value="geography" {% if request.GET.subject == "geography" %}selected{% endif %}>Geography</option>
+</select>
+</div>
+
+<div style="min-width:170px;">
+<label style="display:block;font-weight:700;margin-bottom:6px;">Year</label>
+<select name="year" style="width:100%;padding:11px;border:1px solid #ccc;border-radius:8px;">
+<option value="">All Years</option>
+<option value="2025" {% if request.GET.year == "2025" %}selected{% endif %}>2025</option>
+<option value="2024" {% if request.GET.year == "2024" %}selected{% endif %}>2024</option>
+<option value="2023" {% if request.GET.year == "2023" %}selected{% endif %}>2023</option>
+<option value="2022" {% if request.GET.year == "2022" %}selected{% endif %}>2022</option>
+</select>
+</div>
+
+<button type="submit" style="background:#ff7a00;color:#fff;border:0;padding:12px 22px;border-radius:8px;font-weight:800;cursor:pointer;">
+Filter
+</button>
+
+<a href="{% url 'exam_preparation:ssc_exam_preparation' %}"
+style="background:#111;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:700;">
+Reset
+</a>
+
+</form>
+</div>
+
+
+<div style="
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    background:#fff;
+    padding:12px 15px;
+    border-radius:10px;
+    margin:15px 0;
+">
+    <div>
+        <strong>👤 {{ student.full_name }}</strong><br>
+        <span style="font-size:12px;color:#777;">
+            {{ student.mobile }}
+        </span>
+    </div>
+
+    <a href="{% url 'exam_preparation:ssc_student_logout' %}"
+       style="
+           text-decoration:none;
+           background:#111;
+           color:#fff;
+           padding:9px 14px;
+           border-radius:7px;
+           font-size:13px;
+           font-weight:bold;
+       ">
+        Change Student
+    </a>
+</div>
+
+<div class="subjects">
+<div class="subject">📐 Mathematics Part 1</div>
+<div class="subject">📐 Mathematics Part 2</div>
+<div class="subject">🔬 Science Part 1</div>
+<div class="subject">🔬 Science Part 2</div>
+<div class="subject">📖 English</div>
+<div class="subject">📖 Marathi</div>
+<div class="subject">🏛 History & Political Science</div>
+<div class="subject">�� Geography</div>
+</div>
+
+
+<!-- MCTI SSC MOCK TEST -->
+<div class="card" style="margin-bottom:22px;border:2px solid #f58220;">
+    <div style="font-size:13px;font-weight:bold;color:#f58220;margin-bottom:6px;">
+        📝 FREE PRACTICE TEST
+    </div>
+
+    <h2 style="margin:0 0 8px;">
+        Mathematics Part 1 – Mock Test
+    </h2>
+
+    <p style="margin:0 0 15px;color:#666;line-height:1.5;">
+        Test your preparation with 25 MCQs and get an instant
+        topic-wise performance analysis.
+    </p>
+
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px;">
+        <span class="subject">25 Questions</span>
+        <span class="subject">25 Marks</span>
+        <span class="subject">25 Minutes</span>
+        <span class="subject">Instant Result</span>
+    </div>
+
+    <a class="btn"
+       href="{% url 'exam_preparation:ssc_mock_start' %}">
+        Start Free Mock Test →
+    </a>
+</div>
+<!-- /MCTI SSC MOCK TEST -->
+
+{% if resources %}
+
+<div class="grid">
+
+{% for resource in resources %}
+
+<div class="card">
+
+{% if resource.year %}
+<div class="year">{{ resource.year }}</div>
+{% endif %}
+
+<h3>{{ resource.title }}</h3>
+
+<div class="meta">
+{{ resource.get_subject_display }}<br>
+{{ resource.get_resource_type_display }}<br>
+
+{% if resource.source_name %}
+Source: {{ resource.source_name }}
+{% endif %}
+</div>
+
+{% if resource.file %}
+<a class="btn" href="{% url 'exam_preparation:ssc_resource_open' resource.id %}" target="_blank">
+Open Resource →
+</a>
+
+{% elif resource.source_url %}
+<a class="btn" href="{% url 'exam_preparation:ssc_resource_open' resource.id %}" target="_blank" rel="noopener">
+Open Official Source →
+</a>
+{% endif %}
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="empty">
+<div class="icon">📚</div>
+<h2>SSC Resources Are Being Added</h2>
+<p>
+Subject-wise previous papers and preparation resources
+will appear here shortly.
+</p>
+</div>
+
+{% endif %}
+
+<div class="note">
+<strong>Source & Usage Notice:</strong>
+Official or previous examination resources displayed here belong to
+their respective authorities/rightsholders. MCTI-created practice
+material is provided for educational preparation only. Always verify
+the latest syllabus, examination pattern and official information
+from the relevant examination authority.
+</div>
+
+</div>
+
+<div class="footer">
+<strong>MCTI Technologies</strong><br>
+An Initiative of Maharashtra Computer Training Institute
+</div>
+
+</body>
+</html>

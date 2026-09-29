@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ assessment.title }} | MCTI</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f5f6f8;
+    color:#202020;
+}
+.topbar{
+    background:#111;
+    color:#fff;
+    padding:18px 20px;
+    border-bottom:4px solid #f58220;
+}
+.topbar-inner{
+    max-width:900px;
+    margin:auto;
+}
+.topbar h1{
+    margin:0 0 6px;
+    font-size:23px;
+}
+.topbar p{
+    margin:0;
+    color:#ddd;
+    font-size:14px;
+}
+.container{
+    max-width:900px;
+    margin:22px auto;
+    padding:0 15px 40px;
+}
+.info{
+    background:#fff;
+    border-radius:12px;
+    padding:16px 18px;
+    margin-bottom:18px;
+    box-shadow:0 2px 10px rgba(0,0,0,.06);
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    flex-wrap:wrap;
+}
+.badge{
+    display:inline-block;
+    background:#fff3e8;
+    color:#c85c00;
+    padding:7px 11px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:bold;
+}
+.question{
+    background:#fff;
+    border-radius:12px;
+    margin-bottom:15px;
+    padding:20px;
+    box-shadow:0 2px 10px rgba(0,0,0,.06);
+    border-left:4px solid #f58220;
+}
+.qno{
+    color:#f58220;
+    font-weight:bold;
+    font-size:13px;
+    margin-bottom:7px;
+}
+.qtext{
+    font-size:17px;
+    font-weight:600;
+    line-height:1.45;
+    margin-bottom:15px;
+}
+.option{
+    display:block;
+    border:1px solid #ddd;
+    border-radius:8px;
+    padding:11px 12px;
+    margin:8px 0;
+    cursor:pointer;
+}
+.option:hover{
+    border-color:#f58220;
+    background:#fff8f2;
+}
+.option input{
+    margin-right:9px;
+}
+.submit-box{
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    text-align:center;
+    box-shadow:0 2px 10px rgba(0,0,0,.06);
+}
+.submit-btn{
+    border:0;
+    background:#f58220;
+    color:#fff;
+    font-size:17px;
+    font-weight:bold;
+    padding:14px 35px;
+    border-radius:8px;
+    cursor:pointer;
+}
+.submit-btn:hover{
+    background:#d96c0c;
+}
+.note{
+    margin-top:10px;
+    font-size:12px;
+    color:#777;
+}
+.footer{
+    text-align:center;
+    padding:20px;
+    font-size:12px;
+    color:#777;
+}
+@media(max-width:600px){
+    .topbar h1{font-size:19px}
+    .question{padding:16px}
+    .qtext{font-size:16px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <div class="topbar-inner">
+        <h1>{{ assessment.title }}</h1>
+        <p>MCTI Free Exam Preparation 2026–27</p>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="info">
+        <div>
+            <strong>{{ student.full_name }}</strong><br>
+            <small>{{ student.mobile }}</small>
+        </div>
+
+        <div>
+            <span class="badge">25 Questions</span>
+            <span class="badge">25 Marks</span>
+            <span class="badge">25 Minutes</span>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for question in questions %}
+        <div class="question">
+
+            <div class="qno">
+                QUESTION {{ forloop.counter }} OF {{ questions|length }}
+                {% if question.category %}
+                    • {{ question.category }}
+                {% endif %}
+            </div>
+
+            <div class="qtext">
+                {{ question.question_text }}
+            </div>
+
+            {% for option in question.options.all %}
+            <label class="option">
+                <input
+                    type="radio"
+                    name="question_{{ question.id }}"
+                    value="{{ option.id }}"
+                >
+                {{ option.option_text }}
+            </label>
+            {% endfor %}
+
+        </div>
+        {% endfor %}
+
+        <div class="submit-box">
+            <button class="submit-btn" type="submit">
+                Submit Test & View Result
+            </button>
+
+            <div class="note">
+                Review your answers before submitting.
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+<div class="footer">
+    <strong>MCTI Technologies</strong><br>
+    An Initiative of Maharashtra Computer Training Institute
+</div>
+
+</body>
+</html>

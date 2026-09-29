@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSC Mock Test Result | MCTI</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f5f6f8;
+    color:#202020;
+}
+.header{
+    background:#111;
+    color:white;
+    padding:24px 18px;
+    text-align:center;
+    border-bottom:5px solid #f58220;
+}
+.header h1{margin:0 0 7px;font-size:25px}
+.header p{margin:0;color:#ddd}
+
+.container{
+    max-width:900px;
+    margin:22px auto;
+    padding:0 15px 40px;
+}
+.card{
+    background:#fff;
+    border-radius:14px;
+    padding:22px;
+    margin-bottom:18px;
+    box-shadow:0 2px 12px rgba(0,0,0,.07);
+}
+.student{text-align:center}
+.student h2{margin:0 0 5px}
+
+.score-wrap{
+    display:flex;
+    justify-content:center;
+    gap:35px;
+    flex-wrap:wrap;
+    margin-top:20px;
+}
+.score{
+    text-align:center;
+}
+.score .big{
+    font-size:42px;
+    font-weight:bold;
+    color:#f58220;
+}
+.score small{color:#777}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-top:20px;
+}
+.stat{
+    background:#f7f7f7;
+    border-radius:10px;
+    padding:14px 8px;
+    text-align:center;
+}
+.stat strong{
+    display:block;
+    font-size:21px;
+    margin-bottom:4px;
+}
+.stat span{font-size:12px;color:#777}
+
+h3{
+    margin:0 0 16px;
+    font-size:19px;
+}
+
+.category{
+    border:1px solid #eee;
+    border-radius:10px;
+    padding:15px;
+    margin-bottom:12px;
+}
+.cat-head{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    font-weight:bold;
+}
+.level{
+    color:#f58220;
+}
+.bar{
+    height:9px;
+    background:#eee;
+    border-radius:20px;
+    margin:11px 0;
+    overflow:hidden;
+}
+.fill{
+    height:100%;
+    background:#f58220;
+    border-radius:20px;
+}
+.cat-info{
+    font-size:13px;
+    color:#666;
+}
+
+.actions{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+}
+.btn{
+    display:inline-block;
+    text-decoration:none;
+    border-radius:8px;
+    padding:13px 20px;
+    font-weight:bold;
+}
+.primary{
+    background:#f58220;
+    color:#fff;
+}
+.secondary{
+    background:#111;
+    color:#fff;
+}
+
+.disclaimer{
+    font-size:12px;
+    line-height:1.5;
+    color:#777;
+    text-align:center;
+}
+.footer{
+    text-align:center;
+    color:#777;
+    font-size:12px;
+    padding:10px 15px 25px;
+}
+
+@media(max-width:600px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .header h1{font-size:21px}
+    .score .big{font-size:35px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>🎓 SSC Mock Test Performance Report</h1>
+    <p>MCTI Free Exam Preparation 2026–27</p>
+</div>
+
+<div class="container">
+
+    <div class="card student">
+        <h2>{{ student.full_name }}</h2>
+        <div>{{ assessment.title }}</div>
+
+        <div class="score-wrap">
+
+            <div class="score">
+                <div class="big">
+                    {{ attempt.score }}/{{ attempt.total_marks }}
+                </div>
+                <small>Score</small>
+            </div>
+
+            <div class="score">
+                <div class="big">
+                    {{ attempt.percentage }}%
+                </div>
+                <small>Performance</small>
+            </div>
+
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <strong>{{ attempted }}</strong>
+                <span>Attempted</span>
+            </div>
+
+            <div class="stat">
+                <strong>{{ correct }}</strong>
+                <span>Correct</span>
+            </div>
+
+            <div class="stat">
+                <strong>{{ wrong }}</strong>
+                <span>Wrong</span>
+            </div>
+
+            <div class="stat">
+                <strong>{{ unanswered }}</strong>
+                <span>Unanswered</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📊 Topic-wise Performance Analysis</h3>
+
+        {% for item in category_analysis %}
+        <div class="category">
+
+            <div class="cat-head">
+                <span>{{ item.category }}</span>
+                <span class="level">
+                    {{ item.percentage }}% • {{ item.level }}
+                </span>
+            </div>
+
+            <div class="bar">
+                <div
+                    class="fill"
+                    style="width:{{ item.percentage }}%">
+                </div>
+            </div>
+
+            <div class="cat-info">
+                Correct {{ item.correct }}/{{ item.total }}
+                • Attempted {{ item.attempted }}/{{ item.total }}
+                • Marks {{ item.score }}/{{ item.max_marks }}
+            </div>
+
+        </div>
+        {% empty %}
+        <p>No performance data available.</p>
+        {% endfor %}
+    </div>
+
+    <div class="card">
+        <div class="actions">
+            <a
+                href="{% url 'exam_preparation:ssc_mock_start' %}"
+                class="btn primary">
+                🔄 Try Another Attempt
+            </a>
+
+            <a
+                href="{% url 'exam_preparation:ssc_exam_preparation' %}"
+                class="btn secondary">
+                📚 Back to SSC Preparation
+            </a>
+        </div>
+    </div>
+
+    <div class="card disclaimer">
+        This is an MCTI-created educational practice assessment.
+        It is not an official Maharashtra Board examination or result.
+        Students should verify the latest syllabus, examination pattern
+        and official information from the appropriate board authority.
+    </div>
+
+</div>
+
+<div class="footer">
+    <strong>MCTI Technologies</strong><br>
+    An Initiative of Maharashtra Computer Training Institute
+</div>
+
+</body>
+</html>

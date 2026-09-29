@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SSC Preparation Dashboard | MCTI</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f5f7;color:#181818}
+.top{background:#111;color:#fff;padding:25px}
+.wrap{max-width:1250px;margin:auto;padding:22px}
+.brand{color:#ff7a00;font-weight:800}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:20px 0}
+.card{background:#fff;padding:20px;border-radius:14px;box-shadow:0 3px 15px #0000000d}
+.number{font-size:28px;font-weight:800;color:#ff7a00;margin-top:8px}
+.panel{background:#fff;border-radius:14px;padding:20px;margin-top:20px;overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:850px}
+th,td{padding:12px;border-bottom:1px solid #eee;text-align:left;font-size:14px}
+th{background:#111;color:#fff}
+.badge{background:#fff1e5;color:#b64f00;padding:5px 9px;border-radius:20px;font-weight:700}
+.back{color:#ff7a00;text-decoration:none;font-weight:700}
+.empty{text-align:center;color:#777;padding:25px}
+@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.cards{grid-template-columns:1fr}}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+<div class="wrap">
+<div class="brand">MCTI Technologies</div>
+<h1>🎓 SSC Exam Preparation Dashboard</h1>
+<a class="back" href="/">← MCTI Home</a>
+</div>
+</div>
+
+<div class="wrap">
+
+<div class="cards">
+
+<div class="card">
+Registered Students
+<div class="number">{{ total_students }}</div>
+</div>
+
+<div class="card">
+English Medium
+<div class="number">{{ medium_counts.english }}</div>
+</div>
+
+<div class="card">
+Marathi Medium
+<div class="number">{{ medium_counts.marathi }}</div>
+</div>
+
+<div class="card">
+Semi-English
+<div class="number">{{ medium_counts.semi_english }}</div>
+</div>
+
+<div class="card">
+Resource Opens
+<div class="number">{{ total_resource_opens }}</div>
+</div>
+
+</div>
+
+
+<div class="panel">
+<h2>👨‍🎓 Registered Students</h2>
+
+{% if students %}
+<table>
+<thead>
+<tr>
+<th>Student</th>
+<th>Mobile</th>
+<th>School</th>
+<th>Medium</th>
+<th>City</th>
+<th>Preferred Centre</th>
+<th>Resource Opens</th>
+<th>Registered</th>
+<th>CRM</th>
+</tr>
+</thead>
+
+<tbody>
+{% for student in students %}
+<tr>
+<td><strong>{{ student.full_name }}</strong></td>
+<td>{{ student.mobile }}</td>
+<td>{{ student.school_name }}</td>
+<td><span class="badge">{{ student.get_medium_display }}</span></td>
+<td>{{ student.city|default:"-" }}</td>
+<td>{{ student.preferred_branch|default:"-" }}</td>
+<td><strong>{{ student.resource_opens }}</strong></td>
+<td>{{ student.created_at|date:"d M Y, h:i A" }}</td>
+<td>
+{% if student.enquiry_id %}
+<span class="badge">✓ In CRM</span>
+{% else %}
+<form method="post" action="{% url 'exam_preparation:ssc_send_to_enquiry' student.id %}">
+{% csrf_token %}
+<button type="submit" style="background:#ff7a00;color:#fff;border:0;padding:8px 11px;border-radius:7px;font-weight:700;cursor:pointer;">
+Send to Enquiry
+</button>
+</form>
+{% endif %}
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% else %}
+<div class="empty">No SSC registrations yet.</div>
+{% endif %}
+</div>
+
+
+<div class="panel">
+<h2>📊 Recent Resource Activity</h2>
+
+{% if recent_downloads %}
+<table>
+<thead>
+<tr>
+<th>Student</th>
+<th>Mobile</th>
+<th>Resource</th>
+<th>Subject</th>
+<th>Activity Time</th>
+</tr>
+</thead>
+
+<tbody>
+{% for item in recent_downloads %}
+<tr>
+<td>{{ item.student.full_name }}</td>
+<td>{{ item.student.mobile }}</td>
+<td>{{ item.resource.title }}</td>
+<td>{{ item.resource.get_subject_display }}</td>
+<td>{{ item.downloaded_at|date:"d M Y, h:i A" }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% else %}
+<div class="empty">No resource activity yet.</div>
+{% endif %}
+
+</div>
+
+</div>
+
+</body>
+</html>

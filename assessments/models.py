@@ -9,6 +9,7 @@ class Assessment(models.Model):
         ("staff", "Staff Assessment"),
         ("placement", "Placement Assessment"),
         ("scholarship", "Scholarship Test"),
+        ("exam_preparation", "Exam Preparation"),
         ("other", "Other"),
     ]
 
@@ -59,6 +60,34 @@ class AssessmentQuestion(models.Model):
     marks = models.PositiveIntegerField(default=1)
 
     is_active = models.BooleanField(default=True)
+
+    # Question provenance / exam preparation reference
+    QUESTION_ORIGIN_CHOICES = [
+        ("mcti_practice", "MCTI Practice"),
+        ("board_based", "Based on Board Paper"),
+        ("board_verified", "Verified Board Question"),
+    ]
+
+    question_origin = models.CharField(
+        max_length=30,
+        choices=QUESTION_ORIGIN_CHOICES,
+        default="mcti_practice",
+    )
+
+    board_year = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+    )
+
+    source_name = models.CharField(
+        max_length=255,
+        blank=True,
+    )
+
+    source_reference = models.CharField(
+        max_length=1000,
+        blank=True,
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -111,6 +140,13 @@ class AssessmentAttempt(models.Model):
     participant_name = models.CharField(max_length=150)
     participant_mobile = models.CharField(max_length=20, blank=True)
     participant_email = models.EmailField(blank=True)
+
+    # Freeze the question set selected for this attempt.
+    # Example: [101, 108, 125, ...]
+    selected_question_ids = models.JSONField(
+        default=list,
+        blank=True,
+    )
 
     status = models.CharField(
         max_length=20,
