@@ -12,6 +12,12 @@ from . import quick_views
 from . import report_views
 
 urlpatterns = [
+    path(
+        "aptitude/start/",
+        quick_views.public_aptitude_start,
+        name="public_aptitude_start_legacy"
+    ),
+
     path("", views.career_home, name="home"),
 
     path(
