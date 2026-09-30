@@ -5,6 +5,8 @@ from . import views, fee_corrections
 
 
 urlpatterns = [
+    path("api/course-search/", views.public_course_search, name="public_course_search"),
+
 
     path(
         "robots.txt",
@@ -316,6 +318,12 @@ urlpatterns = [
         "staff-usage-report/",
         views.staff_usage_report,
         name="staff_usage_report"
+    ),
+
+    path(
+        "management/marketing-activity/",
+        views.marketing_activity_dashboard,
+        name="marketing_activity_dashboard"
     ),
 
     path(

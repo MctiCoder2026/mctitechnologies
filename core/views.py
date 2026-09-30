@@ -5573,16 +5573,49 @@ def log_enquiry_whatsapp(
         request.user,
         enquiry
     ):
-
-        return redirect(
-            "enquiry_dashboard"
-        )
+        return redirect("enquiry_dashboard")
 
     if request.method == "POST":
 
         whatsapp_message = (
             request.POST.get("message", "").strip()
         )
+
+        requested_campaign_key = (
+            request.POST.get("campaign_key", "").strip()
+        )
+
+        allowed_campaign_keys = {
+            "scholarshipOffer",
+            "kamotheAnniversaryOldEnquiry",
+            "kamotheAnniversaryExistingStudent",
+        }
+
+        campaign_key = (
+            requested_campaign_key
+            if requested_campaign_key in allowed_campaign_keys
+            else None
+        )
+
+        # Campaign tracking is allowed only for Management
+        # and participating branches. Nerul is excluded.
+        if campaign_key and campaign_key != "scholarshipOffer" and not is_admin_user(request.user):
+            try:
+                staff_branch = request.user.staff_profile.branch
+            except Exception:
+                staff_branch = None
+
+            participating_branches = {
+                "kharghar",
+                "panvel",
+                "koperkhairane",
+                "kamothe",
+                "ghansoli",
+                "head_office",
+            }
+
+            if staff_branch not in participating_branches:
+                campaign_key = None
 
         EnquiryActivity.objects.create(
             enquiry=enquiry,
@@ -5591,25 +5624,33 @@ def log_enquiry_whatsapp(
                 whatsapp_message
                 or "WhatsApp conversation initiated with this lead."
             ),
+            campaign_key=campaign_key,
             created_by=request.user
         )
 
-        # ----------------------------------------------------
-        # AUTO FOLLOW-UP AFTER WHATSAPP
-        # Next contact after 2 days to avoid daily messaging
-        # ----------------------------------------------------
         from datetime import timedelta
         from django.utils import timezone
 
-        next_followup = timezone.localdate() + timedelta(days=2)
+        # Existing Student Anniversary Upgrade = 7 days.
+        # Old Enquiry campaign and normal WhatsApp = 2 days.
+        followup_days = (
+            7
+            if campaign_key == "kamotheAnniversaryExistingStudent"
+            else 2
+        )
+
+        next_followup = (
+            timezone.localdate()
+            + timedelta(days=followup_days)
+        )
 
         Enquiry.objects.filter(
             pk=enquiry.pk
         ).update(
             followup_date=next_followup,
             followup_notes=(
-                "Auto follow-up scheduled 2 days after "
-                "WhatsApp communication."
+                f"Auto follow-up scheduled {followup_days} days "
+                f"after WhatsApp communication."
             )
         )
 
@@ -5619,7 +5660,7 @@ def log_enquiry_whatsapp(
             message=(
                 f"Next follow-up automatically scheduled for "
                 f"{next_followup.strftime('%d %b %Y')} "
-                f"after WhatsApp communication."
+                f"({followup_days}-day WhatsApp follow-up)."
             ),
             created_by=request.user
         )
@@ -5628,7 +5669,6 @@ def log_enquiry_whatsapp(
         "enquiry_detail",
         enquiry_id=enquiry.id
     )
-
 
 # ============================================================
 # LEAD → ADMISSION
@@ -9266,4 +9306,159 @@ def ai_ready_report(request):
             "status_filter": status_filter,
             "band_filter": band_filter,
         },
+    )
+
+
+# ============================================================
+# PUBLIC COURSE AUTOCOMPLETE
+# Used by website enquiry form.
+# Returns active courses matching the typed search term.
+# ============================================================
+def public_course_search(request):
+    from django.http import JsonResponse
+    from .models import Course
+
+    q = request.GET.get("q", "").strip()
+
+    if len(q) < 2:
+        return JsonResponse({"results": []})
+
+    courses = (
+        Course.objects
+        .filter(is_active=True, title__icontains=q)
+        .order_by("display_order", "title")[:12]
+    )
+
+    return JsonResponse({
+        "results": [
+            {"id": course.id, "title": course.title}
+            for course in courses
+        ]
+    })
+
+
+
+# ============================================================
+# MANAGEMENT - MARKETING ACTIVITY MONITOR
+# ============================================================
+
+@login_required
+def marketing_activity_dashboard(request):
+
+    if not is_admin_user(request.user):
+        return redirect("management_dashboard")
+
+    from django.db.models import Count, Max
+
+    campaign_names = {
+        "scholarshipOffer": "Scholarship Offer | 3 Oct Batch",
+        "kamotheAnniversaryOldEnquiry":
+            "Kamothe 1st Anniversary | Old Enquiry | 2-Day Scholarship",
+        "kamotheAnniversaryExistingStudent":
+            "Kamothe 1st Anniversary | Existing Student | 7-Day Upgrade",
+    }
+
+    campaign_keys = list(campaign_names.keys())
+
+    activities = (
+        EnquiryActivity.objects
+        .filter(
+            activity_type="whatsapp",
+            campaign_key__in=campaign_keys,
+        )
+        .select_related(
+            "enquiry",
+            "created_by",
+            "created_by__staff_profile",
+        )
+    )
+
+    branch_order = [
+        ("kharghar", "Kharghar"),
+        ("panvel", "Panvel"),
+        ("kamothe", "Kamothe"),
+        ("koperkhairane", "Koperkhairane"),
+        ("ghansoli", "Ghansoli"),
+        ("nerul", "Nerul"),
+        ("head_office", "Head Office"),
+    ]
+
+    branch_rows = []
+
+    for branch_key, branch_name in branch_order:
+
+        branch_qs = activities.filter(
+            created_by__staff_profile__branch=branch_key
+        )
+
+        branch_rows.append({
+            "branch_key": branch_key,
+            "branch_name": branch_name,
+            "message_count": branch_qs.count(),
+            "unique_enquiries": (
+                branch_qs.values("enquiry_id").distinct().count()
+            ),
+            "active_staff": (
+                branch_qs.values("created_by_id").distinct().count()
+            ),
+            "last_activity": (
+                branch_qs.aggregate(last=Max("created_at"))["last"]
+            ),
+        })
+
+    campaign_rows = []
+
+    for key, label in campaign_names.items():
+
+        campaign_qs = activities.filter(campaign_key=key)
+
+        campaign_rows.append({
+            "key": key,
+            "label": label,
+            "message_count": campaign_qs.count(),
+            "unique_enquiries": (
+                campaign_qs.values("enquiry_id").distinct().count()
+            ),
+            "active_staff": (
+                campaign_qs.values("created_by_id").distinct().count()
+            ),
+        })
+
+    staff_rows = (
+        activities
+        .values(
+            "created_by_id",
+            "created_by__username",
+            "created_by__first_name",
+            "created_by__last_name",
+            "created_by__staff_profile__branch",
+        )
+        .annotate(
+            message_count=Count("id"),
+            unique_enquiries=Count(
+                "enquiry_id",
+                distinct=True
+            ),
+            last_activity=Max("created_at"),
+        )
+        .order_by("-message_count", "created_by__username")
+    )
+
+    context = {
+        "branch_rows": branch_rows,
+        "campaign_rows": campaign_rows,
+        "staff_rows": staff_rows,
+        "total_messages": activities.count(),
+        "total_enquiries": (
+            activities.values("enquiry_id").distinct().count()
+        ),
+        "total_staff": (
+            activities.values("created_by_id").distinct().count()
+        ),
+    }
+
+    return render(
+        request,
+        "core/marketing_activity_dashboard.html",
+        context
     )

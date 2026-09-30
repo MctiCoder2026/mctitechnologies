@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing Activity | MCTI</title>
+
+    <style>
+        *{box-sizing:border-box}
+
+        body{
+            margin:0;
+            font-family:Arial,sans-serif;
+            background:#f5f6f8;
+            color:#1f2937;
+        }
+
+        .page{
+            max-width:1400px;
+            margin:auto;
+            padding:28px;
+        }
+
+        .topbar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:15px;
+            margin-bottom:25px;
+        }
+
+        .topbar h1{
+            margin:0;
+            font-size:28px;
+            color:#111;
+        }
+
+        .topbar p{
+            margin:7px 0 0;
+            color:#6b7280;
+        }
+
+        .back{
+            background:#111;
+            color:#fff;
+            text-decoration:none;
+            padding:11px 18px;
+            border-radius:8px;
+            font-weight:700;
+        }
+
+        .stats{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:18px;
+            margin-bottom:25px;
+        }
+
+        .stat{
+            background:#fff;
+            border-radius:14px;
+            padding:22px;
+            border-left:5px solid #f97316;
+            box-shadow:0 3px 14px rgba(0,0,0,.06);
+        }
+
+        .stat span{
+            display:block;
+            color:#6b7280;
+            font-size:14px;
+            margin-bottom:8px;
+        }
+
+        .stat strong{
+            font-size:30px;
+            color:#111;
+        }
+
+        .panel{
+            background:#fff;
+            border-radius:14px;
+            padding:22px;
+            margin-bottom:24px;
+            box-shadow:0 3px 14px rgba(0,0,0,.06);
+        }
+
+        .panel h2{
+            margin:0 0 18px;
+            font-size:20px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        th{
+            background:#111;
+            color:#fff;
+            text-align:left;
+            padding:12px;
+            font-size:13px;
+        }
+
+        td{
+            padding:13px 12px;
+            border-bottom:1px solid #eee;
+            vertical-align:middle;
+        }
+
+        tbody tr:hover{
+            background:#fff7ed;
+        }
+
+        .count{
+            font-weight:800;
+            color:#ea580c;
+        }
+
+        .zero{
+            color:#9ca3af;
+        }
+
+        .branch{
+            font-weight:700;
+        }
+
+        .campaign{
+            font-weight:700;
+        }
+
+        .note{
+            margin-top:12px;
+            font-size:13px;
+            color:#6b7280;
+        }
+
+        @media(max-width:800px){
+            .page{padding:15px}
+            .topbar{
+                align-items:flex-start;
+                flex-direction:column;
+            }
+            .stats{grid-template-columns:1fr}
+            .panel{overflow-x:auto}
+            table{min-width:700px}
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="topbar">
+        <div>
+            <h1>📣 Marketing Activity Monitor</h1>
+            <p>
+                Branch-wise participation and campaign WhatsApp activity.
+            </p>
+        </div>
+
+        <a class="back" href="{% url 'management_dashboard' %}">
+            ← Management Dashboard
+        </a>
+    </div>
+
+
+    <div class="stats">
+
+        <div class="stat">
+            <span>Campaign Messages</span>
+            <strong>{{ total_messages }}</strong>
+        </div>
+
+        <div class="stat">
+            <span>Unique Enquiries Contacted</span>
+            <strong>{{ total_enquiries }}</strong>
+        </div>
+
+        <div class="stat">
+            <span>Active Staff</span>
+            <strong>{{ total_staff }}</strong>
+        </div>
+
+    </div>
+
+
+    <div class="panel">
+
+        <h2>Branch Participation</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Branch</th>
+                    <th>Messages</th>
+                    <th>Unique Enquiries</th>
+                    <th>Active Staff</th>
+                    <th>Last Activity</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in branch_rows %}
+                <tr>
+                    <td class="branch">{{ row.branch_name }}</td>
+
+                    <td class="{% if row.message_count %}count{% else %}zero{% endif %}">
+                        {{ row.message_count }}
+                    </td>
+
+                    <td>{{ row.unique_enquiries }}</td>
+                    <td>{{ row.active_staff }}</td>
+
+                    <td>
+                        {% if row.last_activity %}
+                            {{ row.last_activity|date:"d M Y, h:i A" }}
+                        {% else %}
+                            <span class="zero">No activity yet</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="note">
+            Anniversary campaign tracking currently includes Kharghar,
+            Panvel, Kamothe, Koperkhairane and Ghansoli.
+            Nerul is excluded from this campaign.
+        </div>
+
+    </div>
+
+
+    <div class="panel">
+
+        <h2>Campaign Performance</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Campaign</th>
+                    <th>Messages</th>
+                    <th>Unique Enquiries</th>
+                    <th>Active Staff</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in campaign_rows %}
+                <tr>
+                    <td class="campaign">{{ row.label }}</td>
+                    <td class="count">{{ row.message_count }}</td>
+                    <td>{{ row.unique_enquiries }}</td>
+                    <td>{{ row.active_staff }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+
+    <div class="panel">
+
+        <h2>Staff Participation</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Staff</th>
+                    <th>Branch</th>
+                    <th>Messages</th>
+                    <th>Unique Enquiries</th>
+                    <th>Last Activity</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in staff_rows %}
+                <tr>
+                    <td>
+                        {% if row.created_by__first_name or row.created_by__last_name %}
+                            {{ row.created_by__first_name }}
+                            {{ row.created_by__last_name }}
+                        {% else %}
+                            {{ row.created_by__username }}
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ row.created_by__staff_profile__branch|default:"Management"|title }}
+                    </td>
+
+                    <td class="count">{{ row.message_count }}</td>
+                    <td>{{ row.unique_enquiries }}</td>
+
+                    <td>
+                        {% if row.last_activity %}
+                            {{ row.last_activity|date:"d M Y, h:i A" }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">
+                        No campaign activity recorded yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

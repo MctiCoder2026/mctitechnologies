@@ -1043,6 +1043,28 @@ body{
 
                     </a>
 
+                    {% if request.user.is_superuser %}
+                    <a
+                        href="{% url 'marketing_activity_dashboard' %}"
+                        class="action-card"
+                    >
+                        <div class="action-icon">
+                            &#128227;
+                        </div>
+
+                        <div>
+                            <strong>
+                                Marketing Activity
+                            </strong>
+
+                            <span>
+                                Monitor branch, staff & campaign participation
+                            </span>
+                        </div>
+                    </a>
+                    {% endif %}
+
+
                     <a
                         href="{% url 'ai_ready_report' %}"
                         class="action-card"

@@ -239,6 +239,19 @@ class Enquiry(models.Model):
         null=True
     )
 
+    CURRENT_STATUS_CHOICES = [
+        ("student", "Student / Studying"),
+        ("working", "Working Professional"),
+        ("both", "Working & Studying"),
+    ]
+
+    current_status = models.CharField(
+        max_length=20,
+        choices=CURRENT_STATUS_CHOICES,
+        blank=True,
+        null=True
+    )
+
     course = models.ForeignKey(
         Course,
         on_delete=models.SET_NULL,
@@ -350,6 +363,16 @@ class EnquiryActivity(models.Model):
     message = models.TextField(
         blank=True
     )
+
+    # Marketing campaign/template identifier.
+    # Normal and historical activities remain blank.
+    campaign_key = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        db_index=True
+    )
+
 
     created_at = models.DateTimeField(
         auto_now_add=True
@@ -2902,3 +2925,258 @@ class FeePaymentCorrection(models.Model):
 
     def __str__(self):
         return f"{self.payment.receipt_number}: {self.original_amount} to {self.requested_amount}"
+
+
+# ============================================================
+# OUTREACH CONTACT
+# Old students / school-college contacts
+# Separate from normal CRM enquiries
+# ============================================================
+
+class OutreachContact(models.Model):
+
+    BRANCH_CHOICES = [
+        ("kharghar", "Kharghar"),
+        ("panvel", "Panvel"),
+        ("koperkhairane", "Koperkhairane"),
+    ]
+
+    CONTACT_TYPE_CHOICES = [
+        ("old_student", "Old Student"),
+        ("school", "School Contact"),
+        ("college", "College Contact"),
+        ("other", "Other"),
+    ]
+
+    STATUS_CHOICES = [
+        ("new", "New"),
+        ("contacted", "Contacted"),
+        ("followup", "Follow Up"),
+        ("interested", "Interested"),
+        ("not_interested", "Not Interested"),
+        ("converted", "Converted to Enquiry"),
+        ("do_not_contact", "Do Not Contact"),
+    ]
+
+    PERMISSION_CHOICES = [
+        ("unknown", "Unknown"),
+        ("allowed", "Allowed"),
+        ("declined", "Declined"),
+    ]
+
+    name = models.CharField(
+        max_length=150
+    )
+
+    mobile = models.CharField(
+        max_length=20,
+        db_index=True
+    )
+
+    normalized_mobile = models.CharField(
+        max_length=15,
+        blank=True,
+        db_index=True,
+        help_text="Digits-only mobile used for duplicate detection"
+    )
+
+    email = models.EmailField(
+        blank=True,
+        null=True
+    )
+
+    branch = models.CharField(
+        max_length=30,
+        choices=BRANCH_CHOICES,
+        db_index=True
+    )
+
+    contact_type = models.CharField(
+        max_length=30,
+        choices=CONTACT_TYPE_CHOICES,
+        default="old_student",
+        db_index=True
+    )
+
+    old_course = models.CharField(
+        max_length=200,
+        blank=True
+    )
+
+    old_admission_year = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    organization_name = models.CharField(
+        max_length=200,
+        blank=True
+    )
+
+    source = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    permission_status = models.CharField(
+        max_length=20,
+        choices=PERMISSION_CHOICES,
+        default="unknown"
+    )
+
+    status = models.CharField(
+        max_length=30,
+        choices=STATUS_CHOICES,
+        default="new",
+        db_index=True
+    )
+
+    followup_date = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    last_contacted_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    notes = models.TextField(
+        blank=True
+    )
+
+    assigned_to = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_outreach_contacts"
+    )
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_outreach_contacts"
+    )
+
+    converted_enquiry = models.ForeignKey(
+        Enquiry,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="outreach_sources"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return f"{self.name} - {self.mobile} - {self.get_branch_display()}"
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(
+                fields=["branch", "status"],
+                name="outreach_branch_status_idx"
+            ),
+        ]
+
+# ============================================================
+# FRANCHISE ENQUIRY
+# ============================================================
+
+class FranchiseEnquiry(models.Model):
+
+    STATUS_CHOICES = [
+        ("new", "New"),
+        ("contacted", "Contacted"),
+        ("interested", "Interested"),
+        ("meeting", "Meeting"),
+        ("qualified", "Qualified"),
+        ("converted", "Converted"),
+        ("closed", "Closed"),
+    ]
+
+    INVESTMENT_CHOICES = [
+        ("undecided", "Not Decided Yet"),
+        ("below_2", "Below ₹2 Lakh"),
+        ("2_5", "₹2 - ₹5 Lakh"),
+        ("5_10", "₹5 - ₹10 Lakh"),
+        ("10_plus", "₹10 Lakh+"),
+    ]
+
+    name = models.CharField(max_length=120)
+
+    mobile = models.CharField(max_length=15)
+
+    email = models.EmailField(
+        blank=True,
+        null=True
+    )
+
+    city = models.CharField(max_length=100)
+
+    state = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    profession_business = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True
+    )
+
+    has_existing_institute = models.BooleanField(
+        default=False
+    )
+
+    investment_range = models.CharField(
+        max_length=20,
+        choices=INVESTMENT_CHOICES,
+        default="undecided"
+    )
+
+    message = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="new"
+    )
+
+    followup_date = models.DateField(
+        blank=True,
+        null=True
+    )
+
+    followup_notes = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return f"{self.name} - {self.city} - {self.mobile}"
+
+    class Meta:
+        ordering = ["-created_at"]

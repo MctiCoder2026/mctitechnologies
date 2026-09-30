@@ -98,6 +98,25 @@ Lead Details | MCTI Technologies
                 </div>
 
 
+                <!-- CURRENT STATUS -->
+
+                <div>
+
+                    <span>
+                        Current Status
+                    </span>
+
+                    <strong>
+                        {% if enquiry.current_status %}
+                            {{ enquiry.get_current_status_display }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </strong>
+
+                </div>
+
+
                 <!-- COURSE -->
 
                 <div>
@@ -664,6 +683,25 @@ Lead Details | MCTI Technologies
                     Special Offer + Career Kit
                 </option>
 
+                {% with staff_branch=request.user.staff_profile.branch %}
+                {% if is_admin or staff_branch == "kharghar" or staff_branch == "panvel" or staff_branch == "koperkhairane" or staff_branch == "kamothe" or staff_branch == "ghansoli" or staff_branch == "head_office" %}
+                <option value="kamotheAnniversaryOldEnquiry">
+                    Kamothe Anniversary | Old Enquiry | Scholarship
+                </option>
+                <option value="kamotheAnniversaryExistingStudent">
+                    Kamothe Anniversary | Existing Student | Upgrade
+                </option>
+                {% endif %}
+                {% endwith %}
+
+                <option value="scholarshipOffer">
+                    🎓 Scholarship Offer | 3 Oct Batch
+                </option>
+
+                <option value="sundayOpen">
+                    Sunday Open - Visit Today
+                </option>
+
                 <option value="followup1">
                     1️⃣ Follow-up 1 — Purpose
                 </option>
@@ -1035,6 +1073,71 @@ ${branchAddress || `${branch} Branch, Navi Mumbai`}
 6. Nerul`,
 
 
+            kamotheAnniversaryOldEnquiry:
+`*MCTI KAMOTHE – 1ST ANNIVERSARY*
+
+Hi ${name},
+
+You had earlier enquired about learning with MCTI. Let us help you restart your learning journey.
+
+*Explore the Scholarship Opportunity*
+Take the Scholarship Test and contact our counsellor to understand your eligibility and applicable course-fee benefit.
+
+*Scholarship Test:*
+https://mctitechnologies.com/assessment/scholarship/
+
+After completing the test, reply *DONE*.
+For counselling and batch details, reply *INTERESTED*.
+
+*MCTI | ${branch} Branch*
+_An Initiative by Maharashtra Computer Training Institute_`,
+
+            kamotheAnniversaryExistingStudent:
+`*MCTI KAMOTHE – 1ST ANNIVERSARY*
+
+Hi ${name},
+
+Already learning with MCTI? Explore your next skill and plan your course upgrade with our counsellor.
+
+Tell us your current course and the skill you want to learn next. We will guide you about suitable courses, available batches and applicable offers.
+
+Reply *UPGRADE* to request counselling.
+
+*MCTI | ${branch} Branch*
+_An Initiative by Maharashtra Computer Training Institute_`,
+
+            scholarshipOffer:
+`*MCTI SCHOLARSHIP OPPORTUNITY – LIMITED SEATS*
+
+Hi ${name},
+
+Thank you for contacting / visiting MCTI.
+
+Our *new batches are starting from 3rd October* and we are offering a limited Scholarship Opportunity to our recent enquiries.
+
+*SCHOLARSHIP BENEFIT*
+• Attempt the *MCTI Scholarship Test*
+• Get an eligible course-fee benefit based on your result
+• Scholarship benefit will be valid for *3 days after completing the test*
+
+*LIMITED SEATS – FIRST COME, FIRST SERVED*
+
+Students interested in joining the upcoming batch are requested to confirm their seat before the batch fills up.
+
+*Scholarship Test:*
+https://mctitechnologies.com/assessment/scholarship/
+
+*Already visited MCTI earlier?*
+You can still participate in this Scholarship Opportunity.
+
+After completing the test, reply *DONE* on WhatsApp. Our Career Counsellor will check your result and guide you about the applicable benefit and available batch.
+
+*Call / WhatsApp:* 8655556219
+
+*MCTI Technologies*
+_An Initiative of Maharashtra Computer Training Institute_`,
+
+
             specialOffer:
             `A special offer is available for your *${course}* enquiry.
 
@@ -1054,6 +1157,23 @@ Reply *VISIT* to schedule your centre visit.
 Reply *ADMISSION* to know the admission benefit.
 
 `,
+
+
+            sundayOpen:
+            `*We Are OPEN Today - Sunday!*
+
+Just a quick update - *MCTI is OPEN today (Sunday).*
+
+I am personally available today for course counselling and admission guidance.
+
+If you were planning to visit, *today is a good time to come.*
+
+*Open Today: 10:00 AM - 8:30 PM*
+
+Reply *YES* if you are planning to visit today.
+
+*MCTI Technologies*
+An Initiative by Maharashtra Computer Training Institute`,
 
 
             followup1:
@@ -1181,9 +1301,18 @@ Thank you.`
                             "{{ csrf_token }}",
 
                         "X-Requested-With":
-                            "XMLHttpRequest"
+                            "XMLHttpRequest",
 
-                    }
+                        "Content-Type":
+                            "application/x-www-form-urlencoded"
+
+                    },
+
+                    body:
+                        new URLSearchParams({
+                            message: messageBox.value.trim(),
+                            campaign_key: templateSelect.value
+                        })
 
                 }
             )
