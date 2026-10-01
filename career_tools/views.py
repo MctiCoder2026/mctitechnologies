@@ -2395,3 +2395,666 @@ def counsellor_profile_detail(request, profile_id):
         "career_tools/counsellor_profile_detail.html",
         context,
     )
+
+
+# =========================================================
+# MCTI CAREER COMPASS - AFTER 10TH
+# =========================================================
+
+def career_compass_start(request):
+    from core.models import Enquiry
+    from .models import CareerProfile
+
+    language = (
+        request.POST.get("language")
+        or request.GET.get("lang")
+        or request.session.get("career_compass_language")
+        or "en"
+    )
+
+    if language not in {"en", "mr"}:
+        language = "en"
+
+    request.session["career_compass_language"] = language
+
+    branches = [
+        "Kharghar",
+        "Panvel",
+        "Koperkhairane",
+        "Kamothe",
+        "Ghansoli",
+        "Nerul",
+    ]
+
+    if request.method == "POST":
+        full_name = request.POST.get("full_name", "").strip()
+        mobile = "".join(filter(str.isdigit, request.POST.get("mobile", "")))
+        school_name = request.POST.get("school_name", "").strip()
+        current_class = request.POST.get("current_class", "").strip()
+        city = request.POST.get("city", "").strip()
+        preferred_branch = request.POST.get("preferred_branch", "").strip()
+        consent = request.POST.get("consent_given") == "on"
+
+        if mobile.startswith("91") and len(mobile) == 12:
+            mobile = mobile[2:]
+
+        if (
+            not full_name
+            or len(mobile) != 10
+            or not consent
+        ):
+            messages.error(
+                request,
+                "Please enter your name, valid 10 digit mobile number and consent."
+            )
+            return render(
+                request,
+                "career_tools/career_compass_start.html",
+                {"branches": branches, "language": language},
+            )
+
+        enquiry = (
+            Enquiry.objects.filter(mobile=mobile)
+            .order_by("-created_at")
+            .first()
+        )
+
+        lead_note = (
+            "Lead generated from MCTI Career Compass - After 10th"
+            f"\nSchool: {school_name or '-'}"
+            f"\nClass: {current_class or '-'}"
+            f"\nCity: {city or '-'}"
+            f"\nPreferred Centre: {preferred_branch or '-'}"
+        )
+
+        if not enquiry:
+            enquiry = Enquiry.objects.create(
+                name=full_name,
+                mobile=mobile,
+                status="new",
+                message=lead_note,
+            )
+
+        profile = (
+            CareerProfile.objects.filter(
+                mobile=mobile,
+                student__isnull=True,
+            )
+            .order_by("-updated_at")
+            .first()
+        )
+
+        if not profile:
+            profile = CareerProfile.objects.create(
+                full_name=full_name,
+                mobile=mobile,
+                enquiry=enquiry,
+                highest_qualification=current_class,
+                college_name=school_name,
+                city=city,
+                preferred_branch=preferred_branch,
+                current_status="School Student",
+                career_interest="Career Direction After 10th",
+                is_guest=True,
+                consent_given=True,
+                source="MCTI Career Compass - After 10th",
+            )
+        else:
+            profile.full_name = full_name
+            profile.enquiry = enquiry
+            profile.highest_qualification = current_class
+            profile.college_name = school_name
+            profile.city = city
+            profile.preferred_branch = preferred_branch
+            profile.current_status = "School Student"
+            profile.career_interest = "Career Direction After 10th"
+            profile.is_guest = True
+            profile.consent_given = True
+            profile.source = "MCTI Career Compass - After 10th"
+            profile.save()
+
+        request.session["career_guest_profile_id"] = profile.id
+        request.session["career_compass_profile_id"] = profile.id
+
+        return redirect("career_tools:career_compass_test")
+
+    return render(
+        request,
+        "career_tools/career_compass_start.html",
+        {
+            "branches": branches,
+            "language": language,
+        },
+    )
+
+
+def career_compass_test(request):
+    language = request.session.get(
+        "career_compass_language",
+        "en"
+    )
+
+    if language not in {"en", "mr"}:
+        language = "en"
+
+    from .models import (
+        CareerProfile,
+        CareerCompassQuestion,
+        CareerCompassAttempt,
+        CareerCompassAnswer,
+    )
+
+    profile_id = request.session.get("career_compass_profile_id")
+
+    profile = CareerProfile.objects.filter(
+        id=profile_id
+    ).first()
+
+    if not profile:
+        return redirect("career_tools:career_compass_start")
+
+    questions = list(
+        CareerCompassQuestion.objects.filter(
+            is_active=True
+        ).order_by("order", "id")
+    )
+
+    if not questions:
+        return HttpResponse(
+            "Career Compass questions are not available.",
+            status=404,
+        )
+
+    if request.method == "POST":
+
+        # Require every question to be answered.
+        answers = {}
+
+        for question in questions:
+            selected = request.POST.get(
+                f"question_{question.id}"
+            )
+
+            if selected not in {"A", "B", "C", "D"}:
+                messages.error(
+                    request,
+                    "Please answer all questions before viewing your result."
+                )
+                return render(
+                    request,
+                    "career_tools/career_compass_test.html",
+                    {
+                        "profile": profile,
+                        "questions": questions,
+                        "total_questions": len(questions),
+                        "language": language,
+                    },
+                )
+
+            answers[question.id] = selected
+
+        attempt = CareerCompassAttempt.objects.create(
+            profile=profile,
+            status="started",
+        )
+
+        scores = {
+            "technology": 0,
+            "business": 0,
+            "science": 0,
+            "creative": 0,
+            "people": 0,
+            "practical": 0,
+        }
+
+        for question in questions:
+            selected = answers[question.id]
+
+            direction = {
+                "A": question.direction_a,
+                "B": question.direction_b,
+                "C": question.direction_c,
+                "D": question.direction_d,
+            }[selected]
+
+            if direction in scores:
+                scores[direction] += 1
+
+            CareerCompassAnswer.objects.create(
+                attempt=attempt,
+                question=question,
+                selected_option=selected,
+                selected_direction=direction,
+            )
+
+        ranked = sorted(
+            scores.items(),
+            key=lambda item: (-item[1], item[0])
+        )
+
+        attempt.technology_score = scores["technology"]
+        attempt.business_score = scores["business"]
+        attempt.science_score = scores["science"]
+        attempt.creative_score = scores["creative"]
+        attempt.people_score = scores["people"]
+        attempt.practical_score = scores["practical"]
+
+        attempt.top_direction = ranked[0][0]
+        attempt.second_direction = ranked[1][0]
+        attempt.third_direction = ranked[2][0]
+
+        attempt.status = "completed"
+        attempt.completed_at = timezone.now()
+        attempt.save()
+
+        if profile.enquiry:
+            labels = {
+                "technology": "Technology & Digital",
+                "business": "Business & Commerce",
+                "science": "Science & Analytical",
+                "creative": "Creative & Media",
+                "people": "People & Communication",
+                "practical": "Practical & Technical",
+            }
+
+            summary = (
+                "\n\nMCTI Career Compass - After 10th"
+                f"\n1. {labels[ranked[0][0]]} ({ranked[0][1]} points)"
+                f"\n2. {labels[ranked[1][0]]} ({ranked[1][1]} points)"
+                f"\n3. {labels[ranked[2][0]]} ({ranked[2][1]} points)"
+                "\nCounselling Status: New"
+            )
+
+            current = (profile.enquiry.message or "").rstrip()
+
+            profile.enquiry.message = (
+                current + summary
+            ).strip()
+
+            profile.enquiry.save(
+                update_fields=["message"]
+            )
+
+        return redirect(
+            "career_tools:career_compass_result",
+            attempt_id=attempt.id,
+        )
+
+    return render(
+        request,
+        "career_tools/career_compass_test.html",
+        {
+            "profile": profile,
+            "questions": questions,
+            "total_questions": len(questions),
+            "language": language,
+        },
+    )
+
+
+def career_compass_result(request, attempt_id):
+    from .models import CareerProfile, CareerCompassAttempt
+
+    language = request.session.get(
+        "career_compass_language",
+        "en"
+    )
+
+    if language not in {"en", "mr"}:
+        language = "en"
+
+    profile_id = request.session.get("career_compass_profile_id")
+
+    attempt = (
+        CareerCompassAttempt.objects
+        .select_related("profile")
+        .filter(
+            id=attempt_id,
+            profile_id=profile_id,
+            status="completed",
+        )
+        .first()
+    )
+
+    if not attempt:
+        return redirect("career_tools:career_compass_start")
+
+    labels = {
+        "technology": "Technology & Digital",
+        "business": "Business & Commerce",
+        "science": "Science & Analytical",
+        "creative": "Creative & Media",
+        "people": "People & Communication",
+        "practical": "Practical & Technical",
+    }
+
+    descriptions = {
+        "technology": "You show interest in computers, digital tools, technology and logical problem solving.",
+        "business": "You show interest in business, money, planning, commerce and entrepreneurship.",
+        "science": "You show interest in analysis, science, research and understanding how things work.",
+        "creative": "You show interest in design, media, ideas, visual communication and creative expression.",
+        "people": "You show interest in communication, teamwork, guidance and people-focused activities.",
+        "practical": "You show interest in hands-on learning, equipment, technical work and practical problem solving.",
+    }
+
+    pathway = {
+        "technology": "Explore Computer Science, IT, coding, AI, digital skills and technology-oriented pathways.",
+        "business": "Explore Commerce, Accounting, Finance, Management and Entrepreneurship pathways.",
+        "science": "Explore Science and analytical pathways, including further study in science-based fields.",
+        "creative": "Explore Design, Graphics, Animation, Media, Content and other creative pathways.",
+        "people": "Explore Management, Teaching, HR, Sales, Hospitality and communication-oriented pathways.",
+        "practical": "Explore Diploma, technical education, vocational training and skill-based pathways.",
+    }
+
+    score_map = {
+        "technology": attempt.technology_score,
+        "business": attempt.business_score,
+        "science": attempt.science_score,
+        "creative": attempt.creative_score,
+        "people": attempt.people_score,
+        "practical": attempt.practical_score,
+    }
+
+    if language == "mr":
+        labels = {
+            "technology": "ततरजञन आण डजटल",
+            "business": "वयवसय आण वणजय",
+            "science": "वजञन आण वशलषण",
+            "creative": "करएटवह आण मडय",
+            "people": "लकसपरक आण सवद",
+            "practical": "परतयकषक आण ततरक",
+        }
+
+        descriptions = {
+            "technology": "तमचय उततरमधन कमपयटर, डजटल सधन, ततरजञन आण तरकक समसय सडवणयकड रच दसत.",
+            "business": "तमचय उततरमधन वयवसय, पस, नयजन, वणजय आण उदयजकतकड रच दसत.",
+            "science": "तमचय उततरमधन वशलषण, वजञन, सशधन आण गषट कश करय करतत ह समजन घणयकड रच दसत.",
+            "creative": "तमचय उततरमधन डझइन, मडय, नवन कलपन आण सरजनशल कमकड रच दसत.",
+            "people": "तमचय उततरमधन सवद, टमवरक, मरगदरशन आण लकसबत कम करणयकड रच दसत.",
+            "practical": "तमचय उततरमधन परतयकष कम, उपकरण, ततरक कशलय आण hands-on learning कड रच दसत.",
+        }
+
+        pathway = {
+            "technology": "Computer Science, IT, Coding, AI आण Digital Skills सबधत परययच अभयस कर.",
+            "business": "Commerce, Accounting, Finance, Management आण Entrepreneurship सबधत परययच अभयस कर.",
+            "science": "Science आण Analytical कषतरतल पढल शकषणच परयय जणन घय.",
+            "creative": "Design, Graphics, Animation, Media आण Content सबधत परययच अभयस कर.",
+            "people": "Management, Teaching, HR, Sales, Hospitality आण Communication सबधत परयय जणन घय.",
+            "practical": "Diploma, Technical Education, Vocational Training आण Skill-based परययच अभयस कर.",
+        }
+
+    top_results = []
+
+    for rank, code in enumerate(
+        [
+            attempt.top_direction,
+            attempt.second_direction,
+            attempt.third_direction,
+        ],
+        start=1,
+    ):
+        top_results.append({
+            "rank": rank,
+            "code": code,
+            "name": labels.get(code, code),
+            "score": score_map.get(code, 0),
+            "description": descriptions.get(code, ""),
+            "pathway": pathway.get(code, ""),
+        })
+
+    return render(
+        request,
+        "career_tools/career_compass_result.html",
+        {
+            "attempt": attempt,
+            "profile": attempt.profile,
+            "top_results": top_results,
+            "language": language,
+        },
+    )
+
+
+# ============================================================
+# CAREER COMPASS MANAGEMENT DASHBOARD
+# ============================================================
+
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q, Count
+from django.shortcuts import get_object_or_404, redirect
+
+
+@login_required
+def career_compass_dashboard(request):
+
+    from .models import CareerProfile, CareerCompassAttempt
+
+    if not (request.user.is_staff or request.user.is_superuser):
+        return redirect("staff_login")
+
+    attempts = (
+        CareerCompassAttempt.objects
+        .select_related("profile", "profile__enquiry")
+        .filter(status="completed")
+        .order_by("-completed_at")
+    )
+
+    # --------------------------------------------------------
+    # BRANCH SECURITY
+    # --------------------------------------------------------
+
+    staff_profile = getattr(request.user, "staffprofile", None)
+
+    if (
+        not request.user.is_superuser
+        and staff_profile
+        and getattr(staff_profile, "branch", None)
+    ):
+        branch_name = str(staff_profile.branch)
+
+        attempts = attempts.filter(
+            profile__preferred_branch__iexact=branch_name
+        )
+
+    # --------------------------------------------------------
+    # FILTERS
+    # --------------------------------------------------------
+
+    search = request.GET.get("q", "").strip()
+    branch = request.GET.get("branch", "").strip()
+    status = request.GET.get("status", "").strip()
+    direction = request.GET.get("direction", "").strip()
+
+    if search:
+        attempts = attempts.filter(
+            Q(profile__full_name__icontains=search)
+            | Q(profile__mobile__icontains=search)
+            | Q(profile__college_name__icontains=search)
+            | Q(profile__city__icontains=search)
+        )
+
+    if branch:
+        attempts = attempts.filter(
+            profile__preferred_branch__iexact=branch
+        )
+
+    if status:
+        attempts = attempts.filter(
+            counselling_status=status
+        )
+
+    if direction:
+        attempts = attempts.filter(
+            top_direction=direction
+        )
+
+    # --------------------------------------------------------
+    # ANALYTICS
+    # --------------------------------------------------------
+
+    all_attempts = CareerCompassAttempt.objects.filter(
+        status="completed"
+    )
+
+    if (
+        not request.user.is_superuser
+        and staff_profile
+        and getattr(staff_profile, "branch", None)
+    ):
+        branch_name = str(staff_profile.branch)
+        all_attempts = all_attempts.filter(
+            profile__preferred_branch__iexact=branch_name
+        )
+
+    total_completed = all_attempts.count()
+
+    total_profiles = (
+        CareerProfile.objects
+        .filter(career_compass_attempts__status="completed")
+        .distinct()
+        .count()
+    )
+
+    new_leads = all_attempts.filter(
+        counselling_status="new"
+    ).count()
+
+    converted = all_attempts.filter(
+        counselling_status="converted"
+    ).count()
+
+    counselling_pipeline = (
+        all_attempts
+        .values("counselling_status")
+        .annotate(total=Count("id"))
+        .order_by()
+    )
+
+    direction_stats = (
+        all_attempts
+        .values("top_direction")
+        .annotate(total=Count("id"))
+        .order_by("-total")
+    )
+
+    branch_stats = (
+        all_attempts
+        .values("profile__preferred_branch")
+        .annotate(total=Count("id"))
+        .order_by("-total")
+    )
+
+    branches = (
+        CareerProfile.objects
+        .filter(career_compass_attempts__status="completed")
+        .exclude(preferred_branch="")
+        .values_list("preferred_branch", flat=True)
+        .distinct()
+        .order_by("preferred_branch")
+    )
+
+    direction_labels = {
+        "technology": "Technology & Digital",
+        "business": "Business & Commerce",
+        "science": "Science & Analytical",
+        "creative": "Creative & Media",
+        "people": "People & Communication",
+        "practical": "Practical & Technical",
+    }
+
+    status_labels = dict(
+        CareerCompassAttempt._meta
+        .get_field("counselling_status")
+        .choices
+    )
+
+    for item in direction_stats:
+        item["label"] = direction_labels.get(
+            item["top_direction"],
+            item["top_direction"]
+        )
+
+    for item in counselling_pipeline:
+        item["label"] = status_labels.get(
+            item["counselling_status"],
+            item["counselling_status"]
+        )
+
+    context = {
+        "attempts": attempts[:300],
+        "total_completed": total_completed,
+        "total_profiles": total_profiles,
+        "new_leads": new_leads,
+        "converted": converted,
+        "direction_stats": direction_stats,
+        "branch_stats": branch_stats,
+        "counselling_pipeline": counselling_pipeline,
+        "branches": branches,
+        "direction_labels": direction_labels,
+        "status_choices": CareerCompassAttempt._meta
+            .get_field("counselling_status").choices,
+        "search": search,
+        "selected_branch": branch,
+        "selected_status": status,
+        "selected_direction": direction,
+    }
+
+    return render(
+        request,
+        "career_tools/career_compass_dashboard.html",
+        context
+    )
+
+
+@login_required
+def career_compass_update_status(request, attempt_id):
+
+    from .models import CareerCompassAttempt
+
+    if not (request.user.is_staff or request.user.is_superuser):
+        return redirect("staff_login")
+
+    attempt = get_object_or_404(
+        CareerCompassAttempt.objects.select_related("profile"),
+        id=attempt_id
+    )
+
+    staff_profile = getattr(request.user, "staffprofile", None)
+
+    if (
+        not request.user.is_superuser
+        and staff_profile
+        and getattr(staff_profile, "branch", None)
+    ):
+        branch_name = str(staff_profile.branch)
+
+        if (
+            attempt.profile.preferred_branch
+            and attempt.profile.preferred_branch.lower()
+            != branch_name.lower()
+        ):
+            return redirect(
+                "career_tools:career_compass_dashboard"
+            )
+
+    if request.method == "POST":
+
+        new_status = request.POST.get(
+            "counselling_status",
+            ""
+        )
+
+        valid_statuses = dict(
+            CareerCompassAttempt._meta
+            .get_field("counselling_status")
+            .choices
+        )
+
+        if new_status in valid_statuses:
+            attempt.counselling_status = new_status
+            attempt.save(
+                update_fields=["counselling_status"]
+            )
+
+    return redirect(
+        "career_tools:career_compass_dashboard"
+    )

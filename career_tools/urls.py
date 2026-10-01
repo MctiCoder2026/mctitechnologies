@@ -10,8 +10,36 @@ app_name = "career_tools"
 
 from . import quick_views
 from . import report_views
+from django.views.generic import RedirectView
 
 urlpatterns = [
+    # Legacy Career Compass link - keep old shared links working
+    path(
+        "compass/",
+        RedirectView.as_view(
+            pattern_name="career_tools:career_compass_start",
+            permanent=True
+        ),
+        name="legacy_career_compass"
+    ),
+
+    # MCTI Career Compass - After 10th
+    path(
+        "career-compass/",
+        views.career_compass_start,
+        name="career_compass_start"
+    ),
+    path(
+        "career-compass/test/",
+        views.career_compass_test,
+        name="career_compass_test"
+    ),
+    path(
+        "career-compass/result/<int:attempt_id>/",
+        views.career_compass_result,
+        name="career_compass_result"
+    ),
+
     path(
         "aptitude/start/",
         quick_views.public_aptitude_start,
@@ -144,5 +172,16 @@ urlpatterns = [
         "counsellor/profile/<int:profile_id>/",
         views.counsellor_profile_detail,
         name="counsellor_profile_detail"
+    ),
+
+    path(
+        "career-compass/dashboard/",
+        views.career_compass_dashboard,
+        name="career_compass_dashboard"
+    ),
+    path(
+        "career-compass/dashboard/<int:attempt_id>/status/",
+        views.career_compass_update_status,
+        name="career_compass_update_status"
     ),
 ]

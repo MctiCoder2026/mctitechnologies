@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.cc-wrap{max-width:760px;margin:35px auto;padding:20px}
+.cc-card{background:#fff;border-radius:18px;padding:30px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+.cc-lang{text-align:center;margin-bottom:20px}
+.cc-lang a{display:inline-block;padding:9px 18px;margin:3px;border:1px solid #ff7900;border-radius:20px;text-decoration:none;color:#111;font-weight:700}
+.cc-lang a.active{background:#ff7900;color:#fff}
+.cc-badge{display:inline-block;background:#fff2e6;color:#e86600;padding:7px 12px;border-radius:20px;font-weight:700}
+.cc-card h1{font-size:34px;margin:15px 0 8px}
+.cc-sub{color:#666;line-height:1.6}
+.cc-form{margin-top:25px}
+.cc-form label{font-weight:700;display:block;margin:14px 0 6px}
+.cc-form input,.cc-form select{width:100%;padding:13px;border:1px solid #ddd;border-radius:9px}
+.cc-check{display:flex!important;gap:9px;align-items:flex-start;font-weight:400!important}
+.cc-check input{width:auto!important;margin-top:4px}
+.cc-btn{width:100%;border:0;background:#ff7900;color:#fff;font-weight:800;padding:15px;border-radius:10px;margin-top:22px;font-size:17px}
+.cc-note{font-size:12px;color:#777;margin-top:16px;line-height:1.5}
+</style>
+
+<div class="cc-wrap">
+<div class="cc-card">
+
+<div class="cc-lang">
+<a href="?lang=en" class="{% if language == 'en' %}active{% endif %}">English</a>
+<a href="?lang=mr" class="{% if language == 'mr' %}active{% endif %}">&#2350;&#2352;&#2366;&#2336;&#2368;</a>
+</div>
+
+{% if language == "mr" %}
+
+<span class="cc-badge">&#2350;&#2379;&#2347;&#2340;  10&#2357;&#2368; &#2344;&#2306;&#2340;&#2352;</span>
+
+<h1>MCTI Career Compass</h1>
+
+<p class="cc-sub">
+10&#2357;&#2368; &#2344;&#2306;&#2340;&#2352; &#2346;&#2369;&#2338;&#2375; &#2325;&#2366;&#2351; &#2325;&#2352;&#2366;&#2357;&#2375; &#2351;&#2366;&#2348;&#2342;&#2381;&#2342;&#2354; &#2360;&#2306;&#2349;&#2381;&#2352;&#2350; &#2310;&#2361;&#2375;?
+30 &#2360;&#2379;&#2346;&#2381;&#2351;&#2366; &#2346;&#2381;&#2352;&#2358;&#2381;&#2344;&#2366;&#2306;&#2330;&#2368; &#2313;&#2340;&#2381;&#2340;&#2352;&#2375; &#2342;&#2381;&#2351;&#2366; &#2310;&#2339;&#2367; &#2340;&#2369;&#2350;&#2330;&#2381;&#2351;&#2366;
+<strong>Top 3 Career Directions</strong> &#2332;&#2366;&#2339;&#2370;&#2344; &#2328;&#2381;&#2351;&#2366;.
+</p>
+
+{% else %}
+
+<span class="cc-badge">FREE  AFTER 10TH</span>
+<h1>MCTI Career Compass</h1>
+
+<p class="cc-sub">
+Confused about what to do after 10th?
+Answer 30 simple questions and discover your
+<strong>Top 3 Career Directions</strong>.
+</p>
+
+{% endif %}
+
+<form method="post" class="cc-form">
+{% csrf_token %}
+<input type="hidden" name="language" value="{{ language }}">
+
+<label>
+{% if language == "mr" %}&#2357;&#2367;&#2342;&#2381;&#2351;&#2366;&#2352;&#2381;&#2341;&#2381;&#2351;&#2366;&#2330;&#2375; &#2344;&#2366;&#2357; *{% else %}Student Name *{% endif %}
+</label>
+<input name="full_name" required>
+
+<label>
+{% if language == "mr" %}&#2350;&#2379;&#2348;&#2366;&#2312;&#2354; &#2344;&#2306;&#2348;&#2352; *{% else %}Mobile Number *{% endif %}
+</label>
+<input name="mobile" inputmode="numeric" maxlength="12" required>
+
+<label>
+{% if language == "mr" %}&#2358;&#2366;&#2355;&#2375;&#2330;&#2375; &#2344;&#2366;&#2357;{% else %}School Name{% endif %}
+</label>
+<input name="school_name">
+
+<label>
+{% if language == "mr" %}&#2360;&#2343;&#2381;&#2351;&#2366;&#2330;&#2368; &#2311;&#2351;&#2340;&#2381;&#2340;&#2366;{% else %}Current Class{% endif %}
+</label>
+
+<select name="current_class">
+<option value="10th">10th Standard / 10&#2357;&#2368;</option>
+<option value="9th">9th Standard / 9&#2357;&#2368;</option>
+<option value="11th">11th Standard / 11&#2357;&#2368;</option>
+<option value="12th">12th Standard / 12&#2357;&#2368;</option>
+<option value="Other">Other / &#2311;&#2340;&#2352;</option>
+</select>
+
+<label>
+{% if language == "mr" %}&#2358;&#2361;&#2352;{% else %}City{% endif %}
+</label>
+<input name="city">
+
+<label>
+{% if language == "mr" %}&#2340;&#2369;&#2350;&#2381;&#2361;&#2366;&#2354;&#2366; &#2360;&#2379;&#2351;&#2368;&#2330;&#2375; MCTI &#2325;&#2375;&#2306;&#2342;&#2381;&#2352;{% else %}Preferred MCTI Centre{% endif %}
+</label>
+
+<select name="preferred_branch">
+<option value="">
+{% if language == "mr" %}&#2325;&#2375;&#2306;&#2342;&#2381;&#2352; &#2344;&#2367;&#2357;&#2337;&#2366;{% else %}Select Centre{% endif %}
+</option>
+{% for branch in branches %}
+<option value="{{ branch }}">{{ branch }}</option>
+{% endfor %}
+</select>
+
+<label class="cc-check">
+<input type="checkbox" name="consent_given" required>
+<span>
+{% if language == "mr" %}
+&#2325;&#2352;&#2367;&#2309;&#2352; &#2350;&#2366;&#2352;&#2381;&#2327;&#2342;&#2352;&#2381;&#2358;&#2344;&#2366;&#2360;&#2366;&#2336;&#2368; &#2350;&#2366;&#2333;&#2368; &#2350;&#2366;&#2361;&#2367;&#2340;&#2368; MCTI &#2360;&#2379;&#2348;&#2340; &#2358;&#2375;&#2309;&#2352; &#2325;&#2352;&#2339;&#2381;&#2351;&#2366;&#2360; &#2350;&#2368; &#2360;&#2361;&#2350;&#2340; &#2310;&#2361;&#2375;.
+{% else %}
+I agree to share my details with MCTI for career guidance.
+{% endif %}
+</span>
+</label>
+
+<button class="cc-btn" type="submit">
+{% if language == "mr" %}
+&#2350;&#2379;&#2347;&#2340; Career Compass &#2360;&#2369;&#2352;&#2370; &#2325;&#2352;&#2366; 
+{% else %}
+Start FREE Career Compass 
+{% endif %}
+</button>
+
+</form>
+
+<p class="cc-note">
+{% if language == "mr" %}
+&#2361;&#2375; &#2325;&#2352;&#2367;&#2309;&#2352;&#2330;&#2368; &#2310;&#2357;&#2337; &#2310;&#2339;&#2367; &#2342;&#2367;&#2358;&#2366; &#2360;&#2350;&#2332;&#2370;&#2344; &#2328;&#2375;&#2339;&#2381;&#2351;&#2366;&#2360;&#2366;&#2336;&#2368;&#2330;&#2375; &#2350;&#2366;&#2352;&#2381;&#2327;&#2342;&#2352;&#2381;&#2358;&#2344; &#2360;&#2366;&#2343;&#2344; &#2310;&#2361;&#2375;.
+&#2361;&#2366; &#2309;&#2306;&#2340;&#2367;&#2350; &#2325;&#2352;&#2367;&#2309;&#2352; &#2344;&#2367;&#2352;&#2381;&#2339;&#2351; &#2344;&#2366;&#2361;&#2368;.
+{% else %}
+This is a career inclination and guidance tool, not a final career decision.
+Academic performance, personal circumstances and professional guidance should also be considered.
+{% endif %}
+</p>
+
+</div>
+</div>
+{% endblock %}

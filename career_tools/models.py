@@ -532,3 +532,142 @@ class CareerRecommendationItem(models.Model):
             f"{self.rank}. "
             f"{self.career_title}"
         )
+
+
+# =========================================================
+# MCTI CAREER COMPASS - AFTER 10TH
+# =========================================================
+
+class CareerCompassQuestion(models.Model):
+
+    DIMENSION_CHOICES = [
+        ("interest", "Interest"),
+        ("subject", "Subject Comfort"),
+        ("problem_solving", "Problem Solving"),
+        ("work_style", "Work Style"),
+        ("environment", "Career Environment"),
+    ]
+
+    dimension = models.CharField(
+        max_length=30,
+        choices=DIMENSION_CHOICES
+    )
+
+    question = models.TextField()
+
+    option_a = models.CharField(max_length=300)
+    option_b = models.CharField(max_length=300)
+    option_c = models.CharField(max_length=300)
+    option_d = models.CharField(max_length=300)
+
+    # Marathi bilingual content
+    question_mr = models.TextField(blank=True)
+    option_a_mr = models.CharField(max_length=300, blank=True)
+    option_b_mr = models.CharField(max_length=300, blank=True)
+    option_c_mr = models.CharField(max_length=300, blank=True)
+    option_d_mr = models.CharField(max_length=300, blank=True)
+
+    direction_a = models.CharField(max_length=30)
+    direction_b = models.CharField(max_length=30)
+    direction_c = models.CharField(max_length=30)
+    direction_d = models.CharField(max_length=30)
+
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=1)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return f"Career Compass Q{self.order} - {self.question[:60]}"
+
+
+class CareerCompassAttempt(models.Model):
+
+    profile = models.ForeignKey(
+        CareerProfile,
+        on_delete=models.CASCADE,
+        related_name="career_compass_attempts"
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ("started", "Started"),
+            ("completed", "Completed"),
+        ],
+        default="started"
+    )
+
+    technology_score = models.PositiveIntegerField(default=0)
+    business_score = models.PositiveIntegerField(default=0)
+    science_score = models.PositiveIntegerField(default=0)
+    creative_score = models.PositiveIntegerField(default=0)
+    people_score = models.PositiveIntegerField(default=0)
+    practical_score = models.PositiveIntegerField(default=0)
+
+    top_direction = models.CharField(max_length=30, blank=True)
+    second_direction = models.CharField(max_length=30, blank=True)
+    third_direction = models.CharField(max_length=30, blank=True)
+
+    counselling_status = models.CharField(
+        max_length=30,
+        choices=[
+            ("new", "New"),
+            ("called", "Called"),
+            ("booked", "Counselling Booked"),
+            ("visited", "Visited"),
+            ("guided", "Guidance Given"),
+            ("converted", "Converted"),
+        ],
+        default="new"
+    )
+
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.profile.full_name} - Career Compass"
+
+
+class CareerCompassAnswer(models.Model):
+
+    attempt = models.ForeignKey(
+        CareerCompassAttempt,
+        on_delete=models.CASCADE,
+        related_name="answers"
+    )
+
+    question = models.ForeignKey(
+        CareerCompassQuestion,
+        on_delete=models.CASCADE,
+        related_name="compass_answers"
+    )
+
+    selected_option = models.CharField(
+        max_length=1,
+        choices=[
+            ("A", "A"),
+            ("B", "B"),
+            ("C", "C"),
+            ("D", "D"),
+        ]
+    )
+
+    selected_direction = models.CharField(max_length=30)
+
+    answered_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["attempt", "question"],
+                name="unique_career_compass_answer"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.attempt.profile.full_name} - Compass Q{self.question_id}"

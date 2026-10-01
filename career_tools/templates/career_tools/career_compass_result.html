@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.cc-result{max-width:850px;margin:30px auto;padding:20px}
+.cc-hero{text-align:center;background:#111;color:#fff;border-radius:18px;padding:30px}
+.cc-hero span{color:#ff8500;font-weight:800}
+.cc-results{margin-top:22px}
+.cc-direction{background:#fff;border:1px solid #eee;border-radius:15px;padding:22px;margin-bottom:14px;box-shadow:0 5px 18px rgba(0,0,0,.05)}
+.cc-rank{color:#ff7900;font-weight:900}
+.cc-direction h2{margin:5px 0 10px}
+.cc-score{font-size:13px;font-weight:800;color:#666}
+.cc-path{background:#fff6ed;padding:12px;border-radius:9px;margin-top:12px}
+.cc-cta{background:#ff7900;color:#fff;text-align:center;border-radius:18px;padding:25px;margin-top:25px}
+.cc-disclaimer{font-size:12px;color:#777;text-align:center;margin:20px}
+</style>
+
+<div class="cc-result">
+
+<div class="cc-hero">
+<span>
+{% if language == "mr" %}
+तमच CAREER DIRECTION PROFILE
+{% else %}
+YOUR CAREER DIRECTION PROFILE
+{% endif %}
+</span>
+
+<h1>{{ profile.full_name }}</h1>
+
+<p>
+{% if language == "mr" %}
+तमचय उततरनसर खलल तन कषतरच अधक अभयस करण उपयकत ठर शकत.
+{% else %}
+Your answers indicate these three areas are worth exploring further.
+{% endif %}
+</p>
+</div>
+
+<div class="cc-results">
+{% for item in top_results %}
+<div class="cc-direction">
+
+<div class="cc-rank">
+#{{ item.rank }}
+{% if language == "mr" %}CAREER DIRECTION{% else %}CAREER DIRECTION{% endif %}
+</div>
+
+<h2>{{ item.name }}</h2>
+
+<div class="cc-score">
+{% if language == "mr" %}Inclination Points{% else %}Inclination Points{% endif %}: {{ item.score }}
+</div>
+
+<p>{{ item.description }}</p>
+
+<div class="cc-path">
+<strong>
+{% if language == "mr" %}10व नतर ह परयय Explore कर:{% else %}After 10th  Explore:{% endif %}
+</strong><br>
+{{ item.pathway }}
+</div>
+
+</div>
+{% endfor %}
+</div>
+
+<div class="cc-cta">
+{% if language == "mr" %}
+<h2>10व नतर कय नवडव यबददल अजनह सभरम आह?</h2>
+<p>MCTI टमसबत <strong>मफत Career Guidance Session</strong> घय.</p>
+<p>पसतच कदर: <strong>{{ profile.preferred_branch|default:"जवळच MCTI कदर" }}</strong></p>
+<strong>मरगदरशनसठ आमच Career Team तमचयश सपरक कर शकत.</strong>
+{% else %}
+<h2>Still confused about what to choose after 10th?</h2>
+<p>Get a <strong>FREE Career Guidance Session</strong> with the MCTI team.</p>
+<p>Preferred Centre: <strong>{{ profile.preferred_branch|default:"Nearest MCTI Centre" }}</strong></p>
+<strong>Our career team can contact you for guidance.</strong>
+{% endif %}
+</div>
+
+<p class="cc-disclaimer">
+{% if language == "mr" %}
+Career Compass ह करअरच सभवय दश समजन घणयसठच मरगदरशन सधन आह.
+ह कणतह शख, करस कव करअर नशचत करत नह.
+{% else %}
+Career Compass provides indicative career-direction guidance.
+It does not prescribe a stream, course or career and should not replace academic or professional counselling.
+{% endif %}
+</p>
+
+
+<style>
+.mcti-result-actions{
+ max-width:760px;margin:22px auto;padding:22px;background:#fff;
+ border:1px solid #eee;border-radius:16px;text-align:center;
+ box-shadow:0 6px 22px rgba(0,0,0,.07)
+}
+.mcti-result-actions h3{margin:0 0 8px}
+.mcti-result-actions p{color:#555;line-height:1.5}
+.mcti-action-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:15px}
+.mcti-action-row a{padding:12px 17px;border-radius:10px;text-decoration:none;font-weight:700}
+.mcti-wa{background:#25D366;color:white!important}
+.mcti-rate{background:#111;color:white!important}
+
+.mcti-complete-overlay{
+ position:fixed;inset:0;background:rgba(0,0,0,.65);
+ display:none;align-items:center;justify-content:center;
+ padding:18px;z-index:999999
+}
+.mcti-complete-modal{
+ width:100%;max-width:430px;background:#fff;border-radius:20px;
+ padding:28px 22px;text-align:center;
+ box-shadow:0 20px 60px rgba(0,0,0,.3)
+}
+.mcti-complete-modal h2{margin:8px 0}
+.mcti-complete-modal p{color:#555;line-height:1.5}
+.mcti-modal-buttons{display:grid;gap:10px;margin-top:18px}
+.mcti-modal-buttons a,.mcti-modal-buttons button{
+ border:0;border-radius:10px;padding:13px;text-decoration:none;
+ font-weight:700;font-size:15px;cursor:pointer
+}
+.mcti-modal-share{background:#25D366;color:#fff!important}
+.mcti-modal-rate{background:#111;color:#fff!important}
+.mcti-modal-close{background:#f58220;color:#fff}
+</style>
+
+<div class="mcti-result-actions">
+ <h3>🎓 Help Another Student</h3>
+ <p>
+   Found this free tool useful?<br>
+   Share it with your friends and WhatsApp groups.
+ </p>
+
+ <div class="mcti-action-row">
+   <a class="mcti-wa"
+      target="_blank" rel="noopener"
+      href="https://wa.me/?text=Try%20the%20FREE%20MCTI%20Career%20Compass%20and%20discover%20your%20career%20directions.%0A%0Ahttps://mctitechnologies.com/career/career-compass/">
+      📲 Share with Friends
+   </a>
+
+   <a class="mcti-rate"
+      target="_blank" rel="noopener"
+      href="https://g.page/r/Cd5zZsaq_ayWEBE/review">
+      ⭐ Rate Your Experience
+   </a>
+ </div>
+
+ <div style="font-size:11px;color:#888;margin-top:12px">
+   Google Review is optional. Please share only your genuine experience.
+ </div>
+</div>
+
+<div id="careerCompassCompletePopup" class="mcti-complete-overlay">
+ <div class="mcti-complete-modal">
+
+   <div style="font-size:44px">🎉</div>
+   <h2>Career Compass Completed!</h2>
+
+   <p>
+     Your result is ready.<br>
+     Share this free tool and help someone else benefit too.
+   </p>
+
+   <div class="mcti-modal-buttons">
+
+     <a class="mcti-modal-share"
+        target="_blank" rel="noopener"
+        href="https://wa.me/?text=Try%20the%20FREE%20MCTI%20Career%20Compass%20and%20discover%20your%20career%20directions.%0A%0Ahttps://mctitechnologies.com/career/career-compass/">
+        📲 Share with Friends
+     </a>
+
+     <a class="mcti-modal-rate"
+        target="_blank" rel="noopener"
+        href="https://g.page/r/Cd5zZsaq_ayWEBE/review">
+        ⭐ Rate Your Experience
+     </a>
+
+     <button type="button"
+             class="mcti-modal-close"
+             onclick="document.getElementById('careerCompassCompletePopup').style.display='none'">
+        View My Result
+     </button>
+
+   </div>
+ </div>
+</div>
+
+<script>
+(function(){
+ var key="careerCompass_completed_{{ attempt.id|default:'result' }}";
+ try{
+   if(!sessionStorage.getItem(key)){
+      var p=document.getElementById("careerCompassCompletePopup");
+      if(p) p.style.display="flex";
+      sessionStorage.setItem(key,"1");
+   }
+ }catch(e){
+   var p=document.getElementById("careerCompassCompletePopup");
+   if(p) p.style.display="flex";
+ }
+})();
+</script>
+
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.cc-test{max-width:900px;margin:30px auto;padding:18px}
+.cc-head{text-align:center;margin-bottom:25px}
+.cc-head h1{margin-bottom:6px}
+.cc-q{background:#fff;border:1px solid #eee;border-radius:15px;padding:22px;margin-bottom:16px;box-shadow:0 4px 15px rgba(0,0,0,.04)}
+.cc-num{color:#ff7900;font-weight:800;font-size:13px}
+.cc-question{font-weight:800;font-size:17px;margin:7px 0 14px}
+.cc-option{display:block;border:1px solid #ddd;border-radius:10px;padding:12px;margin:8px 0;cursor:pointer}
+.cc-option:hover{border-color:#ff7900;background:#fff8f2}
+.cc-option input{margin-right:8px}
+.cc-submit{width:100%;background:#ff7900;color:#fff;border:0;padding:16px;border-radius:10px;font-size:18px;font-weight:800;margin:10px 0 30px}
+</style>
+
+<div class="cc-test">
+
+<div class="cc-head">
+<h1>MCTI Career Compass</h1>
+{% if language == "mr" %}
+{% if language == "mr" %}
+<p>
+{{ profile.full_name }},
+&#2340;&#2369;&#2350;&#2381;&#2361;&#2366;&#2354;&#2366;
+&#2360;&#2352;&#2381;&#2357;&#2366;&#2340;
+&#2351;&#2379;&#2327;&#2381;&#2351;
+&#2357;&#2366;&#2335;&#2339;&#2366;&#2352;&#2366;
+&#2346;&#2352;&#2381;&#2351;&#2366;&#2351;
+&#2344;&#2367;&#2357;&#2337;&#2366;.
+&#2351;&#2375;&#2341;&#2375;
+&#2325;&#2379;&#2339;&#2340;&#2375;&#2361;&#2368;
+&#2313;&#2340;&#2381;&#2340;&#2352;
+&#2348;&#2352;&#2379;&#2348;&#2352;
+&#2325;&#2367;&#2306;&#2357;&#2366;
+&#2330;&#2369;&#2325;
+&#2344;&#2366;&#2361;&#2368;.
+</p>
+{% else %}
+<p>
+{{ profile.full_name }}, choose the option that feels most like you.
+There are no right or wrong answers.
+</p>
+{% endif %}
+<p>यथ कणतह उततर बरबर कव चकच नह.</p>
+{% else %}
+<p>{{ profile.full_name }}, choose the option that feels <strong>most like you</strong>.</p>
+<p>There are no right or wrong answers.</p>
+{% endif %}
+</div>
+
+<form method="post">
+{% csrf_token %}
+
+{% for q in questions %}
+<div class="cc-q">
+
+<div class="cc-num">QUESTION {{ forloop.counter }} OF {{ total_questions }}</div>
+
+<div class="cc-question">
+{% if language == "mr" %}{{ q.question_mr|default:q.question }}{% else %}{{ q.question }}{% endif %}
+</div>
+
+<label class="cc-option">
+<input type="radio" name="question_{{ q.id }}" value="A" required>
+{% if language == "mr" %}{{ q.option_a_mr|default:q.option_a }}{% else %}{{ q.option_a }}{% endif %}
+</label>
+
+<label class="cc-option">
+<input type="radio" name="question_{{ q.id }}" value="B">
+{% if language == "mr" %}{{ q.option_b_mr|default:q.option_b }}{% else %}{{ q.option_b }}{% endif %}
+</label>
+
+<label class="cc-option">
+<input type="radio" name="question_{{ q.id }}" value="C">
+{% if language == "mr" %}{{ q.option_c_mr|default:q.option_c }}{% else %}{{ q.option_c }}{% endif %}
+</label>
+
+<label class="cc-option">
+<input type="radio" name="question_{{ q.id }}" value="D">
+{% if language == "mr" %}{{ q.option_d_mr|default:q.option_d }}{% else %}{{ q.option_d }}{% endif %}
+</label>
+
+</div>
+{% endfor %}
+
+<button class="cc-submit" type="submit">
+{% if language == "mr" %}मझ Career Direction पह  {% else %}See My Career Direction {% endif %}
+</button>
+
+</form>
+</div>
+
+{% endblock %}

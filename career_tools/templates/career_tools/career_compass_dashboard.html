@@ -1,0 +1,436 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.ccd{
+    max-width:1450px;
+    margin:25px auto;
+    padding:18px;
+}
+.ccd h1{
+    margin-bottom:5px;
+}
+.sub{
+    color:#666;
+    margin-bottom:22px;
+}
+.cards{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:14px;
+    box-shadow:0 4px 18px rgba(0,0,0,.07);
+}
+.number{
+    font-size:30px;
+    font-weight:800;
+    color:#f47721;
+}
+.label{
+    color:#666;
+    margin-top:4px;
+}
+.filters{
+    background:#fff;
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:20px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+.filters input,
+.filters select{
+    padding:10px;
+    border:1px solid #ddd;
+    border-radius:7px;
+}
+.btn{
+    background:#111;
+    color:#fff;
+    padding:10px 16px;
+    border:0;
+    border-radius:7px;
+    text-decoration:none;
+    cursor:pointer;
+}
+.analytics{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+.panel{
+    background:#fff;
+    border-radius:12px;
+    padding:17px;
+    box-shadow:0 4px 18px rgba(0,0,0,.06);
+}
+.panel h3{
+    margin-top:0;
+}
+.stat-row{
+    display:flex;
+    justify-content:space-between;
+    border-bottom:1px solid #eee;
+    padding:8px 0;
+}
+.table-wrap{
+    overflow:auto;
+    background:#fff;
+    border-radius:12px;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1200px;
+}
+th{
+    background:#111;
+    color:#fff;
+    text-align:left;
+    padding:11px;
+    font-size:13px;
+}
+td{
+    padding:11px;
+    border-bottom:1px solid #eee;
+    vertical-align:top;
+    font-size:13px;
+}
+.name{
+    font-weight:800;
+}
+.small{
+    font-size:12px;
+    color:#666;
+}
+.direction{
+    display:inline-block;
+    background:#fff1e6;
+    color:#d85f00;
+    padding:4px 7px;
+    border-radius:6px;
+    margin:2px 0;
+}
+.actions a{
+    display:inline-block;
+    text-decoration:none;
+    margin:2px;
+    padding:6px 8px;
+    border-radius:6px;
+    background:#f3f3f3;
+    color:#111;
+}
+.status-form{
+    display:flex;
+    gap:5px;
+}
+.status-form select{
+    padding:6px;
+}
+.status-form button{
+    border:0;
+    background:#f47721;
+    color:white;
+    padding:6px 9px;
+    border-radius:5px;
+}
+@media(max-width:900px){
+    .cards{grid-template-columns:repeat(2,1fr)}
+    .analytics{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+    .cards{grid-template-columns:1fr}
+}
+</style>
+
+<div class="ccd">
+
+<h1>MCTI Career Compass Dashboard</h1>
+<div class="sub">
+After 10th Career Guidance  Leads  Counselling  Conversion
+</div>
+
+<div class="cards">
+
+<div class="card">
+<div class="number">{{ total_profiles }}</div>
+<div class="label">Students</div>
+</div>
+
+<div class="card">
+<div class="number">{{ total_completed }}</div>
+<div class="label">Completed Tests</div>
+</div>
+
+<div class="card">
+<div class="number">{{ new_leads }}</div>
+<div class="label">New Counselling Leads</div>
+</div>
+
+<div class="card">
+<div class="number">{{ converted }}</div>
+<div class="label">Converted</div>
+</div>
+
+</div>
+
+
+<form method="get" class="filters">
+
+<input
+type="text"
+name="q"
+value="{{ search }}"
+placeholder="Name / Mobile / School / City"
+>
+
+<select name="branch">
+<option value="">All Centres</option>
+{% for b in branches %}
+<option value="{{ b }}"
+{% if selected_branch == b %}selected{% endif %}>
+{{ b }}
+</option>
+{% endfor %}
+</select>
+
+<select name="status">
+<option value="">All Status</option>
+{% for value,label in status_choices %}
+<option value="{{ value }}"
+{% if selected_status == value %}selected{% endif %}>
+{{ label }}
+</option>
+{% endfor %}
+</select>
+
+<select name="direction">
+<option value="">All Career Directions</option>
+<option value="technology">Technology & Digital</option>
+<option value="business">Business & Commerce</option>
+<option value="science">Science & Analytical</option>
+<option value="creative">Creative & Media</option>
+<option value="people">People & Communication</option>
+<option value="practical">Practical & Technical</option>
+</select>
+
+<button class="btn">Filter</button>
+
+<a class="btn"
+href="{% url 'career_tools:career_compass_dashboard' %}">
+Reset
+</a>
+
+</form>
+
+
+<div class="analytics">
+
+<div class="panel">
+<h3>Top Career Directions</h3>
+
+{% for item in direction_stats %}
+<div class="stat-row">
+<span>{{ item.label }}</span>
+<strong>{{ item.total }}</strong>
+</div>
+{% empty %}
+No data yet.
+{% endfor %}
+
+</div>
+
+
+<div class="panel">
+<h3>Counselling Pipeline</h3>
+
+{% for item in counselling_pipeline %}
+<div class="stat-row">
+<span>{{ item.label }}</span>
+<strong>{{ item.total }}</strong>
+</div>
+{% empty %}
+No data yet.
+{% endfor %}
+
+</div>
+
+
+<div class="panel">
+<h3>Centre-wise Leads</h3>
+
+{% for item in branch_stats %}
+<div class="stat-row">
+<span>
+{{ item.profile__preferred_branch|default:"Not Selected" }}
+</span>
+<strong>{{ item.total }}</strong>
+</div>
+{% empty %}
+No data yet.
+{% endfor %}
+
+</div>
+
+</div>
+
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>#</th>
+<th>Student</th>
+<th>School / Class</th>
+<th>Centre</th>
+<th>Top 3 Directions</th>
+<th>Points</th>
+<th>Counselling</th>
+<th>Date</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for a in attempts %}
+
+<tr>
+
+<td>{{ forloop.counter }}</td>
+
+<td>
+<div class="name">
+{{ a.profile.full_name }}
+</div>
+
+<div>
+{{ a.profile.mobile }}
+</div>
+
+<div class="small">
+{{ a.profile.city }}
+</div>
+</td>
+
+<td>
+{{ a.profile.college_name|default:"-" }}
+<div class="small">
+{{ a.profile.highest_qualification|default:"-" }}
+</div>
+</td>
+
+<td>
+{{ a.profile.preferred_branch|default:"-" }}
+</td>
+
+<td>
+
+<span class="direction">
+1. {{ a.top_direction|title }}
+</span><br>
+
+<span class="direction">
+2. {{ a.second_direction|title }}
+</span><br>
+
+<span class="direction">
+3. {{ a.third_direction|title }}
+</span>
+
+</td>
+
+<td>
+T: {{ a.technology_score }} |
+B: {{ a.business_score }} |
+S: {{ a.science_score }}<br>
+
+C: {{ a.creative_score }} |
+P: {{ a.people_score }} |
+PT: {{ a.practical_score }}
+</td>
+
+<td>
+
+<form
+method="post"
+action="{% url 'career_tools:career_compass_update_status' a.id %}"
+class="status-form"
+>
+
+{% csrf_token %}
+
+<select name="counselling_status">
+
+{% for value,label in status_choices %}
+
+<option
+value="{{ value }}"
+{% if a.counselling_status == value %}selected{% endif %}
+>
+{{ label }}
+</option>
+
+{% endfor %}
+
+</select>
+
+<button type="submit">Save</button>
+
+</form>
+
+</td>
+
+<td>
+{{ a.completed_at|date:"d M Y" }}
+<div class="small">
+{{ a.completed_at|date:"h:i A" }}
+</div>
+</td>
+
+<td class="actions">
+
+<a href="tel:{{ a.profile.mobile }}">
+Call
+</a>
+
+<a
+target="_blank"
+rel="noopener"
+href="https://wa.me/91{{ a.profile.mobile }}"
+>
+WhatsApp
+</a>
+
+</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="9" style="text-align:center;padding:30px">
+No Career Compass results found.
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+{% endblock %}
