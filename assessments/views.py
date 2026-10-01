@@ -2238,3 +2238,443 @@ def scholarship_send_to_enquiry(request, scholarship_id):
         )
 
     return redirect("assessments:scholarship_dashboard")
+
+# ============================================================
+# MCTI CYBER FRAUD AWARENESS TEST 2026
+# ============================================================
+
+CYBER_FRAUD_SLUG = "mcti-cyber-fraud-awareness-2026"
+
+
+@transaction.atomic
+def cyber_fraud_start(request):
+
+    assessment = get_object_or_404(
+        Assessment,
+        slug=CYBER_FRAUD_SLUG,
+        is_active=True,
+    )
+
+    if request.method == "POST":
+
+        language = request.POST.get("language", "en").strip().lower()
+        if language not in {"en", "mr", "hi"}:
+            language = "en"
+
+        request.session["cyber_fraud_language"] = language
+
+        full_name = request.POST.get("full_name", "").strip()
+        mobile = request.POST.get("mobile", "").strip()
+        email = request.POST.get("email", "").strip()
+        city = request.POST.get("city", "").strip()
+        current_status = request.POST.get("current_status", "").strip()
+        institution_name = request.POST.get("institution_name", "").strip()
+        consent = request.POST.get("consent_given") == "on"
+
+        digits = "".join(ch for ch in mobile if ch.isdigit())
+
+        if len(digits) == 12 and digits.startswith("91"):
+            digits = digits[2:]
+
+        if (
+            not full_name
+            or len(digits) != 10
+            or not city
+            or not current_status
+            or not consent
+        ):
+            messages.error(
+                request,
+                "Please complete all required fields and enter a valid 10-digit mobile number."
+            )
+        else:
+
+            mobile = digits
+
+            enquiry = (
+                Enquiry.objects
+                .filter(mobile=mobile)
+                .order_by("-created_at")
+                .first()
+            )
+
+            if not enquiry:
+                enquiry_kwargs = {
+                    "name": full_name,
+                    "mobile": mobile,
+                }
+
+                # Optional fields are intentionally not assumed here.
+                try:
+                    enquiry = Enquiry.objects.create(**enquiry_kwargs)
+                except Exception:
+                    enquiry = None
+
+            profile = AssessmentParticipantProfile.objects.create(
+                assessment=assessment,
+                full_name=full_name,
+                mobile=mobile,
+                email=email,
+                qualification=current_status,
+                institution_name=institution_name,
+                district="",
+                city=city,
+                current_status=current_status,
+                career_interest="Cyber Safety Awareness",
+                enquiry=enquiry,
+                consent_given=True,
+            )
+
+            attempt = AssessmentAttempt.objects.create(
+                assessment=assessment,
+                participant_profile=profile,
+                participant_name=full_name,
+                participant_mobile=mobile,
+                participant_email=email,
+                status="started",
+            )
+
+            request.session["cyber_fraud_attempt_id"] = attempt.id
+
+            return redirect(
+                "assessments:cyber_fraud_quiz",
+                attempt_id=attempt.id,
+            )
+
+    return render(
+        request,
+        "assessments/cyber_fraud_start.html",
+        {
+            "assessment": assessment,
+        },
+    )
+
+
+@transaction.atomic
+def cyber_fraud_quiz(request, attempt_id):
+
+    language = request.session.get("cyber_fraud_language", "en")
+    if language not in {"en", "mr", "hi"}:
+        language = "en"
+
+    if request.session.get("cyber_fraud_attempt_id") != attempt_id:
+        messages.error(
+            request,
+            "Please register first to access the Cyber Fraud Awareness Test."
+        )
+        return redirect("assessments:cyber_fraud_start")
+
+    attempt = get_object_or_404(
+        AssessmentAttempt.objects.select_related(
+            "assessment",
+            "participant_profile",
+        ),
+        id=attempt_id,
+        assessment__slug=CYBER_FRAUD_SLUG,
+        status="started",
+    )
+
+    questions = list(
+        attempt.assessment.questions
+        .filter(is_active=True)
+        .prefetch_related("options")
+        .order_by("order", "id")
+    )
+
+    if request.method == "POST":
+
+        submitted_answers = []
+
+        for question in questions:
+
+            option_id = request.POST.get(
+                f"question_{question.id}"
+            )
+
+            if not option_id:
+                messages.error(
+                    request,
+                    "Please answer all 25 questions before submitting."
+                )
+
+                return render(
+                    request,
+                    "assessments/cyber_fraud_quiz.html",
+                    {
+                        "attempt": attempt,
+                        "assessment": attempt.assessment,
+                        "questions": questions,
+                        "language": language,
+                    },
+                )
+
+            option = next(
+                (
+                    item
+                    for item in question.options.all()
+                    if str(item.id) == str(option_id)
+                ),
+                None,
+            )
+
+            if option is None:
+                messages.error(
+                    request,
+                    "Invalid answer detected. Please try again."
+                )
+
+                return render(
+                    request,
+                    "assessments/cyber_fraud_quiz.html",
+                    {
+                        "attempt": attempt,
+                        "assessment": attempt.assessment,
+                        "questions": questions,
+                        "language": language,
+                    },
+                )
+
+            submitted_answers.append(
+                (question, option)
+            )
+
+        score = 0
+        total_marks = 0
+
+        for question, option in submitted_answers:
+
+            is_correct = option.is_correct
+
+            marks_awarded = (
+                question.marks if is_correct else 0
+            )
+
+            total_marks += question.marks
+            score += marks_awarded
+
+            AssessmentAnswer.objects.update_or_create(
+                attempt=attempt,
+                question=question,
+                defaults={
+                    "selected_option": option,
+                    "is_correct": is_correct,
+                    "marks_awarded": marks_awarded,
+                },
+            )
+
+        percentage = (
+            (score / total_marks) * 100
+            if total_marks
+            else 0
+        )
+
+        if score <= 8:
+            band = "Cyber Safety Beginner"
+            title = "Your Cyber Awareness Needs Attention"
+            message = (
+                "You may be vulnerable to common digital scams. "
+                "Build the habit of pausing, verifying and protecting "
+                "your banking and account credentials."
+            )
+
+        elif score <= 15:
+            band = "Cyber Aware Learner"
+            title = "You Are Building Cyber Awareness"
+            message = (
+                "You recognize several common fraud techniques, "
+                "but a few situations could still put you at risk."
+            )
+
+        elif score <= 20:
+            band = "Cyber Aware"
+            title = "You Have Good Cyber Fraud Awareness"
+            message = (
+                "You understand many common digital fraud warning signs "
+                "and safer online practices."
+            )
+
+        else:
+            band = "Cyber Safety Champion"
+            title = "Excellent Cyber Fraud Awareness"
+            message = (
+                "You demonstrate strong awareness of common cyber fraud "
+                "techniques and safer digital behaviour."
+            )
+
+        recommendation = (
+            "Pause before acting on urgent messages. Verify requests "
+            "through official channels. Never share OTP, PIN, password "
+            "or CVV. Avoid unknown links, QR codes and remote-access apps. "
+            "If financial cyber fraud occurs, act quickly and report it "
+            "through your bank/payment provider and official cybercrime channels."
+        )
+
+        AssessmentResult.objects.update_or_create(
+            attempt=attempt,
+            defaults={
+                "result_band": band,
+                "result_title": title,
+                "result_message": message,
+                "recommendation": recommendation,
+            },
+        )
+
+        attempt.score = score
+        attempt.total_marks = total_marks
+        attempt.percentage = percentage
+        attempt.status = "completed"
+        attempt.completed_at = timezone.now()
+
+        attempt.save(
+            update_fields=[
+                "score",
+                "total_marks",
+                "percentage",
+                "status",
+                "completed_at",
+            ]
+        )
+
+        return redirect(
+            "assessments:cyber_fraud_result",
+            attempt_id=attempt.id,
+        )
+
+    return render(
+        request,
+        "assessments/cyber_fraud_quiz.html",
+        {
+            "attempt": attempt,
+            "assessment": attempt.assessment,
+            "questions": questions,
+            "language": language,
+        },
+    )
+
+
+def cyber_fraud_result(request, attempt_id):
+
+    language = request.session.get("cyber_fraud_language", "en")
+    if language not in {"en", "mr", "hi"}:
+        language = "en"
+
+
+    if request.session.get("cyber_fraud_attempt_id") != attempt_id:
+        messages.error(
+            request,
+            "Please register first to access your Cyber Awareness result."
+        )
+        return redirect("assessments:cyber_fraud_start")
+
+    attempt = get_object_or_404(
+        AssessmentAttempt.objects.select_related(
+            "assessment",
+            "participant_profile",
+            "result",
+        ),
+        id=attempt_id,
+        assessment__slug=CYBER_FRAUD_SLUG,
+        status="completed",
+    )
+
+    return render(
+        request,
+        "assessments/cyber_fraud_result.html",
+        {
+            "attempt": attempt,
+            "assessment": attempt.assessment,
+            "result": attempt.result,
+            "language": language,
+        },
+    )
+
+
+# ============================================================
+# MCTI CYBER FRAUD AWARENESS - MANAGEMENT DASHBOARD
+# ============================================================
+
+def cyber_fraud_dashboard(request):
+    if not request.user.is_authenticated:
+        return redirect("staff_login")
+
+    if not (request.user.is_staff or request.user.is_superuser):
+        return redirect("staff_login")
+
+    from django.db.models import Avg
+    from assessments.models import (
+        Assessment,
+        AssessmentAttempt,
+        AssessmentParticipantProfile,
+    )
+
+    assessment = get_object_or_404(
+        Assessment,
+        slug="mcti-cyber-fraud-awareness-2026"
+    )
+
+    profiles = (
+        AssessmentParticipantProfile.objects
+        .filter(assessment=assessment)
+        .order_by("-created_at")
+    )
+
+    attempts = (
+        AssessmentAttempt.objects
+        .filter(assessment=assessment)
+        .select_related("participant_profile")
+        .order_by("-started_at")
+    )
+
+    q = request.GET.get("q", "").strip()
+    status_filter = request.GET.get("status", "").strip()
+
+    if q:
+        from django.db.models import Q
+        attempts = attempts.filter(
+            Q(participant_name__icontains=q) |
+            Q(participant_mobile__icontains=q) |
+            Q(participant_email__icontains=q) |
+            Q(participant_profile__full_name__icontains=q) |
+            Q(participant_profile__mobile__icontains=q) |
+            Q(participant_profile__city__icontains=q)
+        )
+
+    if status_filter:
+        attempts = attempts.filter(status=status_filter)
+
+    all_attempts = AssessmentAttempt.objects.filter(
+        assessment=assessment
+    )
+
+    completed = all_attempts.filter(status="completed")
+
+    avg_score = completed.aggregate(
+        avg=Avg("percentage")
+    )["avg"] or 0
+
+    high_awareness = completed.filter(
+        percentage__gte=80
+    ).count()
+
+    needs_awareness = completed.filter(
+        percentage__lt=60
+    ).count()
+
+    context = {
+        "assessment": assessment,
+        "total_registrations": profiles.count(),
+        "total_started": all_attempts.count(),
+        "total_completed": completed.count(),
+        "avg_score": round(float(avg_score), 1),
+        "high_awareness": high_awareness,
+        "needs_awareness": needs_awareness,
+        "attempts": attempts[:500],
+        "q": q,
+        "status_filter": status_filter,
+    }
+
+    return render(
+        request,
+        "assessments/cyber_fraud_dashboard.html",
+        context
+    )

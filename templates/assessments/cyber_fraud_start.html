@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCTI Cyber Fraud Awareness Test 2026</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#181818}
+.hero{background:#111;color:white;padding:38px 18px;text-align:center;border-bottom:5px solid #f58220}
+.hero h1{margin:0 0 10px;font-size:32px}.hero span{color:#f58220}
+.hero p{max-width:700px;margin:auto;line-height:1.6}
+.wrap{max-width:720px;margin:28px auto;padding:0 16px}
+.card{background:white;border-radius:16px;padding:28px;box-shadow:0 4px 18px #0001}
+label{display:block;font-weight:bold;margin:15px 0 6px}
+input,select{width:100%;padding:13px;border:1px solid #ccc;border-radius:8px;font-size:16px}
+button{width:100%;border:0;background:#f58220;color:#111;font-weight:bold;font-size:18px;padding:15px;border-radius:9px;margin-top:22px;cursor:pointer}
+.note{background:#fff4e8;padding:14px;border-left:4px solid #f58220;margin:18px 0;line-height:1.5}
+.msg{background:#ffe8e8;padding:12px;border-radius:8px;margin-bottom:15px}
+.footer{text-align:center;color:#666;padding:25px;font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="hero">
+<h1>MCTI <span>Cyber Fraud Awareness Test 2026</span></h1>
+<p>Can you spot a digital scam before you become a victim?</p>
+<p><b>FREE  25 Questions  Instant Awareness Result</b></p>
+</div>
+
+<div class="wrap">
+<div class="card">
+
+{% if messages %}
+{% for message in messages %}
+<div class="msg">{{ message }}</div>
+{% endfor %}
+{% endif %}
+
+<h2>Start Your Free Awareness Test</h2>
+
+<div class="note">
+This is an educational cyber-safety awareness activity.
+It is not a professional cybersecurity certification or legal/financial advice.
+</div>
+
+<form method="post">
+{% csrf_token %}
+
+<label>🌐 Choose Language / भाषा निवडा / भाषा चुनें *</label>
+<select name="language" required>
+<option value="en">English</option>
+<option value="mr">मराठी</option>
+<option value="hi">हिंदी</option>
+</select>
+
+<label>Full Name *</label>
+<input name="full_name" required>
+
+<label>Mobile Number *</label>
+<input name="mobile" inputmode="numeric" maxlength="10" required>
+
+<label>Email</label>
+<input name="email" type="email">
+
+<label>School / College / Company</label>
+<input name="institution_name">
+
+<label>Current Status *</label>
+<select name="current_status" required>
+<option value="">Select</option>
+<option>School Student</option>
+<option>College Student</option>
+<option>Working Professional</option>
+<option>Business / Self Employed</option>
+<option>Job Seeker</option>
+<option>Parent / Homemaker</option>
+<option>Other</option>
+</select>
+
+<label>City *</label>
+<input name="city" required>
+
+<label style="font-weight:normal">
+<input type="checkbox" name="consent_given" required style="width:auto">
+ I agree to participate in this awareness test and allow MCTI to contact me regarding educational guidance.
+</label>
+
+<button type="submit">START FREE TEST </button>
+</form>
+
+</div>
+</div>
+
+<div class="footer">
+<b>MCTI Technologies</b><br>
+An Initiative of Maharashtra Computer Training Institute
+</div>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cyber Fraud Awareness Test</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f4f4;font-family:Arial,sans-serif;color:#181818}
+.top{background:#111;color:white;padding:22px;text-align:center;border-bottom:5px solid #f58220}
+.top span{color:#f58220}
+.wrap{max-width:850px;margin:25px auto;padding:0 15px}
+.q{background:white;padding:20px;margin-bottom:16px;border-radius:13px;box-shadow:0 3px 12px #0001}
+.q h3{margin-top:0;font-size:17px;line-height:1.5}
+.opt{display:block;padding:11px;border:1px solid #ddd;border-radius:8px;margin:8px 0;cursor:pointer}
+.opt:hover{border-color:#f58220;background:#fff8f1}
+button{width:100%;background:#f58220;border:0;padding:16px;font-size:18px;font-weight:bold;border-radius:9px;margin:10px 0 30px}
+.msg{background:#ffe5e5;padding:12px;margin-bottom:15px;border-radius:8px}
+</style>
+</head>
+<body>
+
+<div class="top">
+<h2>MCTI <span>Cyber Fraud Awareness Test</span></h2>
+<div>25 Questions  Select one answer for each question</div>
+</div>
+
+<div class="wrap">
+
+{% if messages %}
+{% for message in messages %}
+<div class="msg">{{ message }}</div>
+{% endfor %}
+{% endif %}
+
+<form method="post">
+{% csrf_token %}
+
+{% for question in questions %}
+<div class="q">
+<h3>{{ forloop.counter }}. {% if language == "mr" %}{{ question.question_text_mr|default:question.question_text }}{% elif language == "hi" %}{{ question.question_text_hi|default:question.question_text }}{% else %}{{ question.question_text }}{% endif %}</h3>
+
+{% for option in question.options.all %}
+<label class="opt">
+<input type="radio"
+       name="question_{{ question.id }}"
+       value="{{ option.id }}"
+       required>
+{% if language == "mr" %}{{ option.option_text_mr|default:option.option_text }}{% elif language == "hi" %}{{ option.option_text_hi|default:option.option_text }}{% else %}{{ option.option_text }}{% endif %}
+</label>
+{% endfor %}
+
+</div>
+{% endfor %}
+
+<button type="submit">SUBMIT & VIEW MY RESULT </button>
+</form>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% if language == "mr" %}तुमचा सायबर जागरूकता निकाल{% elif language == "hi" %}आपका साइबर जागरूकता परिणाम{% else %}Your Cyber Awareness Result{% endif %}</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f5f5;font-family:Arial,sans-serif;color:#181818}
+.top{background:#111;color:white;text-align:center;padding:30px 15px;border-bottom:5px solid #f58220}
+.top span{color:#f58220}
+.wrap{max-width:760px;margin:28px auto;padding:0 15px}
+.card{background:white;padding:28px;border-radius:16px;box-shadow:0 4px 18px #0001;margin-bottom:18px}
+.score{text-align:center;font-size:50px;font-weight:bold;color:#f58220}
+.band{text-align:center;font-size:23px;font-weight:bold}
+.tip{padding:12px 0;border-bottom:1px solid #eee;line-height:1.5}
+.alert{background:#fff3e5;border-left:5px solid #f58220;padding:15px;line-height:1.6}
+.footer{text-align:center;padding:25px;color:#666;font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="top">
+<h1>
+{% if language == "mr" %}
+तुमचा <span>सायबर जागरूकता निकाल</span>
+{% elif language == "hi" %}
+आपका <span>साइबर जागरूकता परिणाम</span>
+{% else %}
+Your <span>Cyber Awareness Result</span>
+{% endif %}
+</h1>
+<p>{{ attempt.participant_name }}</p>
+</div>
+
+<div class="wrap">
+
+<div class="card">
+<div class="score">{{ attempt.score }}/{{ attempt.total_marks }}</div>
+{% if language == "mr" %}
+
+    {% if attempt.score <= 8 %}
+    <div class="band">सायबर सुरक्षा नवशिक्या</div>
+    <h2>तुमच्या सायबर जागरूकतेकडे अधिक लक्ष देण्याची गरज आहे</h2>
+    <p>सामान्य डिजिटल फसवणुकीपासून तुम्हाला धोका असू शकतो. कोणतीही कृती करण्यापूर्वी थांबा, पडताळणी करा आणि तुमची बँकिंग व अकाउंटची गोपनीय माहिती सुरक्षित ठेवा.</p>
+
+    {% elif attempt.score <= 15 %}
+    <div class="band">सायबर जागरूक विद्यार्थी</div>
+    <h2>तुमची सायबर जागरूकता वाढत आहे</h2>
+    <p>तुम्ही अनेक सामान्य फसवणुकीच्या पद्धती ओळखता, परंतु काही परिस्थितींमध्ये अजूनही धोका असू शकतो.</p>
+
+    {% elif attempt.score <= 20 %}
+    <div class="band">सायबर जागरूक</div>
+    <h2>तुमची सायबर फसवणूक जागरूकता चांगली आहे</h2>
+    <p>तुम्हाला अनेक सामान्य डिजिटल फसवणुकीची धोक्याची चिन्हे आणि सुरक्षित ऑनलाइन पद्धती समजतात.</p>
+
+    {% else %}
+    <div class="band">सायबर सुरक्षा चॅम्पियन</div>
+    <h2>उत्कृष्ट सायबर फसवणूक जागरूकता</h2>
+    <p>तुम्हाला सामान्य सायबर फसवणुकीच्या पद्धती आणि सुरक्षित डिजिटल वर्तनाची चांगली समज आहे.</p>
+    {% endif %}
+
+{% elif language == "hi" %}
+
+    {% if attempt.score <= 8 %}
+    <div class="band">साइबर सुरक्षा शुरुआती</div>
+    <h2>आपकी साइबर जागरूकता पर अधिक ध्यान देने की जरूरत है</h2>
+    <p>आप सामान्य डिजिटल धोखाधड़ी के प्रति संवेदनशील हो सकते हैं। कोई भी कदम उठाने से पहले रुकें, सत्यापन करें और अपनी बैंकिंग तथा अकाउंट की गोपनीय जानकारी सुरक्षित रखें।</p>
+
+    {% elif attempt.score <= 15 %}
+    <div class="band">साइबर जागरूक शिक्षार्थी</div>
+    <h2>आप अपनी साइबर जागरूकता बढ़ा रहे हैं</h2>
+    <p>आप कई सामान्य धोखाधड़ी के तरीकों को पहचानते हैं, लेकिन कुछ परिस्थितियां अभी भी आपको जोखिम में डाल सकती हैं।</p>
+
+    {% elif attempt.score <= 20 %}
+    <div class="band">साइबर जागरूक</div>
+    <h2>आपकी साइबर फ्रॉड जागरूकता अच्छी है</h2>
+    <p>आप डिजिटल धोखाधड़ी के कई सामान्य चेतावनी संकेतों और सुरक्षित ऑनलाइन व्यवहार को समझते हैं।</p>
+
+    {% else %}
+    <div class="band">साइबर सुरक्षा चैंपियन</div>
+    <h2>उत्कृष्ट साइबर फ्रॉड जागरूकता</h2>
+    <p>आप सामान्य साइबर धोखाधड़ी के तरीकों और सुरक्षित डिजिटल व्यवहार के बारे में अच्छी जागरूकता रखते हैं।</p>
+    {% endif %}
+
+{% else %}
+
+<div class="band">{{ result.result_band }}</div>
+<h2>{{ result.result_title }}</h2>
+<p>{{ result.result_message }}</p>
+
+{% endif %}
+</div>
+
+<div class="card">
+
+{% if language == "mr" %}
+<h2>5 सायबर सुरक्षा नियम</h2>
+<div class="tip"><b>1.</b> OTP, PIN, password किंवा CVV कधीही शेअर करू नका.</div>
+<div class="tip"><b>2.</b> अचानक आलेल्या तातडीच्या banking/KYC links वर विश्वास ठेवू नका.</div>
+<div class="tip"><b>3.</b> अनोळखी QR codes, payment requests आणि संशयास्पद apps बाबत सावध रहा.</div>
+<div class="tip"><b>4.</b> अनोळखी कॉल करणाऱ्यांना remote access किंवा screen-sharing control कधीही देऊ नका.</div>
+<div class="tip"><b>5.</b> आर्थिक cyber fraud झाल्यास त्वरित तुमच्या bank/payment provider शी संपर्क करा आणि अधिकृत cybercrime reporting channels वापरा.</div>
+
+{% elif language == "hi" %}
+<h2>5 साइबर सुरक्षा नियम</h2>
+<div class="tip"><b>1.</b> OTP, PIN, password या CVV कभी साझा न करें।</div>
+<div class="tip"><b>2.</b> अचानक मिले urgent banking/KYC links पर भरोसा न करें।</div>
+<div class="tip"><b>3.</b> अनजान QR codes, payment requests और संदिग्ध apps से सावधान रहें।</div>
+<div class="tip"><b>4.</b> अनजान callers को remote access या screen-sharing control कभी न दें।</div>
+<div class="tip"><b>5.</b> Financial cyber fraud होने पर तुरंत अपने bank/payment provider से संपर्क करें और आधिकारिक cybercrime reporting channels का उपयोग करें।</div>
+
+{% else %}
+<h2>5 Cyber Safety Rules</h2>
+<div class="tip"><b>1.</b> Never share OTP, PIN, password or CVV.</div>
+<div class="tip"><b>2.</b> Do not trust urgent banking/KYC links received unexpectedly.</div>
+<div class="tip"><b>3.</b> Be cautious with unknown QR codes, payment requests and suspicious apps.</div>
+<div class="tip"><b>4.</b> Never give unknown callers remote access or screen-sharing control.</div>
+<div class="tip"><b>5.</b> If financial cyber fraud occurs, contact your bank/payment provider immediately and use official cybercrime reporting channels.</div>
+{% endif %}
+
+</div>
+
+<div class="card">
+<div class="alert">
+{% if language == "mr" %}
+<b>लक्षात ठेवा:</b><br>
+थांबा • पडताळा • सुरक्षित रहा • तक्रार करा.<br><br>
+एखादा कॉल किंवा संदेश भीती, घाई किंवा दबाव निर्माण करतो म्हणून लगेच कृती करू नका.
+{% elif language == "hi" %}
+<b>याद रखें:</b><br>
+रुकें • सत्यापित करें • सुरक्षित रहें • रिपोर्ट करें।<br><br>
+केवल इसलिए तुरंत कदम न उठाएं क्योंकि कोई कॉल या संदेश डर, जल्दबाजी या दबाव पैदा करता है।
+{% else %}
+<b>Remember:</b><br>
+Pause • Verify • Protect • Report.<br><br>
+Do not act only because a caller or message creates fear, urgency or pressure.
+{% endif %}
+</div>
+</div>
+
+</div>
+
+
+<style>
+.mcti-result-actions{
+ max-width:760px;margin:22px auto;padding:22px;background:#fff;
+ border:1px solid #eee;border-radius:16px;text-align:center;
+ box-shadow:0 6px 22px rgba(0,0,0,.07)
+}
+.mcti-result-actions h3{margin:0 0 8px}
+.mcti-result-actions p{color:#555;line-height:1.5}
+.mcti-action-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:15px}
+.mcti-action-row a{padding:12px 17px;border-radius:10px;text-decoration:none;font-weight:700}
+.mcti-wa{background:#25D366;color:white!important}
+.mcti-rate{background:#111;color:white!important}
+
+.mcti-complete-overlay{
+ position:fixed;inset:0;background:rgba(0,0,0,.65);
+ display:none;align-items:center;justify-content:center;
+ padding:18px;z-index:999999
+}
+.mcti-complete-modal{
+ width:100%;max-width:430px;background:#fff;border-radius:20px;
+ padding:28px 22px;text-align:center;
+ box-shadow:0 20px 60px rgba(0,0,0,.3)
+}
+.mcti-complete-modal h2{margin:8px 0}
+.mcti-complete-modal p{color:#555;line-height:1.5}
+.mcti-modal-buttons{display:grid;gap:10px;margin-top:18px}
+.mcti-modal-buttons a,.mcti-modal-buttons button{
+ border:0;border-radius:10px;padding:13px;text-decoration:none;
+ font-weight:700;font-size:15px;cursor:pointer
+}
+.mcti-modal-share{background:#25D366;color:#fff!important}
+.mcti-modal-rate{background:#111;color:#fff!important}
+.mcti-modal-close{background:#f58220;color:#fff}
+</style>
+
+<div class="mcti-result-actions">
+ {% if language == "mr" %}
+ <h3>🎓 इतरांनाही सायबर सुरक्षित बनवा</h3>
+ <p>ही मोफत चाचणी उपयुक्त वाटली?<br>मित्र आणि WhatsApp groups मध्ये शेअर करा.</p>
+ {% elif language == "hi" %}
+ <h3>🎓 दूसरों को भी साइबर सुरक्षित बनाएं</h3>
+ <p>यह मुफ्त टेस्ट उपयोगी लगा?<br>इसे दोस्तों और WhatsApp groups में साझा करें।</p>
+ {% else %}
+ <h3>🎓 Help Another Student</h3>
+ <p>Found this free tool useful?<br>Share it with your friends and WhatsApp groups.</p>
+ {% endif %}
+
+ <div class="mcti-action-row">
+   <a class="mcti-wa"
+      target="_blank" rel="noopener"
+      href="https://wa.me/?text=Can%20you%20spot%20a%20digital%20scam%3F%20Take%20the%20FREE%20MCTI%20Cyber%20Fraud%20Awareness%20Test.%0A%0Ahttps://mctitechnologies.com/assessment/cyber-fraud-awareness/">
+      📲 {% if language == "mr" %}मित्रांसोबत शेअर करा{% elif language == "hi" %}दोस्तों के साथ साझा करें{% else %}Share with Friends{% endif %}
+   </a>
+
+   <a class="mcti-rate"
+      target="_blank" rel="noopener"
+      href="https://g.page/r/Cd5zZsaq_ayWEBE/review">
+      ⭐ {% if language == "mr" %}तुमचा अनुभव सांगा{% elif language == "hi" %}अपना अनुभव बताएं{% else %}Rate Your Experience{% endif %}
+   </a>
+ </div>
+
+ <div style="font-size:11px;color:#888;margin-top:12px">
+   {% if language == "mr" %}Google Review ऐच्छिक आहे. कृपया फक्त तुमचा खरा अनुभव शेअर करा.{% elif language == "hi" %}Google Review वैकल्पिक है। कृपया केवल अपना वास्तविक अनुभव साझा करें।{% else %}Google Review is optional. Please share only your genuine experience.{% endif %}
+ </div>
+</div>
+
+<div id="cyberFraudCompletePopup" class="mcti-complete-overlay">
+ <div class="mcti-complete-modal">
+
+   <div style="font-size:44px">🎉</div>
+   <h2>{% if language == "mr" %}सायबर जागरूकता चाचणी पूर्ण झाली!{% elif language == "hi" %}साइबर जागरूकता टेस्ट पूरी हुई!{% else %}Cyber Awareness Test Completed!{% endif %}</h2>
+
+   <p>
+{% if language == "mr" %}
+तुमचा निकाल तयार आहे.<br>
+ही मोफत चाचणी शेअर करा आणि इतरांनाही सायबर सुरक्षित राहण्यास मदत करा.
+{% elif language == "hi" %}
+आपका परिणाम तैयार है।<br>
+इस मुफ्त टेस्ट को साझा करें और दूसरों को भी साइबर सुरक्षित रहने में मदद करें।
+{% else %}
+Your result is ready.<br>
+Share this free tool and help someone else benefit too.
+{% endif %}
+</p>
+
+   <div class="mcti-modal-buttons">
+
+     <a class="mcti-modal-share"
+        target="_blank" rel="noopener"
+        href="https://wa.me/?text=Can%20you%20spot%20a%20digital%20scam%3F%20Take%20the%20FREE%20MCTI%20Cyber%20Fraud%20Awareness%20Test.%0A%0Ahttps://mctitechnologies.com/assessment/cyber-fraud-awareness/">
+        📲 {% if language == "mr" %}मित्रांसोबत शेअर करा{% elif language == "hi" %}दोस्तों के साथ साझा करें{% else %}Share with Friends{% endif %}
+     </a>
+
+     <a class="mcti-modal-rate"
+        target="_blank" rel="noopener"
+        href="https://g.page/r/Cd5zZsaq_ayWEBE/review">
+        ⭐ {% if language == "mr" %}तुमचा अनुभव सांगा{% elif language == "hi" %}अपना अनुभव बताएं{% else %}Rate Your Experience{% endif %}
+     </a>
+
+     <button type="button"
+             class="mcti-modal-close"
+             onclick="document.getElementById('cyberFraudCompletePopup').style.display='none'">
+        {% if language == "mr" %}माझा निकाल पहा{% elif language == "hi" %}मेरा परिणाम देखें{% else %}View My Result{% endif %}
+     </button>
+
+   </div>
+ </div>
+</div>
+
+<script>
+(function(){
+ var key="cyberFraud_completed_{{ attempt.id|default:'result' }}";
+ try{
+   if(!sessionStorage.getItem(key)){
+      var p=document.getElementById("cyberFraudCompletePopup");
+      if(p) p.style.display="flex";
+      sessionStorage.setItem(key,"1");
+   }
+ }catch(e){
+   var p=document.getElementById("cyberFraudCompletePopup");
+   if(p) p.style.display="flex";
+ }
+})();
+</script>
+
+
+<div class="footer">
+<b>MCTI Technologies</b><br>
+An Initiative of Maharashtra Computer Training Institute
+</div>
+
+</body>
+</html>
