@@ -921,4 +921,22 @@ function logWhatsAppAndOpen(
 
 </script>
 
+
+<!-- FOLLOWUP_PAGINATION_FIX -->
+<div style="margin:20px 0;padding:16px;background:#fff;
+border:1px solid #e5e7eb;border-radius:10px;text-align:center">
+<a href="{% url 'enquiry_dashboard' %}"
+style="display:inline-block;padding:10px 15px;border-radius:7px;
+background:#ff7200;color:white;text-decoration:none">
+All Enquiries / Assign Leads</a>
+{% if enquiry_page.has_previous %}
+<a style="margin:0 12px" href="?{{ enquiry_page_query }}&amp;page={{ enquiry_page.previous_page_number }}">← Previous</a>
+{% endif %}
+<span style="margin:0 12px">Page {{ enquiry_page.number }} /
+{{ enquiry_page.paginator.num_pages }} ·
+{{ enquiry_page.paginator.count }} enquiries</span>
+{% if enquiry_page.has_next %}
+<a style="margin:0 12px" href="?{{ enquiry_page_query }}&amp;page={{ enquiry_page.next_page_number }}">Next →</a>
+{% endif %}
+</div>
 {% endblock %}

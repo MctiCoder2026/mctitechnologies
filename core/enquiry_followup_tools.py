@@ -137,8 +137,14 @@ def complete_enquiry_followup(request, enquiry_id):
     elif not notes or len(notes) > 2000:
         error = "Add notes (maximum 2000 characters)."
     elif result != "closed":
+        value = request.POST.get("next_contact_date", "").strip()
         try:
-            next_date = date.fromisoformat(request.POST.get("next_contact_date", ""))
+            next_date = (
+                date.fromisoformat(value) if value
+                else timezone.localdate() + timedelta(
+                    days=1 if result == "no_answer" else 2
+                )
+            )
             if next_date <= timezone.localdate():
                 raise ValueError()
         except ValueError:
@@ -207,3 +213,30 @@ def decorate_leads(groups, today):
                     a.created_by.get_full_name() or a.created_by.username
                 ) if a.created_by else "Deleted user"
     return groups
+
+
+def schedule_action_followup(enquiry_id, user, action, campaign_key=None):
+    days = (
+        1 if action == "call"
+        else 7 if campaign_key == "kamotheAnniversaryExistingStudent"
+        else 2
+    )
+    with transaction.atomic():
+        enquiry = Enquiry.objects.select_for_update().get(pk=enquiry_id)
+        if enquiry.status in ("converted", "closed"):
+            return enquiry.followup_date
+        old_date = enquiry.followup_date
+        next_date = timezone.localdate() + timedelta(days=days)
+        enquiry.followup_date = next_date
+        enquiry.status = "followup"
+        enquiry.save(update_fields=["followup_date", "status"])
+        EnquiryActivity.objects.create(
+            enquiry=enquiry, activity_type="followup", created_by=user,
+            message=(
+                f"Next follow-up automatically scheduled after {action} action. "
+                f"Previous due: {old_date or 'Not scheduled'}. "
+                f"Next follow-up: {next_date}. "
+                "Action initiation does not confirm successful contact."
+            ),
+        )
+        return next_date

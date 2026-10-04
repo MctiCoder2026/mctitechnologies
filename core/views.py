@@ -5060,12 +5060,13 @@ def enquiry_dashboard(request):
         .count()
     )
 
-    enquiries = (
-        enquiries
-        .order_by(
-            "-created_at"
-        )[:100]
-    )
+    from django.core.paginator import Paginator
+    enquiry_page = Paginator(
+        enquiries.order_by("-created_at", "-pk"), 100
+    ).get_page(request.GET.get("page"))
+    enquiry_page_params = request.GET.copy()
+    enquiry_page_params.pop("page", None)
+    enquiries = enquiry_page.object_list
 
     todays_followups = (
         count_queryset
@@ -5158,6 +5159,8 @@ def enquiry_dashboard(request):
             "converted": converted,
             "closed": closed,
             "enquiries": enquiries,
+            "enquiry_page": enquiry_page,
+            "enquiry_page_query": enquiry_page_params.urlencode(),
             "todays_followups": todays_followups,
             "overdue_followups": overdue_followups,
             "upcoming_followups": upcoming_followups,
@@ -5372,9 +5375,22 @@ def enquiry_detail(
 
             if form.is_valid():
 
-                updated_enquiry = (
-                    form.save()
-                )
+                updated_enquiry = form.save(commit=False)
+                if updated_enquiry.status in ("converted", "closed"):
+                    updated_enquiry.followup_date = None
+                else:
+                    from datetime import timedelta
+                    today = timezone.localdate()
+                    selected_date = updated_enquiry.followup_date
+                    if selected_date is None or (
+                        selected_date == old_followup_date
+                        and selected_date <= today
+                    ):
+                        updated_enquiry.followup_date = today + timedelta(days=2)
+                    if updated_enquiry.status == "new":
+                        updated_enquiry.status = "followup"
+                updated_enquiry.save()
+                form.save_m2m()
 
                 if old_status != updated_enquiry.status:
                     EnquiryActivity.objects.create(
@@ -5591,6 +5607,7 @@ def delete_enquiry(request, enquiry_id):
 # ============================================================
 
 @login_required
+@transaction.atomic
 def log_enquiry_call(
     request,
     enquiry_id
@@ -5612,6 +5629,8 @@ def log_enquiry_call(
 
     if request.method == "POST":
 
+        from .enquiry_followup_tools import schedule_action_followup
+        schedule_action_followup(enquiry.pk, request.user, "call")
         EnquiryActivity.objects.create(
             enquiry=enquiry,
             activity_type="call",
@@ -5632,6 +5651,7 @@ def log_enquiry_call(
 # ============================================================
 
 @login_required
+@transaction.atomic
 def log_enquiry_whatsapp(
     request,
     enquiry_id
@@ -5701,7 +5721,10 @@ def log_enquiry_whatsapp(
             created_by=request.user
         )
 
-        # Follow-up schedule changes only when staff saves a result.
+        from .enquiry_followup_tools import schedule_action_followup
+        schedule_action_followup(
+            enquiry.pk, request.user, "whatsapp", campaign_key,
+        )
 
     return redirect(
         "enquiry_detail",
