@@ -325,6 +325,55 @@
 
     </div>
 
+
+    <div style="margin:16px 0;">
+        {% if latest_attempt %}
+        <a id="career-performance-whatsapp"
+           data-mobile="{{ profile.mobile }}"
+           target="_blank" rel="noopener noreferrer"
+           style="display:none;background:#128c7e;color:white;padding:12px 18px;border-radius:9px;text-decoration:none;font-weight:bold;">
+            WhatsApp Performance भेजें
+        </a>
+        <span id="career-performance-mobile-error" hidden style="color:#b42318;">
+            WhatsApp ke liye valid mobile number required hai.
+        </span>
+        <textarea id="career-performance-message" hidden>
+*MCTI Career Performance Report*
+
+Hello {{ profile.full_name }},
+Here is your latest assessment performance.
+
+*Aptitude Result*
+Overall Score: {{ latest_attempt.score_percentage }}%
+Correct Answers: {{ latest_attempt.correct_answers }}/{{ latest_attempt.total_questions }}
+{% if latest_attempt.completed_at %}Test Date: {{ latest_attempt.completed_at|date:"d M Y" }}{% endif %}
+
+*Category Scores*
+Numerical Aptitude: {{ latest_attempt.numerical_score }}%
+Logical Reasoning: {{ latest_attempt.logical_score }}%
+Verbal Ability: {{ latest_attempt.verbal_score }}%
+Computer / Digital: {{ latest_attempt.computer_score }}%
+Career / Work Aptitude: {{ latest_attempt.career_score }}%
+{% if latest_recommendation %}
+*Career Guidance*
+Strongest Area: {{ latest_recommendation.strongest_area }}
+Area to Improve: {{ latest_recommendation.improvement_area }}
+{% for item in top_recommendations %}
+{{ item.rank }}. {{ item.career_title }} — {{ item.match_percentage }}% Match
+{% if item.recommended_course %}Recommended Course: {{ item.recommended_course }}{% endif %}
+{% endfor %}
+{% endif %}
+Contact your MCTI counsellor to discuss your next learning steps.
+
+*MCTI Technologies*
+An Initiative by Maharashtra Computer Training Institute
+https://mctitechnologies.com
+        </textarea>
+        {% else %}
+        <span style="color:#777;">Performance sharing will be available after the aptitude test.</span>
+        {% endif %}
+    </div>
+
     <div class="hero">
 
         <h1>
@@ -829,6 +878,29 @@
     </div>
 
 </div>
+
+
+<script>
+(function () {
+    const link = document.getElementById("career-performance-whatsapp");
+    const message = document.getElementById("career-performance-message");
+    if (!link || !message) return;
+
+    let phone = (link.dataset.mobile || "").replace(/[^0-9]/g, "");
+    if (phone.length === 14 && phone.startsWith("0091")) phone = phone.slice(2);
+    if (phone.length === 11 && phone.startsWith("0")) phone = phone.slice(1);
+    if (/^[6-9][0-9]{9}$/.test(phone)) phone = "91" + phone;
+
+    if (!/^91[6-9][0-9]{9}$/.test(phone)) {
+        document.getElementById("career-performance-mobile-error").hidden = false;
+        return;
+    }
+
+    link.href = "https://wa.me/" + phone + "?text=" +
+        encodeURIComponent(message.value.trim());
+    link.style.display = "inline-block";
+})();
+</script>
 
 </body>
 </html>

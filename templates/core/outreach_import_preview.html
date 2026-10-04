@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Outreach Import Preview | MCTI</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f5f6f8;
+    color:#222;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+    padding:30px 20px;
+}
+
+.header{
+    margin-bottom:22px;
+}
+
+.header h1{
+    margin:0 0 7px;
+}
+
+.subtitle{
+    color:#666;
+}
+
+.info{
+    background:#fff;
+    border-radius:12px;
+    padding:18px;
+    margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    margin-bottom:20px;
+}
+
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    border-top:4px solid #ff7a00;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+.number{
+    font-size:30px;
+    font-weight:700;
+}
+
+.label{
+    margin-top:5px;
+    color:#666;
+}
+
+.warning{
+    background:#fff7ed;
+    border-left:4px solid #ff7a00;
+    padding:15px;
+    margin-bottom:20px;
+    border-radius:7px;
+}
+
+.year-panel{
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+    margin-bottom:20px;
+}
+
+.year-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+    margin-top:15px;
+}
+
+.year{
+    background:#f5f6f8;
+    border-radius:8px;
+    padding:12px;
+    text-align:center;
+}
+
+.year strong{
+    display:block;
+    font-size:20px;
+}
+
+.actions{
+    display:flex;
+    gap:10px;
+}
+
+.back{
+    background:#111;
+    color:#fff;
+    padding:12px 18px;
+    border-radius:8px;
+    text-decoration:none;
+    font-weight:600;
+}
+
+@media(max-width:700px){
+
+    .cards{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .year-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+
+        <h1>🔍 Outreach Import Preview</h1>
+
+        <div class="subtitle">
+            Review your old student data before importing.
+        </div>
+
+    </div>
+
+
+    <div class="info">
+
+        <strong>File:</strong>
+        {{ filename }}
+
+        <br><br>
+
+        <strong>Import Branch:</strong>
+        {{ branch_name }}
+
+    </div>
+
+
+    <div class="cards">
+
+        <div class="card">
+            <div class="number">
+                {{ total_rows }}
+            </div>
+            <div class="label">
+                Total Rows
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="number">
+                {{ ready_rows }}
+            </div>
+            <div class="label">
+                Valid Students
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="number">
+                {{ duplicate_rows }}
+            </div>
+            <div class="label">
+                Duplicate Mobiles
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="number">
+                {{ invalid_rows }}
+            </div>
+            <div class="label">
+                Invalid / No Mobile
+            </div>
+        </div>
+
+    </div>
+
+
+    {% if duplicate_rows %}
+
+    <div class="warning">
+        <strong>Duplicate warning:</strong>
+        {{ duplicate_rows }} mobile number(s) already exist
+        or appear more than once in this Excel.
+    </div>
+
+    {% endif %}
+
+
+    <div class="year-panel">
+
+        <h3>Admission Year Summary</h3>
+
+        <div class="year-grid">
+
+            {% for year,count in year_counts %}
+
+            <div class="year">
+                <strong>{{ count }}</strong>
+                {{ year }}
+            </div>
+
+            {% empty %}
+
+            No year information found.
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+    <div class="warning">
+        <strong>No data has been imported yet.</strong><br>
+        This page is preview only.
+    </div>
+
+
+    <div class="actions">
+
+        <a
+            href="{% url 'outreach_dashboard' %}"
+            class="back"
+        >
+            ← Cancel
+        </a>
+
+        {% if ready_rows > 0 %}
+
+        <form
+            method="post"
+            action="{% url 'outreach_import' %}"
+            style="margin:0;"
+        >
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="temp_path"
+                value="{{ temp_path }}"
+            >
+
+            <input
+                type="hidden"
+                name="branch"
+                value="{{ branch }}"
+            >
+
+            <button
+                type="submit"
+                style="
+                    border:0;
+                    background:#ff7a00;
+                    color:white;
+                    padding:12px 20px;
+                    border-radius:8px;
+                    font-weight:700;
+                    cursor:pointer;
+                "
+                onclick="this.disabled=true; this.innerText='Importing...'; this.form.submit();"
+            >
+                ✓ Confirm Import {{ ready_rows }} Students
+            </button>
+
+        </form>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

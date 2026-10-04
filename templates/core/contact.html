@@ -82,79 +82,206 @@ Contact Us | MCTI Technologies
 
             </div>
 
-            <form method="POST">
+            <form method="POST" id="mctiEnquiryForm">
 
                 {% csrf_token %}
 
+                {% if form.non_field_errors %}
+                    <div class="mcti-form-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
                 <div class="mcti-form-row">
 
                     <div class="mcti-form-group">
-
-                        <label>Name</label>
-
+                        <label>Name <strong>*</strong></label>
                         {{ form.name }}
-
+                        {{ form.name.errors }}
                     </div>
 
                     <div class="mcti-form-group">
-
-                        <label>Mobile Number</label>
-
+                        <label>Mobile Number <strong>*</strong></label>
                         {{ form.mobile }}
-
+                        {{ form.mobile.errors }}
                     </div>
 
                 </div>
 
-
                 <div class="mcti-form-group">
-
-                    <label>Email</label>
-
-                    {{ form.email }}
-
+                    <label>Current Status <small>(Optional)</small></label>
+                    {{ form.current_status }}
+                    {{ form.current_status.errors }}
                 </div>
-
 
                 <div class="mcti-form-row">
 
                     <div class="mcti-form-group">
+                        <label>Interested Course <strong>*</strong></label>
 
-                        <label>Interested Course</label>
+                        <div class="mcti-course-search-wrap" style="position:relative;">
+                            <input
+                                type="text"
+                                id="courseSearch"
+                                class="form-control"
+                                placeholder="Type course name..."
+                                autocomplete="off">
 
-                        {{ form.course }}
+                            <div
+                                id="courseSuggestions"
+                                style="
+                                    display:none;
+                                    position:absolute;
+                                    top:100%;
+                                    left:0;
+                                    right:0;
+                                    z-index:1000;
+                                    background:#fff;
+                                    border:1px solid #ddd;
+                                    border-radius:8px;
+                                    max-height:260px;
+                                    overflow-y:auto;
+                                    box-shadow:0 8px 20px rgba(0,0,0,.12);
+                                ">
+                            </div>
 
+                            <div style="display:none;">
+                                {{ form.course }}
+                            </div>
+                        </div>
+
+                        <div id="selectedCourseText"
+                             style="display:none; margin-top:8px; font-size:14px;">
+                        </div>
+
+                        {{ form.course.errors }}
                     </div>
 
                     <div class="mcti-form-group">
-
-                        <label>Preferred Branch</label>
-
+                        <label>Preferred Branch <strong>*</strong></label>
                         {{ form.branch }}
-
+                        {{ form.branch.errors }}
                     </div>
 
                 </div>
 
-
                 <div class="mcti-form-group">
-
-                    <label>Message</label>
-
-                    {{ form.message }}
-
+                    <label>Email <small>(Optional)</small></label>
+                    {{ form.email }}
+                    {{ form.email.errors }}
                 </div>
 
+                <div class="mcti-form-group">
+                    <label>Message <small>(Optional)</small></label>
+                    {{ form.message }}
+                    {{ form.message.errors }}
+                </div>
 
                 <button
                     type="submit"
                     class="mcti-contact-submit">
-
                     Send Enquiry →
-
                 </button>
 
             </form>
+
+            <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const searchInput = document.getElementById("courseSearch");
+                const courseSelect = document.getElementById("id_course");
+                const suggestions = document.getElementById("courseSuggestions");
+                const selectedText = document.getElementById("selectedCourseText");
+
+                if (!searchInput || !courseSelect || !suggestions) return;
+
+                let timer = null;
+
+                function closeSuggestions() {
+                    suggestions.style.display = "none";
+                    suggestions.innerHTML = "";
+                }
+
+                function clearSelection() {
+                    courseSelect.value = "";
+                    selectedText.style.display = "none";
+                    selectedText.textContent = "";
+                }
+
+                searchInput.addEventListener("input", function () {
+                    const query = this.value.trim();
+
+                    clearSelection();
+                    clearTimeout(timer);
+
+                    if (query.length < 2) {
+                        closeSuggestions();
+                        return;
+                    }
+
+                    timer = setTimeout(function () {
+                        fetch("{% url 'public_course_search' %}?q=" + encodeURIComponent(query))
+                            .then(function (response) {
+                                if (!response.ok) {
+                                    throw new Error("Course search failed");
+                                }
+                                return response.json();
+                            })
+                            .then(function (data) {
+                                suggestions.innerHTML = "";
+
+                                if (!data.results || data.results.length === 0) {
+                                    const empty = document.createElement("div");
+                                    empty.textContent = "No matching course found";
+                                    empty.style.padding = "12px";
+                                    empty.style.color = "#666";
+                                    suggestions.appendChild(empty);
+                                    suggestions.style.display = "block";
+                                    return;
+                                }
+
+                                data.results.forEach(function (course) {
+                                    const item = document.createElement("div");
+                                    item.textContent = course.title;
+                                    item.style.padding = "11px 12px";
+                                    item.style.cursor = "pointer";
+                                    item.style.borderBottom = "1px solid #eee";
+
+                                    item.addEventListener("mouseenter", function () {
+                                        this.style.background = "#fff4ec";
+                                    });
+
+                                    item.addEventListener("mouseleave", function () {
+                                        this.style.background = "#fff";
+                                    });
+
+                                    item.addEventListener("click", function () {
+                                        courseSelect.value = String(course.id);
+                                        searchInput.value = course.title;
+
+                                        selectedText.textContent = "✓ Selected: " + course.title;
+                                        selectedText.style.display = "block";
+
+                                        closeSuggestions();
+                                    });
+
+                                    suggestions.appendChild(item);
+                                });
+
+                                suggestions.style.display = "block";
+                            })
+                            .catch(function () {
+                                closeSuggestions();
+                            });
+                    }, 250);
+                });
+
+                document.addEventListener("click", function (event) {
+                    if (!event.target.closest(".mcti-course-search-wrap")) {
+                        closeSuggestions();
+                    }
+                });
+            });
+            </script>
 
         </div>
 

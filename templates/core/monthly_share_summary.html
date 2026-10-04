@@ -1,0 +1,80 @@
+<section class="card">
+<h2>Monthly Collection &amp; Partner Settlement</h2>
+<div class="summary-grid">
+<div class="summary-box">
+<div class="summary-label">Total Collection — Fresh + Old Fees</div>
+<div class="summary-value">₹{{ closing.collection_amount|floatformat:2 }}</div>
+</div>
+<div class="summary-box">
+<div class="summary-label">Total Monthly Expenses</div>
+<div class="summary-value">₹{{ closing.total_expenses|floatformat:2 }}</div>
+</div>
+<div class="summary-box">
+<div class="summary-label">
+{% if closing.cash_profit < 0 %}Net Loss{% else %}Net Profit{% endif %}
+</div>
+<div class="summary-value {% if closing.cash_profit < 0 %}loss{% else %}profit{% endif %}">
+₹{{ net_absolute|floatformat:2 }}
+</div>
+</div>
+</div>
+<p class="info">Net Profit / Loss = Actual Collection − Total Expenses.</p>
+{% if preview_enabled %}
+<div class="summary-grid" style="margin-top:16px">
+<div class="summary-box">
+<div class="summary-label">Reserve Fund</div>
+<div class="summary-value">₹{{ closing.reserve_fund_amount|floatformat:2 }}</div>
+</div>
+<div class="summary-box">
+<div class="summary-label">Partner Settlement After Reserve</div>
+<div class="summary-value {% if after_reserve < 0 %}loss{% else %}profit{% endif %}">
+₹{{ after_reserve|floatformat:2 }}
+</div>
+</div>
+</div>
+<p class="info">Partner settlement = Net Profit / Loss − Reserve Fund.</p>
+{% endif %}
+
+
+{% if preview_enabled %}
+<h3 style="margin-top:24px">Calculated Partner Shares</h3>
+<p class="info">
+{% if closing.status == "draft" %}
+Draft preview — save changes to refresh amounts.
+{% else %}
+Submitted preview — shares will be saved on validation.
+{% endif %}
+</p>
+{% if share_error %}
+<div class="warning">{{ share_error }}</div>
+{% elif share_rows %}
+<div style="overflow-x:auto">
+<table style="width:100%;border-collapse:collapse">
+<thead><tr>
+<th style="padding:12px;text-align:left">Partner</th>
+<th style="padding:12px;text-align:right">Share</th>
+<th style="padding:12px;text-align:right">Amount</th>
+</tr></thead>
+<tbody>
+{% for row in share_rows %}
+<tr style="border-top:1px solid #e2e8f0">
+<td style="padding:14px 12px"><strong>{{ row.partner.partner_name }}</strong></td>
+<td style="padding:14px 12px;text-align:right">
+{{ row.partner.share_percentage|floatformat:2 }}%</td>
+<td style="padding:14px 12px;text-align:right"
+class="{% if row.loss %}loss{% else %}profit{% endif %}">
+<strong>₹{{ row.absolute_amount|floatformat:2 }}</strong><br>
+<small>{% if row.loss %}Loss share{% else %}Profit share{% endif %}</small>
+</td>
+</tr>
+{% endfor %}
+</tbody></table>
+</div>
+<p class="info">Calculated share does not confirm payment.</p>
+{% else %}
+<div class="warning">Configure active branch partners before submission.</div>
+{% endif %}
+{% else %}
+<p class="info">Final amounts and payment status appear in the saved partner shares below.</p>
+{% endif %}
+</section>

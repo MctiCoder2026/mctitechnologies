@@ -4,6 +4,9 @@
 <div style="max-width:1050px;margin:25px auto;padding:16px">
   <div style="background:#191919;color:white;border-left:6px solid #ff7200;padding:22px;border-radius:12px;margin-bottom:18px">
     <h1>Trainer Dashboard</h1>
+{% load payroll_links %}
+{% payroll_links %}
+
     <p>{{ trainer.name }} · {{ trainer.branch }} · Your assigned students and topics · up to 3 different topics per day</p>
   </div>
   <form method="post" action="{% url 'lms:trainer_logout' %}" style="text-align:right;margin-bottom:15px">

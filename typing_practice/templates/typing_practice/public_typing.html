@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Free English Typing Practice | MCTI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:#f5f6f8;color:#151515}
+.top{background:#111827;color:white;padding:17px 22px;font-weight:900;font-size:21px}
+.o{color:#ff7200}
+.wrap{max-width:1050px;margin:auto;padding:30px 18px 60px}
+.hero{background:#111827;color:white;border-radius:22px;padding:38px 28px;text-align:center}
+.hero h1{font-size:38px;margin:0 0 12px}
+.hero p{color:#ddd;font-size:17px;line-height:1.6}
+.btn{display:inline-block;background:#ff7200;color:white;text-decoration:none;padding:13px 20px;border-radius:9px;font-weight:800;margin:6px}
+.btn.dark{background:#292f3a}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:24px}
+.card{background:white;padding:22px;border-radius:16px;box-shadow:0 3px 15px #0001}
+.card h3{margin-top:5px}
+.free{color:#16803a;font-weight:800}
+.cta{margin-top:25px;background:#fff1e6;border-radius:17px;padding:25px;text-align:center}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.hero h1{font-size:29px}}
+</style>
+</head>
+<body>
+<div class="top">MCTI <span class="o">Typing Lab</span></div>
+<div class="wrap">
+
+<div class="hero">
+<h1>How Fast Can You <span class="o">Type?</span></h1>
+<p>Improve English typing speed, accuracy and keyboard confidence with MCTI's interactive Typing Lab.</p>
+<a class="btn" href="#free">Start Free Practice →</a>
+<a class="btn dark" href="{% url 'student_login' %}">Existing Student Login</a>
+</div>
+
+<div id="free" class="grid">
+
+{% for lesson in lessons %}
+<div class="card">
+<div class="free">✓ FREE LESSON {{ lesson.order }}</div>
+<h3>{{ lesson.title }}</h3>
+<p>Target {{ lesson.target_wpm }} WPM · {{ lesson.target_accuracy }}% accuracy</p>
+<a class="btn" href="{% url 'typing_practice:public_practice' lesson.slug %}">Practice Now</a>
+</div>
+{% endfor %}
+
+<div class="card">
+<div class="free">🎮 FREE GAME</div>
+<h3>Letter Rush</h3>
+<p>Challenge your keyboard reflexes in a quick typing game.</p>
+<a class="btn" href="{% url 'typing_practice:public_game' %}">Play Now</a>
+</div>
+
+</div>
+
+<div class="cta">
+<h2>Want the complete Typing Journey?</h2>
+<p>Practice more lessons, take benchmark exams and track your improvement.</p>
+<a class="btn" href="{% url 'typing_practice:public_register' %}">Continue FREE →</a>
+</div>
+
+</div>
+</body>
+</html>

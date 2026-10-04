@@ -185,3 +185,8 @@ urlpatterns = [
         name="career_compass_update_status"
     ),
 ]
+from . import assessment_report_views
+urlpatterns += [
+    path("reports/", assessment_report_views.assessment_reports,
+         name="assessment_reports"),
+]

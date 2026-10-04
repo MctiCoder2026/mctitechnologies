@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Employee & Salary | MCTI</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f5f5;color:#171717;font-family:Arial}
+main{max-width:1200px;margin:25px auto;padding:18px}
+header{background:#171717;color:#fff;border-bottom:4px solid #ff7200;
+padding:24px;border-radius:14px}h1{margin:0;font-size:25px}
+.panel{background:white;border:1px solid #e5e5e5;border-radius:14px;
+padding:24px;margin-top:20px}h2{font-size:19px;margin:0 0 18px}
+.forms{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+label{display:block;margin-bottom:7px;font-size:13px;font-weight:bold}
+input,select,textarea{max-width:100%;padding:10px;border:1px solid #ccc;
+border-radius:7px;font:14px Arial}
+.forms input,.forms select,.forms textarea{width:100%}
+button,.link{display:inline-block;background:#ff7200;color:white;border:0;
+padding:10px 14px;border-radius:7px;text-decoration:none;cursor:pointer;font-weight:bold}
+.errorlist{color:#b42318}small{color:#666}.scroll{overflow:auto}
+table{width:100%;border-collapse:collapse;white-space:nowrap}
+th,td{padding:12px;border-bottom:1px solid #eee;text-align:left;font-size:13px}
+th{background:#fff7f0}.issue{border:1px solid #e5e5e5;border-radius:10px;padding:17px;margin:12px 0}
+.issue p{white-space:pre-wrap;line-height:1.6}.reply{border-left:3px solid #ff7200;padding-left:12px}
+.message{padding:12px;background:#fff0e4;border-radius:8px;margin-top:12px}
+@media(max-width:750px){.forms{grid-template-columns:1fr}.panel{padding:18px}}
+</style></head><body><main>
+<header><h1>{% if manager %}Employee & Salary Management{% else %}My Profile & Salary{% endif %}</h1>
+<p>MCTI Technologies</p>
+{% if manager %}<p>Open salary issues: {{ open_issues }}</p>{% endif %}</header>
+{% for message in messages %}<div class="message">{{ message }}</div>{% endfor %}
+
+{% if manager %}
+<div class="forms">
+<section class="panel"><h2>Employee Profile</h2>
+<p><small>Select an existing login. For a new trainer/intern, enter a new username and password.</small></p>
+<form method="post">{% csrf_token %}
+<input type="hidden" name="action" value="profile">
+{{ profile_form.as_p }}<button>Save Profile</button>
+<a href="{% url 'branch_employee_payroll' %}">New Profile</a>
+</form></section>
+<section class="panel"><h2>Monthly Salary / Stipend</h2>
+<p><small>Save drafts here. To update a draft, use the same employee and salary month.</small></p>
+<form method="post" action="{% url 'branch_employee_payroll' %}">{% csrf_token %}
+<input type="hidden" name="action" value="salary">
+{{ salary_form.as_p }}<button>Save Draft</button>
+</form></section>
+</div>
+<section class="panel"><h2>Employees</h2><div class="scroll"><table>
+<tr><th>Name</th><th>Login</th><th>Branch</th><th>Designation</th><th>Type</th><th>Action</th></tr>
+{% for e in profiles %}<tr><td>{{ e.name }}</td><td>{{ e.user.username }}</td>
+<td>{{ e.branch|title }}</td><td>{{ e.designation }}</td>
+<td>{{ e.get_employment_type_display }}</td>
+<td><a href="?edit={{ e.pk }}">Edit Profile</a></td></tr>
+{% empty %}<tr><td colspan="6">Add the first employee profile above.</td></tr>{% endfor %}
+</table></div></section>
+{% else %}
+<section class="panel"><h2>My Profile</h2>
+{% if employee %}
+<p><b>{{ employee.name }}</b> · {{ employee.user.username }}</p>
+<p>{{ employee.branch|title }} · {{ employee.designation }} · {{ employee.get_employment_type_display }}</p>
+<p>Joining date: {{ employee.joining_date|date:"d M Y" }}</p>
+{% else %}<p>Your branch head has not configured your employee profile yet.</p>{% endif %}
+</section>
+{% endif %}
+
+<section class="panel"><h2>Monthly Details</h2><div class="scroll"><table>
+<tr><th>Employee / Month</th><th>Basic / Stipend</th><th>Allowances</th>
+<th>Deductions</th><th>Net Payable</th><th>Status</th><th>Payment / Note</th><th>Action</th></tr>
+{% for r in salaries %}<tr>
+<td>{{ r.employee.name }}<br>{{ r.month|date:"M Y" }}</td>
+<td>₹{{ r.basic_amount|floatformat:2 }}</td><td>₹{{ r.allowances|floatformat:2 }}</td>
+<td>₹{{ r.deductions|floatformat:2 }}</td><td><b>₹{{ r.net_amount|floatformat:2 }}</b></td>
+<td>{{ r.get_status_display }}</td>
+<td style="white-space:normal;min-width:180px">{{ r.note|linebreaksbr }}
+<br>{{ r.paid_on|date:"d M Y" }} {{ r.payment_reference }}</td>
+<td>
+{% if manager %}
+{% if r.status == "draft" %}
+<form method="post" action="{% url 'branch_employee_payroll' %}">{% csrf_token %}
+<input type="hidden" name="action" value="publish">
+<input type="hidden" name="salary_id" value="{{ r.pk }}">
+<button>Publish</button></form>
+{% elif r.status == "published" %}
+<form method="post" action="{% url 'branch_employee_payroll' %}">{% csrf_token %}
+<input type="hidden" name="action" value="paid">
+<input type="hidden" name="salary_id" value="{{ r.pk }}">
+<input type="date" name="paid_on" required max="{{ today|date:'Y-m-d' }}" aria-label="Payment date">
+<input name="payment_reference" maxlength="200" required placeholder="Mode / reference" aria-label="Payment reference">
+<button>Mark Full Payment</button></form>
+{% else %}Locked{% endif %}
+{% else %}
+<details><summary>Raise Salary Issue</summary>
+<form method="post">{% csrf_token %}
+<input type="hidden" name="salary_id" value="{{ r.pk }}">
+<textarea name="message" rows="3" minlength="5" maxlength="2000"
+required placeholder="Describe your salary issue" aria-label="Salary issue"></textarea>
+<button>Submit Note</button></form></details>
+{% endif %}
+</td></tr>
+{% empty %}<tr><td colspan="8">No salary records available.</td></tr>{% endfor %}
+</table></div></section>
+
+<section class="panel"><h2>Salary Issues & Replies</h2>
+{% for issue in issues %}
+<div class="issue">
+<b>{{ issue.salary.employee.name }} · {{ issue.salary.month|date:"M Y" }} · {{ issue.get_status_display }}</b>
+<small> · {{ issue.created_at|date:"d M Y, h:i A" }}</small>
+<p>{{ issue.message }}</p>
+{% for reply in issue.replies.all %}
+<div class="reply"><small>{{ reply.author.username }} · {{ reply.created_at|date:"d M Y, h:i A" }}</small>
+<p>{{ reply.message }}</p></div>{% endfor %}
+{% if manager %}
+<form method="post" action="{% url 'branch_employee_payroll' %}">{% csrf_token %}
+<input type="hidden" name="action" value="reply">
+<input type="hidden" name="issue_id" value="{{ issue.pk }}">
+<textarea name="reply" rows="2" minlength="5" maxlength="2000" required
+placeholder="Reply to employee" aria-label="Reply"></textarea>
+<select name="status" aria-label="Issue status">
+<option value="replied">Replied</option><option value="resolved">Resolved</option>
+</select><button>Send Reply</button>
+</form>{% endif %}
+</div>
+{% empty %}<p>No salary issues.</p>{% endfor %}
+</section>
+</main></body></html>

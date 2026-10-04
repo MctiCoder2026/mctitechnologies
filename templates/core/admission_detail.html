@@ -761,6 +761,15 @@ body {
     </a>
     {% endif %}
 
+    <a
+        href="https://wa.me/91{{ admission.mobile }}?text=Congratulations%2C%20{{ admission.student_name|urlencode }}%21%0A%0AYour%20admission%20at%20MCTI%20Technologies%20has%20been%20successfully%20confirmed.%20Welcome%20to%20MCTI%21%0A%0ASTUDENT%20LOGIN%20DETAILS%0AStudent%20ID%3A%20{{ admission.admission_number|urlencode }}%0APassword%3A%20Your%20registered%20mobile%20number%0A%0ALOGIN%20TO%20STUDENT%20PORTAL%0Ahttps%3A%2F%2Fmctitechnologies.com%2Fstudent%2Flogin%2F%0A%0AHOW%20TO%20USE%20YOUR%20STUDENT%20PORTAL%0A1.%20Login%20using%20your%20Student%20ID%20and%20password.%0A2.%20Open%20My%20Courses%20to%20access%20your%20enrolled%20course.%0A3.%20Study%20LMS%20topics%20and%20complete%20quizzes.%0A4.%20Login%20regularly%20for%20Attendance.%0A5.%20Track%20your%20course%20progress.%0A%0APlease%20keep%20your%20Student%20ID%20safe%20for%20future%20use.%0A%0AWishing%20you%20success%20in%20your%20learning%20and%20career%21%0A%0ARegards%2C%0AMCTI%20Technologies%0AAn%20Initiative%20by%20Maharashtra%20Computer%20Training%20Institute"
+        target="_blank"
+        class="btn"
+        style="background:#25D366;color:#ffffff;"
+    >
+        📲 WhatsApp Welcome
+    </a>
+
     <button
         onclick="window.print()"
         class="btn btn-print"

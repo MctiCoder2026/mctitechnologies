@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ exam.title }}</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f5f7;font-family:Arial;color:#171717}
+.top{background:#111827;color:#fff;padding:18px 24px}.top a{color:#fff;text-decoration:none}
+.wrap{max-width:950px;margin:30px auto;padding:0 18px}
+.card{background:#fff;border-radius:18px;padding:25px;box-shadow:0 4px 18px #0001}
+.target{background:#fff2e7;padding:12px;border-radius:10px;margin:15px 0}
+.text{font-size:24px;line-height:1.8;padding:20px;background:#f8fafc;border-radius:12px;white-space:pre-wrap}
+.char.current{background:#ff7200;color:#fff}.char.ok{color:#16803a}.char.bad{color:#dc2626;background:#fee2e2}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:15px 0}
+.stat{background:#111827;color:#fff;border-radius:10px;padding:12px;text-align:center}.stat b{display:block;font-size:22px;color:#ff8a24}
+button,.btn{border:0;background:#ff7200;color:#fff;padding:12px 18px;border-radius:9px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
+.result{margin-top:18px;padding:18px;border-radius:12px;background:#f3f4f6;display:none}
+.lock{padding:30px;text-align:center}
+@media(max-width:650px){.stats{grid-template-columns:repeat(2,1fr)}.text{font-size:19px}}
+
+.lab-back{
+    display:inline-flex !important;
+    align-items:center;
+    gap:7px;
+    background:#ff7200 !important;
+    color:#fff !important;
+    padding:10px 16px !important;
+    border-radius:9px;
+    text-decoration:none !important;
+    font-size:14px;
+    font-weight:800;
+    line-height:1.2;
+    box-shadow:0 2px 7px rgba(0,0,0,.18);
+}
+.lab-back:hover{
+    background:#e86500 !important;
+}
+.text{max-height:320px;overflow-y:auto;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<div class="top"><a href="{% url 'typing_practice:dashboard' %}" class="lab-back">⌨️ Back to Typing Lab</a></div>
+<div class="wrap">
+{% if not unlocked %}
+<div class="card lock"><h2>🔒 Exam Locked</h2><p>Complete the previous benchmark exam first.</p><a class="btn" href="{% url 'typing_practice:dashboard' %}" class="lab-back">Back to Practice</a></div>
+{% else %}
+<div class="card">
+<h1>🏆 {{ exam.title }}</h1>
+<p>Take the exam when you feel ready. Focus on accuracy first.</p>
+<div class="target"><b>Benchmark:</b> {{ exam.target_wpm }} WPM + {{ exam.target_accuracy }}% Accuracy</div>
+<div class="stats">
+<div class="stat"><b id="wpm">0</b>WPM</div>
+<div class="stat"><b id="accuracy">100</b>Accuracy %</div>
+<div class="stat"><b id="errors">0</b>Errors</div>
+<div class="stat"><b id="time">{% if lesson.order >= 11 and lesson.order <= 20 %}300{% else %}60{% endif %}</b>Seconds Left</div>
+</div>
+<div id="text" class="text"></div>
+<p><button id="start">Start Exam</button> <button id="restart" type="button">Restart</button></p>
+<div id="result" class="result"></div>
+<textarea id="input" style="position:absolute;opacity:0;pointer-events:none"></textarea>
+</div>
+{% endif %}
+</div>
+
+{% if unlocked %}
+<script>
+const TEST_SECONDS={% if lesson.order >= 11 and lesson.order <= 20 %}300{% else %}60{% endif %};
+const baseText="{{ exam.content|escapejs }}".trim()
+ || "Practice typing with accuracy and confidence.";
+const source=Array(Math.ceil(10000/baseText.length)).fill(baseText).join(" ");
+const saveUrl="{% url 'typing_practice:save_exam_attempt' lesson.slug %}";
+const text=document.getElementById("text"),input=document.getElementById("input");
+let index=0,errors=0,typed=0,startTime=null,timer=null,finished=false;
+
+function csrf(){
+ const x=document.cookie.split("; ").find(v=>v.startsWith("csrftoken="));
+ return x?decodeURIComponent(x.split("=")[1]):"";
+}
+function render(){
+ text.innerHTML="";
+ [...source].forEach((c,i)=>{
+   const s=document.createElement("span");
+   s.textContent=c;s.className="char"+(i===0?" current":"");
+   text.appendChild(s);
+ });
+}
+function elapsed(){return startTime?Math.min(TEST_SECONDS,Math.max(0.001,(Date.now()-startTime)/1000)):0}
+function metrics(){
+ const sec=elapsed();
+ const correct=text.querySelectorAll(".char.ok").length;
+ const w=sec?Math.round((correct/5)/(sec/60)):0;
+ const a=typed?Math.max(0,Math.round(((typed-errors)/typed)*100)):100;
+ document.getElementById("wpm").textContent=w;
+ document.getElementById("accuracy").textContent=a;
+ document.getElementById("errors").textContent=errors;
+ document.getElementById("time").textContent=Math.max(0,Math.ceil(TEST_SECONDS-sec));
+ return {w,a,sec:Math.max(1,Math.round(sec))};
+}
+function begin(){
+ if(finished)return;
+ if(!startTime){
+   startTime=Date.now();
+   document.getElementById("start").disabled=true;
+   document.getElementById("start").textContent="Test Running...";
+   timer=setInterval(()=>{
+     metrics();
+     if(elapsed()>=TEST_SECONDS)finish();
+   },100);
+ }
+ input.focus();
+}
+async function finish(){
+ if(finished)return;finished=true;clearInterval(timer);
+ const m=metrics();
+ const r=await fetch(saveUrl,{method:"POST",headers:{"Content-Type":"application/json","X-CSRFToken":csrf()},body:JSON.stringify({wpm:m.w,accuracy:m.a,errors:errors,typed_characters:typed,duration_seconds:m.sec})});
+ const d=await r.json();
+ const box=document.getElementById("result");
+ box.setAttribute("role","dialog");
+ box.setAttribute("aria-modal","true");
+ box.setAttribute("aria-label","Typing exam result");
+ box.style.cssText="display:block;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100% - 36px);max-width:480px;max-height:85vh;overflow-y:auto;margin:0;padding:35px 24px;background:white;border-radius:20px;text-align:center;box-shadow:0 20px 80px #0005;z-index:10001;";
+ const backdrop=document.createElement("div");
+ backdrop.style.cssText="position:fixed;inset:0;background:rgba(17,24,39,.8);z-index:10000;";
+ document.body.appendChild(backdrop);
+ input.blur();
+ if(d.passed){
+   box.innerHTML="<h2>🎉 Benchmark Achieved!</h2><p>"+d.wpm+" WPM · "+d.accuracy+"% accuracy</p><a class='btn' href='{% url "typing_practice:dashboard" %}'>Continue Journey →</a>";
+ }else{
+   let msg="You're getting closer. ";
+   if(d.speed_needed>0)msg+="Only "+d.speed_needed+" WPM more. ";
+   if(d.accuracy_needed>0)msg+="Improve accuracy by "+d.accuracy_needed+"%.";
+   box.innerHTML="<h2>Almost there 💪</h2><p>"+msg+"</p><p>"+d.wpm+" WPM · "+d.accuracy+"% accuracy</p>";
+ }
+ const action=box.querySelector("a,button");
+ if(action)action.focus();
+ else{box.tabIndex=-1;box.focus();}
+}
+document.addEventListener("keydown",e=>{
+ if(finished || !startTime || e.ctrlKey || e.metaKey || e.altKey)return;
+ if(elapsed()>=TEST_SECONDS){e.preventDefault();finish();return}
+ if(e.key==="Backspace"){e.preventDefault();if(index>0){const spans=text.children;if(spans[index])spans[index].classList.remove("current");index--;spans[index].className="char current";metrics();}return}
+ if(e.key.length!==1)return;
+ e.preventDefault();begin();
+ const spans=text.children;
+ if(index>=source.length)return;
+ spans[index].classList.remove("current");
+ typed++;
+ if(e.key===source[index])spans[index].classList.add("ok");else{spans[index].classList.add("bad");errors++}
+ index++;
+ if(index>=source.length){metrics();return}
+ spans[index].classList.add("current");spans[index].scrollIntoView({block:"nearest"});metrics();
+});
+let countingDown=false;
+const countdownOverlay=document.createElement("div");
+countdownOverlay.style.cssText=
+ "display:none;position:fixed;inset:0;background:rgba(17,24,39,.92);z-index:9999;align-items:center;justify-content:center;flex-direction:column;color:#ff8a24;font-size:100px;font-weight:900;text-align:center;";
+countdownOverlay.setAttribute("role","status");
+countdownOverlay.setAttribute("aria-live","assertive");
+document.body.appendChild(countdownOverlay);
+
+document.getElementById("start").onclick=()=>{
+ if(countingDown || startTime || finished)return;
+ countingDown=true;
+ document.getElementById("start").disabled=true;
+ countdownOverlay.style.display="flex";
+ let count=3;
+ countdownOverlay.textContent=count;
+ const countdownTimer=setInterval(()=>{
+   count--;
+   if(count>0){
+     countdownOverlay.textContent=count;
+   }else{
+     clearInterval(countdownTimer);
+     countdownOverlay.style.fontSize="64px";
+     countdownOverlay.textContent="Let's Go! 🚀";
+     setTimeout(()=>{
+       countdownOverlay.style.display="none";
+       countingDown=false;
+       begin();
+     },700);
+   }
+ },1000);
+};
+document.getElementById("restart").onclick=()=>location.reload();
+render();
+</script>
+{% endif %}
+</body>
+</html>

@@ -6,6 +6,158 @@ Lead Details | MCTI Technologies
 
 {% block content %}
 
+<!-- MCTI_CONTACT_ROW_FIX -->
+<style>
+.mcti-detail-grid .mcti-detail-actions{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+ gap:12px!important;
+}
+.mcti-detail-grid .mcti-detail-actions>form{
+ grid-column:1!important;grid-row:1!important;
+ width:100%!important;display:block!important;min-width:0!important;margin:0!important;
+}
+.mcti-detail-grid .mcti-detail-actions>form>.mcti-call-btn{
+ display:flex!important;width:100%!important;min-height:46px!important;
+ align-items:center!important;justify-content:center!important;
+ gap:8px!important;margin:0!important;
+}
+.mcti-detail-grid .mcti-detail-actions>#quickWhatsApp{
+ grid-column:2!important;grid-row:1!important;
+ display:flex!important;width:100%!important;min-width:0!important;
+ min-height:46px!important;align-items:center!important;
+ justify-content:center!important;gap:8px!important;margin:0!important;
+}
+.mcti-detail-grid .mcti-detail-actions>a.mcti-save-btn,
+.mcti-detail-grid .mcti-detail-actions>span{
+ grid-column:1/-1!important;grid-row:2!important;margin:0!important;
+}
+.mcti-schedule-title{
+ margin:0 0 12px!important;font-size:18px!important;font-weight:700!important;
+ color:#171717!important;
+}
+.mcti-schedule-details>.mcti-ui-help{margin:0 0 18px!important}
+</style>
+
+
+<!-- MCTI_LEAD_BUTTON_FIX -->
+<style>
+.mcti-detail-grid .mcti-save-btn,
+.mcti-result-card button[type="submit"],
+.mcti-result-card form>div:last-child>button{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:100%!important;min-height:46px!important;padding:12px 18px!important;
+ margin:14px 0 0!important;border:0!important;border-radius:9px!important;
+ font-size:14px!important;font-weight:700!important;line-height:1.3!important;
+ cursor:pointer!important;box-sizing:border-box!important;
+}
+.mcti-assignment-box .mcti-save-btn{background:#171717!important;color:#fff!important}
+.mcti-result-card button{background:#ff7200!important;color:#fff!important}
+.mcti-current-assignment{
+ display:flex!important;align-items:center!important;gap:8px!important;flex-wrap:wrap!important;
+}
+.mcti-detail-actions{
+ display:grid!important;grid-template-columns:1fr 1fr!important;
+ gap:12px!important;align-items:stretch!important;margin-top:18px!important;
+}
+.mcti-detail-actions>form{display:block!important;margin:0!important}
+.mcti-detail-actions .mcti-call-btn,
+.mcti-detail-actions .mcti-whatsapp-btn{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ gap:9px!important;width:100%!important;height:auto!important;min-height:46px!important;
+ padding:12px 16px!important;border:0!important;border-radius:9px!important;
+ font-size:14px!important;font-weight:700!important;line-height:1.3!important;
+ cursor:pointer!important;box-sizing:border-box!important;
+}
+.mcti-detail-actions .mcti-call-btn{background:#171717!important;color:#fff!important}
+.mcti-detail-actions .mcti-whatsapp-btn{background:#128c7e!important;color:#fff!important}
+.mcti-detail-actions .mcti-call-btn i,
+.mcti-detail-actions .mcti-whatsapp-btn i{font-size:17px!important}
+.mcti-detail-actions>.mcti-save-btn,
+.mcti-detail-actions>span{
+ grid-column:1/-1!important;width:100%!important;margin:0!important;
+ min-height:46px!important;display:flex!important;align-items:center!important;
+ justify-content:center!important;gap:8px!important;
+}
+.mcti-detail-actions>a.mcti-save-btn{
+ background:#fff3e8!important;color:#b54708!important;
+ border:1px solid #ffcfaa!important;text-decoration:none!important;
+}
+.mcti-detail-actions button:hover,
+.mcti-detail-grid .mcti-save-btn:hover{filter:brightness(.95)}
+</style>
+
+
+<!-- MCTI_LEAD_DETAIL_POLISH -->
+<style>
+.mcti-detail-grid{
+ display:grid!important;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)!important;
+ gap:24px!important;align-items:start!important;margin-bottom:24px!important;
+}
+.mcti-detail-grid>*{min-width:0;align-self:start}
+.mcti-detail-card{
+ padding:24px!important;border:1px solid #e5e7eb!important;border-radius:16px!important;
+ background:#fff!important;box-shadow:0 3px 14px rgba(17,24,39,.04)!important;
+ height:auto!important;
+}
+.mcti-detail-card-header{margin-bottom:20px!important}
+.mcti-detail-card-header>span{
+ display:block;color:#ff7200!important;font-size:11px!important;
+ font-weight:800!important;letter-spacing:1.2px!important;margin-bottom:7px!important;
+}
+.mcti-detail-card-header h2{font-size:22px!important;line-height:1.3!important;margin:0 0 8px!important}
+.mcti-detail-card-header p,.mcti-ui-help{color:#64748b;font-size:13px;line-height:1.6}
+.mcti-detail-grid .mcti-assignment-box{
+ margin-top:20px!important;padding-top:18px!important;border-top:1px solid #eee!important;
+}
+.mcti-detail-grid label,.mcti-message-field label{
+ display:block!important;font-size:13px!important;font-weight:600!important;
+ color:#334155!important;margin:0 0 7px!important;
+}
+.mcti-detail-grid select,.mcti-detail-grid input:not([type=hidden]),
+.mcti-detail-grid textarea,.mcti-whatsapp-composer select,.mcti-whatsapp-composer textarea{
+ box-sizing:border-box!important;width:100%!important;max-width:100%!important;
+ padding:11px 12px!important;border:1px solid #d7dce3!important;border-radius:8px!important;
+ background:#fff!important;color:#171717!important;font:inherit!important;font-size:14px!important;
+}
+.mcti-detail-grid textarea{min-height:110px!important;resize:vertical}
+.mcti-result-card form>label{margin-top:16px!important}
+.mcti-result-card form>div:last-child{margin-top:16px}
+.mcti-result-card button{
+ background:#ff7200!important;padding:12px 18px!important;border-radius:8px!important;
+ font-size:14px!important;font-weight:700!important;min-height:44px;
+}
+.mcti-result-card select:focus,.mcti-result-card textarea:focus,
+.mcti-result-card input:focus{outline:2px solid #ffd2ae;outline-offset:1px}
+.mcti-followup-column{display:flex;flex-direction:column;gap:16px}
+.mcti-schedule-card{padding:16px 20px!important}
+.mcti-schedule-details summary{
+ cursor:pointer;font-size:14px;font-weight:700;color:#334155;padding:5px 0;
+}
+.mcti-schedule-details form p{margin:16px 0}
+.mcti-current-assignment{
+ margin:14px 0!important;padding:12px!important;background:#f8fafc!important;
+ border-radius:8px!important;font-size:13px!important;
+}
+.mcti-detail-actions{display:flex!important;gap:10px!important;flex-wrap:wrap!important;margin-top:20px!important;align-items:center}
+.mcti-whatsapp-composer{margin-bottom:24px!important}
+.mcti-whatsapp-composer textarea{min-height:180px!important;line-height:1.6!important}
+.mcti-message-field{margin-bottom:18px!important}
+.mcti-danger-details{
+ border:1px solid #fecaca;border-radius:10px;background:#fffafa;
+ padding:14px 18px;margin:20px 0;color:#991b1b;font-size:13px;
+}
+.mcti-danger-details summary{cursor:pointer;font-weight:700}
+.mcti-danger-details p{margin:12px 0}
+.mcti-activity-card{margin-top:24px!important}
+@media(max-width:850px){
+ .mcti-detail-grid{grid-template-columns:1fr!important;gap:16px!important}
+ .mcti-detail-card{padding:18px!important}
+ .mcti-detail-card-header h2{font-size:20px!important}
+}
+</style>
+
+
 <section class="mcti-dashboard">
 
 <div class="mcti-dashboard-container">
@@ -496,7 +648,11 @@ Lead Details | MCTI Technologies
                  CONTACT ACTIONS
             ======================================== -->
 
-            <div class="mcti-detail-actions">
+            
+{% if enquiry.status != "converted" and enquiry.status != "closed" %}
+
+{% endif %}
+<div class="mcti-detail-actions">
 
 
                 <!-- CALL -->
@@ -510,11 +666,7 @@ Lead Details | MCTI Technologies
                     <button type="submit"
                             class="mcti-call-btn"
                             title="Call"
-                            onclick="setTimeout(function(){ window.location.href='tel:{{ enquiry.mobile }}'; }, 150);">
-
-                        <i class="fa-solid fa-phone"></i>
-
-                    </button>
+                            onclick="setTimeout(function(){ window.location.href='tel:{{ enquiry.mobile }}'; }, 150);"><i class="fa-solid fa-phone"></i><span>Call</span></button>
 
                 </form>
 
@@ -524,11 +676,7 @@ Lead Details | MCTI Technologies
                 <button type="button"
                         id="quickWhatsApp"
                         class="mcti-whatsapp-btn"
-                        title="WhatsApp">
-
-                    <i class="fa-brands fa-whatsapp"></i>
-
-                </button>
+                        title="WhatsApp"><i class="fa-brands fa-whatsapp"></i><span>WhatsApp</span></button>
                 {% if enquiry.status != "converted" %}
 
     <a href="{% url 'create_admission' enquiry.id %}"
@@ -565,39 +713,7 @@ Lead Details | MCTI Technologies
 
         {% if request.user.is_superuser and enquiry.status != "converted" %}
 
-            <div class="mcti-detail-card"
-                 style="border:1px solid #fecaca; background:#fff7f7;">
-
-                <div class="mcti-detail-card-header">
-                    <span style="color:#b42318;">POWER USER</span>
-                    <h2>Delete Dummy Enquiry</h2>
-                    <p>
-                        Use this only for test, dummy or duplicate enquiries.
-                    </p>
-                </div>
-
-                <form method="POST"
-                      action="{% url 'delete_enquiry' enquiry.id %}"
-                      onsubmit="return confirm('Delete enquiry for {{ enquiry.name|escapejs }} ({{ enquiry.mobile|escapejs }})? This action cannot be undone.');">
-
-                    {% csrf_token %}
-
-                    <button type="submit"
-                            style="
-                                border:0;
-                                border-radius:8px;
-                                padding:11px 18px;
-                                background:#b42318;
-                                color:#fff;
-                                font-weight:800;
-                                cursor:pointer;
-                            ">
-                        Delete Enquiry
-                    </button>
-
-                </form>
-
-            </div>
+            
 
         {% endif %}
 
@@ -606,38 +722,43 @@ Lead Details | MCTI Technologies
              FOLLOW-UP
         ======================================== -->
 
-        <div class="mcti-detail-card">
+        
+<div class="mcti-followup-column">
+{% if enquiry.status != "converted" and enquiry.status != "closed" %}
+<div class="mcti-detail-card mcti-result-card">
+<div class="mcti-detail-card-header"><span>FOLLOW-UP ACTION</span><h2 id="record-followup-result" style="scroll-margin-top:100px;">Record Result</h2><p>Save the conversation outcome and your next follow-up date.</p></div>
+<form method="post" action="{% url 'complete_enquiry_followup' enquiry.id %}">
+{% csrf_token %}
+<label style="display:block;">Result</label>
+<select name="contact_result" required style="width:100%;padding:10px;margin:8px 0;">
+<option value="">Choose result</option>
+<option value="contacted">Contacted successfully</option>
+<option value="message_sent">WhatsApp message sent</option>
+<option value="no_answer">No answer / retry required</option>
+<option value="closed">Closed / not interested</option>
+</select>
+<label style="display:block;">Result notes</label>
+<textarea name="contact_notes" required maxlength="2000" rows="3" style="width:100%;padding:10px;margin:8px 0;"></textarea>
+<label style="display:block;">Next follow-up date (after today; not needed if closed)</label>
+<input type="date" name="next_contact_date" style="padding:10px;margin:8px 0;">
+<div><button style="background:#ff7200;color:white;border:0;padding:12px 18px;border-radius:8px;">Save Follow-up Result</button></div>
+</form>
+</div>
+{% endif %}
+<div class="mcti-detail-card mcti-schedule-card">
 
-            <div class="mcti-detail-card-header">
+<div class="mcti-schedule-details"><h3 class="mcti-schedule-title">Change Follow-up Schedule</h3>
+<p class="mcti-ui-help">Use this to edit the schedule only. To record a call or message outcome, use Record Result above.</p>
+<form method="POST">
+{% csrf_token %}
+{{ form.as_p }}
+<button type="submit" class="mcti-save-btn">Save Schedule</button>
+</form>
+</div>
 
-                <span>
-                    FOLLOW-UP
-                </span>
+</div>
+</div>
 
-                <h2>
-                    Update Lead
-                </h2>
-
-            </div>
-
-
-            <form method="POST">
-
-                {% csrf_token %}
-
-                {{ form.as_p }}
-
-
-                <button type="submit"
-                        class="mcti-save-btn">
-
-                    Save Follow-up
-
-                </button>
-
-            </form>
-
-        </div>
 
     </div>
 
@@ -674,10 +795,16 @@ Lead Details | MCTI Technologies
             </label>
 
             <select id="whatsappTemplate">
+<option value="new">01 · Welcome + Course + Approx Fee</option>
+<option value="standardFollowup1">02 · Follow-up 1 — Guidance</option>
+<option value="standardFollowup2">03 · Follow-up 2 — Centre Visit</option>
+<option value="standardFollowup3">04 · Follow-up 3 — Decision Support</option>
+<option value="standardAptitude">05 · Aptitude Assessment</option>
+<option value="standardScholarship">06 · Scholarship Assessment</option>
+<option value="standardClosing">07 · Admission / Closing</option>
 
-                <option value="new">
-                    🆕 New Enquiry
-                </option>
+
+                
 
                 <option value="specialOffer">
                     Special Offer + Career Kit
@@ -730,7 +857,52 @@ Lead Details | MCTI Technologies
                     💰 Fees Reminder
                 </option>
 
-            </select>
+            <option value="counsellingAppointment">Counselling Appointment</option></select>
+<!-- MCTI_COUNSELLING_APPOINTMENT -->
+<div id="appointmentFields" hidden
+     style="margin:14px 0;padding:14px;border:1px solid #e2e8f0;
+            border-radius:10px;background:#f8fafc">
+    <strong style="display:block;margin-bottom:10px">Book Counselling Appointment</strong>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+        <div>
+            <label for="appointmentDate">Appointment Date</label>
+            <input type="date" id="appointmentDate"
+                   style="width:100%;box-sizing:border-box;padding:10px">
+        </div>
+        <div>
+            <label for="appointmentTime">Appointment Time — IST</label>
+            <input type="time" id="appointmentTime"
+                   style="width:100%;box-sizing:border-box;padding:10px">
+        </div>
+    </div>
+    <small style="display:block;margin-top:9px;color:#64748b">
+        Name, course and centre details are filled automatically.
+        Select date and time, then send using the existing WhatsApp button.
+    </small>
+</div>
+
+<div style="margin-top:16px;">
+<label for="standardApproxFee">Approved approx. fee range — review before sharing</label>
+<input id="standardApproxFee" type="text" maxlength="100"
+placeholder="Enter centre-approved amount or range"
+style="width:100%;padding:11px 12px;border:1px solid #d7dce3;border-radius:8px;">
+<small style="display:block;margin-top:6px;color:#64748b;">Used in Welcome message. Confirm the amount/range with your centre.</small>
+</div>
+<details style="margin-top:18px;padding:14px;background:#fff7f0;border-radius:9px;">
+<summary style="cursor:pointer;font-weight:700;">Standard Counselling Roadmap</summary>
+<ol style="padding-left:20px;line-height:1.8;margin-top:12px;">
+<li>First call: understand goal, current skill, preferred timing and course.</li>
+<li>Send Welcome with course link and approved approx. fee.</li>
+<li>Record the response and agree on the next follow-up date.</li>
+<li>Follow-up 1: clarify questions and course suitability.</li>
+<li>Follow-up 2: arrange a centre visit or counselling appointment.</li>
+<li>Follow-up 3: discuss concerns and the next decision.</li>
+<li>Offer Aptitude/Scholarship assessment where relevant.</li>
+<li>Closing: confirm course, batch, final fee and admission steps.</li>
+</ol>
+<p style="font-size:13px;color:#64748b;">Follow the agreed dates. Stop promotional follow-ups if the person declines. Record the actual outcome after each contact.</p>
+</details>
+
 
         </div>
 
@@ -768,7 +940,35 @@ Lead Details | MCTI Technologies
          ACTIVITY TIMELINE
     ======================================== -->
 
-    <div class="mcti-detail-card mcti-activity-card">
+    
+{% if request.user.is_superuser and enquiry.status != "converted" %}
+<details class="mcti-danger-details">
+<summary>Admin tools · Delete dummy enquiry</summary>
+<p>Use only for a test, dummy or duplicate enquiry.</p>
+<form method="POST"
+                      action="{% url 'delete_enquiry' enquiry.id %}"
+                      onsubmit="return confirm('Delete enquiry for {{ enquiry.name|escapejs }} ({{ enquiry.mobile|escapejs }})? This action cannot be undone.');">
+
+                    {% csrf_token %}
+
+                    <button type="submit"
+                            style="
+                                border:0;
+                                border-radius:8px;
+                                padding:11px 18px;
+                                background:#b42318;
+                                color:#fff;
+                                font-weight:800;
+                                cursor:pointer;
+                            ">
+                        Delete Enquiry
+                    </button>
+
+                </form>
+</details>
+{% endif %}
+
+<div class="mcti-detail-card mcti-activity-card">
 
         <div class="mcti-detail-card-header">
 
@@ -1273,13 +1473,175 @@ Thank you.`
            LOAD TEMPLATE
         ======================================== */
 
+
+        // MCTI_STANDARD_COUNSELLING
+        const approxFeeInput = document.getElementById("standardApproxFee");
+        approxFeeInput.value = indicativeFee.includes("_") ? "" : indicativeFee;
+        const standardWebsite = "https://mctitechnologies.com";
+        const standardSignoff = `Team MCTI Technologies
+${branch}
+${standardWebsite}`;
+
+        function standardWelcome() {
+            const approvedFee = approxFeeInput.value.trim();
+            const feeLine = approvedFee
+                ? `*Approx. course fee:* ${approvedFee}
+Final fee will be confirmed by the centre based on the selected training plan and any applicable offer.`
+                : "Please contact our counsellor for the applicable course fee.";
+            return `Hello ${name},
+
+Welcome to *MCTI Technologies*!
+Thank you for enquiring about *${course}*.
+
+*Course details:*
+${courseUrl}
+
+${feeLine}
+
+What would you like to achieve through this course, and which batch timing would suit you?
+
+We will help you choose the right learning path.
+
+${standardSignoff}`;
+        }
+
+        Object.assign(templates, {
+            standardFollowup1: `Hello ${name},
+
+Following up on your enquiry about *${course}*.
+
+Have you had a chance to review the course details?
+${courseUrl}
+
+Please share any questions about the syllabus, practical learning, duration or fee. We will guide you based on your goal.
+
+${standardSignoff}`,
+            standardFollowup2: `Hello ${name},
+
+Would you like to visit our *${branch}* centre for counselling about *${course}*?
+
+We can discuss the learning plan, batch timing and applicable fee before you decide.
+
+Please share a convenient day and time so we can confirm an appointment.
+${branchMap ? "\nCentre map:\n" + branchMap + "\n" : ""}
+${standardSignoff}`,
+            standardFollowup3: `Hello ${name},
+
+Checking in regarding your *${course}* enquiry.
+
+Are you planning to start soon, considering a later date, or looking for another course?
+If timing, fee or course suitability is a concern, please let us know so we can guide you.
+
+If you prefer no further follow-up, please tell us and we will respect your preference.
+
+${standardSignoff}`,
+            standardAptitude: `Hello ${name},
+
+If you would like help choosing your learning direction, you can take our *Free Career / Aptitude Assessment*.
+
+Start here:
+${careerKitUrl}
+
+After completion, our counsellor can discuss your performance, strengths and areas to improve. The result is guidance to support your decision.
+
+${standardSignoff}`,
+            standardScholarship: `Hello ${name},
+
+You can explore the *MCTI Scholarship Assessment* for available course-fee benefits.
+
+Assessment link:
+https://mctitechnologies.com/assessment/scholarship/
+
+After the test, contact our counsellor to confirm eligibility, validity and applicable course benefits. Any scholarship benefit is subject to the current programme terms.
+
+${standardSignoff}`,
+            standardClosing: `Hello ${name},
+
+When you are ready to proceed with *${course}*, we can help you complete the next steps:
+
+1. Confirm your course and preferred batch.
+2. Review the final fee and available payment options.
+3. Complete admission and receive your student login details.
+
+Please reply with your preferred start date. Our counsellor will confirm the details before you proceed.
+
+${standardSignoff}`
+        });
+
+        approxFeeInput.addEventListener("input", function () {
+            if (templateSelect.value === "new") {
+                messageBox.value = standardWelcome();
+            }
+        });
+
+
+
+        const appointmentFields = document.getElementById("appointmentFields");
+        const appointmentDate = document.getElementById("appointmentDate");
+        const appointmentTime = document.getElementById("appointmentTime");
+
+        function indiaToday() {
+            const parts = new Intl.DateTimeFormat("en-GB", {
+                timeZone: "Asia/Kolkata",
+                year: "numeric", month: "2-digit", day: "2-digit"
+            }).formatToParts(new Date());
+            const get = type => parts.find(p => p.type === type).value;
+            return `${get("year")}-${get("month")}-${get("day")}`;
+        }
+        appointmentDate.min = indiaToday();
+
+        function appointmentMessage() {
+            let dateText = "[Select date]";
+            let timeText = "[Select time]";
+            if (appointmentDate.value) {
+                dateText = new Intl.DateTimeFormat("en-GB", {
+                    day: "2-digit", month: "short", year: "numeric",
+                    timeZone: "UTC"
+                }).format(new Date(appointmentDate.value + "T00:00:00Z"));
+            }
+            if (appointmentTime.value) {
+                const [hours, minutes] = appointmentTime.value.split(":");
+                const hour = Number(hours);
+                timeText = `${hour % 12 || 12}:${minutes} ${hour >= 12 ? "PM" : "AM"} IST`;
+            }
+            const addressLine = branchAddress.trim()
+                ? "\n" + branchAddress.trim() : "";
+            const mapLine = branchMap.trim()
+                ? "\n📌 Map: " + branchMap.trim() : "";
+
+            return `Hello ${name},
+
+Your counselling appointment for *${course}* is confirmed.
+
+📅 ${dateText} | ⏰ ${timeText}
+📍 *MCTI Technologies – ${branch}*${addressLine}${mapLine}
+
+Our counsellor will guide you on training, fees, batches and career benefits. Please arrive 5–10 minutes early.
+
+Team MCTI Technologies
+${branch}
+https://mctitechnologies.com`;
+        }
+
+        [appointmentDate, appointmentTime].forEach(input => {
+            input.addEventListener("input", function () {
+                if (templateSelect.value === "counsellingAppointment") {
+                    messageBox.value = appointmentMessage();
+                }
+            });
+        });
+
         function updateMessage() {
 
             const selected =
                 templateSelect.value;
 
             messageBox.value =
-                templates[selected] || "";
+                selected === "counsellingAppointment"
+                    ? appointmentMessage()
+                    : (selected === "new" ? standardWelcome() : (templates[selected] || ""));
+
+            appointmentFields.hidden = selected !== "counsellingAppointment";
 
         }
 
@@ -1333,6 +1695,26 @@ Thank you.`
         ======================================== */
 
         function openWhatsApp() {
+
+            if (templateSelect.value === "counsellingAppointment") {
+                if (!appointmentDate.value || !appointmentTime.value) {
+                    alert("Please select the appointment date and time.");
+                    (!appointmentDate.value ? appointmentDate : appointmentTime).focus();
+                    return;
+                }
+                const appointmentInstant = new Date(
+                    appointmentDate.value + "T" + appointmentTime.value + ":00+05:30"
+                );
+                if (
+                    !Number.isFinite(appointmentInstant.getTime())
+                    || appointmentInstant <= new Date()
+                ) {
+                    alert("Please select a future appointment date and time in IST.");
+                    appointmentDate.focus();
+                    return;
+                }
+            }
+
 
             const message =
                 messageBox.value.trim();

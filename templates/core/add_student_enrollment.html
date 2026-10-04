@@ -319,7 +319,17 @@ textarea {
 
             {% csrf_token %}
 
-            <div class="form-grid">
+            <div class="student-box">
+        <strong>Reward Points Wallet</strong>
+        <p>Earned: {{ reward_earned }} · Used: {{ reward_used }} ·
+        Available: <b>{{ reward_balance }}</b></p>
+        <p>1 point = ₹1. Maximum 10% of the next course fee.</p>
+        <label for="id_reward_points">Use reward points</label>
+        {{ form.reward_points }}
+        {{ form.reward_points.errors }}
+        <div id="reward-warning" class="fee-warning"></div>
+    </div>
+    <div class="form-grid">
 
                 <div class="form-group">
                     <label>Course</label>
@@ -358,6 +368,7 @@ textarea {
                 <div class="form-group">
                     <label>Discount Amount</label>
                     {{ form.discount_amount }}
+    <div class="fee-info">Manual discount; reward points are entered separately.</div>
                     {{ form.discount_amount.errors }}
 
                     <div class="fee-info">
@@ -375,6 +386,7 @@ textarea {
                 <div class="form-group">
                     <label>Final Fee</label>
                     {{ form.final_fee }}
+    <div class="fee-info">Final fee includes the reward points discount.</div>
                     {{ form.final_fee.errors }}
 
                     <div class="fee-info">
@@ -472,6 +484,25 @@ document.addEventListener("DOMContentLoaded", function () {
     ============================================================
     */
 
+    const rewardInput = document.getElementById("id_reward_points");
+    const rewardWarning = document.getElementById("reward-warning");
+    const rewardBalance = Number("{{ reward_balance }}") || 0;
+
+    function rewardValid() {
+        const points = Number(rewardInput.value || 0);
+        const fee = getNumber(standardFeeInput.value);
+        const discount = getNumber(discountInput.value);
+        const limit = Math.min(rewardBalance, Math.floor(fee * 0.10 + 0.000001));
+        const valid = Number.isInteger(points) && points >= 0
+            && points <= limit && points + discount <= fee;
+        rewardWarning.style.display = valid ? "none" : "block";
+        rewardWarning.textContent = "Available for this course: up to "
+            + limit + " points. Combined discounts cannot exceed its fee.";
+        return valid;
+    }
+
+    rewardInput.addEventListener("input", calculateFinalFee);
+
     function getNumber(value) {
 
         const parsed = parseFloat(value);
@@ -552,7 +583,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         let finalFee =
-            standardFee - discountAmount;
+            standardFee - discountAmount - getNumber(rewardInput.value);
 
 
         if (
@@ -672,7 +703,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             submitButton.disabled =
                 !discountValid ||
-                !paymentValid;
+                !paymentValid || !rewardValid();
         }
     }
 
@@ -782,6 +813,11 @@ document.addEventListener("DOMContentLoaded", function () {
         form.addEventListener(
             "submit",
             function (event) {
+                if (!rewardValid()) {
+                    event.preventDefault();
+                    rewardInput.focus();
+                    return;
+                }
 
                 const standardFee =
                     getNumber(
@@ -868,5 +904,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </script>
 
-</body>
+<div class="container" style="margin-top:20px">
+    <div class="card">
+    <h3>Reward Points History</h3>
+    {% for entry in reward_history %}
+        <p>{{ entry.created_at|date:"d M Y" }} ·
+        <strong>{{ entry.points }} points</strong> · {{ entry.description }}</p>
+    {% empty %}
+        <p>No points credited or used yet.</p>
+    {% endfor %}
+    </div>
+    </div>
+    </body>
 </html>

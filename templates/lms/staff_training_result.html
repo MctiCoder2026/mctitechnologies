@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz Result | MCTI Staff Training{% endblock %}
+
+{% block content %}
+<style>
+.result{max-width:650px;margin:60px auto;text-align:center;background:#fff;border:1px solid #ddd;border-radius:20px;padding:40px}
+.score{font-size:55px;font-weight:900;color:#ff7a00;margin:15px 0}
+.pass{color:#16833b;font-size:25px;font-weight:800}
+.fail{color:#b42318;font-size:25px;font-weight:800}
+.btn{display:inline-block;background:#111;color:#fff!important;padding:12px 20px;border-radius:9px;text-decoration:none;font-weight:700;margin:8px}
+.orange{background:#ff7a00}
+</style>
+
+<div class="result">
+
+<h2>{{ topic.title }}</h2>
+
+<div class="score">
+{{ score }}/{{ total_questions }}
+</div>
+
+{% if passed %}
+
+<div class="pass">✓ PASSED</div>
+
+<p>
+Excellent. The next training topic has been unlocked.
+</p>
+
+<a class="btn orange"
+   href="{% url 'lms:staff_training' %}">
+    Continue Training →
+</a>
+
+{% else %}
+
+<div class="fail">TRY AGAIN</div>
+
+<p>
+Minimum 3 correct answers are required.
+Review the topic and attempt the quiz again.
+</p>
+
+<a class="btn"
+   href="{% url 'lms:staff_training_topic' topic.id %}">
+    Review Topic
+</a>
+
+<a class="btn orange"
+   href="{% url 'lms:staff_training_quiz' topic.id %}">
+    Retry Quiz
+</a>
+
+{% endif %}
+
+</div>
+{% endblock %}

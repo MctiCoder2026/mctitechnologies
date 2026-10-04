@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Student Details | MCTI Technologies</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f6fa;color:#182230;
+font-family:Arial,sans-serif}
+.page{max-width:940px;margin:48px auto;padding:0 20px}
+.topbar{display:flex;align-items:center;justify-content:space-between;
+gap:16px;margin-bottom:22px}
+.brand{font-weight:800;font-size:16px}
+.brand span{color:#f97316}
+.back-link{color:#526174;font-size:13px;text-decoration:none}
+.card{background:#fff;border:1px solid #e3e8ef;border-radius:18px;
+box-shadow:0 8px 30px rgba(24,34,48,.04);overflow:hidden}
+.heading{padding:26px 30px;border-bottom:1px solid #edf0f4}
+.heading h1{margin:0 0 8px;font-size:25px;letter-spacing:-.5px}
+.heading p{margin:0;color:#64748b;font-size:14px;line-height:1.6}
+.layout{display:grid;grid-template-columns:240px 1fr}
+.profile{padding:30px 24px;background:#fafbfc;
+border-right:1px solid #edf0f4;text-align:center}
+.photo-frame{width:112px;height:112px;margin:0 auto 18px;
+border-radius:18px;background:#fff0e6;border:1px solid #ffdcc2;
+display:flex;align-items:center;justify-content:center;overflow:hidden}
+.photo-frame img{width:100%;height:100%;object-fit:cover}
+.initial{font-size:38px;font-weight:800;color:#c65300}
+.profile h2{margin:0 0 10px;font-size:18px;line-height:1.4;
+overflow-wrap:anywhere}
+.id-badge{display:inline-block;background:#eef2f7;color:#475569;
+font-size:12px;padding:7px 10px;border-radius:7px}
+.branch{margin:12px 0;color:#64748b;font-size:13px}
+.photo-hint{margin-top:25px;font-size:12px;color:#7a8797;line-height:1.7}
+.form-area{padding:30px}
+.field{margin-bottom:22px}
+label.field-label{display:block;font-size:13px;font-weight:700;
+margin-bottom:9px;color:#344054}
+input[type=text],input[type=date]{width:100%;height:46px;
+border:1px solid #d6dce5;border-radius:9px;padding:11px 13px;
+background:white;color:#182230;font:14px Arial}
+input:focus{outline:2px solid #ffdcc2;outline-offset:1px;border-color:#fb923c}
+.upload{padding:15px;border:1px dashed #cbd5e1;border-radius:10px;
+background:#fafbfc;font-size:13px;line-height:1.8;overflow-wrap:anywhere}
+.upload input[type=file]{display:block;width:100%;margin-top:8px;
+font-size:12px;color:#64748b}
+input[type=file]::file-selector-button{border:1px solid #d6dce5;
+padding:9px 12px;margin-right:10px;border-radius:7px;background:white;
+color:#344054;cursor:pointer}
+.help{font-size:12px;color:#7a8797;margin:8px 0 0;line-height:1.6}
+.errorlist{padding-left:18px;color:#b42318;font-size:13px;line-height:1.5}
+.notice{background:#f7f9fc;border:1px solid #e7ecf3;border-radius:9px;
+padding:12px 14px;color:#64748b;font-size:12px;line-height:1.7}
+.actions{display:flex;gap:12px;margin-top:24px}
+.actions button,.actions a{height:45px;min-width:130px;padding:0 20px;
+border-radius:9px;font:700 13px Arial;display:inline-flex;
+align-items:center;justify-content:center;text-decoration:none;cursor:pointer}
+.save{background:#f97316;border:1px solid #f97316;color:white}
+.save:hover{background:#ea580c}
+.cancel{background:white;border:1px solid #d6dce5;color:#475569}
+.cancel:hover{background:#f8fafc}
+.footer{text-align:center;margin-top:20px;font-size:12px;color:#94a3b8}
+@media(max-width:650px){
+.page{margin:20px auto;padding:0 14px}
+.heading{padding:22px}.heading h1{font-size:22px}
+.layout{grid-template-columns:1fr}
+.profile{border-right:0;border-bottom:1px solid #edf0f4;padding:22px}
+.photo-frame{width:88px;height:88px;margin-bottom:12px}
+.photo-hint{display:none}.form-area{padding:22px}
+.actions button,.actions a{flex:1;min-width:0}
+}
+
+/* MCTI_ORANGE_WHITE_BLACK */
+body{background:#f5f5f5;color:#171717}
+.brand{color:#171717}
+.brand span{color:#ff7200}
+.back-link{color:#333}
+.card{border-color:#e5e5e5;box-shadow:0 10px 30px #00000008}
+.heading{background:#171717;border-bottom:4px solid #ff7200}
+.heading h1{color:#fff}
+.heading p{color:#ddd}
+.profile{background:#fff7f0;border-color:#f2dfce}
+.profile h2{color:#171717}
+.photo-frame{background:#fff;border:2px solid #ff7200}
+.initial{color:#ff7200}
+.id-badge{background:#171717;color:#fff}
+.branch{color:#444}
+.photo-hint,.help{color:#666}
+.form-area{background:#fff}
+label.field-label{color:#171717}
+input[type=text],input[type=date]{color:#171717;border-color:#d5d5d5}
+input:focus{border-color:#ff7200;outline-color:#ff720033}
+.upload{background:#fafafa;border-color:#ccc}
+.upload input[type=file]{color:#555}
+input[type=file]::file-selector-button{
+background:#171717;color:#fff;border-color:#171717}
+.notice{background:#fff7f0;border-color:#ffdfc4;
+border-left:3px solid #ff7200;color:#555}
+.save{background:#ff7200;border-color:#ff7200;color:#fff}
+.save:hover{background:#e96500;border-color:#e96500}
+.cancel{background:#171717;border-color:#171717;color:#fff}
+.cancel:hover{background:#333;border-color:#333}
+.footer{color:#666}
+
+</style>
+</head>
+<body>
+<main class="page">
+<div class="topbar">
+<div class="brand">MCTI <span>Technologies</span></div>
+<a class="back-link" href="{% url 'student_list' %}">← Students</a>
+</div>
+<section class="card">
+<header class="heading">
+<h1>Student Details</h1>
+<p>Update the student's name, birthday and profile photo.</p>
+</header>
+<div class="layout">
+<aside class="profile">
+<div class="photo-frame">
+{% if student.photo %}
+<img id="student-photo-preview" src="{{ student.photo.url }}" alt="Student photo">
+<span class="initial" id="student-photo-initial" hidden>{{ student.name|slice:":1"|upper }}</span>
+{% else %}
+<img id="student-photo-preview" alt="Selected student photo" hidden>
+<span class="initial" id="student-photo-initial">{{ student.name|slice:":1"|upper }}</span>
+{% endif %}
+</div>
+<h2>{{ student.name }}</h2>
+<span class="id-badge">{{ student.student_id }}</span>
+<p class="branch">{{ student.branch|title }}</p>
+<p class="photo-hint">A clear profile photo helps staff identify the student.</p>
+</aside>
+<div class="form-area">
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+{{ form.non_field_errors }}
+<div class="field">
+<label class="field-label" for="{{ form.name.id_for_label }}">Student Name</label>
+{{ form.name }}{{ form.name.errors }}
+</div>
+<div class="field">
+<label class="field-label" for="{{ form.date_of_birth.id_for_label }}">Date of Birth</label>
+{{ form.date_of_birth }}{{ form.date_of_birth.errors }}
+<p class="help">Enter the actual birth date for birthday wishes.</p>
+</div>
+<div class="field">
+<label class="field-label" for="{{ form.photo.id_for_label }}">Profile Photo</label>
+<div class="upload">{{ form.photo }}</div>
+{{ form.photo.errors }}
+<p class="help">Upload a clear image. Maximum file size: 5 MB.</p>
+</div>
+<div class="notice">Course, fees and admission details are managed by the power user.</div>
+<div class="actions">
+<button class="save" type="submit">Save Changes</button>
+<a class="cancel" href="{% url 'student_list' %}">Cancel</a>
+</div>
+</form>
+</div>
+</div>
+</section>
+<p class="footer">MCTI Technologies · Student Management</p>
+</main>
+<script>
+(function(){
+const input=document.querySelector('input[type="file"][name="photo"]');
+const preview=document.getElementById("student-photo-preview");
+const initial=document.getElementById("student-photo-initial");
+if(!input || !preview)return;
+let previousUrl=null;
+input.addEventListener("change",function(){
+ const file=this.files && this.files[0];
+ if(!file || !file.type.startsWith("image/") || file.size>5*1024*1024)return;
+ if(previousUrl)URL.revokeObjectURL(previousUrl);
+ previousUrl=URL.createObjectURL(file);
+ preview.src=previousUrl;
+ preview.hidden=false;
+ initial.hidden=true;
+});
+})();
+</script>
+
+<div style="max-width:1000px;margin:20px auto;padding:0 20px">
+<a href="{% url 'student_record_change' 'student' student.pk %}"
+style="display:inline-block;background:#171717;color:#fff;
+padding:12px 18px;border-radius:8px;text-decoration:none">
+Active / Ex Student Status</a>
+{% if request.user.is_superuser and student.admission_id %}
+<a href="{% url 'student_record_change' 'admission' student.admission_id %}"
+style="display:inline-block;background:#ff7200;color:#fff;
+padding:12px 18px;border-radius:8px;text-decoration:none">
+Change Admission Date</a>
+{% endif %}
+</div>
+</body>
+</html>

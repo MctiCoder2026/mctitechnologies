@@ -189,62 +189,106 @@ def get_lms_enrollment(student, course):
     return enrollment
 
 
+def get_mia_module_position(enrollment, module):
+    # Virtual sequence: MS Office -> Advanced Excel -> Tally.
+    # Database module IDs, order and student progress remain unchanged.
+    from .models import LMSModule
+
+    sequence = (2, 1, 3)
+    package = enrollment.course
+    included = set(
+        package.included_courses.filter(is_active=True)
+        .values_list("pk", flat=True)
+    )
+    if included != set(sequence) or module.course_id not in sequence:
+        raise ValueError("MIA included courses must be MS Office, Excel and Tally.")
+
+    position = 0
+    for course_id in sequence:
+        ids = list(
+            LMSModule.objects.filter(
+                course_id=course_id, is_active=True
+            ).order_by("order", "pk").values_list("pk", flat=True)
+        )
+        if course_id == module.course_id:
+            if module.pk not in ids:
+                raise ValueError("This MIA module is inactive.")
+            return position + ids.index(module.pk) + 1
+        position += len(ids)
+    raise ValueError("MIA module position not found.")
+
+
+def get_package_module_position(enrollment, module):
+    from .models import LMSModule
+
+    course_ids = list(
+        enrollment.course.included_courses.filter(is_active=True)
+        .order_by("display_order", "pk")
+        .values_list("pk", flat=True)
+    )
+    if module.course_id not in course_ids:
+        raise ValueError("Module is not part of this active package.")
+
+    combined_ids = []
+    for course_id in course_ids:
+        combined_ids.extend(
+            LMSModule.objects.filter(
+                course_id=course_id, is_active=True
+            ).order_by("order", "pk").values_list("pk", flat=True)
+        )
+
+    if module.pk not in combined_ids:
+        raise ValueError("This package module is inactive.")
+
+    return combined_ids.index(module.pk) + 1, len(combined_ids)
+
+
 def get_module_fee_access(student, module):
+    enrollment = get_lms_enrollment(student, module.course)
+    position = module.order or 0
+    grouped = bool(
+        enrollment
+        and enrollment.course.is_package
+        and enrollment.course_id != module.course_id
+    )
 
-    """
-    Fee rule:
+    if grouped:
+        try:
+            position, total = get_package_module_position(enrollment, module)
+        except ValueError as exc:
+            return {
+                "allowed": False,
+                "required_percent": 100,
+                "paid_percent": 0,
+                "enrollment": enrollment,
+                "message": str(exc),
+            }
+        halfway = max(5, (total + 1) // 2)
+        required = 0 if position <= 5 else 50 if position <= halfway else 100
+    else:
+        required = 0 if position <= 4 else 50 if position == 5 else 100
 
-    Module 1-4:
-        No fee restriction.
-
-    Module 5:
-        Minimum 50% of enrollment final fee paid.
-
-    Module 6 onwards:
-        Enrollment fee must be 100% paid.
-    """
-
-    module_order = module.order or 0
-
-    # Modules 1-4 follow normal LMS progress rules only.
-    if module_order <= 4:
-
+    if required == 0:
         return {
             "allowed": True,
             "required_percent": 0,
             "paid_percent": 0,
-            "enrollment": None,
+            "enrollment": enrollment,
             "message": "",
         }
 
-    enrollment = get_lms_enrollment(
-        student,
-        module.course
-    )
-
-    if not enrollment:
-
+    if enrollment is None:
         return {
             "allowed": False,
-            "required_percent": (
-                50
-                if module_order == 5
-                else 100
-            ),
+            "required_percent": required,
             "paid_percent": 0,
             "enrollment": None,
-            "message": (
-                "Active enrollment not found "
-                "for this course."
-            ),
+            "message": "Active enrollment not found for this course.",
         }
 
     final_fee = enrollment.final_fee or 0
     paid_fee = enrollment.total_paid or 0
-
-    # Free / zero-fee course should not be fee locked.
     if final_fee <= 0:
-
         return {
             "allowed": True,
             "required_percent": 0,
@@ -253,53 +297,22 @@ def get_module_fee_access(student, module):
             "message": "",
         }
 
-    paid_percent = (
-        paid_fee / final_fee
-    ) * 100
-
-    if module_order == 5:
-
-        required_percent = 50
-
-        allowed = (
-            paid_percent >= required_percent
-        )
-
-        message = (
-            ""
-            if allowed
-            else (
-                "Module 5 will unlock after "
-                "minimum 50% course fee is paid."
-            )
-        )
-
-    else:
-
-        required_percent = 100
-
-        allowed = (
-            paid_fee >= final_fee
-        )
-
-        message = (
-            ""
-            if allowed
-            else (
-                "This module will unlock after "
-                "the complete course fee is paid."
-            )
-        )
-
+    allowed = paid_fee * 100 >= final_fee * required
+    label = (
+        f"Package module {position}"
+        if grouped else "This module"
+    )
     return {
         "allowed": allowed,
-        "required_percent": required_percent,
-        "paid_percent": round(
-            float(paid_percent),
-            2
-        ),
+        "required_percent": required,
+        "paid_percent": round(float(paid_fee / final_fee * 100), 2),
         "enrollment": enrollment,
-        "message": message,
+        "message": (
+            "" if allowed else
+            f"{label} requires {required}% of the "
+            + ("total package fee" if grouped else "course fee")
+            + " to be paid."
+        ),
     }
 
 

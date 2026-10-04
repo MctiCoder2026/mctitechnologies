@@ -1,0 +1,35 @@
+
+{% if reward_wallet_visible %}
+<section class="sr-wallet" aria-label="Attendance rewards">
+    <div class="sr-points-column">
+        <div class="sr-wallet-title">🏆 Reward Points</div>
+        <strong>{{ wallet_balance }}</strong>
+        <p>Available points</p>
+        <p>Earned: {{ wallet_earned }} · Used: {{ wallet_used }}</p>
+    </div>
+    <div class="sr-instruction-column">
+        <h3>How points work</h3>
+        <p><strong>Monthly Attendance Star = 500 points</strong> after approval.</p>
+        <p><strong>1 point = ₹1 discount.</strong> Use on a different next course,
+        up to 10% of its fee.</p>
+        <p>Example: ₹3,000 course → use up to 300 points → pay ₹2,700,
+        before any other discount.</p>
+        <details>
+            <summary>Eligibility &amp; points history</summary>
+            <p>Minimum 10 recorded days. Highest attendance percentage wins;
+            more present days breaks a tie. Equal results share the award.</p>
+            <p>October 2026 onwards · First approval from 1 November.
+            Ask your branch to apply points on your next enrollment.</p>
+            {% for entry in wallet_entries %}
+            <div class="sr-wallet-history">
+                <b>{{ entry.points }} points</b>
+                · {{ entry.created_at|date:"d M Y" }}
+                <div>{{ entry.description }}</div>
+            </div>
+            {% empty %}
+            <p>No points yet. Attend regularly to earn rewards.</p>
+            {% endfor %}
+        </details>
+    </div>
+</section>
+{% endif %}

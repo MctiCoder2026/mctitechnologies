@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCTI Typing Accountability</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f6f8;font-family:Arial;color:#171717}
+.top{background:#111827;color:#fff;padding:18px 25px}
+.top a{color:#fff;text-decoration:none}
+.wrap{max-width:1250px;margin:auto;padding:28px 18px}
+.hero{background:#111827;color:white;padding:25px;border-radius:17px}
+.hero span{color:#ff7200}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+.card{background:white;padding:20px;border-radius:14px;box-shadow:0 3px 12px #0001}
+.card strong{display:block;font-size:28px;color:#ff7200}
+table{width:100%;border-collapse:collapse;background:white}
+th,td{padding:12px;border-bottom:1px solid #eee;text-align:left}
+th{background:#111827;color:white}
+.good{color:#16803a;font-weight:800}
+.warn{color:#c2410c;font-weight:800}
+.scroll{overflow-x:auto;border-radius:14px}
+@media(max-width:700px){.cards{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="top">
+<a href="{% url 'management_dashboard' %}">
+← Management Dashboard
+</a>
+</div>
+
+<div class="wrap">
+
+<div class="hero">
+<h1>MCTI <span>Typing Accountability</span></h1>
+<p>Center-wise activity for the last 7 days. Click a center to see student tracking.</p>
+<a style="color:#ff8a24" href="{% url 'typing_practice:staff_report' %}">View All Students →</a>
+</div>
+
+<div class="cards">
+<div class="card">
+<strong>{{ total_active }}</strong>
+Active Students
+</div>
+
+<div class="card">
+<strong>{{ total_minutes }}</strong>
+Training Minutes
+</div>
+
+<div class="card">
+<strong>{{ public_leads }}</strong>
+Typing Marketing Leads
+</div>
+</div>
+
+<div class="scroll">
+<table>
+<thead>
+<tr>
+<th>Center</th>
+<th>Students</th>
+<th>Active</th>
+<th>Not Practised</th>
+<th>Participation</th>
+<th>Minutes</th>
+<th>Practice</th>
+<th>Games</th>
+<th>Exams</th>
+<th>Passed</th>
+</tr>
+</thead>
+
+<tbody>
+{% for r in branch_rows %}
+<tr>
+<td><a href="{% url 'typing_practice:staff_report' %}?branch={{ r.branch|urlencode }}"><b>{{ r.branch|title }}</b></a></td>
+<td>{{ r.students }}</td>
+<td class="good">{{ r.active }}</td>
+<td class="warn">{{ r.inactive }}</td>
+<td><b>{{ r.participation }}%</b></td>
+<td>{{ r.minutes }}</td>
+<td>{{ r.practice }}</td>
+<td>{{ r.game }}</td>
+<td>{{ r.exam }}</td>
+<td>{{ r.passed }}</td>
+</tr>
+{% empty %}
+<tr><td colspan="10">No branch data available.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+</div>
+</body>
+</html>

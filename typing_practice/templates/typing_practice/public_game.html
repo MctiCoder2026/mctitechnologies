@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Free Letter Rush | MCTI</title>
+<style>
+body{margin:0;background:#111827;color:white;font-family:Arial;text-align:center}
+.wrap{max-width:750px;margin:auto;padding:30px 18px}
+.o{color:#ff7200}.game{height:320px;background:white;border-radius:20px;display:flex;align-items:center;justify-content:center;margin:20px 0}
+#letter{font-size:110px;font-weight:900;color:#ff7200}
+.stats{display:flex;justify-content:center;gap:25px}
+button,a{background:#ff7200;color:white;border:0;padding:12px 18px;border-radius:9px;font-weight:800;text-decoration:none;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🎮 Letter <span class="o">Rush</span></h1>
+<p>Free 30-second typing challenge</p>
+<div class="stats"><span>Score <b id="score">0</b></span><span>Time <b id="time">30</b></span><span>Accuracy <b id="acc">100</b>%</span></div>
+<div class="game"><div id="letter">A</div></div>
+<button id="start">Start Game</button>
+<a href="{% url 'typing_practice:public_typing' %}">Back</a>
+<div id="finish" style="display:none;margin-top:25px">
+<h2>🎉 Challenge Complete!</h2>
+<p id="final"></p>
+<a href="{% url 'typing_practice:public_register' %}">Continue FREE →</a>
+</div>
+</div>
+<script>
+const keys="asdfjkl;qwertyuiopzxcvbnm";
+let score=0,total=0,wrong=0,left=30,running=false,timer;
+const letter=document.getElementById("letter");
+function next(){letter.textContent=keys[Math.floor(Math.random()*keys.length)].toUpperCase()}
+function accuracy(){return total?Math.round(((total-wrong)/total)*100):100}
+function end(){
+ running=false;clearInterval(timer);
+ letter.textContent="🏆";
+ document.getElementById("finish").style.display="block";
+ document.getElementById("final").textContent="Score "+score+" · Accuracy "+accuracy()+"%";
+}
+document.getElementById("start").onclick=()=>{
+ if(running)return;
+ score=0;total=0;wrong=0;left=30;running=true;
+ document.getElementById("finish").style.display="none";
+ next();
+ timer=setInterval(()=>{
+  left--;
+  document.getElementById("time").textContent=left;
+  if(left<=0)end();
+ },1000);
+};
+document.addEventListener("keydown",e=>{
+ if(!running||e.key.length!==1)return;
+ total++;
+ if(e.key.toLowerCase()===letter.textContent.toLowerCase()){score++;next()}
+ else wrong++;
+ document.getElementById("score").textContent=score;
+ document.getElementById("acc").textContent=accuracy();
+});
+</script>
+</body>
+</html>

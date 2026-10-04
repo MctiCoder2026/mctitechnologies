@@ -5,6 +5,12 @@ from . import views
 app_name = "assessments"
 
 urlpatterns = [
+    path(
+        "cyber-fraud-awareness/dashboard/",
+        views.cyber_fraud_dashboard,
+        name="cyber_fraud_dashboard",
+    ),
+
     # --------------------------------------------------------
     # MCTI HR HIRING ASSESSMENT
     # One common flow for all job roles
@@ -103,6 +109,23 @@ urlpatterns = [
         views.ai_ready_certificate,
         name="ai_ready_certificate",
     ),
+    path(
+        "cyber-fraud-awareness/",
+        views.cyber_fraud_start,
+        name="cyber_fraud_start",
+    ),
+    path(
+        "cyber-fraud-awareness/quiz/<int:attempt_id>/",
+        views.cyber_fraud_quiz,
+        name="cyber_fraud_quiz",
+    ),
+    path(
+        "cyber-fraud-awareness/result/<int:attempt_id>/",
+        views.cyber_fraud_result,
+        name="cyber_fraud_result",
+    ),
+
+
     path(
         "certificate/verify/<str:verification_token>/",
         views.verify_assessment_certificate,

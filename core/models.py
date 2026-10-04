@@ -677,6 +677,8 @@ class Admission(models.Model):
 # ============================================================
 
 class Student(models.Model):
+    date_of_birth = models.DateField(null=True, blank=True)
+
 
     STATUS_CHOICES = [
 
@@ -910,6 +912,7 @@ class Student(models.Model):
 # ============================================================
 
 class Enrollment(models.Model):
+    reward_points_used = models.PositiveIntegerField(default=0)
 
     STATUS_CHOICES = [
         ("active", "Active"),
@@ -1188,6 +1191,21 @@ class FeePayment(models.Model):
 
                 next_number = 1
 
+            archived_max = (
+                FeePaymentDeletionAudit.objects.aggregate(
+                    value=models.Max("original_payment_id")
+                )["value"] or 0
+            )
+            next_number = max(next_number, archived_max + 1)
+            while (
+                FeePayment.objects.filter(
+                    receipt_number=f"MCTI-RCP-{next_number:05d}"
+                ).exists()
+                or FeePaymentDeletionAudit.objects.filter(
+                    receipt_number=f"MCTI-RCP-{next_number:05d}"
+                ).exists()
+            ):
+                next_number += 1
             self.receipt_number = (
                 f"MCTI-RCP-{next_number:05d}"
             )
@@ -2356,6 +2374,22 @@ class MonthlyBranchClosing(models.Model):
         decimal_places=2,
         default=0
     )
+    fresh_collection_snapshot = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True
+    )
+
+    old_collection_snapshot = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True
+    )
+
+    other_collection_snapshot = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True
+    )
+
+    fresh_pending_snapshot = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True
+    )
+
     reserve_fund_amount = models.DecimalField(
         max_digits=12,
         decimal_places=2,
@@ -2521,6 +2555,8 @@ class MonthlyBranchClosing(models.Model):
 
     @property
     def pending_collection(self):
+        if self.fresh_pending_snapshot is not None:
+            return self.fresh_pending_snapshot
         return (
             self.billing_amount
             - self.collection_amount
@@ -3180,3 +3216,242 @@ class FranchiseEnquiry(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class StaffPerformanceReward(models.Model):
+    user = models.ForeignKey(
+        "auth.User", on_delete=models.PROTECT,
+        related_name="performance_rewards",
+    )
+    period_start = models.DateField()
+    period_end = models.DateField()
+    score = models.PositiveIntegerField(default=0)
+    confirmed_contacts = models.PositiveIntegerField(default=0)
+    admissions = models.PositiveIntegerField(default=0)
+    gift_description = models.CharField(max_length=255)
+    status = models.CharField(
+        max_length=20,
+        choices=[("approved", "Approved"), ("given", "Reward Given")],
+        default="approved",
+    )
+    approved_by = models.ForeignKey(
+        "auth.User", on_delete=models.PROTECT,
+        related_name="approved_staff_rewards",
+    )
+    approved_at = models.DateTimeField(auto_now_add=True)
+    fulfilled_at = models.DateTimeField(null=True, blank=True)
+    fulfilled_by = models.ForeignKey(
+        "auth.User", on_delete=models.PROTECT,
+        null=True, blank=True, related_name="fulfilled_staff_rewards",
+    )
+
+    class Meta:
+        ordering = ["-approved_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "period_start", "period_end"],
+                name="unique_staff_reward_period",
+            )
+        ]
+
+
+class StudentAttendanceAward(models.Model):
+    reward_points = models.PositiveIntegerField(default=0)
+    student = models.ForeignKey(
+        Student, on_delete=models.PROTECT,
+        related_name="monthly_attendance_awards",
+    )
+    month = models.DateField()
+    branch = models.CharField(max_length=100, blank=True)
+    present_days = models.PositiveIntegerField()
+    marked_days = models.PositiveIntegerField()
+    gift_description = models.CharField(max_length=255)
+    status = models.CharField(
+        max_length=20, default="approved",
+        choices=[("approved", "Approved"), ("given", "Award Given")],
+    )
+    approved_by = models.ForeignKey(
+        "auth.User", on_delete=models.PROTECT,
+        related_name="approved_student_attendance_awards",
+    )
+    approved_at = models.DateTimeField(auto_now_add=True)
+    fulfilled_by = models.ForeignKey(
+        "auth.User", on_delete=models.PROTECT, null=True, blank=True,
+        related_name="fulfilled_student_attendance_awards",
+    )
+    fulfilled_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-month", "-approved_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["student", "month"],
+                name="unique_student_attendance_award_month",
+            )
+        ]
+
+
+class StudentRewardEntry(models.Model):
+    student = models.ForeignKey(
+        Student, on_delete=models.PROTECT, related_name="reward_entries"
+    )
+    points = models.IntegerField()
+    award = models.OneToOneField(
+        StudentAttendanceAward, on_delete=models.PROTECT,
+        null=True, blank=True, related_name="points_entry"
+    )
+    enrollment = models.OneToOneField(
+        Enrollment, on_delete=models.PROTECT,
+        null=True, blank=True, related_name="reward_entry"
+    )
+    description = models.CharField(max_length=255)
+    created_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="student_reward_entries"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-pk"]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(points__gt=0, award__isnull=False, enrollment__isnull=True)
+                    | models.Q(points__lt=0, award__isnull=True, enrollment__isnull=False)
+                ),
+                name="student_reward_entry_valid_source",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.student_id}: {self.points:+d} points"
+
+
+class FeePaymentDeletionAudit(models.Model):
+    original_payment_id = models.PositiveIntegerField(unique=True)
+    receipt_number = models.CharField(max_length=30, unique=True)
+    snapshot = models.JSONField()
+    reason = models.TextField()
+    deleted_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True,
+        related_name="deleted_fee_receipt_audits",
+    )
+    deleted_by_name = models.CharField(max_length=150)
+    deleted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-deleted_at", "-id"]
+
+
+class EmployeePayrollProfile(models.Model):
+    user = models.OneToOneField(
+        User, on_delete=models.PROTECT, related_name="payroll_profile"
+    )
+    name = models.CharField(max_length=120)
+    branch = models.CharField(max_length=100)
+    designation = models.CharField(max_length=100)
+    employment_type = models.CharField(
+        max_length=20,
+        choices=[
+            ("staff", "Staff"), ("trainer", "Trainer"),
+            ("intern", "Intern"), ("part_time", "Part Time"),
+        ],
+        default="trainer",
+    )
+    joining_date = models.DateField(default=timezone.localdate)
+    created_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="payroll_profiles_created"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.branch})"
+
+
+class EmployeeMonthlySalary(models.Model):
+    employee = models.ForeignKey(
+        EmployeePayrollProfile, on_delete=models.PROTECT, related_name="salaries"
+    )
+    month = models.DateField()
+    basic_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    allowances = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    deductions = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    note = models.TextField(blank=True)
+    status = models.CharField(
+        max_length=12,
+        choices=[("draft", "Draft"), ("published", "Published"), ("paid", "Paid")],
+        default="draft",
+    )
+    updated_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="salary_drafts_updated"
+    )
+    published_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, null=True, blank=True,
+        related_name="salary_months_published",
+    )
+    published_at = models.DateTimeField(null=True, blank=True)
+    paid_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, null=True, blank=True,
+        related_name="salary_months_paid",
+    )
+    paid_on = models.DateField(null=True, blank=True)
+    payment_reference = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def net_amount(self):
+        return self.basic_amount + self.allowances - self.deductions
+
+    class Meta:
+        ordering = ["-month", "-pk"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["employee", "month"], name="unique_payroll_employee_month"
+            )
+        ]
+
+
+class EmployeeSalaryIssue(models.Model):
+    salary = models.ForeignKey(
+        EmployeeMonthlySalary, on_delete=models.PROTECT, related_name="issues"
+    )
+    message = models.TextField()
+    status = models.CharField(
+        max_length=12,
+        choices=[("open", "Open"), ("replied", "Replied"), ("resolved", "Resolved")],
+        default="open",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-pk"]
+
+
+class EmployeeSalaryReply(models.Model):
+    issue = models.ForeignKey(
+        EmployeeSalaryIssue, on_delete=models.PROTECT, related_name="replies"
+    )
+    author = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="salary_issue_replies"
+    )
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "pk"]
+
+
+class StudentRecordChangeAudit(models.Model):
+    record_type = models.CharField(max_length=30)
+    record_id = models.PositiveIntegerField()
+    before = models.JSONField(default=dict)
+    after = models.JSONField(default=dict)
+    reason = models.TextField()
+    changed_by = models.ForeignKey(
+        User, on_delete=models.PROTECT,
+        related_name="student_record_changes",
+    )
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-changed_at", "-pk"]

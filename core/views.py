@@ -120,6 +120,11 @@ def mark_student_attendance(request):
             "message": "Student account not found."
         }, status=403)
 
+    if student.status != "active":
+        return JsonResponse({"success": False,
+            "message": "Attendance is available for active students only."},
+            status=403)
+
     latitude = request.POST.get("latitude")
     longitude = request.POST.get("longitude")
 
@@ -527,6 +532,32 @@ def business_contact(request):
 # ============================================================
 # ACCESS CONTROL
 # ============================================================
+
+
+def can_view_business_amounts(user):
+    if not user.is_authenticated or not user.is_active:
+        return False
+    if user.is_superuser:
+        return True
+    if not user.is_staff:
+        return False
+    try:
+        profile = user.staff_profile
+    except StaffProfile.DoesNotExist:
+        return False
+    accounts = {
+        "mcti@ghansoli": "ghansoli",
+        "mcti@kamothe": "kamothe",
+        "mcti@koperkhairane": "koperkhairane",
+        "mcti@nerul": "nerul",
+        "mcti@panvel": "panvel",
+    }
+    expected_branch = accounts.get(user.username.strip().lower())
+    return bool(
+        profile.is_active
+        and expected_branch
+        and (profile.branch or "").strip().lower() == expected_branch
+    )
 
 def is_admin_user(user):
 
@@ -1848,13 +1879,12 @@ def branch_dashboard(request):
             ).date()
 
     branches = [
-        ("kharghar", "Kharghar"),
+        ("kharghar", "Kharghar-HO"),
         ("panvel", "Panvel"),
         ("koperkhairane", "Koperkhairane"),
         ("kamothe", "Kamothe"),
         ("ghansoli", "Ghansoli"),
-        ("nerul", "Nerul"),
-        ("head_office", "Head Office"),
+        ("nerul", "Nerul-CO"),
     ]
 
     # --------------------------------------------------------
@@ -1869,7 +1899,7 @@ def branch_dashboard(request):
         request.user
     )
 
-    can_view_financials = admin_access
+    can_view_financials = can_view_business_amounts(request.user)
 
     if not admin_access:
 
@@ -1885,16 +1915,7 @@ def branch_dashboard(request):
             if item[0] == user_branch
         ]
 
-        try:
-            staff_profile = request.user.staff_profile
-            can_view_financials = (
-                staff_profile.designation
-                .strip()
-                .lower()
-                == "branch head"
-            )
-        except StaffProfile.DoesNotExist:
-            can_view_financials = False
+
 
     branch_data = []
 
@@ -1904,6 +1925,7 @@ def branch_dashboard(request):
 
     overall_enquiries = 0
     overall_converted = 0
+    overall_cohort_converted = 0
     overall_admissions = 0
     overall_billing = 0
     overall_collection = 0
@@ -1931,7 +1953,7 @@ def branch_dashboard(request):
 
         total_enquiries = enquiries.count()
 
-        converted = enquiries.filter(
+        cohort_converted = enquiries.filter(
             status="converted"
         ).count()
 
@@ -1950,6 +1972,16 @@ def branch_dashboard(request):
 
         total_admissions = admissions.count()
 
+        # Conversions in this period, including older enquiries.
+        # Count current linked admissions, not historical activity logs.
+        converted = (
+            admissions.filter(enquiry__isnull=False)
+            .order_by()
+            .values("enquiry_id")
+            .distinct()
+            .count()
+        )
+
         active_students = Student.objects.filter(
             branch__iexact=branch_value,
             status="active"
@@ -1957,7 +1989,7 @@ def branch_dashboard(request):
 
         enrollments = Enrollment.objects.filter(
             branch__iexact=branch_value
-        )
+        ).exclude(status="cancelled")
 
         if start_date and end_date:
 
@@ -1975,36 +2007,16 @@ def branch_dashboard(request):
             or 0
         )
 
-        payments = FeePayment.objects.filter(
-            student__branch__iexact=branch_value
-        )
-
-        if start_date and end_date:
-
-            payments = payments.filter(
-                payment_date__range=[
-                    start_date,
-                    end_date
-                ]
-            )
-
-        total_collection = (
-            payments.aggregate(
-                total=Sum("amount")
-            )["total"]
-            or 0
-        )
-
-        total_outstanding = (
-            total_billing
-            - total_collection
-        )
+        from .collection_breakdown import breakdown
+        collection_details = breakdown(branch_value, start_date, end_date)
+        total_collection = collection_details["collection"]
+        total_outstanding = collection_details["outstanding"]
 
         if total_enquiries > 0:
 
             conversion_rate = round(
                 (
-                    converted
+                    cohort_converted
                     / total_enquiries
                 ) * 100,
                 1
@@ -2016,6 +2028,7 @@ def branch_dashboard(request):
 
         overall_enquiries += total_enquiries
         overall_converted += converted
+        overall_cohort_converted += cohort_converted
         overall_admissions += total_admissions
         overall_billing += total_billing
         overall_collection += total_collection
@@ -2040,6 +2053,8 @@ def branch_dashboard(request):
                 }
             )
 
+        if can_view_financials:
+            branch_item.update(collection_details)
         branch_data.append(branch_item)
 
     # --------------------------------------------------------
@@ -2119,7 +2134,7 @@ def branch_dashboard(request):
 
         overall_conversion_rate = round(
             (
-                overall_converted
+                overall_cohort_converted
                 / overall_enquiries
             ) * 100,
             1
@@ -2184,6 +2199,9 @@ def branch_dashboard(request):
 def reports_dashboard(request):
 
     # Office staff must not access reports or financial analytics.
+
+    if not can_view_business_amounts(request.user):
+        return redirect("branch_dashboard")
     if not request.user.is_superuser:
         try:
             viewer_profile = request.user.staff_profile
@@ -2508,6 +2526,9 @@ def reports_dashboard(request):
 @login_required
 def export_reports_excel(request):
 
+
+    if not can_view_business_amounts(request.user):
+        return redirect("branch_dashboard")
     branch_filter = request.GET.get(
         "branch",
         ""
@@ -2942,6 +2963,10 @@ def fee_due_report(request):
             0
         )
 
+        if balance_fee <= 0:
+            counts["paid"] += 1
+            continue
+
         next_due_date = None
         due_key = "paid"
         due_status = "Fully Paid"
@@ -3140,7 +3165,9 @@ def attendance_dashboard(request):
         branch_filter = forced_branch
 
     students = Student.objects.filter(status="active")
-    records = Attendance.objects.filter(attendance_date=today)
+    records = Attendance.objects.filter(
+        attendance_date=today, student__status="active"
+    )
 
     if branch_filter:
         students = students.filter(branch__iexact=branch_filter)
@@ -3528,9 +3555,33 @@ def create_staff_login_log(
     )
 
 
+
+def record_admin_attendance(request, source="admin_login"):
+    user = request.user
+    if not user.is_authenticated or not user.is_active or not is_admin_user(user):
+        return
+    try:
+        profile = user.staff_profile
+    except StaffProfile.DoesNotExist:
+        return
+    if not profile.is_active:
+        return
+    StaffAttendance.objects.get_or_create(
+        staff=profile,
+        attendance_date=timezone.localdate(),
+        defaults={
+            "first_login_time": timezone.now(),
+            "status": "present",
+            "branch": profile.branch,
+            "ip_address": get_client_ip(request),
+            "source": source,
+        },
+    )
+
 def staff_login(request):
     if request.user.is_authenticated:
         if is_admin_user(request.user):
+            record_admin_attendance(request, source="admin_session")
             return redirect("management_dashboard")
         if request.user.is_staff:
             branch = get_user_branch(request.user)
@@ -3624,6 +3675,7 @@ def staff_login(request):
 
         if is_admin_user(user):
             login(request, user)
+            record_admin_attendance(request)
             create_staff_login_log(
                 request=request,
                 entered_username=username,
@@ -4839,6 +4891,8 @@ def enquiry_dashboard(request):
         )
 
     # --------------------------------------------------------
+    enquiries = enquiries.exclude(message__icontains="MCTI AI Ready Maharashtra")
+
     # CAREER KIT STATUS
     # --------------------------------------------------------
 
@@ -4911,7 +4965,7 @@ def enquiry_dashboard(request):
 
         enquiries = enquiries.filter(
             followup_date=today
-        )
+        ).exclude(status__in=("converted", "closed"))
 
     elif followup_filter == "overdue":
 
@@ -4959,6 +5013,8 @@ def enquiry_dashboard(request):
                 branch__iexact=user_branch
             )
         )
+
+    count_queryset = count_queryset.exclude(message__icontains="MCTI AI Ready Maharashtra")
 
     total = (
         count_queryset.count()
@@ -5084,10 +5140,17 @@ def enquiry_dashboard(request):
 
         assigned_staff = []
 
+
+    from .enquiry_followup_tools import decorate_leads
+    enquiries, todays_followups, overdue_followups = decorate_leads(
+        (enquiries, todays_followups, overdue_followups), today
+    )
+
     return render(
         request,
         "core/enquiry_dashboard.html",
         {
+            "work_summary": __import__("core.enquiry_followup_tools", fromlist=["work_summary"]).work_summary(request, count_queryset),
             "total": total,
             "new": new,
             "contacted": contacted,
@@ -5203,18 +5266,16 @@ def update_enquiry_status(
 # ============================================================
 
 @login_required
+@transaction.atomic
 def enquiry_detail(
     request,
     enquiry_id
 ):
 
-    enquiry = get_object_or_404(
-        Enquiry.objects.select_related(
-            "course",
-            "assigned_user"
-        ),
-        id=enquiry_id
-    )
+    enquiry_query = Enquiry.objects.select_related("course", "assigned_user")
+    if request.method == "POST":
+        enquiry_query = enquiry_query.select_for_update(of=("self",))
+    enquiry = get_object_or_404(enquiry_query, id=enquiry_id)
 
     if not user_can_access_enquiry(
         request.user,
@@ -5294,6 +5355,7 @@ def enquiry_detail(
 
         else:
 
+            old_status = enquiry.status
             old_followup_date = (
                 enquiry.followup_date
             )
@@ -5313,6 +5375,17 @@ def enquiry_detail(
                 updated_enquiry = (
                     form.save()
                 )
+
+                if old_status != updated_enquiry.status:
+                    EnquiryActivity.objects.create(
+                        enquiry=updated_enquiry,
+                        activity_type="status",
+                        message=(
+                            f"Lead status changed from {old_status} "
+                            f"to {updated_enquiry.status}."
+                        ),
+                        created_by=request.user,
+                    )
 
                 new_followup_date = (
                     updated_enquiry
@@ -5628,42 +5701,7 @@ def log_enquiry_whatsapp(
             created_by=request.user
         )
 
-        from datetime import timedelta
-        from django.utils import timezone
-
-        # Existing Student Anniversary Upgrade = 7 days.
-        # Old Enquiry campaign and normal WhatsApp = 2 days.
-        followup_days = (
-            7
-            if campaign_key == "kamotheAnniversaryExistingStudent"
-            else 2
-        )
-
-        next_followup = (
-            timezone.localdate()
-            + timedelta(days=followup_days)
-        )
-
-        Enquiry.objects.filter(
-            pk=enquiry.pk
-        ).update(
-            followup_date=next_followup,
-            followup_notes=(
-                f"Auto follow-up scheduled {followup_days} days "
-                f"after WhatsApp communication."
-            )
-        )
-
-        EnquiryActivity.objects.create(
-            enquiry=enquiry,
-            activity_type="followup",
-            message=(
-                f"Next follow-up automatically scheduled for "
-                f"{next_followup.strftime('%d %b %Y')} "
-                f"({followup_days}-day WhatsApp follow-up)."
-            ),
-            created_by=request.user
-        )
+        # Follow-up schedule changes only when staff saves a result.
 
     return redirect(
         "enquiry_detail",
@@ -5675,15 +5713,16 @@ def log_enquiry_whatsapp(
 # ============================================================
 
 @login_required
+@transaction.atomic
 def create_admission(
     request,
     enquiry_id
 ):
 
-    enquiry = get_object_or_404(
-        Enquiry,
-        id=enquiry_id
-    )
+    enquiry_query = Enquiry.objects.all()
+    if request.method == "POST":
+        enquiry_query = enquiry_query.select_for_update()
+    enquiry = get_object_or_404(enquiry_query, id=enquiry_id)
 
     # --------------------------------------------------------
     # ACCESS
@@ -6179,6 +6218,15 @@ def edit_admission(
     admission_id
 ):
 
+
+    # BASIC_DETAILS_POWER_USER_LOCK
+    if not request.user.is_active or not request.user.is_superuser:
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden(
+            "Only the power user can edit admission course and fees. "
+            "Use Student Basic Details for name, birth date and photo."
+        )
+
     admission = get_object_or_404(
         Admission,
         id=admission_id
@@ -6243,7 +6291,7 @@ def edit_admission(
                 student.course = admission.course
                 student.branch = admission.branch
                 student.joining_date = admission.admission_date
-                student.status = "active"
+                # Preserve the student attendance status.
 
                 student.save(
                     update_fields=[
@@ -6253,7 +6301,6 @@ def edit_admission(
                         "course",
                         "branch",
                         "joining_date",
-                        "status",
                     ]
                 )
 
@@ -6407,7 +6454,8 @@ def fee_payment_list(request):
             )
 
         payments = payments.filter(
-            student__branch__iexact=user_branch
+            Q(enrollment__branch__iexact=user_branch)
+            | Q(enrollment__isnull=True, student__branch__iexact=user_branch)
         )
 
         if (
@@ -6419,6 +6467,45 @@ def fee_payment_list(request):
         ):
             selected_student = None
             student_id = None
+
+    from datetime import date
+    from django.http import HttpResponseBadRequest, HttpResponseForbidden
+    from .collection_breakdown import collection_groups
+
+    selected_branch = request.GET.get("branch", "").strip().lower()
+    collection_type = request.GET.get("collection_type", "").strip()
+    start_raw = request.GET.get("start_date", "").strip()
+    end_raw = request.GET.get("end_date", "").strip()
+    collection_label = ""
+    collection_total = None
+
+    if selected_branch or collection_type or start_raw or end_raw:
+        if not selected_branch or selected_branch not in CLOSING_BRANCHES:
+            return HttpResponseBadRequest("Choose a valid branch.")
+        if not request.user.is_superuser:
+            if selected_branch != (user_branch or "").strip().lower():
+                return HttpResponseForbidden("Other branch access denied.")
+        start = end = None
+        if start_raw or end_raw:
+            try:
+                start = date.fromisoformat(start_raw)
+                end = date.fromisoformat(end_raw)
+                if start > end:
+                    raise ValueError()
+            except ValueError:
+                return HttpResponseBadRequest("Invalid date range.")
+        kind = collection_type or "total"
+        if kind not in ("total", "fresh", "old", "other"):
+            return HttpResponseBadRequest("Invalid collection type.")
+        _, groups = collection_groups(selected_branch, start, end)
+        payments = payments.filter(pk__in=groups[kind].values("pk"))
+        labels = {
+            "total": "Total Collection", "fresh": "Fresh Billing Collection",
+            "old": "Previous Billing Collection", "other": "Other / Unlinked Collection",
+        }
+        collection_label = labels[kind] + " — " + selected_branch.title()
+        if start and end:
+            collection_label += " | " + start.isoformat() + " to " + end.isoformat()
 
     if student_id:
 
@@ -6452,6 +6539,8 @@ def fee_payment_list(request):
         {
             "payments": payments,
             "search": search,
+            "collection_label": collection_label,
+            "collection_total": payments.aggregate(total=Sum("amount"))["total"] or 0,
             "selected_student": selected_student,
         }
     )
@@ -7358,146 +7447,101 @@ def refund_policy(request):
     staff_or_admin,
     login_url="staff_login"
 )
-def add_student_enrollment(
-    request,
-    student_id
-):
+def add_student_enrollment(request, student_id):
+    from django.db import transaction
+    from django.db.models import Sum
+    from .student_reward_points import RewardEnrollmentForm, reward_balance
+    from .models import StudentRewardEntry
 
-    student = get_object_or_404(
-        Student,
-        id=student_id
-    )
+    student = get_object_or_404(Student, id=student_id)
 
-    # --------------------------------------------------------
-    # BRANCH PERMISSION
-    # --------------------------------------------------------
+    if not request.user.is_authenticated or not request.user.is_active:
+        return redirect("staff_login")
 
     if not request.user.is_superuser:
-
-        user_branch = get_user_branch(
-            request.user
-        )
-
+        user_branch = get_user_branch(request.user)
         if not user_branch:
-
             auth_logout(request)
-
-            return redirect(
-                "staff_login"
-            )
-
-        if (
-            (student.branch or "").strip().lower()
-            !=
-            user_branch.strip().lower()
-        ):
-
-            return redirect(
-                "student_list"
-            )
-
-    # --------------------------------------------------------
-    # POST
-    # --------------------------------------------------------
+            return redirect("staff_login")
+        if (student.branch or "").strip().lower() != user_branch.strip().lower():
+            return redirect("student_list")
 
     if request.method == "POST":
-
-        form = EnrollmentForm(
-            request.POST
-        )
-
-        if form.is_valid():
-
-            enrollment = form.save(
-                commit=False
-            )
-
-            enrollment.student = student
-            enrollment.created_by = request.user
-
-            # Branch staff cannot move enrollment
-            # to another branch manually.
+        with transaction.atomic():
+            student = Student.objects.select_for_update().get(pk=student.pk)
             if not request.user.is_superuser:
+                if (
+                    (student.branch or "").strip().lower()
+                    != (get_user_branch(request.user) or "").strip().lower()
+                ):
+                    return redirect("student_list")
 
-                enrollment.branch = (
-                    get_user_branch(
-                        request.user
+            form = RewardEnrollmentForm(request.POST, student=student)
+            if form.is_valid():
+                enrollment = form.save(commit=False)
+                enrollment.student = student
+                enrollment.created_by = request.user
+
+                if not request.user.is_superuser:
+                    enrollment.branch = get_user_branch(request.user)
+                elif not enrollment.branch:
+                    enrollment.branch = student.branch
+
+                enrollment.save()
+                points = enrollment.reward_points_used
+                if points:
+                    StudentRewardEntry.objects.create(
+                        student=student,
+                        enrollment=enrollment,
+                        points=-points,
+                        description=(
+                            f"Next course discount: {enrollment.enrollment_number}"
+                        ),
+                        created_by=request.user,
                     )
-                )
 
-            elif not enrollment.branch:
+                initial_payment = form.cleaned_data.get("initial_payment") or 0
+                if initial_payment > 0:
+                    FeePayment.objects.create(
+                        student=student,
+                        enrollment=enrollment,
+                        amount=initial_payment,
+                        payment_mode=form.cleaned_data.get("payment_mode") or "",
+                        remarks=(
+                            f"Initial payment for {enrollment.course.title} "
+                            f"({enrollment.enrollment_number})"
+                        ),
+                        collected_by=request.user,
+                    )
 
-                enrollment.branch = (
-                    student.branch
-                )
-
-            enrollment.save()
-
-            # ------------------------------------------------
-            # INITIAL PAYMENT
-            # ------------------------------------------------
-
-            initial_payment = (
-                form.cleaned_data.get(
-                    "initial_payment"
-                )
-                or 0
-            )
-
-            payment_mode = (
-                form.cleaned_data.get(
-                    "payment_mode"
-                )
-                or ""
-            )
-
-            if initial_payment > 0:
-
-                FeePayment.objects.create(
-                    student=student,
-                    enrollment=enrollment,
-                    amount=initial_payment,
-                    payment_mode=payment_mode,
-                    remarks=(
-                        "Initial payment for "
-                        f"{enrollment.course.title} "
-                        f"({enrollment.enrollment_number})"
-                    ),
-                    collected_by=request.user,
-                )
-
-            return redirect(
-                "admission_detail",
-                admission_id=student.admission.id
-            )
-
-    # --------------------------------------------------------
-    # GET
-    # --------------------------------------------------------
-
+                if student.admission_id:
+                    return redirect(
+                        "admission_detail", admission_id=student.admission_id
+                    )
+                return redirect("student_list")
     else:
-
-        initial_data = {
-            "branch": student.branch,
-            "status": "active",
-        }
-
-        form = EnrollmentForm(
-            initial=initial_data
+        form = RewardEnrollmentForm(
+            student=student,
+            initial={"branch": student.branch, "status": "active"},
         )
 
-    return render(
-    request,
-    "core/add_student_enrollment.html",
-    {
+    entries = StudentRewardEntry.objects.filter(student=student)
+    return render(request, "core/add_student_enrollment.html", {
         "student": student,
         "form": form,
+        "reward_balance": reward_balance(student),
+        "reward_history": entries[:20],
+        "reward_earned": entries.filter(points__gt=0).aggregate(
+            total=Sum("points")
+        )["total"] or 0,
+        "reward_used": -(entries.filter(points__lt=0).aggregate(
+            total=Sum("points")
+        )["total"] or 0),
         "course_fees": {
             str(course.id): str(course.fee or 0)
             for course in Course.objects.all()
         },
-    }
-)
+    })
 
 # ============================================================
 # MONTHLY BRANCH CLOSING
@@ -7589,7 +7633,7 @@ def _monthly_crm_figures(
                 start_date,
                 end_date,
             ]
-        ).aggregate(
+        ).exclude(status="cancelled").aggregate(
             total=Sum("final_fee")
         )["total"]
         or Decimal("0.00")
@@ -7677,7 +7721,16 @@ def _monthly_crm_figures(
         Decimal("0.00")
     )
 
+
+    from .collection_breakdown import breakdown as collection_breakdown
+    details = collection_breakdown(branch, start_date, end_date)
+    collection_amount = details["collection"]
+
     return {
+        "fresh_collection_snapshot": details["fresh_collection"],
+        "old_collection_snapshot": details["old_collection"],
+        "other_collection_snapshot": details["other_collection"],
+        "fresh_pending_snapshot": details["outstanding"],
         "admissions_count": (
             admissions_count
         ),
@@ -7750,6 +7803,19 @@ def _apply_monthly_closing_figures(
     save=True
 ):
 
+
+    # Submitted, validated and closed snapshots must remain unchanged.
+    if closing.status != "draft":
+        return
+
+    for name in (
+        "fresh_collection_snapshot",
+        "old_collection_snapshot",
+        "other_collection_snapshot",
+        "fresh_pending_snapshot",
+    ):
+        setattr(closing, name, figures[name])
+
     closing.admissions_count = (
         figures["admissions_count"]
     )
@@ -7784,6 +7850,10 @@ def _apply_monthly_closing_figures(
                 "admissions_count",
                 "billing_amount",
                 "collection_amount",
+                "fresh_collection_snapshot",
+                "old_collection_snapshot",
+                "other_collection_snapshot",
+                "fresh_pending_snapshot",
                 *MONTHLY_EXPENSE_SNAPSHOT_FIELDS,
                 "other_expense_description",
                 "updated_at",
@@ -7924,7 +7994,7 @@ def monthly_closing_edit(
             month
         )
 
-    _apply_monthly_closing_figures(
+        _apply_monthly_closing_figures(
             closing,
             figures,
             save=True
@@ -8162,15 +8232,16 @@ def monthly_closing_admin_action(
 
                     closing.partner_shares.all().delete()
 
+                    from .monthly_share_calculation import calculate_partner_shares
+                    partners = list(partners.order_by("pk"))
+                    share_amounts = {
+                        row["partner"].pk: row["amount"]
+                        for row in calculate_partner_shares(closing.cash_profit - closing.reserve_fund_amount, partners)
+                    }
+
                     for partner in partners:
 
-                        share_amount = (
-                            closing.distributable_profit
-                            * partner.share_percentage
-                            / Decimal("100.00")
-                        ).quantize(
-                            Decimal("0.01")
-                        )
+                        share_amount = share_amounts[partner.pk]
 
                         MonthlyPartnerShare.objects.create(
                             closing=closing,
@@ -8936,71 +9007,9 @@ def daily_expense_cancel(
 
 @login_required
 def staff_usage_report(request):
-
-    if not is_admin_user(request.user):
-        return redirect("branch_dashboard")
-
-    today = timezone.localdate()
-    month_start = today.replace(day=1)
-
-    staff_profiles = (
-        StaffProfile.objects
-        .filter(is_active=True)
-        .select_related("user")
-        .order_by("branch", "user__first_name", "user__username")
-    )
-
-    staff_rows = []
-
-    for profile in staff_profiles:
-
-        success_logins = StaffLoginLog.objects.filter(
-            user=profile.user,
-            status="success"
-        )
-
-        today_logins = success_logins.filter(
-            created_at__date=today
-        ).count()
-
-        last_login_log = success_logins.order_by(
-            "-created_at"
-        ).first()
-
-        attendance_today = StaffAttendance.objects.filter(
-            staff=profile,
-            attendance_date=today
-        ).first()
-
-        monthly_active_days = StaffAttendance.objects.filter(
-            staff=profile,
-            attendance_date__gte=month_start,
-            attendance_date__lte=today,
-            status="present"
-        ).count()
-
-        staff_rows.append({
-            "profile": profile,
-            "today_logins": today_logins,
-            "last_login": (
-                last_login_log.created_at
-                if last_login_log else None
-            ),
-            "attendance_today": attendance_today,
-            "monthly_active_days": monthly_active_days,
-        })
-
-    context = {
-        "today": today,
-        "month_start": month_start,
-        "staff_rows": staff_rows,
-    }
-
-    return render(
-        request,
-        "core/staff_usage_report.html",
-        context
-    )
+    if request.user.is_authenticated and request.user.is_active and request.user.is_superuser:
+        return redirect("team_monitoring")
+    return redirect("branch_dashboard")
 
 
 # ============================================================
@@ -9010,71 +9019,9 @@ def staff_usage_report(request):
 
 @login_required
 def staff_usage_report(request):
-
-    if not is_admin_user(request.user):
-        return redirect("branch_dashboard")
-
-    today = timezone.localdate()
-    month_start = today.replace(day=1)
-
-    staff_profiles = (
-        StaffProfile.objects
-        .filter(is_active=True)
-        .select_related("user")
-        .order_by("branch", "user__first_name", "user__username")
-    )
-
-    staff_rows = []
-
-    for profile in staff_profiles:
-
-        success_logins = StaffLoginLog.objects.filter(
-            user=profile.user,
-            status="success"
-        )
-
-        today_logins = success_logins.filter(
-            created_at__date=today
-        ).count()
-
-        last_login_log = success_logins.order_by(
-            "-created_at"
-        ).first()
-
-        attendance_today = StaffAttendance.objects.filter(
-            staff=profile,
-            attendance_date=today
-        ).first()
-
-        monthly_active_days = StaffAttendance.objects.filter(
-            staff=profile,
-            attendance_date__gte=month_start,
-            attendance_date__lte=today,
-            status="present"
-        ).count()
-
-        staff_rows.append({
-            "profile": profile,
-            "today_logins": today_logins,
-            "last_login": (
-                last_login_log.created_at
-                if last_login_log else None
-            ),
-            "attendance_today": attendance_today,
-            "monthly_active_days": monthly_active_days,
-        })
-
-    context = {
-        "today": today,
-        "month_start": month_start,
-        "staff_rows": staff_rows,
-    }
-
-    return render(
-        request,
-        "core/staff_usage_report.html",
-        context
-    )
+    if request.user.is_authenticated and request.user.is_active and request.user.is_superuser:
+        return redirect("team_monitoring")
+    return redirect("branch_dashboard")
 
 # ============================================================
 # FRANCHISE ENQUIRY MANAGEMENT
@@ -9226,10 +9173,15 @@ def ai_ready_report(request):
         slug="ai-ready-maharashtra-2026",
     )
 
+    ai_ready_slugs = [
+        "ai-ready-maharashtra-2026",
+        "ai-ready-maharashtra-2026-marathi",
+    ]
+
     attempts = (
         AssessmentAttempt.objects
         .filter(
-            assessment=assessment,
+            assessment__slug__in=ai_ready_slugs,
         )
         .select_related(
             "participant_profile",
@@ -9273,21 +9225,21 @@ def ai_ready_report(request):
         )
 
     total = AssessmentAttempt.objects.filter(
-        assessment=assessment
+        assessment__slug__in=ai_ready_slugs
     ).count()
 
     completed = AssessmentAttempt.objects.filter(
-        assessment=assessment,
+        assessment__slug__in=ai_ready_slugs,
         status="completed",
     ).count()
 
     started = AssessmentAttempt.objects.filter(
-        assessment=assessment,
+        assessment__slug__in=ai_ready_slugs,
         status="started",
     ).count()
 
     certificates = AssessmentAttempt.objects.filter(
-        assessment=assessment,
+        assessment__slug__in=ai_ready_slugs,
         status="completed",
         certificate__is_valid=True,
     ).count()
@@ -9461,4 +9413,15 @@ def marketing_activity_dashboard(request):
         request,
         "core/marketing_activity_dashboard.html",
         context
+    )
+
+
+# ============================================================
+# MCTI SOCIAL CAUSE - FREE STUDENT HELP
+# ============================================================
+
+def free_student_help(request):
+    return render(
+        request,
+        "core/free_student_help.html"
     )

@@ -59,6 +59,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("core.urls")),
     path("lms/", include("lms.urls")),
+    path("typing/", include("typing_practice.urls")),
     path("assessment/", include("assessments.urls")),
     path("ssc-exam-preparation/", include("exam_preparation.urls")),
     path("api/mobile/", include("mobile_api.urls")),

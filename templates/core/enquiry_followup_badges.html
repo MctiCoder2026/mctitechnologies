@@ -1,0 +1,22 @@
+<div style="margin-top:8px;font-size:12px;line-height:1.6;font-weight:normal;">
+{% if enquiry.work_pending %}
+<span style="display:inline-block;padding:3px 8px;border-radius:6px;{% if enquiry.work_pending == 'Overdue' %}background:#fee2e2;color:#b42318;{% elif enquiry.work_pending == 'Due today' %}background:#fff0d6;color:#9a5300;{% else %}background:#eef2ff;color:#334155;{% endif %}">
+{{ enquiry.work_pending }}
+</span>
+{% endif %}
+{% if enquiry.work_result %}
+<div style="margin-top:5px;padding:6px 9px;border-radius:6px;{% if enquiry.work_retry %}background:#fff0d6;color:#9a5300;{% else %}background:#dcfce7;color:#166534;{% endif %}">
+<b>Last result: {{ enquiry.work_result }}</b><br>
+{{ enquiry.work_actor }} · {{ enquiry.work_when|date:"d M Y, h:i A" }}
+</div>
+{% endif %}
+{% if enquiry.followup_date %}
+<div>Next follow-up: <b>{{ enquiry.followup_date|date:"d M Y" }}</b></div>
+{% endif %}
+{% if enquiry.status != "converted" and enquiry.status != "closed" %}
+<a href="{% url 'enquiry_detail' enquiry.id %}#record-followup-result"
+style="display:inline-block;margin-top:7px;padding:7px 10px;border-radius:6px;background:#ff7200;color:white;text-decoration:none;font-weight:bold;">
+Record Result →
+</a>
+{% endif %}
+</div>

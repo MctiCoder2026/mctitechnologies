@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}My Training | MCTI{% endblock %}
+
+{% block content %}
+<style>
+.staff-wrap{
+    max-width:1200px;
+    margin:30px auto;
+    padding:20px;
+    box-sizing:border-box;
+}
+
+.staff-hero{
+    background:#111;
+    color:#fff;
+    padding:30px;
+    border-radius:18px;
+    border-left:7px solid #ff7200;
+}
+
+.staff-label{
+    color:#ff8a24;
+    font-weight:800;
+    font-size:14px;
+    text-transform:uppercase;
+}
+
+.staff-hero h1{
+    margin:4px 0 8px;
+    font-size:32px;
+    line-height:1.2;
+}
+
+.staff-hero p{
+    margin:0;
+}
+
+.progress-track{
+    width:100%;
+    height:34px;
+    background:#333;
+    border-radius:30px;
+    overflow:hidden;
+    margin-top:18px;
+}
+
+.progress-fill{
+    height:100%;
+    min-width:38px;
+    width:{{ progress_percent }}%;
+    background:#ff7200;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-weight:800;
+}
+
+.progress-text{
+    margin-top:10px !important;
+}
+
+.module-grid{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:20px;
+    margin-top:25px;
+}
+
+.module-card{
+    background:#fff;
+    border:1px solid #e2e2e2;
+    border-radius:16px;
+    padding:22px;
+    box-shadow:0 4px 14px rgba(0,0,0,.06);
+    display:flex;
+    flex-direction:column;
+    min-height:245px;
+    box-sizing:border-box;
+    overflow:hidden;
+}
+
+.module-number{
+    color:#ff7200;
+    font-size:14px;
+    font-weight:900;
+    margin-bottom:10px;
+}
+
+.module-card h3{
+    margin:0 0 12px;
+    font-size:21px;
+    line-height:1.25;
+    color:#111;
+}
+
+.module-description{
+    color:#555;
+    font-size:15px;
+    line-height:1.55;
+    margin:0 0 20px;
+    overflow-wrap:anywhere;
+}
+
+.module-action{
+    margin-top:auto;
+}
+
+.btn-training{
+    display:inline-block;
+    background:#ff7200;
+    color:#fff !important;
+    padding:11px 18px;
+    border-radius:9px;
+    text-decoration:none !important;
+    font-weight:800;
+}
+
+.btn-training:hover{
+    background:#111;
+}
+
+@media(max-width:900px){
+    .module-grid{
+        grid-template-columns:repeat(2, minmax(0,1fr));
+    }
+}
+
+@media(max-width:600px){
+    .staff-wrap{
+        padding:12px;
+        margin:15px auto;
+    }
+
+    .staff-hero{
+        padding:22px;
+    }
+
+    .staff-hero h1{
+        font-size:25px;
+    }
+
+    .module-grid{
+        grid-template-columns:1fr;
+    }
+
+    .module-card{
+        min-height:auto;
+    }
+
+    .btn-training{
+        display:block;
+        text-align:center;
+    }
+}
+</style>
+
+<div class="staff-wrap">
+
+    <div style="margin-bottom:16px;">
+        <a href="{% url 'branch_dashboard' %}"
+           style="
+               display:inline-block;
+               background:#111;
+               color:#fff;
+               padding:11px 18px;
+               border-radius:9px;
+               text-decoration:none;
+               font-weight:800;
+           ">
+            ← Staff Dashboard
+        </a>
+    </div>
+
+    <div style="margin-bottom:18px">
+        <a href="{% url 'lms:staff_classroom' %}"
+           style="display:inline-block;background:#ff7200;color:white;padding:11px 18px;border-radius:9px;text-decoration:none;font-weight:800">
+           Weekly Classroom Control →
+        </a>
+    </div>
+
+    <div class="staff-hero">
+
+        <div class="staff-label">
+            MCTI STAFF DEVELOPMENT
+        </div>
+
+        <h1>{{ course.title }}</h1>
+
+        <p>
+            Learn • Practice • Pass the Quiz • Improve Your Sales Performance
+        </p>
+
+        <div class="progress-track">
+            <div class="progress-fill">
+                {{ progress_percent }}%
+            </div>
+        </div>
+
+        <p class="progress-text">
+            Completed <strong>{{ completed_topics }}</strong>
+            of <strong>{{ total_topics }}</strong> topics
+        </p>
+
+    </div>
+
+    <div class="module-grid">
+
+        {% for module in modules %}
+
+        <div class="module-card">
+
+            <div class="module-number">
+                MODULE {{ module.order }}
+            </div>
+
+            <h3>
+                {{ module.title }}
+            </h3>
+
+            <p class="module-description">
+                {{ module.description|default:"MCTI practical staff training module." }}
+            </p>
+
+            <div class="module-action">
+                <a class="btn-training"
+                   href="{% url 'lms:staff_training_module' module.id %}">
+                    Start / Continue →
+                </a>
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+{% endblock %}

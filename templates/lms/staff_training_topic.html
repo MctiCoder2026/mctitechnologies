@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ topic.title }} | Staff Training{% endblock %}
+
+{% block content %}
+<style>
+.wrap{max-width:900px;margin:30px auto;padding:20px}
+.lesson{background:#fff;border:1px solid #ddd;border-radius:18px;padding:28px}
+.label{color:#ff7a00;font-weight:800}
+.quiz-btn{display:inline-block;background:#111;color:#fff!important;padding:13px 22px;border-radius:10px;text-decoration:none;font-weight:800;margin-top:20px}
+.score{background:#fff4e8;border-left:5px solid #ff7a00;padding:12px;margin-top:20px;border-radius:8px}
+</style>
+
+<div class="wrap">
+
+<p>
+<a href="{% url 'lms:staff_training_module' topic.module.id %}">
+← Back to Module
+</a>
+</p>
+
+<div class="lesson">
+
+<div class="label">
+MODULE {{ topic.module.order }} • TOPIC {{ topic.order }}
+</div>
+
+<h1>{{ topic.title }}</h1>
+
+{% if topic.description %}
+    <div style="line-height:1.7;">
+        {{ topic.description|linebreaks }}
+    </div>
+{% endif %}
+
+{% if progress.attempts %}
+<div class="score">
+    Attempts: <strong>{{ progress.attempts }}</strong>
+    &nbsp; | &nbsp;
+    Best Score:
+    <strong>{{ progress.best_score }}/{{ progress.total_questions }}</strong>
+</div>
+{% endif %}
+
+<h3 style="margin-top:28px;">Knowledge Check</h3>
+<p>Complete the 5-question quiz. Minimum <strong>3/5</strong> is required to unlock the next topic.</p>
+
+<a class="quiz-btn"
+   href="{% url 'lms:staff_training_quiz' topic.id %}">
+    Start Quiz →
+</a>
+
+</div>
+</div>
+{% endblock %}

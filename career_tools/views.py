@@ -86,10 +86,16 @@ def resume_builder(request):
                 "mobile": student.mobile,
                 "email": student.email or "",
                 "city": "",
+                "preferred_branch": (student.branch or "").strip().lower(),
                 "is_guest": False,
                 "source": "MCTI Career Kit - Existing Student",
             }
         )
+
+        student_branch = (student.branch or "").strip().lower()
+        if student_branch and profile.preferred_branch != student_branch:
+            profile.preferred_branch = student_branch
+            profile.save(update_fields=["preferred_branch", "updated_at"])
 
     resume = None
 
@@ -332,6 +338,25 @@ def guest_start(request):
                         "MCTI Career Kit - Guest"
                     ),
                 )
+
+            # ---------------------------------------------
+            # EXISTING MCTI STUDENT CHECK
+            # Prevent duplicate Guest CareerProfile
+            # ---------------------------------------------
+
+            student_profile = (
+                CareerProfile.objects.filter(
+                    mobile=mobile,
+                    student__isnull=False
+                )
+                .select_related("student")
+                .order_by("-updated_at")
+                .first()
+            )
+
+            if student_profile:
+                request.session["career_login_next"] = next_tool
+                return redirect("student_login")
 
             # ---------------------------------------------
             # EXISTING GUEST PROFILE CHECK
@@ -1470,10 +1495,16 @@ def _get_career_profile_for_request(request):
                     "full_name": student.name,
                     "mobile": student.mobile,
                     "email": student.email or "",
+                    "preferred_branch": (student.branch or "").strip().lower(),
                     "is_guest": False,
                     "source": "MCTI Career Kit - Existing Student",
                 },
             )
+
+            student_branch = (student.branch or "").strip().lower()
+            if student_branch and profile.preferred_branch != student_branch:
+                profile.preferred_branch = student_branch
+                profile.save(update_fields=["preferred_branch", "updated_at"])
 
     if profile is None:
         profile_id = request.session.get(
@@ -2172,6 +2203,41 @@ def counsellor_dashboard(request):
         .order_by("-updated_at")
     )
 
+    # Branch-level access control:
+    # Superuser / Head Office -> all profiles
+    # Branch staff -> only profiles belonging to their branch
+    if not request.user.is_superuser:
+        try:
+            staff_profile = request.user.staff_profile
+        except Exception:
+            return HttpResponse(
+                "Staff profile not found.",
+                status=403,
+            )
+
+        if not staff_profile.is_active:
+            return HttpResponse(
+                "Your staff account is inactive.",
+                status=403,
+            )
+
+        staff_branch = (staff_profile.branch or "").strip().lower()
+
+        if staff_branch != "head_office":
+            from django.db.models import Q
+
+            profiles = profiles.filter(
+                Q(preferred_branch__iexact=staff_branch)
+                | (
+                    Q(preferred_branch__isnull=True)
+                    & Q(enquiry__branch__iexact=staff_branch)
+                )
+                | (
+                    Q(preferred_branch="")
+                    & Q(enquiry__branch__iexact=staff_branch)
+                )
+            )
+
     if search_query:
         from django.db.models import Q
 
@@ -2336,6 +2402,12 @@ def counsellor_profile_detail(request, profile_id):
         return HttpResponse(
             "Career profile not found.",
             status=404,
+        )
+
+    if not _staff_can_reset_career_pin(request.user, profile):
+        return HttpResponse(
+            "You do not have permission to view this Career Profile.",
+            status=403,
         )
 
     attempts = (

@@ -1,4 +1,5 @@
-﻿{% load static %}
+<!-- services-popup-guests-only -->
+{% load static %}
 
 <!DOCTYPE html>
 
@@ -51,6 +52,32 @@ content="width=device-width, initial-scale=1.0"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
 >
 
+
+<!-- MCTI MOBILE SUBMENU FIX -->
+<style>
+@media (max-width:900px) {
+    body > header #primaryNavigation .nav-dropdown > .nav-dropdown-menu {
+        display:none !important;
+        opacity:0 !important;
+        visibility:hidden !important;
+        pointer-events:none !important;
+        transform:none !important;
+    }
+    body > header #primaryNavigation .nav-dropdown.submenu-open > .nav-dropdown-menu {
+        display:block !important;
+        opacity:1 !important;
+        visibility:visible !important;
+        pointer-events:auto !important;
+        height:auto !important;
+        max-height:none !important;
+        overflow:visible !important;
+    }
+    body > header #primaryNavigation .submenu-open > .nav-drop-trigger .nav-chevron {
+        transform:rotate(180deg);
+    }
+}
+</style>
+
 </head>
 
 <body>
@@ -97,120 +124,75 @@ content="width=device-width, initial-scale=1.0"
 
 <ul class="nav-links" id="primaryNavigation">
 
+<li>
+<a href="{% url 'home' %}">
+<i class="fa-solid fa-house"></i> Home
+</a>
+</li>
 
-    <!-- HOME -->
+<li>
+<a href="{% url 'courses' %}">
+<i class="fa-solid fa-book-open"></i>
+Courses
+</a>
+</li>
 
-    <li>
+<li class="nav-dropdown">
+<a href="javascript:void(0)" class="nav-drop-trigger" onclick="return false;">
+<i class="fa-solid fa-graduation-cap"></i>
+Students
+<i class="fa-solid fa-chevron-down nav-chevron"></i>
+</a>
 
-        <a href="{% url 'home' %}">
-            Home
-        </a>
+<div class="nav-dropdown-menu">
+<a href="{% url 'academy' %}" target="_blank" rel="noopener noreferrer">Academy</a>
+<a href="{% url 'career_tools:home' %}" target="_blank" rel="noopener noreferrer">Career Kit</a>
+<a href="{% url 'typing_practice:public_typing' %}" target="_blank" rel="noopener noreferrer">Typing Lab</a>
+<a href="{% url 'student_login' %}" target="_blank" rel="noopener noreferrer">Student Login</a>
+</div>
+</li>
 
-    </li>
+<li class="social-cause-nav">
+<a href="{% url 'free_student_help' %}">
+<i class="fa-solid fa-heart"></i>
+Social Cause
+</a>
+</li>
 
+<li class="nav-dropdown">
+<a href="javascript:void(0)" class="nav-drop-trigger" onclick="return false;">
+<i class="fa-solid fa-building"></i>
+Business
+<i class="fa-solid fa-chevron-down nav-chevron"></i>
+</a>
 
-    <!-- COURSES -->
+<div class="nav-dropdown-menu">
+<a href="{% url 'business_solutions' %}" target="_blank" rel="noopener noreferrer">IT Solutions</a>
+<a href="{% url 'ai' %}" target="_blank" rel="noopener noreferrer">AI Solutions</a>
+<a href="{% url 'saas' %}" target="_blank" rel="noopener noreferrer">SaaS</a>
+</div>
+</li>
 
-    <li>
+<li>
+<a href="{% url 'franchise' %}">
+<i class="fa-solid fa-handshake"></i>
+Partner With Us
+</a>
+</li>
 
-        <a href="{% url 'courses' %}">
-            Courses
-        </a>
+<li class="nav-dropdown">
+<a href="javascript:void(0)" class="nav-drop-trigger" onclick="return false;">
+<i class="fa-solid fa-circle-info"></i>
+About
+<i class="fa-solid fa-chevron-down nav-chevron"></i>
+</a>
 
-    </li>
+<div class="nav-dropdown-menu nav-dropdown-right">
+<a href="{% url 'about' %}" target="_blank" rel="noopener noreferrer">About MCTI</a>
+<a href="{% url 'contact' %}" target="_blank" rel="noopener noreferrer">Contact Us</a>
 
-
-    <!-- ACADEMY -->
-
-    <li>
-
-        <a href="{% url 'academy' %}">
-            Academy
-        </a>
-
-    </li>
-    <!-- CAREER KIT -->
-
-    <li>
-        <a href="{% url 'career_tools:home' %}">
-            <i class="fa-solid fa-briefcase"></i>
-            Career Kit
-        </a>
-    </li>
-
-    <!-- IT SOLUTIONS -->
-
-    <li>
-
-        <a href="{% url 'business_solutions' %}">
-            IT Solutions
-        </a>
-
-    </li>
-
-
-    <!-- AI -->
-
-    <li>
-
-        <a href="{% url 'ai' %}">
-            AI
-        </a>
-
-    </li>
-
-
-    <!-- SAAS -->
-
-    <li>
-
-        <a href="{% url 'saas' %}">
-            SaaS
-        </a>
-
-    </li>
-
-
-    <!-- ABOUT -->
-
-    <li>
-
-        <a href="{% url 'about' %}">
-            About
-        </a>
-
-    </li>
-
-
-    <!-- CONTACT -->
-
-    <li>
-
-        <a href="{% url 'contact' %}">
-            Contact
-        </a>
-
-    </li>
-
-
-    <!-- =================================================
-         STUDENT LOGIN
-    ================================================== -->
-
-    <li>
-
-        <a href="{% url 'student_login' %}">
-
-            <i class="fa-solid fa-user-graduate"></i>
-
-            Student Login
-
-        </a>
-
-    </li>
-
-
-  
+</div>
+</li>
 
 </ul>
 
@@ -291,6 +273,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const icon = menuToggle.querySelector("i");
 
     function closeMenu() {
+        resetDropdowns();
         navLinks.classList.remove("active");
         document.body.classList.remove("nav-menu-open");
         menuToggle.setAttribute("aria-expanded", "false");
@@ -330,8 +313,40 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    navLinks.querySelectorAll("a").forEach(function (link) {
+    navLinks.querySelectorAll("a:not(.nav-drop-trigger)").forEach(function (link) {
         link.addEventListener("click", closeMenu);
+    });
+
+    const dropdowns = Array.from(navLinks.querySelectorAll(".nav-dropdown"));
+
+    function resetDropdowns() {
+        dropdowns.forEach(function (item) {
+            item.classList.remove("submenu-open");
+            const trigger = item.querySelector(".nav-drop-trigger");
+            if (trigger) trigger.setAttribute("aria-expanded", "false");
+        });
+    }
+
+    dropdowns.forEach(function (item, index) {
+        const trigger = item.querySelector(".nav-drop-trigger");
+        const submenu = item.querySelector(".nav-dropdown-menu");
+        if (!trigger || !submenu) return;
+
+        submenu.id = submenu.id || "mcti-submenu-" + index;
+        trigger.setAttribute("aria-controls", submenu.id);
+        trigger.setAttribute("aria-expanded", "false");
+
+        trigger.addEventListener("click", function (event) {
+            event.preventDefault();
+            if (window.innerWidth > 900) return;
+            event.stopPropagation();
+            const shouldOpen = !item.classList.contains("submenu-open");
+            resetDropdowns();
+            if (shouldOpen) {
+                item.classList.add("submenu-open");
+                trigger.setAttribute("aria-expanded", "true");
+            }
+        });
     });
 
     document.addEventListener("click", function (event) {
@@ -700,16 +715,32 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    /* Once per browser session */
+    /* =====================================================
+       CAREER POPUP ONLY FOR STUDENT / CAREER PAGES
+    ===================================================== */
+
+    const isCareerPage =
+        currentPath === "/academy/" ||
+        currentPath === "/courses/" ||
+        currentPath.startsWith("/courses/") ||
+        currentPath === "/career/" ||
+        currentPath.startsWith("/career/");
+
+    /* Counsellor is a staff/private area */
 
     if (
-        sessionStorage.getItem(
-            "mctiCareerPopupSeen"
-        )
+        currentPath === "/career/counsellor/" ||
+        currentPath.startsWith("/career/counsellor/")
     ) {
         return;
     }
 
+    if (!isCareerPage) {
+        return;
+    }
+
+
+    /* Show once on each public page load */
 
     let shown = false;
 
@@ -723,11 +754,6 @@ document.addEventListener("DOMContentLoaded", function () {
         shown = true;
 
         popup.classList.add("active");
-
-        sessionStorage.setItem(
-            "mctiCareerPopupSeen",
-            "1"
-        );
 
         window.removeEventListener(
             "scroll",
@@ -797,6 +823,499 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </script>
 
+
+
+
+
+<!-- ======================================================
+     MCTI SERVICES / HIRE / PARTNER POPUP
+======================================================= -->
+
+
+{% if not request.user.is_authenticated %}
+<div id="mctiServicesPopup" class="mcti-services-overlay">
+
+    <div class="mcti-services-popup">
+
+        <button type="button"
+                id="mctiServicesPopupClose"
+                class="mcti-services-close"
+                aria-label="Close">&times;</button>
+
+        <div class="mcti-services-brand">
+            MCTI TECHNOLOGIES
+        </div>
+
+        <h2>More Than Training.</h2>
+
+        <p class="mcti-services-intro">
+            Explore how MCTI can support your business,
+            organization or entrepreneurial journey.
+        </p>
+
+        <a href="{% url 'business_solutions' %}"
+           class="mcti-service-option">
+
+            <span class="mcti-service-icon">⚙️</span>
+
+            <span class="mcti-service-copy">
+                <strong>Business & Technology Services</strong>
+                <small>
+                    CRM, Websites, AI & Automation,
+                    Digital Solutions and SaaS
+                </small>
+            </span>
+
+            <span class="mcti-service-arrow">→</span>
+        </a>
+
+        <a href="{% url 'business_contact' %}?service=corporate_training"
+           class="mcti-service-option">
+
+            <span class="mcti-service-icon">👥</span>
+
+            <span class="mcti-service-copy">
+                <strong>Hire Us | Corporate Training</strong>
+                <small>
+                    Technology services, workforce training
+                    and customized business solutions
+                </small>
+            </span>
+
+            <span class="mcti-service-arrow">→</span>
+        </a>
+
+        <a href="{% url 'franchise' %}"
+           class="mcti-service-option mcti-partner-option">
+
+            <span class="mcti-service-icon">🤝</span>
+
+            <span class="mcti-service-copy">
+                <strong>Become an MCTI Partner</strong>
+                <small>
+                    Build your own Education & Technology
+                    Center with the MCTI ecosystem
+                </small>
+            </span>
+
+            <span class="mcti-service-arrow">→</span>
+        </a>
+
+        <div class="mcti-services-footer">
+            An Initiative by Maharashtra Computer Training Institute
+        </div>
+
+    </div>
+
+</div>
+{% endif %}
+
+
+
+<style>
+
+.mcti-services-overlay{
+    position:fixed;
+    inset:0;
+    z-index:99998;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:20px;
+
+    background:rgba(10,10,10,.68);
+    backdrop-filter:blur(4px);
+
+    opacity:0;
+    visibility:hidden;
+    transition:.25s ease;
+}
+
+.mcti-services-overlay.active{
+    opacity:1;
+    visibility:visible;
+}
+
+.mcti-services-popup{
+    position:relative;
+
+    width:100%;
+    max-width:500px;
+    max-height:90vh;
+    overflow-y:auto;
+
+    padding:34px;
+
+    background:#fff;
+    border-top:6px solid #ff6500;
+    border-radius:20px;
+
+    box-shadow:0 25px 80px rgba(0,0,0,.28);
+
+    transform:translateY(25px) scale(.97);
+    transition:.28s ease;
+}
+
+.mcti-services-overlay.active .mcti-services-popup{
+    transform:translateY(0) scale(1);
+}
+
+.mcti-services-close{
+    position:absolute;
+    top:13px;
+    right:16px;
+
+    width:35px;
+    height:35px;
+
+    border:0;
+    border-radius:50%;
+
+    background:#f4f4f4;
+    color:#333;
+
+    font-size:25px;
+    line-height:30px;
+    cursor:pointer;
+}
+
+.mcti-services-brand{
+    display:inline-block;
+
+    margin-bottom:12px;
+    padding:6px 11px;
+
+    background:#fff0e6;
+    color:#ff6500;
+
+    border-radius:20px;
+
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:1.3px;
+}
+
+.mcti-services-popup h2{
+    margin:0 0 8px;
+
+    color:#171717;
+
+    font-size:30px;
+    line-height:1.15;
+}
+
+.mcti-services-intro{
+    margin:0 0 22px;
+
+    color:#666;
+
+    font-size:14px;
+    line-height:1.6;
+}
+
+.mcti-service-option{
+    display:flex;
+    align-items:center;
+    gap:14px;
+
+    margin-bottom:11px;
+    padding:16px;
+
+    background:#fafafa;
+    border:1px solid #ececec;
+    border-radius:13px;
+
+    color:#222 !important;
+    text-decoration:none !important;
+
+    transition:.2s ease;
+}
+
+.mcti-service-option:hover{
+    border-color:#ffb27d;
+    background:#fff8f3;
+    transform:translateY(-2px);
+}
+
+.mcti-service-icon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex:0 0 45px;
+    width:45px;
+    height:45px;
+
+    background:#fff0e6;
+    border-radius:11px;
+
+    font-size:21px;
+}
+
+.mcti-service-copy{
+    flex:1;
+}
+
+.mcti-service-copy strong{
+    display:block;
+
+    margin-bottom:3px;
+
+    color:#1b1b1b;
+
+    font-size:15px;
+}
+
+.mcti-service-copy small{
+    display:block;
+
+    color:#777;
+
+    font-size:12px;
+    line-height:1.4;
+}
+
+.mcti-service-arrow{
+    color:#ff6500;
+    font-size:22px;
+    font-weight:800;
+}
+
+.mcti-partner-option{
+    background:#151515;
+    border-color:#151515;
+}
+
+.mcti-partner-option:hover{
+    background:#202020;
+    border-color:#ff6500;
+}
+
+.mcti-partner-option .mcti-service-copy strong{
+    color:#fff;
+}
+
+.mcti-partner-option .mcti-service-copy small{
+    color:#ccc;
+}
+
+.mcti-services-footer{
+    margin-top:18px;
+
+    color:#999;
+
+    text-align:center;
+    font-size:10px;
+    line-height:1.4;
+}
+
+@media(max-width:600px){
+
+    .mcti-services-overlay{
+        padding:14px;
+    }
+
+    .mcti-services-popup{
+        padding:28px 20px 22px;
+        border-radius:16px;
+    }
+
+    .mcti-services-popup h2{
+        font-size:25px;
+    }
+
+    .mcti-service-option{
+        padding:13px;
+        gap:11px;
+    }
+
+    .mcti-service-icon{
+        flex-basis:40px;
+        width:40px;
+        height:40px;
+    }
+}
+
+</style>
+
+
+
+{% if not request.user.is_authenticated %}
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    const popup =
+        document.getElementById("mctiServicesPopup");
+
+    const closeButton =
+        document.getElementById("mctiServicesPopupClose");
+
+    if (!popup || !closeButton) return;
+
+    const path = window.location.pathname;
+
+
+    /* =====================================================
+       CAREER / STUDENT RELATED PAGES USE CAREER POPUP
+    ===================================================== */
+
+    const isCareerRelatedPage =
+        path === "/academy/" ||
+        path === "/courses/" ||
+        path.startsWith("/courses/") ||
+        path === "/career/" ||
+        path.startsWith("/career/");
+
+    /* Counsellor is private/staff area */
+
+    if (
+        path === "/career/counsellor/" ||
+        path.startsWith("/career/counsellor/")
+    ) {
+        return;
+    }
+
+    if (isCareerRelatedPage) {
+        return;
+    }
+
+
+    /* Never show on private/system pages */
+
+    const excludedPaths = [
+        "/admin/",
+        "/student/",
+        "/staff",
+        "/management",
+        "/branch-dashboard",
+        "/enquiries/",
+        "/admissions/",
+        "/reports/",
+        "/attendance/",
+        "/lms/",
+        "/monthly-closing/",
+        "/daily-expenses/"
+    ];
+
+    if (
+        excludedPaths.some(
+            item => path.startsWith(item)
+        )
+    ) {
+        return;
+    }
+
+
+    /* Course pages use their own Career popup */
+
+    if (
+        path === "/academy/" ||
+        path === "/courses/" ||
+        path.startsWith("/courses/")
+    ) {
+        return;
+    }
+
+
+    /* All other public pages use Services / Hire / Partner popup */
+
+
+    /* Once per browser session */
+
+    if (
+        sessionStorage.getItem(
+            "mctiServicesPopupSeen"
+        )
+    ) {
+        return;
+    }
+
+
+    let shown = false;
+
+
+    function openServicesPopup(){
+
+        if (shown) return;
+
+        shown = true;
+
+        popup.classList.add("active");
+
+        sessionStorage.setItem(
+            "mctiServicesPopupSeen",
+            "1"
+        );
+
+        window.removeEventListener(
+            "scroll",
+            checkServicesScroll
+        );
+    }
+
+
+    function checkServicesScroll(){
+
+        const scrollable =
+            document.documentElement.scrollHeight
+            - window.innerHeight;
+
+        if (scrollable <= 0) return;
+
+        const percentage =
+            (window.scrollY / scrollable) * 100;
+
+        if (percentage >= 35) {
+            openServicesPopup();
+        }
+    }
+
+
+    window.addEventListener(
+        "scroll",
+        checkServicesScroll,
+        {passive:true}
+    );
+
+
+    closeButton.addEventListener(
+        "click",
+        function(){
+            popup.classList.remove("active");
+        }
+    );
+
+
+    popup.addEventListener(
+        "click",
+        function(event){
+
+            if (event.target === popup) {
+                popup.classList.remove("active");
+            }
+
+        }
+    );
+
+
+    document.addEventListener(
+        "keydown",
+        function(event){
+
+            if (event.key === "Escape") {
+                popup.classList.remove("active");
+            }
+
+        }
+    );
+
+});
+
+</script>
+{% endif %}
 
 
 

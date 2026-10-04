@@ -369,91 +369,8 @@
 
 <body>
 
-    <aside class="sidebar">
-
-        <div class="logo">
-            MCTI <span>Technologies</span>
-        </div>
-
-        <a href="{% url 'management_dashboard' %}">
-            Dashboard
-        </a>
-
-        <a
-            href="{% url 'branch_dashboard' %}"
-            class="active"
-        >
-            Branch Performance
-        </a>
-        <a href="{% url 'daily_expense_list' %}">
-            Daily Expenses
-        </a>
-
-        <a href="{% url 'monthly_closing_list' %}">
-            Monthly Closing
-        </a>
-
-        <a href="{% url 'enquiry_dashboard' %}">
-            Enquiries
-        </a>
-
-        <a href="{% url 'career_tools:quick_career_enquiry' %}">
-            New Career Enquiry
-        </a>
-
-        <a href="{% url 'career_tools:counsellor_dashboard' %}">
-            Career Counsellor Dashboard
-        </a>
-
-        <a href="{% url 'business_lead_list' %}">
-            Business Leads
-        </a>
-
-        <a href="{% url 'admission_list' %}">
-            Admissions
-        </a>
-
-        <a href="{% url 'student_list' %}">
-            Students
-        </a>
-
-        <a href="{% url 'lms:staff_training' %}">
-            🎯 My Training
-        </a>
-
-        <a href="{% url 'fee_payment_list' %}">
-            Fee Payments
-        </a>
-
-        <a href="{% url 'staff_list' %}">
-            Staff
-        </a>
-
-        <a href="{% url 'attendance_dashboard' %}">
-            Attendance
-        </a>
-
-        <a href="{% url 'attendance_report' %}">
-            Attendance Report
-        </a>
-
-        <a href="{% url 'job_list' %}">
-            Placement / Jobs
-        </a>
-        <a href="{% url 'fee_due_report' %}">
-        Fee Due Report
-        </a>
-        <a href="{% url 'reports_dashboard' %}">
-            Reports
-        </a>
-
-        {% if is_admin %}
-        <a href="/admin/">
-            Administrator
-        </a>
-        {% endif %}
-
-    </aside>
+    {% load crm_navigation %}
+{% crm_sidebar %}
 
 
     <main class="main">
@@ -487,6 +404,9 @@
             <h1 class="page-title">
                 Branch-wise Performance
             </h1>
+{% load payroll_links %}
+
+
 
             <p class="page-subtitle">
                 Compare enquiries, admissions,
@@ -574,7 +494,7 @@
         </div>
 
         <div class="subtext">
-            All branches combined
+            {% if is_admin %}All branches combined{% else %}Your branch enquiries{% endif %}
         </div>
     </div>
 
@@ -604,7 +524,7 @@
         </div>
 
         <div class="subtext">
-            All branch admissions
+            {% if is_admin %}All branch admissions{% else %}Your branch admissions{% endif %}
         </div>
     </div>
 
@@ -643,7 +563,7 @@
 
         <div class="summary-card">
             <div class="label">
-                Outstanding
+                Fresh Billing Pending
             </div>
 
             <div class="value">
@@ -651,7 +571,7 @@
             </div>
 
             <div class="subtext">
-                Billing minus collection
+                Pending fees of billing in the selected period
             </div>
         </div>
 
@@ -874,9 +794,12 @@
                                     <th>
                                         Collection
                                     </th>
+<th>Fresh Collection</th>
+<th>Old Collection</th>
+<th>Other / Unlinked</th>
 
                                     <th>
-                                        Outstanding
+                                        Fresh Billing Pending
                                     </th>
                                 {% endif %}
 
@@ -921,8 +844,17 @@
                                     </td>
 
                                     <td class="collection">
-                                        &#8377;{{ item.collection|floatformat:0 }}
-                                    </td>
+<a href="{{ item.collection_url }}">&#8377;{{ item.collection|floatformat:0 }}</a>
+</td>
+<td class="collection">
+<a href="{{ item.fresh_collection_url }}">&#8377;{{ item.fresh_collection|floatformat:0 }}</a>
+</td>
+<td class="collection">
+<a href="{{ item.old_collection_url }}" target="_blank" rel="noopener noreferrer">&#8377;{{ item.old_collection|floatformat:0 }}</a>
+</td>
+<td class="collection">
+<a href="{{ item.other_collection_url }}">&#8377;{{ item.other_collection|floatformat:0 }}</a>
+</td>
 
                                     <td class="collection">
                                         &#8377;{{ item.outstanding|floatformat:0 }}
@@ -985,6 +917,8 @@
 
     <script src="/static/js/staff_mobile.js" defer></script>
 
+{% load student_birthdays %}
+{% student_birthday_popup %}
 </body>
 
 </html>

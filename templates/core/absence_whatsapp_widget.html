@@ -1,0 +1,18 @@
+{% if record.status == "absent" %}
+<div class="mcti-absence-message"
+     data-name="{{ record.student.name }}"
+     data-mobile="{{ record.student.mobile }}"
+     data-date="{{ record.attendance_date|date:'d M Y' }}">
+  <select class="mcti-absence-language" aria-label="Absence message language">
+    <option value="en">English</option>
+    <option value="hi">हिन्दी</option>
+    <option value="mr">मराठी</option>
+  </select>
+  <a class="mcti-absence-link" target="_blank" rel="noopener noreferrer">
+    WhatsApp
+  </a>
+  <small class="mcti-absence-error" hidden>Valid mobile number required.</small>
+</div>
+{% else %}
+<span style="color:#94a3b8">—</span>
+{% endif %}

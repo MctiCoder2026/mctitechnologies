@@ -2229,6 +2229,12 @@ def mark_mobile_attendance(request):
             status=status.HTTP_403_FORBIDDEN,
         )
 
+    if student.status != "active":
+        from django.http import JsonResponse
+        return JsonResponse({"success": False,
+            "message": "Attendance is available for active students only."},
+            status=403)
+
     attendance, created = Attendance.objects.get_or_create(
         student=student,
         attendance_date=today,

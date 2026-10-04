@@ -44,6 +44,21 @@ def get_admission_year_choices():
 
 class EnquiryForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Public website enquiry:
+        # Course and branch are required for a usable sales lead.
+        self.fields["course"].required = True
+        self.fields["branch"].required = True
+
+        # Keep these optional to reduce form friction.
+        self.fields["email"].required = False
+        self.fields["current_status"].required = False
+        self.fields["message"].required = False
+
+        self.fields["course"].empty_label = "Search / Select Course"
+
     class Meta:
         model = Enquiry
 
@@ -51,6 +66,7 @@ class EnquiryForm(forms.ModelForm):
             "name",
             "mobile",
             "email",
+            "current_status",
             "course",
             "branch",
             "message",
@@ -73,7 +89,13 @@ class EnquiryForm(forms.ModelForm):
 
             "email": forms.EmailInput(
                 attrs={
-                    "placeholder": "Email Address",
+                    "placeholder": "Email Address (Optional)",
+                    "class": "form-control",
+                }
+            ),
+
+            "current_status": forms.Select(
+                attrs={
                     "class": "form-control",
                 }
             ),
@@ -541,6 +563,10 @@ class AdmissionEditForm(forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
+        self.fields["admission_date"].disabled = True
+        self.fields["admission_date"].help_text = (
+            "Use Change Admission Date for audited date corrections."
+        )
         self.fields["branch"].required = True
         self.fields["branch"].choices = BRANCH_CHOICES
 

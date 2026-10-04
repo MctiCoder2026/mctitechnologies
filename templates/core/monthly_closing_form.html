@@ -400,17 +400,33 @@
 
                 </div>
 
-                <div class="summary-box red">
+                
+{% if closing.fresh_pending_snapshot != None %}
+<div class="summary-box green">
+<div class="summary-label">Fresh Billing Collection</div>
+<div class="summary-value">₹{{ closing.fresh_collection_snapshot|floatformat:2 }}</div>
+</div>
+<div class="summary-box green">
+<div class="summary-label">Old Fees Collected</div>
+<div class="summary-value">₹{{ closing.old_collection_snapshot|floatformat:2 }}</div>
+</div>
+<div class="summary-box red">
+<div class="summary-label">Fresh Billing Pending</div>
+<div class="summary-value">₹{{ closing.fresh_pending_snapshot|floatformat:2 }}</div>
+</div>
+{% if closing.other_collection_snapshot %}
+<div class="summary-box">
+<div class="summary-label">Other / Unlinked Collection</div>
+<div class="summary-value">₹{{ closing.other_collection_snapshot|floatformat:2 }}</div>
+</div>
+{% endif %}
+{% else %}
+<div class="summary-box">
+<div class="summary-label">Collection Breakdown</div>
+<div class="info">Not recorded in this historical snapshot.</div>
+</div>
+{% endif %}
 
-                    <div class="summary-label">
-                        Pending Collection
-                    </div>
-
-                    <div class="summary-value">
-                        ₹{{ closing.pending_collection|floatformat:2 }}
-                    </div>
-
-                </div>
 
             </div>
 
@@ -516,123 +532,9 @@
 
         </form>
 
-        <section class="card">
+        {% load monthly_share_summary %}
+{% monthly_share_summary closing partners %}
 
-            <h2>Profit & Loss Summary</h2>
-
-            <div class="summary-grid">
-
-                <div class="summary-box">
-
-                    <div class="summary-label">
-                        Total Expenses
-                    </div>
-
-                    <div class="summary-value">
-                        ₹{{ closing.total_expenses|floatformat:2 }}
-                    </div>
-
-                </div>
-
-                <div class="summary-box">
-
-                    <div class="summary-label">
-                        Billing Profit/Loss
-                    </div>
-
-                    <div
-                        class="summary-value {% if closing.business_profit >= 0 %}profit{% else %}loss{% endif %}"
-                    >
-                        ₹{{ closing.business_profit|floatformat:2 }}
-                    </div>
-
-                </div>
-
-                <div class="summary-box">
-
-                    <div class="summary-label">
-                        Cash Profit/Loss
-                    </div>
-
-                    <div
-                        class="summary-value {% if closing.cash_profit >= 0 %}profit{% else %}loss{% endif %}"
-                    >
-                        ₹{{ closing.cash_profit|floatformat:2 }}
-                    </div>
-
-                </div>
-
-                <div class="summary-box">
-
-                    <div class="summary-label">
-                        Profit After Reserve
-                    </div>
-                    <div class="summary-box">
-
-                    <div class="summary-label">
-                        Reserve Fund
-                    </div>
-
-                    <div class="summary-value">
-                        ₹{{ closing.reserve_fund_amount|floatformat:2 }}
-                    </div>
-
-                </div>
-
-                    <div class="summary-value profit">
-                        ₹{{ closing.distributable_profit|floatformat:2 }}
-                    </div>
-
-                </div>
-
-            </div>
-
-            <p class="info">
-                Cash Profit = Collection − Total Expenses.
-                Profit After Reserve = Cash Profit − Reserve Fund.
-                Partner shares are calculated only on Profit After Reserve.
-                If there is a loss, distributable profit is zero.
-            </p>
-
-        </section>
-
-        <section class="card">
-
-            <h2>Branch Partners</h2>
-
-            {% if partners %}
-
-                <div class="partner-list">
-
-                    {% for partner in partners %}
-
-                        <div class="partner-row">
-
-                            <strong>
-                                {{ partner.partner_name }}
-                            </strong>
-
-                            <span>
-                                {{ partner.share_percentage|floatformat:2 }}%
-                            </span>
-
-                        </div>
-
-                    {% endfor %}
-
-                </div>
-
-            {% else %}
-
-                <div class="warning">
-                    No active partners are configured
-                    for this branch. Admin must add partner
-                    names and percentages before submission.
-                </div>
-
-            {% endif %}
-
-        </section>
 
         {% if closing.partner_shares.exists %}
 
@@ -655,7 +557,7 @@
                                 <div class="info">
                                     {{ share.share_percentage|floatformat:2 }}%
                                     ·
-                                    {% if share.is_paid %}
+                                    {% if share.share_amount < 0 %}Loss share{% elif share.share_amount == 0 %}No payout{% elif share.is_paid %}
                                         Paid
                                     {% else %}
                                         Payment Pending

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCTI Typing Lab</title>
+<style>
+body{margin:0;background:#111827;color:white;font-family:Arial;text-align:center}.box{max-width:600px;margin:80px auto;padding:30px}.o{color:#ff7200}a{display:inline-block;background:#ff7200;color:white;padding:13px 20px;border-radius:9px;text-decoration:none;font-weight:800;margin:7px}
+</style>
+</head>
+<body><div class="box">
+<h1>🎉 Welcome to MCTI <span class="o">Typing Lab</span></h1>
+
+{% if existing_student %}
+<p>Hi {{ name }}, you already have an MCTI student account.</p>
+<a href="{% url 'student_login' %}">Student Login →</a>
+{% else %}
+<p>Thanks {{ name }}. Your free registration has been received.</p>
+<p>Already an MCTI student? Login to access your complete Typing Lab, exams and progress.</p>
+<a href="{% url 'student_login' %}">Student Login</a>
+<a href="{% url 'typing_practice:public_typing' %}">Keep Practising</a>
+{% endif %}
+
+</div></body>
+</html>

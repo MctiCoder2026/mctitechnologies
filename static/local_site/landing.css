@@ -35,6 +35,17 @@ body{margin:0;font-family:'Inter',sans-serif;color:var(--text);background:#fff}
 .btn{display:inline-block;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:800}
 .btn-dark{background:#191919;color:#fff}
 .btn-white{background:#fff;color:#d95800}
+.btn-orange{
+    background:var(--orange);
+    color:#fff;
+    border:2px solid var(--orange);
+    transition:all .2s ease;
+}
+.btn-orange:hover{
+    background:var(--deep-orange);
+    border-color:var(--deep-orange);
+    transform:translateY(-1px);
+}
 .hero-visual{
     min-height:390px;border-radius:28px;
     background:rgba(255,255,255,.16);
@@ -74,6 +85,24 @@ body{margin:0;font-family:'Inter',sans-serif;color:var(--text);background:#fff}
 .feature-card .icon{font-size:36px}
 .feature-card h3{margin:14px 0 8px}
 .feature-card p{color:#666;line-height:1.6;font-size:14px}
+
+.corporate-branch{
+    position:relative;
+    border:2px solid var(--orange);
+    overflow:hidden;
+}
+
+.corporate-badge{
+    display:inline-block;
+    margin:-30px -20px 12px;
+    padding:8px 18px;
+    background:var(--orange);
+    color:#fff;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.3px;
+    border-radius:0 0 10px 10px;
+}
 
 .cta-band{background:linear-gradient(120deg,#FF6600,#E65C00);color:#fff;text-align:center;padding:60px 20px}
 .cta-band h2{font-size:38px;margin:0 0 12px}
@@ -1092,6 +1121,145 @@ h1,h2,h3,.brand{font-family:'Poppins',sans-serif;letter-spacing:-0.4px;}
 
     .menu-toggle.active span:nth-child(3){
         transform:translateY(-8px) rotate(-45deg);
+    }
+}
+
+
+/* MCTI Branch Cards */
+.branch-section .feature-card{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:30px 20px;
+    min-height:335px;
+}
+
+.branch-section .feature-card p{
+    width:100%;
+    margin-bottom:20px;
+}
+
+.branch-section .feature-card .btn{
+    margin-top:auto;
+    white-space:nowrap;
+    padding:15px 18px;
+    width:auto;
+    min-width:220px;
+    text-align:center;
+}
+
+
+/* =========================
+   Professional MCTI Footer
+   ========================= */
+
+.footer{
+    background:#111;
+    color:#ccc;
+    padding:55px 0 0;
+    margin-top:0;
+}
+
+.footer-grid{
+    display:grid;
+    grid-template-columns:1.5fr 1fr 1.2fr 1.3fr;
+    gap:45px;
+    padding-bottom:40px;
+}
+
+.footer h3{
+    color:var(--orange);
+    font-size:30px;
+    margin:0 0 8px;
+    font-weight:800;
+}
+
+.footer-brand-name{
+    color:#fff !important;
+    font-weight:700;
+    margin-bottom:14px !important;
+}
+
+.footer h4{
+    color:#fff;
+    font-size:17px;
+    margin:0 0 18px;
+    position:relative;
+    padding-bottom:10px;
+}
+
+.footer h4::after{
+    content:"";
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:38px;
+    height:3px;
+    background:var(--orange);
+    border-radius:3px;
+}
+
+.footer p{
+    color:#aaa;
+    font-size:14px;
+    line-height:1.7;
+    margin:0 0 10px;
+}
+
+.footer-column a{
+    display:block;
+    color:#bbb;
+    text-decoration:none;
+    font-size:14px;
+    margin-bottom:10px;
+    transition:.2s ease;
+}
+
+.footer-column a:hover{
+    color:var(--orange);
+    transform:translateX(3px);
+}
+
+.footer-bottom{
+    border-top:1px solid #2b2b2b;
+    padding:20px 0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+}
+
+.footer-bottom p{
+    margin:0;
+    font-size:13px;
+}
+
+.footer-bottom a{
+    color:var(--orange);
+    text-decoration:none;
+}
+
+@media (max-width:900px){
+    .footer-grid{
+        grid-template-columns:1fr 1fr;
+        gap:35px;
+    }
+}
+
+@media (max-width:600px){
+    .footer{
+        padding-top:40px;
+    }
+
+    .footer-grid{
+        grid-template-columns:1fr;
+        gap:30px;
+    }
+
+    .footer-bottom{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:6px;
     }
 }
 

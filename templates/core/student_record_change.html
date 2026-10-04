@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Student Record Correction | MCTI</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f6f6f6;color:#171717;
+font:15px Arial,sans-serif}header{background:#171717;color:white;
+padding:22px;border-bottom:4px solid #ff7200}main{max-width:680px;
+margin:28px auto;background:white;padding:28px;border:1px solid #eee;
+border-radius:14px}label{display:block;font-weight:bold;margin-bottom:7px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #ddd;
+border-radius:8px;font:inherit}button{background:#ff7200;color:white;
+border:0;border-radius:8px;padding:13px 22px;font-weight:bold;cursor:pointer}
+.errorlist{color:#b42318}p{line-height:1.6}a{color:#171717}
+@media(max-width:700px){main{margin:16px;padding:20px}}
+</style></head><body>
+<header>MCTI TECHNOLOGIES · Student Records</header><main>
+<h1>{% if kind == "student" %}Student Status{% elif kind == "receipt" %}
+Receipt Date Correction{% else %}Admission Date Correction{% endif %}</h1>
+{% if student %}<p><b>{{ student.name }}</b> · {{ student.student_id }}</p>{% endif %}
+{% if kind == "student" %}
+<p>Ex Students keep their login and fee history. They are excluded from
+daily attendance counts and automatic absence marking.
+Use Active Student when they resume classes.</p>
+{% else %}<p>Power User only. Submitted or locked months cannot be changed.
+Every correction retains the old date, new date and reason.</p>{% endif %}
+<form method="post">{% csrf_token %}{{ form.as_p }}
+<button type="submit">Save Change</button></form>
+<p><a href="{% url 'student_list' %}">← Students</a> ·
+<a href="{% url 'fee_payment_list' %}">Fee Payments</a></p>
+</main></body></html>

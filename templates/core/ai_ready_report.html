@@ -145,6 +145,11 @@
         grid-template-columns:repeat(2,1fr);
     }
 }
+.ai-table th:nth-child(7),
+.ai-table td:nth-child(7){
+    min-width:190px;
+    white-space:nowrap;
+}
 </style>
 
 <div class="ai-report-page">
@@ -215,6 +220,7 @@
         <table class="ai-table">
             <thead>
                 <tr>
+                    <th>Sr. No.</th>
                     <th>Participant</th>
                     <th>Education</th>
                     <th>Location</th>
@@ -228,6 +234,10 @@
             <tbody>
             {% for attempt in attempts %}
                 <tr>
+
+                    <td>
+                        <strong>{{ forloop.counter }}</strong>
+                    </td>
 
                     <td>
                         <div class="ai-name">
@@ -294,6 +304,12 @@
                                 >
                                     Verify
                                 </a>
+
+                                &nbsp;|&nbsp;
+                                <a
+                                    href="{% url 'assessments:ai_ready_certificate' attempt.id %}"
+                                    target="_blank"
+                                >Download</a>
                             {% endif %}
                         {% else %}
                             <span class="ai-muted">—</span>
@@ -315,7 +331,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="7" style="text-align:center;padding:35px;">
+                    <td colspan="8" style="text-align:center;padding:35px;">
                         No AI Ready participants found.
                     </td>
                 </tr>

@@ -828,6 +828,13 @@ tbody tr:last-child td {
 <div class="search-box">
 
     <form method="GET" class="search-form">
+{% if collection_label %}
+<input type="hidden" name="branch" value="{{ request.GET.branch }}">
+<input type="hidden" name="collection_type" value="{{ request.GET.collection_type }}">
+<input type="hidden" name="start_date" value="{{ request.GET.start_date }}">
+<input type="hidden" name="end_date" value="{{ request.GET.end_date }}">
+{% endif %}
+
 
         <input
             type="text"
@@ -935,7 +942,14 @@ tbody tr:last-child td {
          TABLE HEADER
     ================================================= -->
 
-    <div class="table-header">
+    {% if collection_label %}
+<div style="padding:16px 22px;background:#fff7ed;border-bottom:1px solid #fed7aa">
+<strong>{{ collection_label }}</strong>
+<div style="margin-top:6px">Matching collection:
+<b>₹{{ collection_total|floatformat:2 }}</b></div>
+</div>
+{% endif %}
+<div class="table-header">
 
         <h2>
 
@@ -1163,6 +1177,13 @@ tbody tr:last-child td {
                                style="display:block;margin-top:7px;color:#9a3412">
                                 Request correction
                             </a>
+{% if request.user.is_superuser and request.user.is_active %}
+<a href="{% url 'delete_fee_receipt' payment.id %}"
+   style="display:block;margin-top:8px;color:#b42318;font-weight:700">
+   Delete Receipt
+</a>
+{% endif %}
+
 
                         </td>
 

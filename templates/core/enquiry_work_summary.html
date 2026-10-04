@@ -1,0 +1,32 @@
+<div style="background:white;border:1px solid #eee;border-top:4px solid #ff7200;border-radius:12px;padding:20px;margin:20px 0;">
+<h2>Follow-up Work Summary</h2>
+<form method="get" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+{% for key,values in work_summary.preserved %}{% for value in values %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}{% endfor %}
+<select name="work_period" style="padding:9px;">
+<option value="today" {% if work_summary.period == "today" %}selected{% endif %}>Today</option>
+<option value="week" {% if work_summary.period == "week" %}selected{% endif %}>Last 7 days</option>
+<option value="custom" {% if work_summary.period == "custom" %}selected{% endif %}>Custom dates</option>
+</select>
+<label>From <input type="date" name="work_start" value="{{ work_summary.start|date:'Y-m-d' }}"></label>
+<label>To <input type="date" name="work_end" value="{{ work_summary.end|date:'Y-m-d' }}"></label>
+<button style="background:#ff7200;color:white;padding:10px 16px;border:0;border-radius:7px;">Apply</button>
+</form>
+{% if work_summary.error %}<p style="color:#b42318;">{{ work_summary.error }}</p>{% endif %}
+<p>{{ work_summary.start|date:"d M Y" }} – {{ work_summary.end|date:"d M Y" }}</p>
+<div style="display:flex;gap:15px;flex-wrap:wrap;margin:15px 0;">
+<span>Call attempts: <b>{{ work_summary.calls }}</b></span>
+<span>WhatsApp initiated: <b>{{ work_summary.whatsapp }}</b></span>
+<span>Results recorded: <b>{{ work_summary.completed }}</b></span>
+<span>Unique handled: <b>{{ work_summary.handled }}</b></span>
+<span>Due today: <b>{{ work_summary.today }}</b></span>
+<span style="color:#b42318;">Overdue: <b>{{ work_summary.overdue }}</b></span>
+</div>
+<div style="overflow-x:auto;"><table style="width:100%;min-width:1000px;border-collapse:collapse;">
+<thead><tr style="background:#fff3e8;"><th>Staff</th><th>Call attempts</th><th>WhatsApp initiated</th><th>Contacted</th><th>Message sent</th><th>No answer</th><th>Results recorded</th><th>Unique handled</th><th>Assigned today</th><th>Assigned overdue</th></tr></thead>
+<tbody>{% for r in work_summary.rows %}<tr>
+<td style="padding:12px;">{{ r.name }}</td><td>{{ r.calls }}</td><td>{{ r.whatsapp }}</td>
+<td>{{ r.contacted }}</td><td>{{ r.sent }}</td><td>{{ r.retry }}</td><td>{{ r.completed }}</td><td>{{ r.handled }}</td><td>{{ r.today }}</td><td>{{ r.overdue }}</td>
+</tr>{% empty %}<tr><td colspan="10">No activity or assigned follow-ups found.</td></tr>{% endfor %}</tbody>
+</table></div>
+<p style="font-size:12px;color:#777;">Activity uses the selected period. Due/overdue shows the current pending schedule. Initiated calls/messages do not confirm contact. Recorded results include no-answer retries.</p>
+</div>

@@ -302,7 +302,40 @@
                 25-question AI Awareness Quiz.
             </div>
 
-            <form method="post">
+            
+<div id="mcti-ai-language"
+     style="margin:0 0 20px;padding:18px;border:1px solid #e5e7eb;
+            border-radius:14px;background:#fff;">
+    <div style="font-weight:800;font-size:16px;margin-bottom:10px;">
+        Choose Quiz Language / प्रश्नमंजुषेची भाषा निवडा
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="?lang=en"
+           style="padding:11px 20px;border-radius:9px;text-decoration:none;
+                  font-weight:800;{% if language == "en" %}background:#f97316;color:#fff;{% else %}background:#f3f4f6;color:#111827;{% endif %}">
+            🇬🇧 English
+        </a>
+
+        <a href="?lang=mr"
+           style="padding:11px 20px;border-radius:9px;text-decoration:none;
+                  font-weight:800;{% if language == "mr" %}background:#f97316;color:#fff;{% else %}background:#f3f4f6;color:#111827;{% endif %}">
+            🇮🇳 मराठी
+        </a>
+    </div>
+
+    {% if language == "mr" %}
+    <div style="margin-top:12px;color:#555;">
+        AI Ready Maharashtra 2026 — मराठी प्रश्नमंजुषा
+    </div>
+    {% else %}
+    <div style="margin-top:12px;color:#555;">
+        AI Ready Maharashtra 2026 — English Quiz
+    </div>
+    {% endif %}
+</div>
+
+<form method="post">
                 {% csrf_token %}
 
                 {{ form.as_p }}

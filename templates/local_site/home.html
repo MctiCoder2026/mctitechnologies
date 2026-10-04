@@ -173,7 +173,7 @@
 </section>
 
 
-<section class="section" id="branches">
+<section class="section branch-section" id="branches">
     <div class="container">
 
         <div class="section-title">
@@ -184,16 +184,28 @@
         <div class="feature-grid">
 
             {% for branch in branches %}
-            <div class="feature-card">
-                <div class="icon">📍</div>
+            <div class="feature-card{% if branch.slug == 'nerul' %} corporate-branch{% endif %}">
+                {% if branch.slug == 'nerul' %}
+                <div class="corporate-badge">Corporate Office</div>
+                {% elif branch.is_head_office %}
+                <div class="corporate-badge">Head Office</div>
+                {% endif %}
+
+                <div class="icon location-pin" aria-label="Location" style="width:42px;height:42px;margin:0 auto;display:flex;align-items:center;justify-content:center;">
+    <svg viewBox="0 0 48 48" aria-hidden="true" width="34" height="34" style="width:34px;height:34px;display:block;">
+        <path d="M24 3C13.5 3 5 11.5 5 22c0 13.5 19 23 19 23s19-9.5 19-23C43 11.5 34.5 3 24 3z"
+              fill="var(--orange)"/>
+        <circle cx="24" cy="22" r="7" fill="#fff"/>
+    </svg>
+</div>
 
                 <h3>{{ branch.name }}</h3>
 
                 <p>{{ branch.address }}</p>
 
-                <a class="btn btn-dark"
+                <a class="btn {% if branch.slug == 'nerul' %}btn-orange{% else %}btn-dark{% endif %}"
                    href="/{{ branch.slug }}/">
-                    View {{ branch.name }} Branch
+                    View {{ branch.name }}{% if branch.slug == 'nerul' %} Corporate Office{% else %} Branch{% endif %}
                 </a>
             </div>
             {% empty %}
@@ -261,12 +273,53 @@
 
 
 <footer class="footer">
-    <div class="container" style="text-align:center;">
-        <p>© 2026 Maharashtra Computer Training Institute. All Rights Reserved.</p>
-        <p>
-            Designed, Developed &amp; Powered by
-            <strong>MCTI Technologies</strong>
-        </p>
+    <div class="container">
+
+        <div class="footer-grid">
+
+            <div class="footer-about">
+                <h3>MCTI</h3>
+                <p class="footer-brand-name">Maharashtra Computer Training Institute</p>
+                <p>
+                    Practical, career-focused computer training designed to
+                    build industry-ready skills for students and professionals.
+                </p>
+            </div>
+
+            <div class="footer-column">
+                <h4>Quick Links</h4>
+                <a href="/">Home</a>
+                <a href="#courses">Courses</a>
+                <a href="#branches">Our Branches</a>
+                <a href="#contact">Contact Us</a>
+            </div>
+
+            <div class="footer-column">
+                <h4>Our Centres</h4>
+                <a href="/kharghar/">Kharghar - Head Office</a>
+                <a href="/panvel/">Panvel</a>
+                <a href="/koperkhairane/">Koperkhairane</a>
+                <a href="/kamothe/">Kamothe</a>
+                <a href="/ghansoli/">Ghansoli</a>
+            </div>
+
+            <div class="footer-column">
+                <h4>MCTI Technologies</h4>
+                <p>Corporate Office: Nerul, Navi Mumbai</p>
+                <p>Education • Technology • Career Solutions</p>
+                <a href="https://mctitechnologies.com/">Visit Corporate Website →</a>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 Maharashtra Computer Training Institute. All Rights Reserved.</p>
+            <p>
+                Designed, Developed &amp; Powered by
+                <a href="https://mctitechnologies.com/"><strong>MCTI Technologies</strong></a>
+            </p>
+        </div>
+
     </div>
 </footer>
 

@@ -11,6 +11,8 @@ Enquiry Dashboard | MCTI Technologies
 <div class="mcti-dashboard-container">
 
 
+
+
     <!-- ========================================
          HEADER
     ======================================== -->
@@ -409,9 +411,8 @@ Enquiry Dashboard | MCTI Technologies
 
                         <div class="mcti-followup-lead">
 
-                            <strong>
-                                {{ enquiry.name }}
-                            </strong>
+                            <strong>{{ enquiry.name }}</strong>
+
 
                             <span>
 
@@ -433,7 +434,7 @@ Enquiry Dashboard | MCTI Technologies
                             </span>
 
                             <strong>
-                                {{ enquiry.assigned_to|default:"Not Assigned" }}
+                                {% if enquiry.assigned_user %}{{ enquiry.assigned_user.get_full_name|default:enquiry.assigned_user.username }}{% else %}{{ enquiry.assigned_to|default:"Not Assigned" }}{% endif %}
                             </strong>
 
                         </div>
@@ -542,9 +543,8 @@ Enquiry Dashboard | MCTI Technologies
 
                         <div class="mcti-followup-lead">
 
-                            <strong>
-                                {{ enquiry.name }}
-                            </strong>
+                            <strong>{{ enquiry.name }}</strong>
+
 
                             <span>
 
@@ -579,7 +579,7 @@ Enquiry Dashboard | MCTI Technologies
                             </span>
 
                             <strong>
-                                {{ enquiry.assigned_to|default:"Not Assigned" }}
+                                {% if enquiry.assigned_user %}{{ enquiry.assigned_user.get_full_name|default:enquiry.assigned_user.username }}{% else %}{{ enquiry.assigned_to|default:"Not Assigned" }}{% endif %}
                             </strong>
 
                         </div>
@@ -703,6 +703,7 @@ Enquiry Dashboard | MCTI Technologies
 
                                 <td>
                                     <strong>{{ enquiry.name }}</strong>
+
                                 </td>
 
                                 <td>

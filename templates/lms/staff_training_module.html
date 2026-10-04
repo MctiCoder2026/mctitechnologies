@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{{ module.title }} | Staff Training{% endblock %}
+
+{% block content %}
+<style>
+.wrap{max-width:950px;margin:30px auto;padding:20px}
+.head{background:#111;color:#fff;padding:25px;border-radius:16px;border-left:7px solid #ff7a00}
+.topic{background:#fff;border:1px solid #ddd;padding:18px;margin-top:14px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;gap:15px}
+.topic h3{margin:0 0 5px}
+.open{background:#ff7a00;color:white!important;padding:9px 15px;border-radius:8px;text-decoration:none;font-weight:700}
+.lock{color:#777;font-weight:700}
+.done{color:#16833b;font-weight:800}
+.back{display:inline-block;margin-bottom:15px;text-decoration:none;font-weight:700}
+</style>
+
+<div class="wrap">
+
+<a class="back" href="{% url 'lms:staff_training' %}">← My Training</a>
+
+<div class="head">
+    <small>MODULE {{ module.order }}</small>
+    <h1>{{ module.title }}</h1>
+    <p>{{ module.description }}</p>
+</div>
+
+{% for topic in topics %}
+<div class="topic">
+
+    <div>
+        <h3>{{ topic.order }}. {{ topic.title }}</h3>
+
+        {% if topic.staff_progress_item.is_completed %}
+            <span class="done">✓ Completed — Best Score {{ topic.staff_progress_item.best_score }}/{{ topic.staff_progress_item.total_questions }}</span>
+        {% elif topic.staff_progress_item.is_unlocked %}
+            <span>Available for learning</span>
+        {% else %}
+            <span class="lock">🔒 Complete previous topic first</span>
+        {% endif %}
+    </div>
+
+    {% if topic.staff_progress_item.is_unlocked %}
+        <a class="open"
+           href="{% url 'lms:staff_training_topic' topic.id %}">
+            Open →
+        </a>
+    {% endif %}
+
+</div>
+{% endfor %}
+
+</div>
+{% endblock %}

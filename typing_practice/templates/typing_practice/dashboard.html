@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCTI Typing Lab</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f6f8;font-family:Arial,sans-serif;color:#171717}
+.top{background:#111827;color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:22px;font-weight:900}.orange{color:#ff7200}
+.top a{color:#fff;text-decoration:none}
+.wrap{max-width:1150px;margin:auto;padding:28px 18px 60px}
+.hero{background:#111827;color:#fff;border-radius:20px;padding:30px;margin-bottom:20px}
+.hero h1{margin:0 0 8px;font-size:32px}
+.hero p{color:#d1d5db;margin:0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.stat,.mode,.lesson{background:#fff;border-radius:15px;padding:18px;box-shadow:0 3px 12px #00000010}
+.stat strong{display:block;font-size:25px;color:#ff7200}
+.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+.mode{text-decoration:none;color:#171717;border-top:4px solid #ff7200}
+.mode b{display:block;margin-bottom:6px}
+.lessons{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.lesson{border-left:5px solid #ff7200}
+.row{display:flex;justify-content:space-between;gap:12px}
+.badge{font-size:12px;background:#fff1e5;color:#c95700;padding:5px 9px;border-radius:20px;height:max-content}
+.meta{font-size:13px;color:#666;margin:8px 0}
+.btn{display:inline-block;background:#ff7200;color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px;font-weight:700;margin:4px 5px 0 0}
+.btn.dark{background:#111827}.btn.lock{background:#aaa;pointer-events:none}
+.pass{color:#16803a;font-weight:700;font-size:13px}
+@media(max-width:750px){.modes,.stats,.lessons{grid-template-columns:1fr}.top{gap:12px}.hero h1{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="top">
+<div class="logo">MCTI <span class="orange">Typing Lab</span></div>
+<a href="{% url 'student_dashboard' %}">← Student Dashboard</a>
+</div>
+<div class="wrap">
+<div class="hero">
+<h1>Learn. Practice. Play. <span class="orange">Achieve.</span></h1>
+<p>Hi {{ student.name }} — build correct finger habits first, then improve speed and accuracy at your own pace.</p>
+</div>
+
+<div class="stats">
+<div class="stat"><strong>{{ passed_lessons }}/{{ total_lessons }}</strong>Exams Completed</div>
+<div class="stat"><strong>{{ best_wpm }}</strong>Best Practice WPM</div>
+<div class="stat"><strong>∞</strong>Practice Attempts</div>
+</div>
+
+<div class="modes">
+<a class="mode" href="#lessons"><b>🎯 Practice</b>No pressure. Practice anytime.</a>
+<a class="mode" href="{% url 'typing_practice:letter_rush' %}"><b>🎮 Games</b>Build speed while playing.</a>
+<a class="mode" href="#lessons"><b>🏆 Exam</b>Take it when you feel ready.</a>
+<a class="mode" href="{% url 'typing_practice:progress' %}"><b>📈 My Progress</b>See your improvement.</a>
+</div>
+
+
+<!-- MCTI TWO CERTIFICATES -->
+<h2>My Typing Certificates</h2>
+<div class="lessons" style="margin-bottom:25px">
+{% for card in certificate_cards %}
+<div class="lesson">
+<b>{{ card.title }}</b>
+<p class="meta">{{ card.description }}</p>
+{% if card.ready %}
+<div class="pass">{% if card.issued %}✓ Issued{% else %}✓ Unlocked{% endif %}</div>
+<a class="btn" href="{% url 'typing_practice:download_certificate' %}?type={{ card.kind }}">Download Certificate</a>
+{% else %}
+<span class="btn lock">🔒 Certificate Locked</span>
+{% endif %}
+</div>
+{% endfor %}
+</div>
+
+<h2 id="lessons">Typing Journey</h2>
+<div class="lessons">
+{% for item in lesson_data %}
+<div class="lesson">
+<div class="row">
+<div>
+<b>Level {{ item.lesson.order }} · {{ item.lesson.title }}</b>
+<div class="meta">{{ item.lesson.get_level_display }} · {{ item.lesson.target_wpm }} WPM · {{ item.lesson.target_accuracy }}% Accuracy</div>
+</div>
+<span class="badge">
+{% if item.level and item.level.exam_passed %}Completed{% else %}Level {{ item.lesson.order }}{% endif %}
+</span>
+</div>
+
+{% if item.practice %}
+<div class="meta">Practice Best: {{ item.practice.best_wpm }} WPM · {{ item.practice.best_accuracy }}%</div>
+{% endif %}
+
+{% if item.level and item.level.exam_passed %}
+<div class="pass">✓ Benchmark Achieved</div>
+{% endif %}
+
+<a class="btn" href="{% url 'typing_practice:lesson' item.lesson.slug %}">🎯 Practice</a>
+
+{% if item.exam_unlocked %}
+<a class="btn dark" href="{% url 'typing_practice:exam' item.lesson.slug %}">
+{% if item.level and item.level.exam_passed %}🏆 Retake Exam{% else %}🏆 Take Exam{% endif %}
+</a>
+{% else %}
+<span class="btn lock">🔒 Exam Locked</span>
+{% endif %}
+</div>
+{% endfor %}
+</div>
+</div>
+</body>
+</html>

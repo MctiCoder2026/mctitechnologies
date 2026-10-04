@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}{{ enquiry.name }} | Franchise Lead{% endblock %}
+
+{% block content %}
+
+<style>
+.fd-wrap{
+    max-width:1050px;
+    margin:40px auto;
+    padding:0 20px;
+}
+.fd-back{
+    display:inline-block;
+    margin-bottom:20px;
+    color:#ff6500;
+    text-decoration:none;
+    font-weight:700;
+}
+.fd-head{
+    background:#111;
+    color:#fff;
+    padding:30px;
+    border-radius:16px;
+    margin-bottom:22px;
+}
+.fd-head span{
+    color:#ff7200;
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:1.4px;
+}
+.fd-head h1{
+    margin:8px 0;
+    font-size:32px;
+}
+.fd-head p{
+    margin:0;
+    color:#bbb;
+}
+.fd-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:22px;
+}
+.fd-card{
+    background:#fff;
+    border:1px solid #e8e8e8;
+    border-radius:14px;
+    padding:25px;
+}
+.fd-card h2{
+    margin:0 0 22px;
+    font-size:20px;
+}
+.fd-info{
+    display:grid;
+    grid-template-columns:150px 1fr;
+    gap:12px;
+    padding:11px 0;
+    border-bottom:1px solid #eee;
+}
+.fd-info:last-child{
+    border-bottom:0;
+}
+.fd-label{
+    color:#777;
+    font-size:13px;
+}
+.fd-value{
+    font-weight:700;
+}
+.fd-field{
+    margin-bottom:18px;
+}
+.fd-field label{
+    display:block;
+    font-size:13px;
+    font-weight:800;
+    margin-bottom:7px;
+}
+.fd-field select,
+.fd-field input,
+.fd-field textarea{
+    width:100%;
+    box-sizing:border-box;
+    border:1px solid #ddd;
+    border-radius:8px;
+    padding:12px;
+    font:inherit;
+}
+.fd-field textarea{
+    min-height:140px;
+    resize:vertical;
+}
+.fd-save{
+    width:100%;
+    border:0;
+    background:#ff6500;
+    color:#fff;
+    padding:14px;
+    border-radius:8px;
+    font-weight:800;
+    cursor:pointer;
+}
+.fd-message{
+    margin-top:22px;
+    background:#fff;
+    border:1px solid #e8e8e8;
+    border-radius:14px;
+    padding:25px;
+}
+.fd-message h2{
+    margin-top:0;
+}
+.fd-message p{
+    white-space:pre-wrap;
+    color:#555;
+    line-height:1.7;
+}
+@media(max-width:750px){
+    .fd-grid{
+        grid-template-columns:1fr;
+    }
+    .fd-info{
+        grid-template-columns:1fr;
+        gap:4px;
+    }
+}
+</style>
+
+<div class="fd-wrap">
+
+<div style="display:flex !important; gap:10px !important; flex-wrap:wrap !important; margin-bottom:20px !important;">
+
+    <a href="{% url 'management_dashboard' %}"
+       style="display:inline-flex !important;
+              align-items:center !important;
+              justify-content:center !important;
+              background:#111 !important;
+              color:#fff !important;
+              padding:11px 18px !important;
+              border-radius:8px !important;
+              text-decoration:none !important;
+              font-size:14px !important;
+              font-weight:700 !important;
+              line-height:1.2 !important;
+              border:none !important;">
+        ← Management Dashboard
+    </a>
+
+    <a href="{% url 'franchise_enquiry_list' %}"
+       style="display:inline-flex !important;
+              align-items:center !important;
+              justify-content:center !important;
+              background:#ff6500 !important;
+              color:#fff !important;
+              padding:11px 18px !important;
+              border-radius:8px !important;
+              text-decoration:none !important;
+              font-size:14px !important;
+              font-weight:700 !important;
+              line-height:1.2 !important;
+              border:none !important;">
+        ← Back to Franchise Enquiries
+    </a>
+
+</div>
+
+<div class="fd-head">
+    <span>FRANCHISE PARTNER LEAD</span>
+    <h1>{{ enquiry.name }}</h1>
+    <p>{{ enquiry.city }}{% if enquiry.state %}, {{ enquiry.state }}{% endif %}</p>
+</div>
+
+<div class="fd-grid">
+
+    <div class="fd-card">
+
+        <h2>Partner Information</h2>
+
+        <div class="fd-info">
+            <div class="fd-label">Mobile</div>
+            <div class="fd-value">{{ enquiry.mobile }}</div>
+        </div>
+
+        <div class="fd-info">
+            <div class="fd-label">Email</div>
+            <div class="fd-value">{{ enquiry.email|default:"—" }}</div>
+        </div>
+
+        <div class="fd-info">
+            <div class="fd-label">Profession / Business</div>
+            <div class="fd-value">{{ enquiry.profession_business|default:"—" }}</div>
+        </div>
+
+        <div class="fd-info">
+            <div class="fd-label">Existing Institute</div>
+            <div class="fd-value">
+                {% if enquiry.has_existing_institute %}Yes{% else %}No{% endif %}
+            </div>
+        </div>
+
+        <div class="fd-info">
+            <div class="fd-label">Investment Range</div>
+            <div class="fd-value">{{ enquiry.get_investment_range_display }}</div>
+        </div>
+
+        <div class="fd-info">
+            <div class="fd-label">Received</div>
+            <div class="fd-value">
+                {{ enquiry.created_at|date:"d M Y, h:i A" }}
+            </div>
+        </div>
+
+        <!-- FRANCHISE WHATSAPP ACTION -->
+        <div style="margin-top:22px;">
+            <button type="button"
+                    onclick="sendFranchiseWhatsApp()"
+                    style="
+                        width:100%;
+                        padding:14px 18px;
+                        border:0;
+                        border-radius:10px;
+                        background:#25D366;
+                        color:#fff;
+                        font-size:15px;
+                        font-weight:700;
+                        cursor:pointer;">
+                WhatsApp Franchise Initial Response
+            </button>
+        </div>
+
+        <script>
+        function sendFranchiseWhatsApp() {
+
+            let mobile = "{{ enquiry.mobile|escapejs }}".replace(/\D/g, "");
+
+            if (mobile.length === 10) {
+                mobile = "91" + mobile;
+            }
+
+            const name = "{{ enquiry.name|escapejs }}";
+            const city = "{{ enquiry.city|default:''|escapejs }}";
+
+            const message =
+`Hello ${name},
+
+Thank you for your interest in becoming an *MCTI Authorized Training Centre*${city ? " in " + city : ""}.
+
+MCTI is expanding its technology-enabled computer education network and is looking for serious *owner-operator partners*.
+
+As an MCTI partner, you can get support for:
+
+• MCTI Brand & Centre Setup Guidance
+• Job-Oriented Course Portfolio
+• LMS & Student Learning System
+• CRM & Admission Management
+• Online Assessments & Career Tools
+• Trainer & Counsellor Training
+• Marketing & Campaign Support
+• Certification System
+• Centre Operations Support
+
+*Indicative Total Project Investment: ₹5–10 Lakh*
+
+Actual investment may vary depending on location, centre size and existing infrastructure.
+
+Franchise approval is subject to *Partner Profile + Location Evaluation*. Final commercial terms will be discussed after qualification.
+
+If you would like to take the discussion forward, please reply *YES* and our team will arrange a Franchise Business Discussion.
+
+*MCTI | Group of Education*
+Powered by MCTI Technologies
++91 8655556219
+info@mctitechnologies.com`;
+
+            window.open(
+                "https://wa.me/" + mobile + "?text=" + encodeURIComponent(message),
+                "_blank"
+            );
+        }
+        </script>
+
+    </div>
+
+
+    <div class="fd-card">
+
+        <h2>Follow-up Management</h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="fd-field">
+                <label>Lead Status</label>
+
+                <select name="status">
+                    {% for value, label in status_choices %}
+                    <option
+                        value="{{ value }}"
+                        {% if enquiry.status == value %}selected{% endif %}
+                    >
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="fd-field">
+                <label>Next Follow-up Date</label>
+
+                <input
+                    type="date"
+                    name="followup_date"
+                    value="{% if enquiry.followup_date %}{{ enquiry.followup_date|date:'Y-m-d' }}{% endif %}"
+                >
+            </div>
+
+            <div class="fd-field">
+                <label>Internal Follow-up Notes</label>
+
+                <textarea
+                    name="followup_notes"
+                    placeholder="Discussion, requirements, next action, meeting notes..."
+                >{{ enquiry.followup_notes|default:"" }}</textarea>
+            </div>
+
+            <button type="submit" class="fd-save">
+                Save Franchise Follow-up
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+{% if enquiry.message %}
+<div class="fd-message">
+    <h2>Applicant's Message</h2>
+    <p>{{ enquiry.message }}</p>
+</div>
+{% endif %}
+
+</div>
+
+{% endblock %}

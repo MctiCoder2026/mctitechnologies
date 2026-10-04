@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ lesson.title }} | MCTI Typing Lab</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f6f8;font-family:Arial;color:#171717}
+.top{background:#111827;color:white;padding:18px 22px}
+.top a{color:white;text-decoration:none}
+.wrap{max-width:950px;margin:30px auto;padding:0 18px}
+.card{background:white;border-radius:18px;padding:25px;box-shadow:0 4px 18px #0001}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}
+.stat{background:#111827;color:white;padding:12px;text-align:center;border-radius:10px}
+.stat b{display:block;color:#ff7200;font-size:23px}
+.text{font-size:25px;line-height:1.8;background:#f8fafc;padding:22px;border-radius:12px;white-space:pre-wrap}
+.char.current{background:#ff7200;color:white}
+.char.ok{color:#16803a}
+.char.bad{background:#fee2e2;color:#dc2626}
+button,.btn{background:#ff7200;color:white;border:0;padding:12px 18px;border-radius:9px;font-weight:800;text-decoration:none;display:inline-block;cursor:pointer;margin-top:15px}
+.result{display:none;background:#fff1e6;padding:20px;border-radius:12px;margin-top:18px}
+.finger{font-weight:700;color:#555;margin-bottom:12px}
+@media(max-width:650px){.stats{grid-template-columns:1fr 1fr}.text{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="top"><a href="{% url 'typing_practice:public_typing' %}">← MCTI Typing Lab</a></div>
+<div class="wrap"><div class="card">
+<h1>🎯 {{ lesson.title }}</h1>
+<div class="finger" id="finger">Place your fingers on the home row and start slowly.</div>
+<p>Target: <b>{{ lesson.target_wpm }} WPM + {{ lesson.target_accuracy }}% Accuracy</b></p>
+
+<div class="stats">
+<div class="stat"><b id="wpm">0</b>WPM</div>
+<div class="stat"><b id="acc">100</b>Accuracy</div>
+<div class="stat"><b id="err">0</b>Errors</div>
+<div class="stat"><b id="time">0</b>Seconds</div>
+</div>
+
+<div id="text" class="text"></div>
+<button id="start">Start Practice</button>
+<div id="result" class="result"></div>
+</div></div>
+
+<script>
+const source="{{ lesson.content|escapejs }}";
+let i=0,typed=0,errors=0,start=null,timer=null,done=false;
+const text=document.getElementById("text");
+
+const fingerMap={
+q:"Left Little Finger",a:"Left Little Finger",z:"Left Little Finger",
+w:"Left Ring Finger",s:"Left Ring Finger",x:"Left Ring Finger",
+e:"Left Middle Finger",d:"Left Middle Finger",c:"Left Middle Finger",
+r:"Left Index Finger",f:"Left Index Finger",v:"Left Index Finger",
+t:"Left Index Finger",g:"Left Index Finger",b:"Left Index Finger",
+y:"Right Index Finger",h:"Right Index Finger",n:"Right Index Finger",
+u:"Right Index Finger",j:"Right Index Finger",m:"Right Index Finger",
+i:"Right Middle Finger",k:"Right Middle Finger",
+o:"Right Ring Finger",l:"Right Ring Finger",
+p:"Right Little Finger",";":"Right Little Finger"
+};
+
+function render(){
+ text.innerHTML="";
+ [...source].forEach((c,n)=>{
+   const s=document.createElement("span");
+   s.textContent=c;
+   s.className="char"+(n===0?" current":"");
+   text.appendChild(s);
+ });
+ finger();
+}
+
+function finger(){
+ const c=(source[i]||"").toLowerCase();
+ document.getElementById("finger").textContent=
+ c===" " ? "👍 Space → Thumb" :
+ fingerMap[c] ? "👉 "+c.toUpperCase()+" → "+fingerMap[c] :
+ "Keep your fingers relaxed on the home row.";
+}
+
+function sec(){
+ return start?Math.max(1,Math.floor((Date.now()-start)/1000)):0;
+}
+
+function stats(){
+ const s=sec();
+ const w=Math.round(((i/5)/(s/60))||0);
+ const a=typed?Math.max(0,Math.round(((typed-errors)/typed)*100)):100;
+ document.getElementById("wpm").textContent=w;
+ document.getElementById("acc").textContent=a+"%";
+ document.getElementById("err").textContent=errors;
+ document.getElementById("time").textContent=s;
+ return {w,a};
+}
+
+function begin(){
+ if(!start){
+   start=Date.now();
+   timer=setInterval(stats,500);
+ }
+}
+
+function finish(){
+ done=true;clearInterval(timer);
+ const m=stats();
+ const box=document.getElementById("result");
+ box.style.display="block";
+ box.innerHTML=
+ "<h2>🎉 Practice Complete</h2>"+
+ "<p><b>"+m.w+" WPM · "+m.a+"% Accuracy</b></p>"+
+ "<p>Want more lessons, benchmark exams and progress tracking?</p>"+
+ "<a class='btn' href='{% url "typing_practice:public_register" %}'>Continue FREE →</a>";
+}
+
+document.getElementById("start").onclick=begin;
+
+document.addEventListener("keydown",e=>{
+ if(done || e.key.length!==1)return;
+ e.preventDefault();begin();
+ const spans=text.children;
+ spans[i].classList.remove("current");
+ typed++;
+ if(e.key===source[i])spans[i].classList.add("ok");
+ else{spans[i].classList.add("bad");errors++}
+ i++;
+ if(i>=source.length){finish();return}
+ spans[i].classList.add("current");
+ finger();stats();
+});
+
+render();
+</script>
+</body>
+</html>

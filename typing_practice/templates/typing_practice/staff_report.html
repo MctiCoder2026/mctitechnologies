@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Typing Training Report | MCTI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f6f8;font-family:Arial;color:#171717}
+.top{background:#111827;color:#fff;padding:18px 25px}
+.top a{color:#fff;text-decoration:none}
+.wrap{max-width:1250px;margin:auto;padding:28px 18px}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:20px 0}
+.card{background:#fff;padding:20px;border-radius:14px;box-shadow:0 3px 12px #0001}
+.card strong{font-size:28px;color:#ff7200;display:block}
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{padding:12px;border-bottom:1px solid #eee;text-align:left}
+th{background:#111827;color:#fff}
+.yes{color:#16803a;font-weight:800}
+.no{color:#b91c1c;font-weight:800}
+select,button{padding:10px;border-radius:7px;border:1px solid #ccc}
+button{background:#ff7200;color:white;border:0;font-weight:700}
+.scroll{overflow-x:auto;border-radius:14px}
+@media(max-width:650px){.cards{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="top">
+{% if can_filter_branches %}
+<a href="{% url 'management_dashboard' %}">← Management Dashboard</a>
+{% else %}
+<a href="{% url 'branch_dashboard' %}">← Branch Dashboard</a>
+{% endif %}
+</div>
+
+<div class="wrap">
+
+<h1>⌨️ Typing Training Report</h1>
+<p>Daily goal completed: <b>{{ daily_completed }}/{{ total_students }}</b>.
+Counts saved practice session minutes; idle time may be included.</p>
+
+{% if branches %}
+<form method="get">
+<select name="branch">
+<option value="">All Centers</option>
+{% for b in branches %}
+<option value="{{ b }}"
+{% if b == selected_branch %}selected{% endif %}>
+{{ b|title }}
+</option>
+{% endfor %}
+</select>
+<button>View</button>
+</form>
+{% endif %}
+
+<div class="cards">
+<div class="card">
+<strong>{{ total_students }}</strong>
+Students
+</div>
+<div class="card">
+<strong>{{ active_students }}</strong>
+Active in Last 7 Days
+</div>
+</div>
+
+
+<!-- MCTI UNIFIED TYPING REPORT -->
+<div class="card" style="margin:20px 0">
+<h2 style="margin-top:0">Student Practice & Weekly Recognition</h2>
+<p><b>Week:</b> {{ week_start|date:"d M Y" }} – {{ week_end|date:"d M Y" }}</p>
+<p>Weekly goal: 5 days with at least 5 active typing minutes each day.
+Weekly Star uses a full 60-second exam and remains provisional during the week.</p>
+<p style="margin-bottom:0">Today's practice shows saved session time.
+Weekly minutes count active typing time.</p>
+</div>
+
+<style>
+.report-table{min-width:1450px;font-size:13px}
+.report-table th{vertical-align:top}
+.report-table td{vertical-align:middle}
+.report-table small{display:block;color:#6b7280;margin-top:5px;line-height:1.4}
+.badge{display:inline-block;padding:6px 9px;border-radius:7px;font-size:12px;font-weight:700}
+.badge-green{background:#dcfce7;color:#166534}
+.badge-orange{background:#fff0df;color:#9a3412}
+.badge-grey{background:#f3f4f6;color:#4b5563}
+.star-row{background:#fff8eb}
+.msg-btn{display:inline-block;background:#16803a;color:#fff;padding:8px 10px;
+border-radius:7px;text-decoration:none;white-space:nowrap}
+</style>
+
+<div class="scroll">
+<table class="report-table">
+<thead><tr>
+<th>Student</th>
+<th>Branch</th>
+<th>Last 7 Days</th>
+<th>Today Practice<br>Daily Goal</th>
+<th>Weekly Days<br>Goal: 5 Days</th>
+<th>Weekly Active<br>Minutes</th>
+<th>Exams Passed</th>
+<th>Best Exam<br>WPM / Accuracy</th>
+<th>This Week's<br>60-Second Exam</th>
+<th>Recognition</th>
+<th>Last Activity<br>Certificate</th>
+<th>Message</th>
+</tr></thead>
+<tbody>
+{% for r in rows %}
+<tr{% if r.weekly_star %} class="star-row"{% endif %}>
+<td><b>{{ r.student.name }}</b><small>{{ r.student.student_id }}</small></td>
+<td>{{ r.student.branch|default:"-"|title }}</td>
+<td>{% if r.active_week %}
+<span class="badge badge-green">Active</span>
+{% else %}<span class="badge badge-grey">No Activity</span>{% endif %}</td>
+<td>
+<b>{{ r.today_minutes }} min</b><br>
+{% if r.daily_done %}<span class="badge badge-green">✓ Completed</span>
+{% else %}<span class="badge badge-orange">Pending</span>{% endif %}
+</td>
+<td>
+{% if r.weekly_eligible %}<span class="badge badge-green">{{ r.weekly_days }}/5 ✓</span>
+{% else %}<span class="badge badge-grey">{{ r.weekly_days }}/5</span>{% endif %}
+</td>
+<td>{{ r.weekly_minutes }} min</td>
+<td>{{ r.passed }}/{{ total_benchmarks }}</td>
+<td>{{ r.best_wpm }} WPM<small>{{ r.best_accuracy }}% accuracy</small></td>
+<td>{% if r.weekly_wpm != None %}
+{{ r.weekly_wpm }} WPM<small>{{ r.weekly_accuracy }}% accuracy</small>
+{% else %}<span class="badge badge-grey">Not Taken</span>{% endif %}</td>
+<td>{% if r.weekly_star %}
+<span class="badge badge-orange">⭐ Weekly Star</span><small>Provisional</small>
+{% elif r.weekly_eligible %}
+<span class="badge badge-green">✓ Consistent Performer</span>
+{% else %}<span class="badge badge-grey">Keep Practising</span>{% endif %}</td>
+<td>
+{% if r.last_activity %}{{ r.last_activity|date:"d M Y, h:i A" }}
+{% else %}Never{% endif %}
+<small>Certificate: {{ r.certificate_status }}</small>
+</td>
+<td>{% if r.whatsapp_url %}
+<a class="msg-btn" href="{{ r.whatsapp_url }}" target="_blank"
+rel="noopener noreferrer">Send WhatsApp</a>
+{% elif r.weekly_eligible %}<small>Check mobile number</small>
+{% else %}—{% endif %}</td>
+</tr>
+{% empty %}<tr><td colspan="12">No students found.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+</div>
+</body>
+</html>

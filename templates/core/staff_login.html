@@ -524,19 +524,6 @@ body{
 
                 {% csrf_token %}
 
-                <input
-                    type="hidden"
-                    name="latitude"
-                    id="login-latitude"
-                >
-
-                <input
-                    type="hidden"
-                    name="longitude"
-                    id="login-longitude"
-                >
-
-
                 <div class="form-group">
 
                     <label>
@@ -597,13 +584,6 @@ body{
                     Login to Branch Dashboard &rarr;
                 </button>
 
-                <div
-                    class="location-status"
-                    id="location-status"
-                    role="status"
-                    aria-live="polite"
-                ></div>
-
             </form>
 
 
@@ -633,67 +613,10 @@ body{
 (function () {
     const form = document.getElementById("staff-login-form");
     const button = document.getElementById("login-button");
-    const latitudeInput = document.getElementById("login-latitude");
-    const longitudeInput = document.getElementById("login-longitude");
-    const statusBox = document.getElementById("location-status");
 
-    let submitting = false;
-
-    function showStatus(message) {
-        statusBox.textContent = message;
-        statusBox.classList.add("show");
-    }
-
-    function submitForm() {
-        if (submitting) {
-            return;
-        }
-
-        submitting = true;
+    form.addEventListener("submit", function () {
         button.disabled = true;
         button.textContent = "Signing in...";
-        form.submit();
-    }
-
-    form.addEventListener("submit", function (event) {
-        event.preventDefault();
-
-        if (submitting) {
-            return;
-        }
-
-        button.disabled = true;
-        button.textContent = "Checking branch location...";
-        showStatus("Please allow location access to verify your branch.");
-
-        if (!navigator.geolocation) {
-            showStatus("Location is not supported on this device. Verifying account...");
-            button.disabled = false;
-            submitForm();
-            return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            function (position) {
-                latitudeInput.value = position.coords.latitude.toFixed(7);
-                longitudeInput.value = position.coords.longitude.toFixed(7);
-                showStatus("Branch location received. Signing in securely...");
-                button.disabled = false;
-                submitForm();
-            },
-            function () {
-                latitudeInput.value = "";
-                longitudeInput.value = "";
-                showStatus("Location permission was not available. Verifying account...");
-                button.disabled = false;
-                submitForm();
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 15000,
-                maximumAge: 0
-            }
-        );
     });
 })();
 </script>

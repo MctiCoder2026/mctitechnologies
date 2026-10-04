@@ -43,14 +43,21 @@ from .models import (
 
 
 AI_READY_SLUG = "ai-ready-maharashtra-2026"
+AI_READY_MARATHI_SLUG = "ai-ready-maharashtra-2026-marathi"
 SCHOLARSHIP_SLUG = "mcti-scholarship-test-2026"
 
 
 @transaction.atomic
 def ai_ready_start(request):
+    language = request.GET.get("lang", "en").lower()
+    selected_slug = (
+        AI_READY_MARATHI_SLUG if language == "mr"
+        else AI_READY_SLUG
+    )
+
     assessment = get_object_or_404(
         Assessment,
-        slug=AI_READY_SLUG,
+        slug=selected_slug,
         is_active=True,
     )
 
@@ -64,48 +71,6 @@ def ai_ready_start(request):
             mobile = data["mobile"]
             email = data.get("email") or ""
 
-            enquiry = (
-                Enquiry.objects.filter(mobile=mobile)
-                .order_by("-created_at")
-                .first()
-            )
-
-            if enquiry is None:
-                enquiry = Enquiry.objects.create(
-                    name=full_name,
-                    mobile=mobile,
-                    email=email or None,
-                    status="new",
-                    followup_date=(
-                        timezone.localdate()
-                        + timedelta(days=1)
-                    ),
-                    message=(
-                        "Lead captured through MCTI AI Ready "
-                        "Maharashtra – AI Awareness Quiz 2026."
-                    ),
-                )
-            else:
-                update_fields = []
-
-                if full_name and enquiry.name != full_name:
-                    enquiry.name = full_name
-                    update_fields.append("name")
-
-                if email and not enquiry.email:
-                    enquiry.email = email
-                    update_fields.append("email")
-
-                if enquiry.followup_date is None:
-                    enquiry.followup_date = (
-                        timezone.localdate()
-                        + timedelta(days=1)
-                    )
-                    update_fields.append("followup_date")
-
-                if update_fields:
-                    enquiry.save(update_fields=update_fields)
-
             profile = AssessmentParticipantProfile.objects.create(
                 assessment=assessment,
                 full_name=full_name,
@@ -117,7 +82,7 @@ def ai_ready_start(request):
                 city=data["city"].strip(),
                 current_status=data["current_status"],
                 career_interest=data["career_interest"].strip(),
-                enquiry=enquiry,
+                enquiry=None,
                 consent_given=data["consent_given"],
             )
 
@@ -130,18 +95,8 @@ def ai_ready_start(request):
                 status="started",
             )
 
-            EnquiryActivity.objects.create(
-                enquiry=enquiry,
-                created_by=None,
-                activity_type="note",
-                message=(
-                    "Registered for MCTI AI Ready Maharashtra – "
-                    "AI Awareness Quiz 2026. "
-                    f"Assessment attempt ID: {attempt.id}"
-                ),
-            )
-
             request.session["ai_ready_attempt_id"] = attempt.id
+            request.session["ai_ready_language"] = language
 
             return redirect(
                 "assessments:ai_ready_quiz",
@@ -157,6 +112,7 @@ def ai_ready_start(request):
         {
             "form": form,
             "assessment": assessment,
+            "language": language,
         },
     )
 
@@ -176,7 +132,10 @@ def ai_ready_quiz(request, attempt_id):
             "participant_profile",
         ),
         id=attempt_id,
-        assessment__slug=AI_READY_SLUG,
+        assessment__slug__in=[
+            AI_READY_SLUG,
+            AI_READY_MARATHI_SLUG,
+        ],
         status="started",
     )
 
@@ -357,7 +316,10 @@ def ai_ready_result(request, attempt_id):
             "result",
         ),
         id=attempt_id,
-        assessment__slug=AI_READY_SLUG,
+        assessment__slug__in=[
+            AI_READY_SLUG,
+            AI_READY_MARATHI_SLUG,
+        ],
         status="completed",
     )
 
@@ -397,7 +359,21 @@ def _get_or_create_ai_certificate(attempt):
 
 
 def ai_ready_certificate(request, attempt_id):
-    if request.session.get("ai_ready_attempt_id") != attempt_id:
+    # Student/public users must own the attempt through their session.
+    # Authenticated admin/management users may download certificates
+    # directly from the AI Ready management report.
+    is_management_user = (
+        request.user.is_authenticated
+        and (
+            request.user.is_superuser
+            or request.user.is_staff
+        )
+    )
+
+    if (
+        not is_management_user
+        and request.session.get("ai_ready_attempt_id") != attempt_id
+    ):
         messages.error(
             request,
             "Please register first to access your certificate."
@@ -411,7 +387,10 @@ def ai_ready_certificate(request, attempt_id):
             "result",
         ),
         id=attempt_id,
-        assessment__slug=AI_READY_SLUG,
+        assessment__slug__in=[
+            AI_READY_SLUG,
+            AI_READY_MARATHI_SLUG,
+        ],
         status="completed",
     )
 

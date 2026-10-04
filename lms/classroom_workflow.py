@@ -123,6 +123,110 @@ def create_trainer(request):
     return redirect("lms:staff_classroom")
 
 
+
+# SEVEN_TOPIC_QUEUE_V1
+def _training_completed_topics(enrollment_id):
+    """Latest non-rejected report determines each topic's completion."""
+    latest = {}
+    records = TrainerTeachingReport.objects.filter(
+        assignment__enrollment_id=enrollment_id,
+    ).exclude(review_status="rejected").order_by("-submitted_at", "-id")
+    for report in records:
+        latest.setdefault(report.assignment.topic_id, report)
+    return {
+        topic_id for topic_id, report in latest.items()
+        if report.closed_at or (
+            report.student_response == "satisfied"
+            and report.trainer_approved_at
+        )
+    }
+
+
+def _refill_training_queue(anchor):
+    """Maintain up to seven pending topics; never change LMS access."""
+    with transaction.atomic():
+        enrollment = type(anchor.enrollment).objects.select_for_update().get(
+            pk=anchor.enrollment_id,
+        )
+        trainer = anchor.trainer
+        if (
+            enrollment.status != "active"
+            or not trainer.is_active
+            or not trainer.user.is_active
+        ):
+            return 0
+
+        branch = (
+            enrollment.branch or enrollment.student.branch or ""
+        ).strip().lower()
+        if trainer.branch.strip().lower() != branch:
+            return 0
+
+        course = enrollment.course
+        if course.is_package:
+            course_ids = list(
+                course.included_courses.filter(is_active=True)
+                .order_by("display_order", "pk")
+                .values_list("pk", flat=True)
+            )
+        else:
+            course_ids = [course.pk]
+
+        if anchor.topic.course_id not in course_ids:
+            return 0
+
+        items = []
+        for course_id in course_ids:
+            items.extend(
+                TrainingChecklistItem.objects.filter(
+                    course_id=course_id, is_published=True,
+                ).order_by("module_order", "order", "pk")
+            )
+        if not items:
+            return 0
+
+        assigned_ids = set(
+            WeeklyTeachingAssignment.objects.filter(
+                enrollment_id=enrollment.pk,
+            ).values_list("topic_id", flat=True)
+        )
+        completed = _training_completed_topics(enrollment.pk)
+        slots = max(0, 7 - len(assigned_ids - completed))
+        if not slots:
+            return 0
+
+        # Preserve the existing starting point for previously trained students.
+        positions = [
+            i for i, item in enumerate(items)
+            if item.pk in assigned_ids
+        ]
+        if not positions:
+            return 0
+        start = min(positions)
+        today = timezone.localdate()
+        monday = today - timedelta(days=today.weekday())
+        created = 0
+
+        for item in items[start:]:
+            if item.pk in assigned_ids or item.pk in completed:
+                continue
+            WeeklyTeachingAssignment.objects.create(
+                enrollment=enrollment,
+                topic=item,
+                trainer=trainer,
+                week_start=monday,
+                assigned_by=anchor.assigned_by,
+                instructions=(
+                    "Automatically assigned in the seven-topic training queue. "
+                    "Record the actual teaching date and practical evidence."
+                ),
+            )
+            assigned_ids.add(item.pk)
+            created += 1
+            if created >= slots:
+                break
+        return created
+
 @login_required
 @require_POST
 def assign_weekly_topic(request):
@@ -163,6 +267,16 @@ def assign_weekly_topic(request):
             existing.assigned_by = staff
             existing.save(update_fields=["trainer", "instructions", "assigned_by"])
         else:
+            assigned_ids = set(
+                WeeklyTeachingAssignment.objects.filter(
+                    enrollment=enrollment,
+                ).values_list("topic_id", flat=True)
+            )
+            completed = _training_completed_topics(enrollment.pk)
+            if len(assigned_ids - completed) >= 7:
+                return HttpResponseForbidden(
+                    "Seven topics are pending. Complete a topic before adding another."
+                )
             today = timezone.localdate()
             WeeklyTeachingAssignment.objects.create(
                 enrollment=enrollment,
@@ -172,6 +286,11 @@ def assign_weekly_topic(request):
                 assigned_by=staff,
                 instructions=instructions,
             )
+    anchor = WeeklyTeachingAssignment.objects.filter(
+        enrollment=enrollment, topic=topic,
+    ).order_by("-week_start", "-id").first()
+    if anchor:
+        _refill_training_queue(anchor)
     return redirect(f"/lms/classroom/staff/?course={topic.course_id}")
 
 
@@ -259,29 +378,12 @@ def submit_class(request, assignment_id):
         )
         return redirect("lms:trainer_workspace")
     with transaction.atomic():
-        # Lock both owners of the daily caps so concurrent submissions cannot
-        # exceed three distinct topics for either trainer or student.
+        # Preserve submission locks; there is no daily topic cap.
         ClassroomTrainer.objects.select_for_update().get(pk=trainer.pk)
         Student.objects.select_for_update().get(pk=assignment.enrollment.student_id)
         assignment = WeeklyTeachingAssignment.objects.select_for_update().get(
             pk=assignment.pk
         )
-        trainer_topics = set(TrainerTeachingReport.objects.filter(
-            submitted_by=trainer,
-            taught_on=taught_on,
-        ).exclude(review_status="rejected").values_list(
-            "assignment__topic_id", flat=True,
-        ))
-        student_topics = set(TrainerTeachingReport.objects.filter(
-            assignment__enrollment__student_id=assignment.enrollment.student_id,
-            taught_on=taught_on,
-        ).exclude(review_status="rejected").values_list(
-            "assignment__topic_id", flat=True,
-        ))
-        if assignment.topic_id not in trainer_topics and len(trainer_topics) >= 3:
-            return HttpResponseForbidden("Trainer can teach at most 3 different topics per day.")
-        if assignment.topic_id not in student_topics and len(student_topics) >= 3:
-            return HttpResponseForbidden("Student can complete at most 3 different topics per day.")
         last = assignment.teaching_reports.order_by("-submitted_at", "-id").first()
 
         # Staff review is a non-blocking quality audit.
@@ -315,82 +417,55 @@ def trainer_approve_completion(request, report_id):
     if not trainer:
         return HttpResponseForbidden("Trainer access required.")
 
-    with transaction.atomic():
-        report = get_object_or_404(
-            TrainerTeachingReport.objects.select_for_update().select_related(
-                "assignment__enrollment",
-                "assignment__topic",
-                "assignment__trainer",
-            ),
-            pk=report_id,
+    initial = get_object_or_404(
+        TrainerTeachingReport.objects.select_related(
+            "assignment__enrollment",
+        ),
+        pk=report_id,
+    )
+    if initial.submitted_by_id != trainer.pk:
+        return HttpResponseForbidden(
+            "Only the trainer who taught this class can approve completion."
         )
 
-        # Only the trainer who actually submitted this training
-        # may approve the student's completion.
-        if report.submitted_by_id != trainer.id:
-            return HttpResponseForbidden(
-                "Only the trainer who taught this class can approve completion."
-            )
-
+    with transaction.atomic():
+        enrollment = initial.assignment.enrollment
+        type(enrollment).objects.select_for_update().get(pk=enrollment.pk)
+        report = get_object_or_404(
+            TrainerTeachingReport.objects.select_for_update(),
+            pk=report_id,
+        )
+        if report.submitted_by_id != trainer.pk:
+            return HttpResponseForbidden("Trainer mismatch.")
+        if enrollment.status != "active":
+            return HttpResponseForbidden("Enrollment is not active.")
+        if report.review_status == "rejected":
+            return HttpResponseForbidden("Correct the rejected report first.")
         if report.student_response != "satisfied":
             return HttpResponseForbidden(
                 "Student must mark the topic satisfied before trainer approval."
             )
 
-        if report.trainer_approved_at:
-            return redirect("lms:trainer_workspace")
+        latest = TrainerTeachingReport.objects.filter(
+            assignment__enrollment_id=enrollment.pk,
+            assignment__topic_id=report.assignment.topic_id,
+        ).exclude(review_status="rejected").order_by(
+            "-submitted_at", "-id",
+        ).first()
+        if not latest or latest.pk != report.pk:
+            return HttpResponseForbidden("Approve only the latest training record.")
 
-        if report.closed_at:
-            return HttpResponseForbidden("This topic is already closed.")
+        if not report.trainer_approved_at:
+            if report.closed_at:
+                return HttpResponseForbidden("This topic is already closed.")
+            report.trainer_approved_at = timezone.now()
+            report.save(update_fields=["trainer_approved_at"])
 
-        report.trainer_approved_at = timezone.now()
-        report.save(update_fields=["trainer_approved_at"])
-
-        assignment = report.assignment
-        enrollment = assignment.enrollment
-
-        # Trainer approval controls progression.
-        # Main staff review remains a separate non-blocking quality audit.
-        if enrollment.status == "active" and assignment.trainer.is_active:
-            items = list(
-                TrainingChecklistItem.objects.filter(
-                    course_id=assignment.topic.course_id,
-                    is_published=True,
-                ).order_by("module_order", "order", "id")
-            )
-
-            for position, item in enumerate(items):
-                if item.pk != assignment.topic_id:
-                    continue
-
-                if position + 1 < len(items):
-                    next_item = items[position + 1]
-
-                    if not WeeklyTeachingAssignment.objects.filter(
-                        enrollment=enrollment,
-                        topic=next_item,
-                    ).exists():
-                        today = timezone.localdate()
-                        assigned_monday = (
-                            today - timedelta(days=today.weekday())
-                        )
-
-                        WeeklyTeachingAssignment.objects.create(
-                            enrollment=enrollment,
-                            topic=next_item,
-                            trainer=assignment.trainer,
-                            week_start=assigned_monday,
-                            assigned_by=assignment.assigned_by,
-                            instructions=(
-                                "Automatically assigned after trainer "
-                                "approved student completion."
-                            ),
-                        )
-                break
+        added = _refill_training_queue(report.assignment)
 
     messages.success(
         request,
-        "Student completion approved. Next topic is ready."
+        f"Completion approved. {added} topic(s) added to the training queue."
     )
     return redirect("lms:trainer_workspace")
 

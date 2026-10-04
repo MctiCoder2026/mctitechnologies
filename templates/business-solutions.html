@@ -2,9 +2,342 @@
 
 {% block title %}
 MCTI Business Solutions | IT, Software & Digital Transformation
+<!-- =========================================
+     MCTI FRANCHISE PARTNER SCROLL CTA
+========================================= -->
+
+<style>
+.business-partner-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    background:#111;
+    color:#fff !important;
+    border:2px solid #111;
+    padding:12px 20px;
+    border-radius:6px;
+    font-weight:700;
+    transition:.2s ease;
+}
+
+.business-partner-btn:hover{
+    background:#ff6500;
+    border-color:#ff6500;
+}
+
+.franchise-scroll-popup{
+    position:fixed;
+    right:28px;
+    bottom:95px;
+    width:340px;
+    background:#111;
+    color:#fff;
+    border-radius:16px;
+    padding:24px;
+    box-shadow:0 15px 45px rgba(0,0,0,.25);
+    z-index:9998;
+
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(25px);
+    transition:.3s ease;
+}
+
+.franchise-scroll-popup.show{
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+}
+
+.franchise-popup-close{
+    position:absolute;
+    top:10px;
+    right:12px;
+    border:0;
+    background:transparent;
+    color:#aaa;
+    font-size:22px;
+    cursor:pointer;
+}
+
+.franchise-popup-label{
+    display:block;
+    color:#ff6500;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:1.5px;
+    margin-bottom:8px;
+}
+
+.franchise-scroll-popup h3{
+    margin:0 25px 8px 0;
+    color:#fff;
+    font-size:22px;
+    line-height:1.25;
+}
+
+.franchise-scroll-popup p{
+    margin:0 0 16px;
+    color:#ccc;
+    font-size:14px;
+    line-height:1.55;
+}
+
+.franchise-popup-btn{
+    display:block;
+    text-align:center;
+    text-decoration:none;
+    background:#ff6500;
+    color:#fff !important;
+    padding:12px 16px;
+    border-radius:8px;
+    font-weight:800;
+}
+
+@media(max-width:600px){
+    .franchise-scroll-popup{
+        left:15px;
+        right:15px;
+        bottom:85px;
+        width:auto;
+        padding:20px;
+    }
+
+    .franchise-scroll-popup h3{
+        font-size:19px;
+    }
+}
+</style>
+
+
+<div
+    class="franchise-scroll-popup"
+    id="franchisePartnerPopup"
+    role="dialog"
+    aria-label="MCTI Franchise Opportunity"
+>
+    <button
+        type="button"
+        class="franchise-popup-close"
+        id="franchisePopupClose"
+        aria-label="Close"
+    >×</button>
+
+    <span class="franchise-popup-label">
+        MCTI PARTNER OPPORTUNITY
+    </span>
+
+    <h3>Build Your Own Education & Technology Center</h3>
+
+    <p>
+        Interested in growing with MCTI?
+        Explore our partner opportunity and register your interest.
+    </p>
+
+    <a
+        href="{% url 'franchise' %}"
+        class="franchise-popup-btn"
+    >
+        Become a Partner With Us →
+    </a>
+</div>
+
+
+<script>
+(function(){
+
+    const popup = document.getElementById("franchisePartnerPopup");
+    const closeBtn = document.getElementById("franchisePopupClose");
+
+    if (!popup || !closeBtn) return;
+
+    let closed = false;
+
+    function checkScroll(){
+
+        if (closed) return;
+
+        const documentHeight =
+            document.documentElement.scrollHeight - window.innerHeight;
+
+        if (documentHeight <= 0) return;
+
+        const scrollPercent =
+            window.scrollY / documentHeight;
+
+        if (scrollPercent >= 0.20){
+            popup.classList.add("show");
+        }
+    }
+
+    closeBtn.addEventListener("click", function(){
+        popup.classList.remove("show");
+        closed = true;
+    });
+
+    window.addEventListener("scroll", checkScroll, {passive:true});
+
+    checkScroll();
+
+})();
+</script>
+
 {% endblock %}
 
+
 {% block content %}
+
+<style>
+/* MCTI BUSINESS HERO PARTNER CARD */
+
+.hero-franchise-card{
+    position:absolute;
+    z-index:5;
+    right:max(45px, calc((100vw - 1200px) / 2));
+    top:50%;
+    transform:translateY(-50%);
+
+    display:block;
+    width:340px;
+    box-sizing:border-box;
+    padding:30px;
+
+    background:#ffffff;
+    border:1px solid #ffe0cc;
+    border-top:5px solid #ff6500;
+    border-radius:18px;
+
+    box-shadow:0 18px 50px rgba(0,0,0,.14);
+
+    color:#1f2937 !important;
+    text-decoration:none !important;
+    transition:.25s ease;
+}
+
+.hero-franchise-card:hover{
+    transform:translateY(-50%) translateY(-5px);
+    box-shadow:0 24px 60px rgba(0,0,0,.19);
+}
+
+.hero-franchise-card,
+.hero-franchise-card *{
+    text-decoration:none !important;
+}
+
+.hero-franchise-icon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    width:52px;
+    height:52px;
+    margin-bottom:18px;
+
+    background:#fff1e6;
+    border-radius:14px;
+
+    font-size:26px;
+}
+
+.hero-franchise-label{
+    display:block;
+    margin-bottom:9px;
+
+    color:#ff6500 !important;
+
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:1.4px;
+}
+
+.hero-franchise-card h2{
+    margin:0 0 14px !important;
+
+    color:#1f2937 !important;
+
+    font-size:24px !important;
+    line-height:1.25 !important;
+}
+
+.hero-franchise-card h2 strong{
+    display:block;
+    margin-top:3px;
+    color:#ff6500 !important;
+}
+
+.hero-franchise-card p{
+    margin:0 0 20px !important;
+
+    color:#666 !important;
+
+    font-size:14px !important;
+    line-height:1.6 !important;
+}
+
+.hero-franchise-action{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:13px 16px;
+
+    background:#111;
+    color:#fff !important;
+
+    border-radius:8px;
+
+    font-size:14px;
+    font-weight:800;
+}
+
+.hero-franchise-action span{
+    color:#ff6500 !important;
+    font-size:20px;
+}
+
+@media (min-width:1001px){
+    .business-hero-content{
+        padding-right:410px;
+    }
+}
+
+@media (max-width:1000px){
+
+    .business-hero{
+        display:block;
+        padding-bottom:35px;
+    }
+
+    .hero-franchise-card{
+        position:relative;
+        top:auto;
+        right:auto;
+        transform:none;
+
+        width:auto;
+        max-width:600px;
+        margin:0 30px 25px;
+    }
+
+    .hero-franchise-card:hover{
+        transform:translateY(-4px);
+    }
+}
+
+@media (max-width:600px){
+
+    .hero-franchise-card{
+        margin:0 20px 20px;
+        padding:22px;
+    }
+
+    .hero-franchise-card h2{
+        font-size:21px !important;
+    }
+}
+</style>
+
 
 <!-- ================================
      BUSINESS HERO
@@ -46,9 +379,35 @@ MCTI Business Solutions | IT, Software & Digital Transformation
                 Corporate Training
             </a>
 
+
         </div>
 
     </div>
+
+    <a href="{% url 'franchise' %}" class="hero-franchise-card">
+
+        <div class="hero-franchise-icon">🤝</div>
+
+        <span class="hero-franchise-label">
+            MCTI PARTNER OPPORTUNITY
+        </span>
+
+        <h2>
+            Build Your Own
+            <strong>Education & Technology Center</strong>
+        </h2>
+
+        <p>
+            Grow with MCTI's training, technology,
+            digital learning and business ecosystem.
+        </p>
+
+        <div class="hero-franchise-action">
+            Become a Partner
+            <span>→</span>
+        </div>
+
+    </a>
 
 </section>
 

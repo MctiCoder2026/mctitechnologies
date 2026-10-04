@@ -134,7 +134,7 @@ td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
   <div class="table-wrap">
     <table>
       <thead>
-        <tr><th>Date</th><th>Student</th><th>Mobile</th><th>Course</th><th>Branch</th><th>Status</th><th>First Login</th><th>Source</th><th>Remarks</th><th>Marked By</th></tr>
+        <tr><th>Date</th><th>Student</th><th>Mobile</th><th>Course</th><th>Branch</th><th>Status</th><th>First Login</th><th>Source</th><th>Remarks</th><th>Marked By</th><th>Absent Message</th></tr>
       </thead>
       <tbody>
         {% for record in records %}
@@ -153,9 +153,10 @@ td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
           <td>{{ record.get_source_display }}</td>
           <td>{{ record.remarks|default:"-" }}</td>
           <td>{{ record.marked_by|default:"-" }}</td>
+<td>{% include "core/absence_whatsapp_widget.html" %}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="10" style="text-align:center;padding:30px;color:#6b7280">No attendance records found.</td></tr>
+        <tr><td colspan="11" style="text-align:center;padding:30px;color:#6b7280">No attendance records found.</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -166,5 +167,6 @@ td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
 </main>
     <script src="/static/js/staff_mobile.js" defer></script>
 
+{% include "core/absence_whatsapp_assets.html" %}
 </body>
 </html>

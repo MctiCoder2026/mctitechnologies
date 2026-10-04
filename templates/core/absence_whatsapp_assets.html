@@ -1,0 +1,51 @@
+<style>
+.mcti-absence-message{
+    display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-width:195px
+}
+.mcti-absence-message .mcti-absence-language{
+    width:auto;min-width:95px;padding:8px 9px;border:1px solid #dbe2ea;
+    border-radius:7px;background:white;font-size:12px
+}
+.mcti-absence-message .mcti-absence-link{
+    display:inline-flex;align-items:center;justify-content:center;
+    padding:8px 11px;background:#15803d;color:white;text-decoration:none;
+    border-radius:7px;font-size:12px;font-weight:700;cursor:pointer
+}
+.mcti-absence-message .mcti-absence-link:hover{background:#166534}
+.mcti-absence-message .mcti-absence-error{width:100%;color:#b91c1c;font-size:11px}
+.mcti-absence-message [hidden]{display:none!important}
+</style>
+<script>
+(function(){
+  function initialise(){
+    document.querySelectorAll(".mcti-absence-message").forEach(function(box){
+      const select=box.querySelector(".mcti-absence-language");
+      const link=box.querySelector(".mcti-absence-link");
+      const error=box.querySelector(".mcti-absence-error");
+      let phone=(box.dataset.mobile||"").replace(/\D/g,"");
+      if(phone.length===12 && phone.startsWith("91")) phone=phone.slice(2);
+      else if(phone.length===11 && phone.startsWith("0")) phone=phone.slice(1);
+      if(!/^[6-9]\d{9}$/.test(phone)){
+        link.hidden=true;
+        error.hidden=false;
+        return;
+      }
+      function update(){
+        const name=box.dataset.name||"Student";
+        const date=box.dataset.date;
+        const templates={
+          en:`Hello ${name}, you were marked absent from your MCTI class on ${date}. Please inform your centre of the reason and when you can attend next. — Team MCTI`,
+          hi:`नमस्ते ${name}, ${date} को आपकी MCTI क्लास में अनुपस्थिति दर्ज हुई है। कृपया अपने सेंटर को कारण और अगली क्लास में आने की जानकारी दें। — टीम MCTI`,
+          mr:`नमस्कार ${name}, ${date} रोजी तुमची MCTI वर्गात अनुपस्थिती नोंदवली आहे. कृपया तुमच्या सेंटरला कारण आणि पुढील वर्गाला कधी येणार ते कळवा. — टीम MCTI`
+        };
+        link.href="https://wa.me/91"+phone+"?text="+encodeURIComponent(templates[select.value]);
+      }
+      select.addEventListener("change",update);
+      update();
+    });
+  }
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",initialise);
+  }else{initialise();}
+})();
+</script>

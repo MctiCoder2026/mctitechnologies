@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCTI Assessment Reports</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f5f5;font-family:Arial,sans-serif;color:#171717}
+main{max-width:1500px;margin:auto;padding:24px}h1{margin-bottom:8px}
+.panel{background:white;padding:20px;border-radius:12px;margin:18px 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.card{background:#fff;padding:18px;border-radius:12px;border-top:4px solid #ff7200}.card strong{display:block;font-size:27px;margin-top:8px}
+form{display:flex;gap:12px;flex-wrap:wrap;align-items:end}label{display:block;font-size:13px;margin-bottom:5px}
+input,select{padding:10px;border:1px solid #ddd;border-radius:7px;max-width:100%}
+.btn{display:inline-block;padding:11px 16px;background:#171717;color:white;border:0;border-radius:7px;text-decoration:none;cursor:pointer}.orange{background:#ff7200}
+table{width:100%;border-collapse:collapse;min-width:1050px}th,td{text-align:left;padding:12px;border-bottom:1px solid #eee;vertical-align:top;font-size:13px}th{background:#fff3e8}
+small{color:#666}.summary{display:flex;gap:10px;flex-wrap:wrap}.badge{padding:10px;background:#fff3e8;border-radius:7px}
+@media(max-width:650px){main{padding:12px}.panel{padding:14px}}
+</style>
+</head>
+<body><main>
+<a class="btn" href="{% if management %}{% url 'management_dashboard' %}{% else %}{% url 'branch_dashboard' %}{% endif %}">← Dashboard</a>
+<h1>Assessment Reports</h1>
+<p>Aptitude and assessment performance in one place.</p>
+<div class="cards">{% for card in cards %}<div class="card">{{ card.label }}<strong>{{ card.count }}</strong></div>{% endfor %}</div>
+<div class="panel">
+<form method="get">
+{% if management %}<div><label>Branch</label><select name="branch"><option value="">All branches</option>{% for b in branches %}<option value="{{ b }}" {% if selected_branch == b %}selected{% endif %}>{{ b|title }}</option>{% endfor %}</select></div>{% endif %}
+<div><label>Assessment</label><select name="kind"><option value="">All assessments</option>{% for card in cards %}<option value="{{ card.key }}" {% if selected_kind == card.key %}selected{% endif %}>{{ card.label }}</option>{% endfor %}</select></div>
+<div><label>Period</label><select name="period"><option value="today" {% if period == "today" %}selected{% endif %}>Today</option><option value="week" {% if period == "week" %}selected{% endif %}>Last 7 days</option><option value="custom" {% if period == "custom" %}selected{% endif %}>Custom dates</option><option value="all" {% if period == "all" %}selected{% endif %}>All dates</option></select></div>
+<div><label>From (custom)</label><input type="date" name="start" value="{{ start|date:'Y-m-d' }}"></div>
+<div><label>To (custom)</label><input type="date" name="end" value="{{ end|date:'Y-m-d' }}"></div>
+<div><label>Search</label><input name="q" value="{{ search }}" placeholder="Name / mobile"></div>
+<button class="btn orange">Apply</button>
+</form>
+<p>{{ title }}</p>
+<a class="btn" href="?{{ params }}&export=xlsx">Download Excel</a>
+<a class="btn orange" href="?{{ params }}&export=pdf">Download PDF</a>
+<p><small>Exports include every matching record, including records on other pages. Assessment dates use completion time; Hiring uses application time. Repeat attempts appear separately. Unassigned records are visible to management.</small></p>
+{% if management %}<div class="summary">{% for branch,count in summary %}<div class="badge">{{ branch|title }}: <b>{{ count }}</b></div>{% endfor %}</div>{% endif %}
+</div>
+<div class="panel">
+<h2>Performance — {{ total }} records</h2>
+<div style="overflow-x:auto"><table>
+<thead><tr><th>Date</th><th>Assessment</th><th>Name / Mobile</th><th>Branch</th><th>Score</th><th>Performance</th><th>Profile</th></tr></thead>
+<tbody>{% for r in page %}<tr>
+<td>{{ r.date|date:"d M Y, h:i A" }}</td><td>{{ r.label }}</td>
+<td><b>{{ r.name }}</b><br>{{ r.mobile }}</td><td>{{ r.branch|title }}</td>
+<td>{% if r.score != None %}{{ r.score }}%{% else %}—{% endif %}</td>
+<td>{{ r.detail }}</td><td>{% if r.url %}<a href="{{ r.url }}">View</a>{% else %}—{% endif %}</td>
+</tr>{% empty %}<tr><td colspan="7">No records found. Try another date range.</td></tr>{% endfor %}</tbody>
+</table></div>
+<p>{% if page.has_previous %}<a href="?{{ params }}&page={{ page.previous_page_number }}">← Previous</a>{% endif %}
+ Page {{ page.number }} / {{ page.paginator.num_pages }}
+{% if page.has_next %}<a href="?{{ params }}&page={{ page.next_page_number }}">Next →</a>{% endif %}</p>
+</div>
+</main></body></html>

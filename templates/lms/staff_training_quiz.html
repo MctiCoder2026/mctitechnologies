@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz | {{ topic.title }}{% endblock %}
+
+{% block content %}
+<style>
+.wrap{max-width:900px;margin:30px auto;padding:20px}
+.quiz-head{background:#111;color:#fff;padding:22px;border-radius:15px;border-left:6px solid #ff7a00}
+.question{background:#fff;border:1px solid #ddd;border-radius:14px;padding:20px;margin-top:16px}
+.option{display:block;padding:11px;margin:8px 0;background:#f7f7f7;border-radius:8px;cursor:pointer}
+.submit{background:#ff7a00;color:#fff;border:0;padding:13px 25px;border-radius:9px;font-weight:800;font-size:16px;margin-top:20px;cursor:pointer}
+</style>
+
+<div class="wrap">
+
+<div style="margin-bottom:16px;">
+    <a href="{% url 'lms:staff_training' %}"
+       style="
+           display:inline-block;
+           padding:10px 16px;
+           background:#111;
+           color:#fff;
+           text-decoration:none;
+           border-radius:8px;
+           font-weight:700;
+       ">
+        ← Back to My Training
+    </a>
+</div>
+
+<div class="quiz-head">
+    <small>MCTI STAFF TRAINING • KNOWLEDGE CHECK</small>
+    <h1>{{ topic.title }}</h1>
+    <p>{{ total_questions }} Questions • Pass Score: 3/{{ total_questions }}</p>
+</div>
+
+<form method="post">
+{% csrf_token %}
+
+{% for question in questions %}
+<div class="question">
+
+    <h3>{{ forloop.counter }}. {{ question.question }}</h3>
+
+    {% for option in question.shuffled_options %}
+        <label class="option">
+            <input type="radio"
+                   name="question_{{ question.id }}"
+                   value="{{ option.key }}"
+                   required>
+            {{ option.text }}
+        </label>
+    {% endfor %}
+
+</div>
+{% endfor %}
+
+<button class="submit" type="submit">
+    Submit Quiz
+</button>
+
+</form>
+
+</div>
+{% endblock %}

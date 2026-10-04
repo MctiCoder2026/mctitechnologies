@@ -1,0 +1,54 @@
+
+{% if birthday_rows %}
+<style>
+.mcti-bday-open{position:fixed;right:20px;bottom:20px;z-index:900;
+border:0;border-radius:12px;padding:13px 18px;background:#ff7200;
+color:white;font-weight:700;cursor:pointer;box-shadow:0 5px 18px #0002}
+#mcti-bday-dialog{width:min(560px,88vw);max-height:80vh;overflow:auto;
+padding:24px;border:0;border-radius:16px;color:#172033;font-family:Arial}
+#mcti-bday-dialog::backdrop{background:#0008}
+.bday-head{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.bday-head h2{font-size:22px;margin:0}
+.bday-head button{border:0;background:#f1f5f9;padding:8px 12px;
+border-radius:8px;cursor:pointer}
+.bday-row{display:flex;align-items:center;gap:12px;padding:16px 0;
+border-bottom:1px solid #e2e8f0;flex-wrap:wrap}
+.bday-row img{width:48px;height:48px;object-fit:cover;border-radius:50%}
+.bday-name{flex:1;min-width:140px}.bday-name small{display:block;
+margin-top:5px;color:#64748b}
+.bday-wish{background:#15803d;color:white!important;padding:10px 13px;
+border-radius:8px;text-decoration:none;font-size:13px;font-weight:bold}
+</style>
+<button class="mcti-bday-open" id="mcti-bday-open" type="button">
+🎂 Birthdays Today · {{ birthday_rows|length }}</button>
+<dialog id="mcti-bday-dialog">
+<div class="bday-head"><h2>🎂 Today's Birthdays</h2>
+<button id="mcti-bday-close" type="button">Close</button></div>
+<p>{{ birthday_today|date:"d M Y" }}</p>
+{% for row in birthday_rows %}
+<div class="bday-row">
+{% if row.student.photo %}<img src="{{ row.student.photo.url }}" alt="">{% endif %}
+<div class="bday-name"><strong>{{ row.student.name }}</strong>
+<small>{{ row.student.student_id }} · {{ row.student.branch|title }}</small></div>
+{% if row.whatsapp_url %}
+<a class="bday-wish" href="{{ row.whatsapp_url }}" target="_blank"
+rel="noopener noreferrer">WhatsApp Wish</a>
+{% else %}<small>Valid mobile number needed</small>{% endif %}
+</div>{% endfor %}
+</dialog>
+<script>
+(function(){
+ const dialog=document.getElementById("mcti-bday-dialog");
+ if(!dialog || typeof dialog.showModal!=="function") return;
+ document.getElementById("mcti-bday-open").onclick=()=>dialog.showModal();
+ document.getElementById("mcti-bday-close").onclick=()=>dialog.close();
+ const key="mcti-birthday-{{ birthday_user_id }}-{{ birthday_today|date:'Y-m-d' }}";
+ try{
+   if(!sessionStorage.getItem(key)){
+     dialog.showModal();
+     sessionStorage.setItem(key,"1");
+   }
+ }catch(e){dialog.showModal();}
+})();
+</script>
+{% endif %}

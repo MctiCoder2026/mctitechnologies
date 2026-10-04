@@ -1,0 +1,81 @@
+<style>
+.mcti-support-share{
+    max-width:760px;
+    margin:30px auto 15px;
+    padding:24px;
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:18px;
+    box-shadow:0 8px 28px rgba(0,0,0,.08);
+    text-align:center;
+}
+.mcti-support-share h3{
+    margin:0 0 8px;
+    color:#111;
+}
+.mcti-support-share p{
+    color:#555;
+    line-height:1.6;
+}
+.mcti-share-buttons{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-top:18px;
+}
+.mcti-share-btn{
+    display:inline-block;
+    padding:12px 18px;
+    border-radius:10px;
+    text-decoration:none;
+    font-weight:700;
+}
+.mcti-whatsapp{background:#25D366;color:#fff!important;}
+.mcti-review{background:#111;color:#fff!important;}
+.mcti-tools{background:#f58220;color:#fff!important;}
+.mcti-support-note{
+    font-size:12px;
+    color:#777;
+    margin-top:15px;
+}
+</style>
+
+<div class="mcti-support-share">
+
+    <h3>🎓 Help Another Student</h3>
+
+    <p>
+        हा Free Test उपयोगी वाटला का?<br>
+        तुमच्या मित्रांना आणि WhatsApp Group मध्ये शेअर करा.<br>
+        <strong>तुमच्या एका Share मुळे एखाद्या विद्यार्थ्याला योग्य दिशा मिळू शकते. ❤️</strong>
+    </p>
+
+    <div class="mcti-share-buttons">
+
+        <a class="mcti-share-btn mcti-whatsapp"
+           target="_blank"
+           rel="noopener"
+           href="https://wa.me/?text={{ request.build_absolute_uri|urlencode }}">
+            📲 Share with Friends
+        </a>
+
+        <a class="mcti-share-btn mcti-review"
+           target="_blank"
+           rel="noopener"
+           href="https://g.page/r/Cd5zZsaq_ayWEBE/review">
+            ⭐ Share Your Experience
+        </a>
+
+        <a class="mcti-share-btn mcti-tools"
+           href="/assessment/ai-ready/">
+            🤖 Explore Free Tools
+        </a>
+
+    </div>
+
+    <div class="mcti-support-note">
+        Google Review ऐच्छिक आहे. कृपया फक्त तुमचा वास्तविक अनुभव शेअर करा.
+    </div>
+
+</div>

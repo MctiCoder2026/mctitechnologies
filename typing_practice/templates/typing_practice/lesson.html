@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>{{ lesson.title }} | MCTI Typing Practice</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f4f5f7;
+    color:#171717;
+}
+
+.topbar{
+    background:#111;
+    color:white;
+    padding:16px 24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.brand{
+    font-size:21px;
+    font-weight:800;
+}
+
+.brand span{
+    color:#ff7900;
+}
+
+.back{
+    color:white;
+    text-decoration:none;
+    font-size:14px;
+}
+
+.container{
+    max-width:1050px;
+    margin:35px auto;
+    padding:0 20px;
+}
+
+.lesson-head{
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    align-items:flex-start;
+    margin-bottom:22px;
+}
+
+.lesson-head h1{
+    margin:0 0 8px;
+    font-size:30px;
+}
+
+.subtitle{
+    color:#666;
+}
+
+.targets{
+    background:#fff4e9;
+    border:1px solid #ffd4ad;
+    padding:12px 18px;
+    border-radius:10px;
+    font-weight:700;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin-bottom:18px;
+}
+
+.stat{
+    background:white;
+    border-radius:12px;
+    padding:18px;
+    text-align:center;
+    box-shadow:0 2px 10px rgba(0,0,0,.06);
+}
+
+.stat strong{
+    display:block;
+    font-size:27px;
+    color:#ff7200;
+}
+
+.stat span{
+    color:#777;
+    font-size:12px;
+    text-transform:uppercase;
+    font-weight:700;
+}
+
+.practice-card{
+    background:white;
+    padding:30px;
+    border-radius:16px;
+    box-shadow:0 4px 20px rgba(0,0,0,.08);
+}
+
+.instruction{
+    color:#777;
+    margin-bottom:18px;
+}
+
+.text-display{
+    font-family:"Courier New",monospace;
+    font-size:25px;
+    line-height:1.9;
+    padding:22px;
+    background:#fafafa;
+    border:2px solid #eee;
+    border-radius:12px;
+    min-height:170px;
+    user-select:none;
+    cursor:text;
+}
+
+.char{
+    border-radius:3px;
+}
+
+.char.current{
+    background:#ffcc9d;
+    border-bottom:3px solid #ff7200;
+}
+
+.char.correct{
+    color:#16803a;
+    background:#e9f8ee;
+}
+
+.char.incorrect{
+    color:#c62828;
+    background:#ffe8e8;
+}
+
+.typing-input{
+    position:absolute;
+    opacity:0;
+    pointer-events:none;
+}
+
+.controls{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+}
+
+button{
+    border:none;
+    border-radius:9px;
+    padding:12px 22px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.restart{
+    background:#111;
+    color:white;
+}
+
+.focus-btn{
+    background:#ff7200;
+    color:white;
+}
+
+.status{
+    margin-top:15px;
+    font-size:14px;
+    color:#777;
+}
+
+.result-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:999;
+}
+
+.result-card{
+    background:white;
+    width:100%;
+    max-width:480px;
+    padding:35px;
+    border-radius:18px;
+    text-align:center;
+}
+
+.result-icon{
+    font-size:50px;
+}
+
+.result-card h2{
+    margin:12px 0 8px;
+}
+
+.result-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin:25px 0;
+}
+
+.result-box{
+    background:#f5f5f5;
+    border-radius:10px;
+    padding:15px 5px;
+}
+
+.result-box strong{
+    display:block;
+    font-size:22px;
+}
+
+.result-actions{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+}
+
+.result-actions a{
+    text-decoration:none;
+    padding:12px 18px;
+    border-radius:9px;
+    background:#111;
+    color:white;
+    font-weight:700;
+}
+
+.result-actions button{
+    background:#ff7200;
+    color:white;
+}
+
+@media(max-width:700px){
+
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .lesson-head{
+        flex-direction:column;
+    }
+
+    .text-display{
+        font-size:20px;
+    }
+
+    .practice-card{
+        padding:18px;
+    }
+}
+.text-display{max-height:320px;overflow-y:auto;overflow-wrap:anywhere}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <div class="brand">
+        MCTI <span>Typing Practice</span>
+    </div>
+
+    <a class="back"
+       href="{% url 'typing_practice:dashboard' %}">
+        ← All Lessons
+    </a>
+</div>
+
+<div class="container">
+
+    <div class="lesson-head">
+
+        <div>
+            <h1>{{ lesson.order }}. {{ lesson.title }}</h1>
+
+            <div class="subtitle">
+                {{ lesson.get_level_display }} Level
+            </div>
+        </div>
+
+        <div class="targets">
+            Target:
+            {{ lesson.target_wpm }} WPM
+            ·
+            {{ lesson.target_accuracy }}% Accuracy
+        </div>
+
+    </div>
+
+    <div class="stats">
+
+        <div class="stat">
+            <strong id="wpm">0</strong>
+            <span>WPM</span>
+        </div>
+
+        <div class="stat">
+            <strong id="accuracy">100%</strong>
+            <span>Accuracy</span>
+        </div>
+
+        <div class="stat">
+            <strong id="errors">0</strong>
+            <span>Errors</span>
+        </div>
+
+        <div class="stat">
+            <strong id="timer">5:00</strong>
+            <span>Time</span>
+        </div>
+
+    </div>
+
+    <div class="practice-card">
+
+        <div class="instruction">
+            Daily 5-minute practice: click the practice area and start typing.
+            Focus on accuracy before speed.
+        </div>
+
+        <div id="textDisplay"
+             class="text-display"
+             tabindex="0"></div>
+
+        <textarea
+            id="typingInput"
+            class="typing-input"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"></textarea>
+
+        <div class="controls">
+
+            <button
+                type="button"
+                class="focus-btn"
+                id="startButton">
+                Start Typing
+            </button>
+
+            <button
+                type="button"
+                class="restart"
+                id="restartButton">
+                Restart
+            </button>
+
+        </div>
+
+        <div class="status" id="status">
+            Timer starts with your first key.
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="result-overlay" id="resultOverlay">
+
+    <div class="result-card">
+
+        <div class="result-icon" id="resultIcon">
+            🎯
+        </div>
+
+        <h2 id="resultTitle">
+            Practice Complete
+        </h2>
+
+        <p id="resultMessage"></p>
+
+        <div class="result-grid">
+
+            <div class="result-box">
+                <strong id="finalWpm">0</strong>
+                WPM
+            </div>
+
+            <div class="result-box">
+                <strong id="finalAccuracy">0%</strong>
+                Accuracy
+            </div>
+
+            <div class="result-box">
+                <strong id="finalErrors">0</strong>
+                Errors
+            </div>
+
+        </div>
+
+        <div class="result-actions">
+
+            <button
+                type="button"
+                onclick="restartPractice()">
+                Practice Again
+            </button>
+
+            <a href="{% url 'typing_practice:dashboard' %}">
+                Lessons
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+const PRACTICE_SECONDS = 300;
+const baseText = "{{ lesson.content|escapejs }}".trim()
+    || "Practice typing with accuracy and confidence.";
+const lessonText = Array(Math.ceil(10000 / baseText.length))
+    .fill(baseText).join(" ");
+
+const saveUrl =
+    "{% url 'typing_practice:save_attempt' lesson.slug %}";
+
+const targetWpm =
+    Number("{{ lesson.target_wpm }}");
+
+const targetAccuracy =
+    Number("{{ lesson.target_accuracy }}");
+
+const textDisplay =
+    document.getElementById("textDisplay");
+
+const typingInput =
+    document.getElementById("typingInput");
+
+const startButton =
+    document.getElementById("startButton");
+
+const restartButton =
+    document.getElementById("restartButton");
+
+const wpmElement =
+    document.getElementById("wpm");
+
+const accuracyElement =
+    document.getElementById("accuracy");
+
+const errorsElement =
+    document.getElementById("errors");
+
+const timerElement =
+    document.getElementById("timer");
+
+const statusElement =
+    document.getElementById("status");
+
+let started = false;
+let completed = false;
+let startTime = null;
+let timerInterval = null;
+let currentIndex = 0;
+let errors = 0;
+let typedCount = 0;
+let activeMilliseconds = 0;
+let lastPracticeKey = 0;
+let lastActiveTick = 0;
+
+function countActiveTyping(){
+    const now = performance.now();
+    if(lastActiveTick && started && !completed &&
+       document.visibilityState === "visible" &&
+       document.hasFocus() && document.activeElement === typingInput){
+        const until = Math.min(now, lastPracticeKey + 5000);
+        activeMilliseconds += Math.max(0, Math.min(500, until-lastActiveTick));
+    }
+    lastActiveTick = now;
+}
+
+
+function renderText(){
+
+    textDisplay.innerHTML = "";
+
+    [...lessonText].forEach(
+        (character,index) => {
+
+            const span =
+                document.createElement("span");
+
+            span.textContent = character;
+
+            span.className = "char";
+
+            if(index === 0){
+                span.classList.add("current");
+            }
+
+            textDisplay.appendChild(span);
+        }
+    );
+}
+
+
+function focusTyping(){
+
+    typingInput.focus();
+
+    statusElement.textContent =
+        started
+        ? "Keep typing..."
+        : "Start typing when ready.";
+}
+
+
+function startTimer(){
+
+    if(started){
+        return;
+    }
+
+    started = true;
+    startTime = Date.now();
+
+    lastActiveTick = performance.now();
+    timerInterval = setInterval(() => {
+        countActiveTyping();
+        updateStats();
+        if(elapsedSeconds() >= PRACTICE_SECONDS){
+            finishPractice();
+        }
+    }, 250);
+
+    statusElement.textContent =
+        "Typing in progress...";
+}
+
+
+function elapsedSeconds(){
+
+    if(!startTime){
+        return 0;
+    }
+
+    return Math.min(
+        PRACTICE_SECONDS,
+        Math.max(1, Math.floor((Date.now() - startTime) / 1000))
+    );
+}
+
+
+function calculateStats(){
+
+    const seconds = elapsedSeconds();
+
+    const minutes =
+        Math.max(seconds / 60, 1 / 60);
+
+    const wpm =
+        Math.max(
+            0,
+            Math.round(
+                (textDisplay.querySelectorAll(".char.correct").length / 5) / minutes
+            )
+        );
+
+    const accuracy =
+        typedCount > 0
+        ? Math.max(
+            0,
+            Math.round(
+                ((typedCount - errors)
+                / typedCount) * 100
+            )
+        )
+        : 100;
+
+    return {
+        seconds,
+        wpm,
+        accuracy
+    };
+}
+
+
+function updateStats(){
+
+    const stats =
+        calculateStats();
+
+    wpmElement.textContent =
+        stats.wpm;
+
+    accuracyElement.textContent =
+        stats.accuracy + "%";
+
+    errorsElement.textContent =
+        errors;
+
+    const remaining = Math.max(0, PRACTICE_SECONDS - stats.seconds);
+    timerElement.textContent =
+        Math.floor(remaining / 60) + ":" +
+        String(remaining % 60).padStart(2, "0");
+}
+
+
+function getCsrfToken(){
+
+    const cookies =
+        document.cookie.split(";");
+
+    for(const cookie of cookies){
+
+        const item =
+            cookie.trim();
+
+        if(item.startsWith("csrftoken=")){
+
+            return decodeURIComponent(
+                item.substring(
+                    "csrftoken=".length
+                )
+            );
+        }
+    }
+
+    return "";
+}
+
+
+async function finishPractice(){
+
+    if(completed){
+        return;
+    }
+
+    countActiveTyping();
+    completed = true;
+
+    clearInterval(timerInterval);
+
+    updateStats();
+
+    const stats =
+        calculateStats();
+
+    statusElement.textContent =
+        "Saving your result...";
+
+    let result = {
+        passed:
+            stats.wpm >= targetWpm &&
+            stats.accuracy >= targetAccuracy
+    };
+
+    try{
+
+        const response =
+            await fetch(
+                saveUrl,
+                {
+                    method:"POST",
+                    headers:{
+                        "Content-Type":
+                            "application/json",
+                        "X-CSRFToken":
+                            getCsrfToken()
+                    },
+                    body:JSON.stringify({
+                        active_seconds:Math.min(300, Math.floor(activeMilliseconds/1000)),
+                        wpm:stats.wpm,
+                        accuracy:stats.accuracy,
+                        errors:errors,
+                        typed_characters:
+                            typedCount,
+                        duration_seconds:
+                            stats.seconds
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if(response.ok && data.ok){
+
+            result = data;
+
+            statusElement.textContent =
+                "Result saved successfully.";
+        }
+        else{
+
+            statusElement.textContent =
+                "Practice completed. Result could not be saved.";
+        }
+
+    }
+    catch(error){
+
+        statusElement.textContent =
+            "Practice completed. Result could not be saved.";
+    }
+
+    showResult(
+        stats,
+        result.passed
+    );
+}
+
+
+function showResult(stats,passed){
+
+    document.getElementById(
+        "finalWpm"
+    ).textContent = stats.wpm;
+
+    document.getElementById(
+        "finalAccuracy"
+    ).textContent =
+        stats.accuracy + "%";
+
+    document.getElementById(
+        "finalErrors"
+    ).textContent = errors;
+
+    const icon =
+        document.getElementById(
+            "resultIcon"
+        );
+
+    const title =
+        document.getElementById(
+            "resultTitle"
+        );
+
+    const message =
+        document.getElementById(
+            "resultMessage"
+        );
+
+    if(passed){
+
+        icon.textContent = "🏆";
+
+        title.textContent =
+            "Lesson Completed!";
+
+        message.textContent =
+            "Great work! You achieved the lesson target.";
+    }
+    else{
+
+        icon.textContent = "⌨️";
+
+        title.textContent =
+            "Good Practice!";
+
+        message.textContent =
+            "Practice again to reach "
+            + targetWpm
+            + " WPM with "
+            + targetAccuracy
+            + "% accuracy.";
+    }
+
+    document.getElementById(
+        "resultOverlay"
+    ).style.display = "flex";
+}
+
+
+function restartPractice(){
+
+    clearInterval(timerInterval);
+
+    started = false;
+    completed = false;
+    startTime = null;
+    currentIndex = 0;
+    errors = 0;
+    typedCount = 0;
+
+    activeMilliseconds = 0;
+    lastPracticeKey = 0;
+    lastActiveTick = 0;
+    typingInput.value = "";
+
+    wpmElement.textContent = "0";
+    accuracyElement.textContent = "100%";
+    errorsElement.textContent = "0";
+    timerElement.textContent = "5:00";
+
+    statusElement.textContent =
+        "Timer starts with your first key.";
+
+    document.getElementById(
+        "resultOverlay"
+    ).style.display = "none";
+
+    renderText();
+
+    focusTyping();
+}
+
+
+typingInput.addEventListener(
+    "keydown",
+    function(event){
+
+        if(completed){
+            event.preventDefault();
+            return;
+        }
+
+        if(
+            event.key === "Shift" ||
+            event.key === "Control" ||
+            event.key === "Alt" ||
+            event.key === "Meta" ||
+            event.key === "CapsLock" ||
+            event.key === "Tab"
+        ){
+            return;
+        }
+
+        event.preventDefault();
+
+        if(event.key === "Backspace"){
+
+            if(currentIndex > 0){
+
+                currentIndex--;
+
+                const chars =
+                    textDisplay.querySelectorAll(
+                        ".char"
+                    );
+
+                chars[currentIndex]
+                    .classList.remove(
+                        "correct",
+                        "incorrect"
+                    );
+
+                chars.forEach(
+                    char =>
+                        char.classList.remove(
+                            "current"
+                        )
+                );
+
+                chars[currentIndex]
+                    .classList.add(
+                        "current"
+                    );
+            }
+
+            updateStats();
+            return;
+        }
+
+        if(event.key.length !== 1 || event.ctrlKey || event.metaKey || event.altKey){
+            return;
+        }
+
+        if(started && elapsedSeconds() >= PRACTICE_SECONDS){
+            finishPractice();
+            return;
+        }
+        if(currentIndex >= lessonText.length)return;
+
+        countActiveTyping();
+        lastPracticeKey = performance.now();
+        startTimer();
+
+        const expected =
+            lessonText[currentIndex];
+
+        typedCount++;
+
+        const chars =
+            textDisplay.querySelectorAll(
+                ".char"
+            );
+
+        chars[currentIndex]
+            .classList.remove(
+                "current"
+            );
+
+        if(event.key === expected){
+
+            chars[currentIndex]
+                .classList.add(
+                    "correct"
+                );
+        }
+        else{
+
+            chars[currentIndex]
+                .classList.add(
+                    "incorrect"
+                );
+
+            errors++;
+        }
+
+        currentIndex++;
+
+        if(currentIndex >= lessonText.length){
+            updateStats();
+            return;
+        }
+
+        chars[currentIndex]
+            .classList.add(
+                "current"
+            );
+        chars[currentIndex].scrollIntoView({block:"nearest"});
+
+        updateStats();
+    }
+);
+
+
+textDisplay.addEventListener(
+    "click",
+    focusTyping
+);
+
+startButton.addEventListener(
+    "click",
+    focusTyping
+);
+
+restartButton.addEventListener(
+    "click",
+    restartPractice
+);
+
+
+renderText();
+</script>
+
+</body>
+</html>

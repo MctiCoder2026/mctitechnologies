@@ -54,6 +54,8 @@ class AssessmentQuestion(models.Model):
     )
 
     question_text = models.TextField()
+    question_text_mr = models.TextField(blank=True, default="")
+    question_text_hi = models.TextField(blank=True, default="")
     category = models.CharField(max_length=100, blank=True)
 
     order = models.PositiveIntegerField(default=1)
@@ -106,6 +108,8 @@ class AssessmentOption(models.Model):
     )
 
     option_text = models.CharField(max_length=500)
+    option_text_mr = models.TextField(blank=True, default="")
+    option_text_hi = models.TextField(blank=True, default="")
     is_correct = models.BooleanField(default=False)
     order = models.PositiveIntegerField(default=1)
 

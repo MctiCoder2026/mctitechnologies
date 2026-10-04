@@ -1,0 +1,14 @@
+
+{% if payroll_manager or payroll_employee %}
+<div style="margin:18px 0;display:flex;gap:10px;flex-wrap:wrap">
+{% if payroll_manager %}
+<a href="{% url 'branch_employee_payroll' %}" style="display:inline-block;
+background:#ff7200;color:white;padding:12px 16px;border-radius:8px;
+text-decoration:none;font:700 13px Arial">Employee & Salary Management</a>
+{% endif %}
+{% if payroll_employee %}
+<a href="{% url 'employee_my_payroll' %}" style="display:inline-block;
+background:#171717;color:white;padding:12px 16px;border-radius:8px;
+text-decoration:none;font:700 13px Arial">My Profile / Salary</a>
+{% endif %}
+</div>{% endif %}

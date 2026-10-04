@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Letter Rush - MCTI</title>
+<style>
+body{margin:0;background:#111827;color:#fff;font-family:Arial;text-align:center}
+.wrap{max-width:750px;margin:auto;padding:25px}
+.orange{color:#ff7200}.game{height:330px;background:#fff;color:#111;border-radius:20px;display:flex;align-items:center;justify-content:center;margin:20px 0}
+.letter{font-size:110px;font-weight:900;color:#ff7200}
+.stats{display:flex;justify-content:center;gap:25px;font-size:18px}
+button,a{background:#ff7200;color:#fff;border:0;border-radius:9px;padding:12px 18px;font-weight:700;text-decoration:none;cursor:pointer}
+
+.lab-back{
+    display:inline-flex !important;
+    align-items:center;
+    gap:7px;
+    background:#ff7200 !important;
+    color:#fff !important;
+    padding:10px 16px !important;
+    border-radius:9px;
+    text-decoration:none !important;
+    font-size:14px;
+    font-weight:800;
+    line-height:1.2;
+    box-shadow:0 2px 7px rgba(0,0,0,.18);
+}
+.lab-back:hover{
+    background:#e86500 !important;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🎮 Letter <span class="orange">Rush</span></h1>
+<p>Type the displayed letter as quickly and accurately as you can.</p>
+<div class="stats"><span>Score: <b id="score">0</b></span><span>Time: <b id="time">60</b>s</span><span>Accuracy: <b id="acc">100</b>%</span></div>
+<div class="game"><div id="letter" class="letter">A</div></div>
+<button id="start">Start Game</button>
+<a href="{% url 'typing_practice:dashboard' %}" class="lab-back">Typing Lab</a>
+</div>
+<script>
+const letters="asdfjkl;qwertyuiopzxcvbnm";
+let score=0,total=0,wrong=0,left=60,running=false,timer=null,startAt=null;
+function csrf(){const x=document.cookie.split("; ").find(v=>v.startsWith("csrftoken="));return x?decodeURIComponent(x.split("=")[1]):""}
+function next(){document.getElementById("letter").textContent=letters[Math.floor(Math.random()*letters.length)].toUpperCase()}
+function accuracy(){return total?Math.round(((total-wrong)/total)*100):100}
+async function end(){
+ running=false;clearInterval(timer);
+ const sec=Math.max(1,Math.floor((Date.now()-startAt)/1000));
+ const wpm=Math.round((score/5)/(sec/60));
+ document.getElementById("letter").textContent="🏆 "+score;
+ await fetch("{% url 'typing_practice:save_game_attempt' %}",{method:"POST",headers:{"Content-Type":"application/json","X-CSRFToken":csrf()},body:JSON.stringify({score:score,wpm:wpm,accuracy:accuracy(),duration_seconds:sec})});
+}
+document.getElementById("start").onclick=()=>{
+ if(running)return;score=0;total=0;wrong=0;left=60;running=true;startAt=Date.now();next();
+ timer=setInterval(()=>{left--;document.getElementById("time").textContent=left;if(left<=0)end()},1000);
+};
+document.addEventListener("keydown",e=>{
+ if(!running||e.key.length!==1)return;
+ total++;
+ if(e.key.toLowerCase()===document.getElementById("letter").textContent.toLowerCase()){score++;next()}else wrong++;
+ document.getElementById("score").textContent=score;
+ document.getElementById("acc").textContent=accuracy();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+
+{% block title %}
+MCTI Social Cause | Free Student Help
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+.social-page{
+    background:#f5f6f8;
+    min-height:80vh;
+    padding-bottom:70px;
+}
+
+.social-hero{
+    background:#111827;
+    color:white;
+    text-align:center;
+    padding:70px 20px 75px;
+}
+
+.social-badge{
+    display:inline-block;
+    padding:7px 14px;
+    background:#ff7200;
+    color:white;
+    border-radius:30px;
+    font-size:13px;
+    font-weight:900;
+    margin-bottom:15px;
+}
+
+.social-hero h1{
+    margin:0 0 14px;
+    font-size:46px;
+}
+
+.social-hero h1 span{
+    color:#ff7200;
+}
+
+.social-hero p{
+    max-width:800px;
+    margin:auto;
+    color:#d1d5db;
+    font-size:18px;
+    line-height:1.7;
+}
+
+.social-wrap{
+    max-width:1150px;
+    margin:-30px auto 0;
+    padding:0 18px;
+    position:relative;
+}
+
+.social-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:17px;
+}
+
+.social-card{
+    background:white;
+    border:1px solid #eee;
+    border-radius:16px;
+    padding:25px;
+    box-shadow:0 5px 22px rgba(0,0,0,.07);
+    transition:.2s;
+}
+
+.social-card:hover{
+    transform:translateY(-4px);
+    border-color:#ff7200;
+}
+
+.social-icon{
+    font-size:37px;
+    margin-bottom:12px;
+}
+
+.social-card h3{
+    margin:0 0 9px;
+    font-size:20px;
+}
+
+.social-card p{
+    min-height:70px;
+    color:#666;
+    line-height:1.55;
+}
+
+.social-card a{
+    display:inline-block;
+    background:#ff7200;
+    color:white;
+    padding:10px 15px;
+    border-radius:8px;
+    text-decoration:none;
+    font-weight:800;
+}
+
+.social-note{
+    background:white;
+    margin-top:25px;
+    padding:30px;
+    border-radius:16px;
+    border-top:4px solid #ff7200;
+    text-align:center;
+}
+
+.social-note h2{
+    margin-top:0;
+}
+
+.social-note p{
+    max-width:800px;
+    margin:auto;
+    color:#666;
+    line-height:1.7;
+}
+
+@media(max-width:850px){
+
+    .social-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+}
+
+@media(max-width:600px){
+
+    .social-grid{
+        grid-template-columns:1fr;
+    }
+
+    .social-hero h1{
+        font-size:34px;
+    }
+
+}
+
+</style>
+
+
+<section class="social-page">
+
+<div class="social-hero">
+
+    <div class="social-badge">
+        ❤️ MCTI SOCIAL CAUSE
+    </div>
+
+    <h1>
+        Free Student <span>Help</span>
+    </h1>
+
+    <p>
+        Free digital learning, career guidance,
+        employability and digital-safety resources
+        for students, job seekers and families.
+    </p>
+
+</div>
+
+
+<div class="social-wrap">
+
+<div class="social-grid">
+
+
+<div class="social-card">
+
+<div class="social-icon">🤖</div>
+
+<h3>AI Ready Maharashtra</h3>
+
+<p>
+Check your AI awareness and understand your
+readiness for an AI-powered future.
+</p>
+
+<a href="/assessment/ai-ready/">
+Start Free →
+</a>
+
+</div>
+
+
+<div class="social-card">
+
+<div class="social-icon">🧭</div>
+
+<h3>Career Compass</h3>
+
+<p>
+Explore interests and get useful direction
+for education and career planning.
+</p>
+
+<a href="/career/career-compass/">
+Explore Career →
+</a>
+
+</div>
+
+
+<div class="social-card">
+
+<div class="social-icon">🧠</div>
+
+<h3>Aptitude Test</h3>
+
+<p>
+Understand aptitude, strengths and areas
+where further improvement may help.
+</p>
+
+<a href="/career/aptitude/start/">
+Take Free Test →
+</a>
+
+</div>
+
+
+<div class="social-card">
+
+<div class="social-icon">💼</div>
+
+<h3>Interview Preparation</h3>
+
+<p>
+Prepare for job opportunities and assess
+your readiness for different roles.
+</p>
+
+<a href="/assessment/hiring/">
+Prepare Free →
+</a>
+
+</div>
+
+
+<div class="social-card">
+
+<div class="social-icon">📝</div>
+
+<h3>SSC Exam Practice</h3>
+
+<p>
+Practice useful questions and strengthen
+exam preparation online.
+</p>
+
+<a href="/ssc-exam-preparation/">
+Start Practice →
+</a>
+
+</div>
+
+
+<div class="social-card">
+
+<div class="social-icon">🛡️</div>
+
+<h3>Cyber Fraud Awareness</h3>
+
+<p>
+Learn practical digital-safety habits
+and improve awareness about online fraud.
+</p>
+
+<a href="/assessment/cyber-fraud-awareness/">
+Learn & Test →
+</a>
+
+</div>
+
+
+<div class="social-card">
+
+<div class="social-icon">⌨️</div>
+
+<h3>English Typing Lab</h3>
+
+<p>
+Improve typing speed, accuracy and
+keyboard confidence through practice.
+</p>
+
+<a href="/typing/free/">
+Start Typing →
+</a>
+
+</div>
+
+
+</div>
+
+
+<div class="social-note">
+
+<h2>
+MCTI for Students & Society
+</h2>
+
+<p>
+MCTI provides these digital tools as a free
+student-support initiative to make career guidance,
+employability practice, digital learning and
+online-safety awareness more accessible.
+</p>
+
+</div>
+
+
+</div>
+
+</section>
+
+{% endblock %}

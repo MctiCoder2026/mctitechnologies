@@ -640,139 +640,8 @@ body{
      SIDEBAR
 ============================ -->
 
-<aside class="sidebar">
-
-    <div class="logo">
-        <h2>
-            <span>MCTI</span> Technologies
-        </h2>
-
-        <p>
-            Management System
-        </p>
-    </div>
-
-
-    <div class="menu">
-
-        <div class="menu-title">MAIN</div>
-
-        <a href="{% url 'management_dashboard' %}" class="active">
-            🏠 Dashboard
-        </a>
-
-        <a href="{% url 'branch_dashboard' %}">
-            📊 Branch Performance
-        </a>
-
-
-        <div class="menu-title">SALES & CRM</div>
-
-        <a href="{% url 'enquiry_dashboard' %}">
-            📞 Enquiries
-        </a>
-
-        <a href="{% url 'career_tools:quick_career_enquiry' %}">
-            ➕ New Career Enquiry
-        </a>
-
-        <a href="{% url 'career_tools:counsellor_dashboard' %}">
-            🎯 Career Counsellor
-        </a>
-
-        <a href="{% url 'business_lead_list' %}">
-            🏢 Business Leads
-        </a>
-
-        <a href="{% url 'ai_ready_report' %}">
-            🤖 AI Ready Maharashtra
-        </a>
-
-        <a href="{% url 'assessments:scholarship_dashboard' %}">
-            🎓 Scholarship Leads
-        </a>
-
-
-        <div class="menu-title">STUDENTS & TRAINING</div>
-
-        <a href="{% url 'admission_list' %}">
-            🎓 Admissions
-        </a>
-
-        <a href="{% url 'student_list' %}">
-            👨‍🎓 Students
-        </a>
-
-        <a href="{% url 'student_quick_view' %}">
-            🔎 Student Quick View
-        </a>
-
-        <a href="{% url 'lms:delivery_report' %}">
-            📚 Classroom Delivery
-        </a>
-
-        <a href="{% url 'attendance_dashboard' %}">
-            ✅ Attendance
-        </a>
-
-        <a href="{% url 'attendance_report' %}">
-            📊 Attendance Report
-        </a>
-
-
-        <div class="menu-title">HR & TEAM</div>
-
-        <a href="{% url 'assessments:hiring_hr_dashboard' %}">
-            👥 HR & Hiring
-        </a>
-
-        <a href="{% url 'staff_list' %}">
-            🧑‍💼 Staff
-        </a>
-
-        <a href="{% url 'staff_usage_report' %}">
-            📈 Staff Usage & Attendance
-        </a>
-
-
-        <div class="menu-title">FINANCE & REPORTS</div>
-
-        <a href="{% url 'fee_payment_list' %}">
-            💳 Fee Payments
-        </a>
-
-        <a href="{% url 'fee_due_report' %}">
-            📅 Fee Due Report
-        </a>
-
-        <a href="{% url 'daily_expense_list' %}">
-            💰 Daily Expenses
-        </a>
-
-        <a href="{% url 'monthly_closing_list' %}">
-            🧾 Monthly Closing
-        </a>
-
-        <a href="{% url 'reports_dashboard' %}">
-            📊 Reports
-        </a>
-
-
-        {% if request.user.is_superuser %}
-
-        <div class="menu-title">SYSTEM</div>
-
-        <div class="admin-link">
-            <a href="/admin/">
-                ⚙️ Django Backend
-            </a>
-        </div>
-
-        {% endif %}
-
-    </div>
-
-</aside>
+{% load crm_navigation %}
+{% crm_sidebar %}
 
 
 <!-- ============================
@@ -790,6 +659,11 @@ body{
             <h1>
                 Management Dashboard
             </h1>
+
+
+{% load payroll_links %}
+
+
 
             <p>
                 MCTI Technologies Administration
@@ -1485,5 +1359,7 @@ body{
 
     <script src="/static/js/staff_mobile.js" defer></script>
 
+{% load student_birthdays %}
+{% student_birthday_popup %}
 </body>
 </html>

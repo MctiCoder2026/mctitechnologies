@@ -1,10 +1,24 @@
-﻿from django.urls import path, include
+from . import employee_payroll
+from . import student_basic_details
+from django.urls import path, include
 from django.views.generic import TemplateView
 
 from . import views, fee_corrections
 
 
+from . import student_record_changes
+
 urlpatterns = [
+    path("records/<str:kind>/<int:record_id>/change/", student_record_changes.change_record, name="student_record_change"),
+    path("employee/payroll/", employee_payroll.manage_payroll, name="branch_employee_payroll"),
+    path("employee/my-payroll/", employee_payroll.my_payroll, name="employee_my_payroll"),
+
+    path(
+        "students/<int:student_id>/basic-details/",
+        student_basic_details.edit_basic_details,
+        name="student_basic_edit",
+    ),
+
     path("api/course-search/", views.public_course_search, name="public_course_search"),
 
 
@@ -28,6 +42,12 @@ urlpatterns = [
         "about/",
         views.about,
         name="about"
+    ),
+
+    path(
+        "free-student-help/",
+        views.free_student_help,
+        name="free_student_help"
     ),
 
     path(
@@ -531,3 +551,22 @@ urlpatterns = [
     ),
 ]
 
+
+from . import enquiry_followup_tools
+urlpatterns += [
+    path("enquiry/<int:enquiry_id>/complete-followup/",
+         enquiry_followup_tools.complete_enquiry_followup,
+         name="complete_enquiry_followup"),
+]
+
+from .team_monitoring import team_monitoring
+
+urlpatterns += [
+    path("team-monitoring/", team_monitoring, name="team_monitoring"),
+]
+
+from .receipt_deletion import delete_receipt
+urlpatterns += [
+    path("fee-payments/<int:payment_id>/delete/",
+         delete_receipt, name="delete_fee_receipt"),
+]

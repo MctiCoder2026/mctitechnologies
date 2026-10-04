@@ -132,7 +132,7 @@ td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Student</th><th>Mobile</th><th>Course</th><th>Branch</th><th>Status</th><th>Remarks</th></tr>
+          <tr><th>Student</th><th>Mobile</th><th>Course</th><th>Branch</th><th>Status</th><th>Remarks</th><th>Absent Message</th></tr>
         </thead>
         <tbody>
           {% for row in student_rows %}
@@ -150,9 +150,12 @@ td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
               </select>
             </td>
             <td><input type="text" name="remarks_{{ row.student.id }}" value="{% if row.record %}{{ row.record.remarks|default:'' }}{% endif %}" placeholder="Optional"></td>
+<td>{% if row.record %}
+{% include "core/absence_whatsapp_widget.html" with record=row.record %}
+{% else %}<span style="color:#94a3b8">Save attendance first</span>{% endif %}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="6" style="text-align:center;padding:30px;color:#6b7280">No active students found for this filter.</td></tr>
+          <tr><td colspan="7" style="text-align:center;padding:30px;color:#6b7280">No active students found for this filter.</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -164,5 +167,6 @@ td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
 </main>
     <script src="/static/js/staff_mobile.js" defer></script>
 
+{% include "core/absence_whatsapp_assets.html" %}
 </body>
 </html>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Verify MCTI Typing Certificate</title>
+<style>
+body{font-family:Arial;background:#f5f6f8;color:#171717;margin:0;padding:24px}
+main{max-width:620px;margin:40px auto;background:white;padding:32px;border-radius:18px;border-top:6px solid #ff7200}
+h1{color:#ff7200}dt{font-weight:bold;margin-top:18px}dd{margin:6px 0}
+</style></head><body><main>
+<h1>MCTI Technologies</h1>
+<h2>Verified Certificate of Achievement</h2>
+<p>{{ certificate.achievement_title }}</p>
+<dl>
+<dt>Awarded to</dt><dd>{{ certificate.student_name }}</dd>
+<dt>Certificate Number</dt><dd>{{ certificate.certificate_number }}</dd>
+<dt>Final Benchmark</dt>
+<dd>{{ certificate.final_wpm }} WPM · {{ certificate.final_accuracy }}% accuracy</dd>
+<dt>Benchmarks Completed</dt><dd>{{ certificate.benchmarks_completed }}</dd>
+<dt>Completion Date</dt><dd>{{ certificate.completed_at|date:"d M Y" }}</dd>
+<dt>Issue Date</dt><dd>{{ certificate.issued_at|date:"d M Y" }}</dd>
+</dl>
+<p>An Initiative by Maharashtra Computer Training Institute</p>
+</main></body></html>

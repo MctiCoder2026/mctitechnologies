@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* MCTI_MONITORING_UI_V2 */
+.tm{
+    max-width:1500px;margin:32px auto;padding:0 24px 40px;
+    color:#172033;font-size:14px;line-height:1.55
+}
+.tm *{box-sizing:border-box}
+.tm-head{display:flex;align-items:center;justify-content:space-between;
+    gap:20px;flex-wrap:wrap;margin-bottom:24px}
+.tm-head small{font-size:11px;font-weight:800;letter-spacing:1.5px;color:#ff7200}
+.tm h1{font-size:30px;line-height:1.25;margin:7px 0 10px;letter-spacing:-.6px}
+.tm h2{font-size:21px;line-height:1.35;margin:0 0 10px}
+.tm p{color:#64748b;margin:8px 0 16px;font-size:13px}
+.tm a{color:#172033;text-decoration:none}
+.tm-head>a{background:white;border:1px solid #dbe2ea;padding:10px 16px;
+    border-radius:9px;font-weight:700}
+.tm-tools,.tm-panel{
+    background:white;border:1px solid #e2e8f0;border-radius:16px;
+    padding:24px;margin:20px 0;box-shadow:0 4px 18px rgba(15,23,42,.035)
+}
+.tm-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.tm-tools label{display:flex;align-items:center;gap:8px;color:#64748b;font-size:12px}
+.tm input,.tm select,.tm button,.tm-link{
+    font:inherit;font-size:13px;border-radius:8px;min-height:40px;
+    padding:9px 12px;border:1px solid #dbe2ea
+}
+.tm input,.tm select{background:#fff;color:#172033}
+.tm input:focus,.tm select:focus{
+    outline:2px solid #ffcfaa;outline-offset:1px;border-color:#ff7200
+}
+.tm button,.tm .tm-link{
+    background:#ff7200;color:white;border:1px solid #ff7200;
+    font-weight:700;cursor:pointer;display:inline-flex;align-items:center;
+    justify-content:center
+}
+.tm button:hover,.tm .tm-link:hover{background:#e96500}
+.tm-tools .tm-link{background:white;color:#172033;border-color:#dbe2ea}
+.tm-tools .tm-link:hover{background:#fff3e8}
+.tm-cards{
+    display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;margin:22px 0
+}
+.tm-card{
+    background:#fff;border:1px solid #e2e8f0;border-radius:13px;
+    padding:20px;color:#64748b;font-size:12px;font-weight:600
+}
+.tm-card b{display:block;color:#172033;font-size:30px;line-height:1.2;margin-top:10px}
+.tm-card:nth-child(2){background:#f0fdf4;border-color:#bbf7d0}
+.tm-card:nth-child(2) b{color:#15803d}
+.tm-card:nth-child(5){background:#fff5f5;border-color:#fecaca}
+.tm-card:nth-child(5) b{color:#b91c1c}
+.tm-scroll{overflow:auto;border:1px solid #e2e8f0;border-radius:10px;margin-top:18px}
+.tm table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;min-width:1050px}
+.tm th{
+    background:#f8fafc;color:#475569;font-size:11px;font-weight:800;
+    letter-spacing:.3px;padding:14px 16px;text-align:left;white-space:nowrap;
+    border-bottom:1px solid #e2e8f0
+}
+.tm td{
+    padding:18px 16px;text-align:left;border-bottom:1px solid #edf1f5;
+    vertical-align:top;line-height:1.7;background:white
+}
+.tm tbody tr:last-child td{border-bottom:0}
+.tm tbody tr:hover td{background:#fffaf5}
+.tm td:first-child{min-width:205px}
+.tm td:first-child>b{font-size:14px}
+.tm small{display:block;color:#64748b;font-size:11px;line-height:1.6;margin-top:4px}
+.tm td form{display:flex;gap:7px;min-width:205px;align-items:center;flex-wrap:wrap}
+.tm td input{width:135px;min-width:0}
+.tm td button{font-size:12px;min-height:38px;padding:8px 11px}
+.tm-score{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-width:44px;height:36px;background:#fff0e3;color:#c45300;
+    border:1px solid #ffd7b7;border-radius:9px;font-size:17px;font-weight:800
+}
+.tm-details{margin-top:8px}
+.tm-details summary{cursor:pointer;font-size:11px;color:#64748b;font-weight:700}
+.tm-details[open] summary{color:#c45300;margin-bottom:8px}
+.tm-rules{margin:12px 0 18px;padding:12px 15px;background:#f8fafc;
+    border:1px solid #e2e8f0;border-radius:9px}
+.tm-rules summary{cursor:pointer;font-size:12px;font-weight:700;color:#475569}
+.tm-rules p{margin:10px 0 0}
+.tm-muted{color:#94a3b8;font-size:12px}
+.tm-notice{padding:12px 16px;background:#f0fdf4;
+    border:1px solid #bbf7d0;border-radius:9px}
+@media(max-width:1100px){.tm-cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){
+    .tm{padding:0 12px 24px;margin-top:20px}
+    .tm h1{font-size:24px}.tm-panel,.tm-tools{padding:16px}
+    .tm-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .tm-card{padding:15px}.tm-card b{font-size:26px}
+    .tm-tools label{width:100%;justify-content:space-between}
+    .tm-tools select{flex:1}
+}
+</style>
+
+<div class="tm">
+<div class="tm-head">
+<div><small>POWER USER • PRIVATE REPORT</small><h1>Team Monitoring & Rewards</h1>
+<p>Recorded activity, pending work and recognition in one place.</p></div>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<a class="tm-link" href="#student-attendance-awards">🏆 Student Attendance Awards</a>
+<a class="tm-link" href="#staff-attendance">Staff Attendance</a>
+<a class="tm-link" href="{% url 'management_dashboard' %}">← Dashboard</a>
+</div>
+
+</div>
+{% for message in messages %}<div class="tm-notice">{{ message }}</div>{% endfor %}
+<form method="get" class="tm-tools">
+<input type="hidden" name="award_month" value="{{ award_month }}">
+
+<select name="period">
+<option value="today" {% if period == "today" %}selected{% endif %}>Today</option>
+<option value="week" {% if period == "week" %}selected{% endif %}>Last 7 days</option>
+<option value="month" {% if period == "month" %}selected{% endif %}>This month</option>
+<option value="custom" {% if period == "custom" %}selected{% endif %}>Custom dates</option>
+</select>
+<label>From <input type="date" name="start" value="{{ start|date:'Y-m-d' }}"></label>
+<label>To <input type="date" name="end" value="{{ end|date:'Y-m-d' }}"></label>
+<select name="branch"><option value="">All branches</option>
+{% for b in branches %}<option value="{{ b }}" {% if branch == b %}selected{% endif %}>{{ b|title }}</option>{% endfor %}
+</select>
+<button>Apply</button>
+<a class="tm-link" href="?{{ excel_query }}">Excel</a>
+<a class="tm-link" href="?{{ pdf_query }}">PDF</a>
+</form>
+<div class="tm-cards">
+<div class="tm-card">Staff / Admin<b>{{ total }}</b></div>
+<div class="tm-card">Recorded work<b>{{ active }}</b></div>
+<div class="tm-card">No recorded work<b>{{ quiet }}</b></div>
+<div class="tm-card">Due today<b>{{ due_today }}</b></div>
+<div class="tm-card">Overdue<b>{{ due_overdue }}</b></div>
+<div class="tm-card">Unassigned due<b>{{ unassigned }}</b></div>
+</div>
+<div class="tm-panel">
+<h2>Performance & Reward Approval</h2>
+<p>{{ start|date:"d M Y" }} – {{ end|date:"d M Y" }} · Ranked by recorded outcomes</p>
+<details class="tm-rules"><summary>Scoring &amp; tracking rules</summary>
+<p>Unique confirmed contacts × 2 + admissions created × 10.
+Repeated call/WhatsApp clicks earn no points.
+No recorded work does not mean absent.
+Pending counts show the current schedule.</p></details>
+<div class="tm-scroll"><table>
+<thead><tr><th>Rank / User</th><th>Usage</th><th>Unique actions</th><th>Results</th>
+<th>Admissions / Fees</th><th>Pending now</th><th>Score</th><th>Reward</th></tr></thead>
+<tbody>
+{% for r in rows %}
+<tr>
+<td><b>{{ forloop.counter }}. {{ r.name }}</b><small>{{ r.user.username }}</small>
+<small>{{ r.branch|title }} · {{ r.role }}</small>
+{% if not r.enabled %}<small>Account/profile inactive or unassigned</small>{% endif %}</td>
+<td><b>{{ r.days }} work days</b>
+<small>{{ r.quiet_days }} days without recorded work</small>
+<details class="tm-details"><summary>Login &amp; activity details</summary>
+<small>{{ r.logins }} successful logins / {{ r.login_days }} days</small>
+<small>{{ r.denied }} denied logins</small>
+<small>Last login: {{ r.user.last_login|date:"d M Y H:i"|default:"Not recorded" }}</small>
+<small>Last work in period: {{ r.latest|date:"d M Y H:i"|default:"None" }}</small>
+</details></td>
+<td>Calls: {{ r.calls }}<small>WhatsApp: {{ r.whatsapp }}</small></td>
+<td>Confirmed: {{ r.contacts }}<small>Result leads: {{ r.results }}</small>
+<small>Conversion logs: {{ r.conversions }}</small></td>
+<td>Admissions: {{ r.admissions }}<small>Receipts: {{ r.receipts }}</small>
+<small>₹{{ r.collection|floatformat:2 }}</small></td>
+<td>Today: {{ r.today }}<small>Overdue: {{ r.overdue }}</small></td>
+<td><span class="tm-score">{{ r.score }}</span></td>
+<td>
+{% if r.reward %}
+<b>{{ r.reward.get_status_display }}</b><small>{{ r.reward.gift_description }}</small>
+<small>Approved score: {{ r.reward.score }}</small>
+{% if r.reward.status == "approved" %}
+<form method="post">{% csrf_token %}
+<input type="hidden" name="user_id" value="{{ r.user.pk }}">
+<button name="action" value="given">Mark Reward Given</button></form>
+{% endif %}
+{% elif r.score > 0 and r.enabled %}
+<form method="post">{% csrf_token %}
+<input type="hidden" name="user_id" value="{{ r.user.pk }}">
+<input name="gift" maxlength="255" placeholder="Gift / recognition" required>
+<button name="action" value="approve">Approve</button></form>
+{% else %}<span class="tm-muted">No qualifying score</span>{% endif %}
+</td></tr>
+{% empty %}<tr><td colspan="8">No users found.</td></tr>{% endfor %}
+</tbody></table></div></div>
+
+<div class="tm-panel" id="staff-attendance">
+<h2>Staff Attendance</h2>
+<p>Today: {{ attendance_date|date:"d M Y" }} · Present: {{ attendance_present }}.
+Period totals: {{ start|date:"d M Y" }} – {{ end|date:"d M Y" }}.
+Login-based attendance; location verification is currently disabled.
+Missing records are not automatically marked Absent.</p>
+<div class="tm-scroll"><table>
+<tr><th>Staff / Admin</th><th>Today</th><th>First recorded check-in</th>
+<th>Present days</th><th>Leave days</th><th>Recorded absent</th><th>No record</th></tr>
+{% for r in rows %}
+{% if r.attendance_status != "No staff profile" %}
+<tr>
+<td><b>{{ r.name }}</b><small>{{ r.branch|title }} · {{ r.role }}</small></td>
+<td><b>{{ r.attendance_status }}</b></td>
+<td>{{ r.attendance_today.first_login_time|date:"H:i"|default:"—" }}</td>
+<td>{{ r.present_days }}</td><td>{{ r.leave_days }}</td>
+<td>{{ r.absent_days }}</td><td>{{ r.missing_days|default_if_none:"N/A" }}</td>
+</tr>
+{% endif %}
+{% endfor %}
+</table></div>
+<details class="tm-rules">
+<summary>Daily attendance records — latest 100 in selected period</summary>
+<div class="tm-scroll"><table>
+<tr><th>Date</th><th>User</th><th>Branch</th><th>Status</th><th>Recorded check-in</th><th>Source</th></tr>
+{% for a in attendance_history %}
+<tr><td>{{ a.attendance_date|date:"d M Y" }}</td>
+<td>{{ a.staff.user.get_full_name|default:a.staff.user.username }}</td>
+<td>{{ a.branch|title }}</td><td>{{ a.get_status_display }}</td>
+<td>{{ a.first_login_time|date:"H:i"|default:"—" }}</td><td>{{ a.source }}</td></tr>
+{% empty %}<tr><td colspan="6">No attendance records in this period.</td></tr>{% endfor %}
+</table></div></details>
+</div>
+
+<div class="tm-panel" id="student-attendance-awards" style="scroll-margin-top:85px">
+<h2>🏆 Monthly Student Attendance Awards</h2>
+    <p>Approve a winner to credit 500 points. 1 point = ₹1.
+    Students can use points on a different next course, up to 10% of its fee.</p>
+<p>{{ award_month_label|date:"F Y" }} · {{ award_winners }} branch winners.
+Minimum 10 marked days. Highest attendance percentage per branch wins;
+ties are joint winners. Missing records are not counted.</p>
+<form method="get" class="tm-tools">
+<input type="hidden" name="period" value="{{ period }}">
+<input type="hidden" name="start" value="{{ start|date:'Y-m-d' }}">
+<input type="hidden" name="end" value="{{ end|date:'Y-m-d' }}">
+<input type="hidden" name="branch" value="{{ branch }}">
+<label>Award month
+<input type="month" name="award_month" value="{{ award_month }}" max="{{ award_latest_month }}" required>
+</label><button>View Month</button>
+</form>
+<div class="tm-scroll"><table>
+<tr><th>Student</th><th>Branch</th><th>Present</th><th>Absent</th><th>Leave</th>
+<th>Marked Days</th><th>Attendance</th><th>Award</th></tr>
+{% for r in award_rows %}
+<tr><td><b>{{ r.student__name }}</b><small>{{ r.student__student_id }}</small></td>
+<td>{{ r.branch|title|default:"Unassigned" }}</td>
+<td>{{ r.present }}</td><td>{{ r.absent }}</td><td>{{ r.leave }}</td>
+<td>{{ r.marked }}</td><td><span class="tm-score">{{ r.percentage }}%</span></td>
+<td>
+{% if r.award %}
+<b>{{ r.award.get_status_display }}</b><small>{% if r.award.reward_points %}
+    {{ r.award.reward_points }} points credited
+    {% else %}{{ r.award.gift_description }}{% endif %}</small>
+{% if r.award.status == "approved" and not r.award.reward_points %}
+<form method="post">{% csrf_token %}
+<input type="hidden" name="student_id" value="{{ r.student_id }}">
+<button name="action" value="student_award_given">Mark Award Given</button>
+</form>{% endif %}
+{% elif not award_points_enabled %}
+<span style="color:#64748b">Rewards start October 2026</span>
+{% elif r.winner %}
+<b style="color:#15803d">Monthly Attendance Star</b>
+<form method="post">{% csrf_token %}
+<input type="hidden" name="student_id" value="{{ r.student_id }}">
+<span>500 points · ₹500 next-course benefit</span>
+<button name="action" value="student_award_approve">Approve</button>
+</form>
+{% elif not r.eligible %}<small>Minimum 10 marked days and assigned branch required</small>
+{% else %}<small>Keep improving</small>{% endif %}
+</td></tr>
+{% empty %}<tr><td colspan="8">No attendance records for this month.</td></tr>{% endfor %}
+</table></div>
+<details class="tm-rules"><summary>Student award history — latest 30</summary>
+<div class="tm-scroll"><table>
+<tr><th>Month</th><th>Student</th><th>Branch</th><th>Approved Record</th><th>Gift</th><th>Status</th></tr>
+{% for a in award_history %}
+<tr><td>{{ a.month|date:"F Y" }}</td><td>{{ a.student.name }}</td>
+<td>{{ a.branch|title }}</td><td>{{ a.present_days }} / {{ a.marked_days }} Present</td>
+<td>{{ a.gift_description }}</td><td>{{ a.get_status_display }}
+<small>{{ a.approved_by.username }} · {{ a.approved_at|date:"d M Y" }}</small>
+{% if a.fulfilled_at %}<small>Given: {{ a.fulfilled_at|date:"d M Y" }}</small>{% endif %}
+</td></tr>
+{% empty %}<tr><td colspan="6">No student awards approved yet.</td></tr>{% endfor %}
+</table></div></details>
+<p>Attendance % = Present ÷ (Present + Absent + Leave) × 100.
+Review attendance completeness before approving. Approved attendance snapshots are preserved.</p>
+</div>
+<div class="tm-panel"><h2>Recent Recorded Activity</h2><small>Latest 50 activities in selected period</small>
+<div class="tm-scroll"><table><tr><th>When</th><th>User</th><th>Enquiry</th><th>Action / Notes</th></tr>
+{% for a in recent %}<tr>
+<td>{{ a.created_at|date:"d M Y H:i" }}</td><td>{{ a.created_by.get_full_name|default:a.created_by.username }}</td>
+<td><a href="{% url 'enquiry_detail' enquiry_id=a.enquiry_id %}">{{ a.enquiry.name }} →</a></td>
+<td>{{ a.get_activity_type_display }}<small>{{ a.message|truncatechars:250 }}</small></td>
+</tr>{% empty %}<tr><td colspan="4">No recorded activity.</td></tr>{% endfor %}
+</table></div></div>
+<div class="tm-panel"><h2>Reward History</h2><small>Latest 30 rewards for selected users</small>
+<div class="tm-scroll"><table><tr><th>User</th><th>Period</th><th>Reward</th><th>Status</th><th>Approval / Fulfilment</th></tr>
+{% for r in history %}<tr>
+<td>{{ r.user.get_full_name|default:r.user.username }}</td>
+<td>{{ r.period_start }} – {{ r.period_end }}</td>
+<td>{{ r.gift_description }}<small>Score {{ r.score }}</small></td>
+<td>{{ r.get_status_display }}</td>
+<td>{{ r.approved_by.username }} · {{ r.approved_at|date:"d M Y H:i" }}
+{% if r.fulfilled_at %}<small>Given by {{ r.fulfilled_by.username }} · {{ r.fulfilled_at|date:"d M Y H:i" }}</small>{% endif %}</td>
+</tr>{% empty %}<tr><td colspan="5">No rewards approved yet.</td></tr>{% endfor %}
+</table></div></div>
+</div>
+{% endblock %}

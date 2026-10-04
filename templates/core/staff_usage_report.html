@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Usage & Attendance | MCTI{% endblock %}
+
+{% block content %}
+
+<style>
+.staff-report-wrap{
+    max-width:1400px;
+    margin:30px auto;
+    padding:0 18px;
+}
+.report-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    margin-bottom:22px;
+}
+.report-header h1{
+    margin:0;
+    font-size:28px;
+    font-weight:800;
+}
+.report-header p{
+    margin:5px 0 0;
+    color:#666;
+}
+.back-btn{
+    background:#111;
+    color:#fff;
+    padding:11px 18px;
+    border-radius:8px;
+    text-decoration:none;
+    font-weight:700;
+}
+.report-card{
+    background:#fff;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 4px 18px rgba(0,0,0,.08);
+    border-top:4px solid #f58220;
+}
+.table-responsive{
+    overflow-x:auto;
+}
+.staff-table{
+    width:100%;
+    border-collapse:collapse;
+}
+.staff-table th{
+    background:#111;
+    color:#fff;
+    padding:14px 12px;
+    text-align:left;
+    white-space:nowrap;
+}
+.staff-table td{
+    padding:13px 12px;
+    border-bottom:1px solid #eee;
+    vertical-align:middle;
+}
+.staff-table tr:hover{
+    background:#fff8f2;
+}
+.branch-badge{
+    background:#fff1e5;
+    color:#d96500;
+    padding:5px 9px;
+    border-radius:20px;
+    font-weight:700;
+    display:inline-block;
+}
+.present{
+    color:#17803d;
+    font-weight:800;
+}
+.absent{
+    color:#c62828;
+    font-weight:800;
+}
+.login-count{
+    font-weight:800;
+    font-size:16px;
+}
+@media(max-width:700px){
+    .report-header{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+}
+</style>
+
+<div class="staff-report-wrap">
+
+    <div class="report-header">
+        <div>
+            <h1>Staff Usage & Attendance</h1>
+            <p>{{ today|date:"d M Y" }} · Live staff system usage</p>
+        </div>
+
+        <a href="{% url 'management_dashboard' %}" class="back-btn">
+            ← Management Dashboard
+        </a>
+    </div>
+
+    <div class="report-card">
+        <div class="table-responsive">
+            <table class="staff-table">
+                <thead>
+                    <tr>
+                        <th>Staff</th>
+                        <th>Branch</th>
+                        <th>Attendance Today</th>
+                        <th>First Login</th>
+                        <th>Today Logins</th>
+                        <th>Last Login</th>
+                        <th>Monthly Active Days</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for row in staff_rows %}
+                    <tr>
+                        <td>
+                            <strong>
+                                {% if row.profile.user.get_full_name %}
+                                    {{ row.profile.user.get_full_name }}
+                                {% else %}
+                                    {{ row.profile.user.username }}
+                                {% endif %}
+                            </strong>
+                            <br>
+                            <small>{{ row.profile.designation }}</small>
+                        </td>
+
+                        <td>
+                            <span class="branch-badge">
+                                {{ row.profile.get_branch_display }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {% if row.attendance_today %}
+                                <span class="present">● Present</span>
+                            {% else %}
+                                <span class="absent">● Not Logged In</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if row.attendance_today.first_login_time %}
+                                {{ row.attendance_today.first_login_time|date:"h:i A" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td class="login-count">
+                            {{ row.today_logins }}
+                        </td>
+
+                        <td>
+                            {% if row.last_login %}
+                                {{ row.last_login|date:"d M Y, h:i A" }}
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <strong>{{ row.monthly_active_days }}</strong> days
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7">No active staff found.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

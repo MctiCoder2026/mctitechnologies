@@ -1,0 +1,544 @@
+{% extends "base.html" %}
+
+{% block title %}
+MCTI Franchise Opportunity | Start Your Education & Technology Center
+{% endblock %}
+
+{% block content %}
+
+<style>
+.franchise-page{
+    background:#f7f7f7;
+    color:#171717;
+}
+
+.franchise-hero{
+    background:
+        radial-gradient(circle at 85% 20%, rgba(255,111,0,.22), transparent 30%),
+        linear-gradient(135deg,#090909,#1c1c1c);
+    color:#fff;
+    padding:90px 20px 80px;
+}
+
+.franchise-wrap{
+    max-width:1180px;
+    margin:auto;
+}
+
+.franchise-hero-grid{
+    display:grid;
+    grid-template-columns:1.15fr .85fr;
+    gap:55px;
+    align-items:center;
+}
+
+.franchise-tag{
+    display:inline-block;
+    color:#ff7a00;
+    font-weight:800;
+    letter-spacing:1.5px;
+    font-size:13px;
+    margin-bottom:18px;
+}
+
+.franchise-hero h1{
+    font-size:54px;
+    line-height:1.08;
+    margin:0 0 20px;
+    max-width:700px;
+}
+
+.franchise-hero h1 span{
+    color:#ff7a00;
+}
+
+.franchise-hero p{
+    color:#d4d4d4;
+    font-size:18px;
+    line-height:1.7;
+    max-width:650px;
+}
+
+.franchise-hero-note{
+    margin-top:28px;
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.franchise-pill{
+    border:1px solid #444;
+    background:#161616;
+    padding:10px 15px;
+    border-radius:30px;
+    font-size:13px;
+    color:#eee;
+}
+
+.franchise-hero-card{
+    background:#fff;
+    color:#111;
+    padding:35px;
+    border-radius:22px;
+    box-shadow:0 25px 70px rgba(0,0,0,.35);
+}
+
+.franchise-hero-card small{
+    color:#ff6a00;
+    font-weight:800;
+    letter-spacing:1px;
+}
+
+.franchise-hero-card h2{
+    margin:10px 0 15px;
+    font-size:28px;
+}
+
+.franchise-hero-card p{
+    color:#666;
+    font-size:15px;
+    line-height:1.6;
+}
+
+.franchise-btn{
+    display:inline-block;
+    margin-top:12px;
+    padding:15px 24px;
+    background:#ff6a00;
+    color:#fff !important;
+    text-decoration:none;
+    border-radius:8px;
+    font-weight:800;
+}
+
+.franchise-section{
+    padding:80px 20px;
+}
+
+.franchise-heading{
+    text-align:center;
+    max-width:760px;
+    margin:0 auto 45px;
+}
+
+.franchise-heading span{
+    color:#ff6a00;
+    font-weight:800;
+    font-size:13px;
+    letter-spacing:1.5px;
+}
+
+.franchise-heading h2{
+    font-size:38px;
+    margin:10px 0 15px;
+}
+
+.franchise-heading p{
+    color:#666;
+    line-height:1.7;
+}
+
+.franchise-benefits{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+}
+
+.franchise-benefit{
+    background:#fff;
+    padding:28px;
+    border-radius:14px;
+    border:1px solid #e9e9e9;
+    box-shadow:0 8px 30px rgba(0,0,0,.04);
+}
+
+.franchise-icon{
+    width:48px;
+    height:48px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    background:#fff1e7;
+    font-size:23px;
+    margin-bottom:18px;
+}
+
+.franchise-benefit h3{
+    margin:0 0 9px;
+    font-size:19px;
+}
+
+.franchise-benefit p{
+    margin:0;
+    color:#666;
+    line-height:1.6;
+    font-size:14px;
+}
+
+.franchise-interest{
+    background:#111;
+    color:#fff;
+}
+
+.franchise-form-grid{
+    display:grid;
+    grid-template-columns:.8fr 1.2fr;
+    gap:60px;
+    align-items:start;
+}
+
+.franchise-copy span{
+    color:#ff7200;
+    font-weight:800;
+    letter-spacing:1.5px;
+    font-size:13px;
+}
+
+.franchise-copy h2{
+    font-size:42px;
+    margin:12px 0 18px;
+}
+
+.franchise-copy p{
+    color:#bbb;
+    line-height:1.8;
+}
+
+.franchise-copy strong{
+    color:#fff;
+}
+
+.franchise-form{
+    background:#fff;
+    color:#111;
+    padding:35px;
+    border-radius:18px;
+}
+
+.form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+}
+
+.franchise-field{
+    margin-bottom:17px;
+}
+
+.franchise-field label{
+    display:block;
+    font-weight:700;
+    font-size:13px;
+    margin-bottom:7px;
+}
+
+.franchise-field input,
+.franchise-field select,
+.franchise-field textarea{
+    width:100%;
+    box-sizing:border-box;
+    border:1px solid #ddd;
+    background:#fafafa;
+    border-radius:7px;
+    padding:13px;
+    font:inherit;
+}
+
+.franchise-field textarea{
+    min-height:100px;
+    resize:vertical;
+}
+
+.franchise-submit{
+    width:100%;
+    border:0;
+    background:#ff6a00;
+    color:#fff;
+    padding:16px;
+    border-radius:8px;
+    font-size:16px;
+    font-weight:800;
+    cursor:pointer;
+}
+
+.franchise-success{
+    background:#eaf8ee;
+    color:#176b2c;
+    border:1px solid #bfe6c8;
+    padding:20px;
+    border-radius:10px;
+    margin-bottom:22px;
+    font-weight:700;
+}
+
+.franchise-disclaimer{
+    color:#777;
+    font-size:12px;
+    line-height:1.5;
+    margin-top:13px;
+}
+
+@media(max-width:850px){
+    .franchise-hero-grid,
+    .franchise-form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .franchise-benefits{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .franchise-hero h1{
+        font-size:40px;
+    }
+
+    .franchise-copy h2,
+    .franchise-heading h2{
+        font-size:32px;
+    }
+}
+
+@media(max-width:560px){
+    .franchise-hero{
+        padding-top:60px;
+    }
+
+    .franchise-hero h1{
+        font-size:34px;
+    }
+
+    .franchise-benefits,
+    .form-row{
+        grid-template-columns:1fr;
+    }
+
+    .franchise-form,
+    .franchise-hero-card{
+        padding:24px;
+    }
+}
+</style>
+
+<div class="franchise-page">
+
+<section class="franchise-hero">
+<div class="franchise-wrap franchise-hero-grid">
+
+    <div>
+        <span class="franchise-tag">MCTI PARTNER OPPORTUNITY</span>
+
+        <h1>
+            Build Your Own
+            <span>Education & Technology Center.</span>
+        </h1>
+
+        <p>
+            Express your interest in partnering with the growing MCTI
+            education and technology ecosystem and bringing career-focused
+            learning opportunities to your city.
+        </p>
+
+        <div class="franchise-hero-note">
+            <span class="franchise-pill">Education</span>
+            <span class="franchise-pill">Technology</span>
+            <span class="franchise-pill">Career Development</span>
+            <span class="franchise-pill">Digital Systems</span>
+        </div>
+    </div>
+
+    <div class="franchise-hero-card">
+        <small>PARTNER WITH MCTI</small>
+
+        <h2>Interested in an MCTI Center?</h2>
+
+        <p>
+            We are currently accepting expressions of interest from
+            entrepreneurs, educators and existing institute owners.
+        </p>
+
+        <a href="#franchise-enquiry" class="franchise-btn">
+            Submit Your Interest →
+        </a>
+    </div>
+
+</div>
+</section>
+
+
+<section class="franchise-section">
+<div class="franchise-wrap">
+
+    <div class="franchise-heading">
+        <span>THE MCTI ECOSYSTEM</span>
+
+        <h2>More Than a Traditional Training Center</h2>
+
+        <p>
+            MCTI combines education, technology and student career tools
+            to build a modern learning ecosystem.
+        </p>
+    </div>
+
+    <div class="franchise-benefits">
+
+        <div class="franchise-benefit">
+            <div class="franchise-icon">🎓</div>
+            <h3>Career-Focused Courses</h3>
+            <p>IT, accounting, development, data, digital and professional skill programs.</p>
+        </div>
+
+        <div class="franchise-benefit">
+            <div class="franchise-icon">💻</div>
+            <h3>Digital Learning</h3>
+            <p>LMS, quizzes, student progress and technology-enabled learning support.</p>
+        </div>
+
+        <div class="franchise-benefit">
+            <div class="franchise-icon">📊</div>
+            <h3>CRM & Operations</h3>
+            <p>Structured enquiry, admission, follow-up and center management systems.</p>
+        </div>
+
+        <div class="franchise-benefit">
+            <div class="franchise-icon">🧭</div>
+            <h3>Career Tools</h3>
+            <p>Aptitude and career-oriented tools designed to improve student guidance.</p>
+        </div>
+
+        <div class="franchise-benefit">
+            <div class="franchise-icon">📣</div>
+            <h3>Brand & Marketing</h3>
+            <p>Access to structured branding and marketing support as the network develops.</p>
+        </div>
+
+        <div class="franchise-benefit">
+            <div class="franchise-icon">🤝</div>
+            <h3>Partner Ecosystem</h3>
+            <p>Build with an organization focused on education, technology and scalable systems.</p>
+        </div>
+
+    </div>
+
+</div>
+</section>
+
+
+<section class="franchise-section franchise-interest" id="franchise-enquiry">
+<div class="franchise-wrap franchise-form-grid">
+
+    <div class="franchise-copy">
+
+        <span>EXPRESS YOUR INTEREST</span>
+
+        <h2>Bring MCTI to Your City.</h2>
+
+        <p>
+            We are currently collecting enquiries from people interested
+            in becoming future MCTI partners.
+        </p>
+
+        <p>
+            Share your details with us. Our team will review your location,
+            background and interest before discussing the next steps.
+        </p>
+
+        <p>
+            <strong>No franchise fee or commercial commitment is required
+            through this enquiry form.</strong>
+        </p>
+
+    </div>
+
+    <div class="franchise-form">
+
+        {% if success %}
+        <div class="franchise-success">
+            ✓ Thank you! Your franchise interest has been received.
+            Our team will contact you after reviewing your details.
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-row">
+                <div class="franchise-field">
+                    <label>Full Name *</label>
+                    <input type="text" name="name" required>
+                </div>
+
+                <div class="franchise-field">
+                    <label>Mobile Number *</label>
+                    <input type="tel" name="mobile" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="franchise-field">
+                    <label>Email</label>
+                    <input type="email" name="email">
+                </div>
+
+                <div class="franchise-field">
+                    <label>City *</label>
+                    <input type="text" name="city" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="franchise-field">
+                    <label>State</label>
+                    <input type="text" name="state">
+                </div>
+
+                <div class="franchise-field">
+                    <label>Current Profession / Business</label>
+                    <input type="text" name="profession_business">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="franchise-field">
+                    <label>Do you currently operate an institute?</label>
+                    <select name="has_existing_institute">
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                    </select>
+                </div>
+
+                <div class="franchise-field">
+                    <label>Approx. Investment Range</label>
+                    <select name="investment_range">
+                        {% for value, label in investment_choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="franchise-field">
+                <label>Tell us about your interest</label>
+                <textarea name="message"
+                    placeholder="Location, experience, existing business or anything you would like us to know..."></textarea>
+            </div>
+
+            <button type="submit" class="franchise-submit">
+                Submit Franchise Interest →
+            </button>
+
+            <div class="franchise-disclaimer">
+                Submission of this form is only an expression of interest
+                and does not constitute a franchise offer, approval or agreement.
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+</section>
+
+</div>
+
+{% endblock %}

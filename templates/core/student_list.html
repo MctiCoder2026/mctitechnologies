@@ -514,64 +514,8 @@ tbody tr:hover{
 
 <div class="dashboard">
 
-<aside class="sidebar">
-
-    <div class="logo">
-        <h2>
-            <span>MCTI</span> Technologies
-        </h2>
-        <p>Management System</p>
-    </div>
-
-    <div class="menu">
-
-        <div class="menu-title">MAIN</div>
-
-        <a href="{% url 'management_dashboard' %}">
-            🏠 Dashboard
-        </a>
-
-        <a href="{% url 'enquiry_dashboard' %}">
-            📞 Enquiries
-        </a>
-
-        <a href="{% url 'fee_payment_list' %}">
-            💳 Fee Payments
-        </a>
-
-        <div class="menu-title">MANAGEMENT</div>
-
-        <a href="{% url 'admission_list' %}">
-            🎓 Admissions
-        </a>
-
-        <a href="{% url 'student_list' %}" class="active">
-            👨‍🎓 Students
-        </a>
-
-        <a href="#">
-            👥 Staff
-        </a>
-
-        <a href="#">
-            📊 Reports
-        </a>
-
-        {% if request.user.is_superuser %}
-
-        <div class="admin-link">
-
-            <a href="/admin/">
-                ⚙️ Django Backend
-            </a>
-
-        </div>
-
-        {% endif %}
-
-    </div>
-
-</aside>
+{% load crm_navigation %}
+{% crm_sidebar %}
 
 
 <main class="main">
@@ -751,6 +695,12 @@ tbody tr:hover{
 
                                 <span class="student-name">
                                     {{ student.name }}
+                                    <a href="{% url 'student_basic_edit' student.pk %}"
+                                       style="display:block;margin-top:6px;font-size:12px;
+                                       color:#c65300;text-decoration:none">
+                                        Edit Name / DOB / Photo
+                                    </a>
+
                                 </span>
 
                                 <span class="small-text">
@@ -792,7 +742,7 @@ tbody tr:hover{
                                 {% elif student.status == "completed" %}
 
                                     <span class="status status-completed">
-                                        Completed
+                                        Ex Student
                                     </span>
 
                                 {% else %}

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cyber Fraud Awareness Dashboard | MCTI</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f4f5f7;
+    color:#171717;
+}
+.top{
+    background:#111;
+    color:white;
+    padding:22px;
+    border-bottom:5px solid #f58220;
+}
+.top-inner{
+    max-width:1400px;
+    margin:auto;
+}
+.top h1{
+    margin:0 0 6px;
+    font-size:27px;
+}
+.top p{
+    margin:0;
+    color:#ddd;
+}
+.wrap{
+    max-width:1400px;
+    margin:24px auto;
+    padding:0 18px 40px;
+}
+.back{
+    display:inline-block;
+    margin-bottom:18px;
+    color:#111;
+    font-weight:bold;
+    text-decoration:none;
+}
+.cards{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:12px;
+    margin-bottom:22px;
+}
+.card{
+    background:white;
+    border-radius:12px;
+    padding:18px;
+    box-shadow:0 2px 10px #0000000d;
+    border-top:4px solid #f58220;
+}
+.card .num{
+    font-size:27px;
+    font-weight:800;
+}
+.card .label{
+    margin-top:6px;
+    color:#666;
+    font-size:13px;
+}
+.filters{
+    background:white;
+    padding:16px;
+    border-radius:12px;
+    margin-bottom:18px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+.filters input,
+.filters select{
+    padding:11px 12px;
+    border:1px solid #ccc;
+    border-radius:7px;
+    min-width:220px;
+}
+.btn{
+    background:#f58220;
+    color:white;
+    border:0;
+    padding:11px 18px;
+    border-radius:7px;
+    cursor:pointer;
+    font-weight:bold;
+    text-decoration:none;
+}
+.reset{
+    background:#222;
+}
+.table-box{
+    background:white;
+    border-radius:12px;
+    overflow:auto;
+    box-shadow:0 2px 10px #0000000d;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1000px;
+}
+th{
+    background:#171717;
+    color:white;
+    text-align:left;
+    padding:13px 12px;
+    font-size:13px;
+}
+td{
+    padding:13px 12px;
+    border-bottom:1px solid #eee;
+    font-size:14px;
+}
+.score{
+    font-weight:bold;
+}
+.good{color:#16833c}
+.mid{color:#b66b00}
+.low{color:#c22}
+.mobile{
+    color:#111;
+    font-weight:bold;
+    text-decoration:none;
+}
+.empty{
+    padding:35px;
+    text-align:center;
+    color:#777;
+}
+@media(max-width:1050px){
+    .cards{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:600px){
+    .cards{grid-template-columns:repeat(2,1fr)}
+    .top h1{font-size:21px}
+    .filters input,.filters select{width:100%}
+}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+    <div class="top-inner">
+        <h1> MCTI Cyber Fraud Awareness Dashboard</h1>
+        <p>MCTI Cyber Fraud Awareness Test 2026  Management Report</p>
+    </div>
+</div>
+
+<div class="wrap">
+
+<a class="back" href="{% url 'management_dashboard' %}">
+     Back to MCTI Administration
+</a>
+
+<div class="cards">
+
+    <div class="card">
+        <div class="num">{{ total_registrations }}</div>
+        <div class="label">Registrations</div>
+    </div>
+
+    <div class="card">
+        <div class="num">{{ total_started }}</div>
+        <div class="label">Tests Started</div>
+    </div>
+
+    <div class="card">
+        <div class="num">{{ total_completed }}</div>
+        <div class="label">Tests Completed</div>
+    </div>
+
+    <div class="card">
+        <div class="num">{{ avg_score }}%</div>
+        <div class="label">Average Score</div>
+    </div>
+
+    <div class="card">
+        <div class="num">{{ high_awareness }}</div>
+        <div class="label">High Awareness 80%</div>
+    </div>
+
+    <div class="card">
+        <div class="num">{{ needs_awareness }}</div>
+        <div class="label">Needs Awareness &lt;60%</div>
+    </div>
+
+</div>
+
+<form method="get" class="filters">
+
+    <input
+        type="text"
+        name="q"
+        value="{{ q }}"
+        placeholder="Search name, mobile, city..."
+    >
+
+    <select name="status">
+        <option value="">All Test Status</option>
+        <option value="started"
+            {% if status_filter == 'started' %}selected{% endif %}>
+            Started
+        </option>
+        <option value="completed"
+            {% if status_filter == 'completed' %}selected{% endif %}>
+            Completed
+        </option>
+        <option value="abandoned"
+            {% if status_filter == 'abandoned' %}selected{% endif %}>
+            Abandoned
+        </option>
+    </select>
+
+    <button class="btn" type="submit">
+        Filter
+    </button>
+
+    <a
+        class="btn reset"
+        href="{% url 'assessments:cyber_fraud_dashboard' %}">
+        Reset
+    </a>
+
+</form>
+
+<div class="table-box">
+
+<table>
+<thead>
+<tr>
+    <th>#</th>
+    <th>Participant</th>
+    <th>Mobile</th>
+    <th>City</th>
+    <th>Status</th>
+    <th>Score</th>
+    <th>Percentage</th>
+    <th>Started</th>
+    <th>Contact</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for attempt in attempts %}
+
+<tr>
+
+<td>{{ forloop.counter }}</td>
+
+<td>
+    {% if attempt.participant_profile %}
+        {{ attempt.participant_profile.full_name }}
+    {% else %}
+        {{ attempt.participant_name|default:"-" }}
+    {% endif %}
+</td>
+
+<td>
+    {% if attempt.participant_profile %}
+        {{ attempt.participant_profile.mobile }}
+    {% else %}
+        {{ attempt.participant_mobile|default:"-" }}
+    {% endif %}
+</td>
+
+<td>
+    {% if attempt.participant_profile %}
+        {{ attempt.participant_profile.city|default:"-" }}
+    {% else %}
+        -
+    {% endif %}
+</td>
+
+<td>
+    {{ attempt.status|title }}
+</td>
+
+<td class="score">
+    {{ attempt.score|default:"0" }}/{{ attempt.total_marks|default:"0" }}
+</td>
+
+<td>
+    {% if attempt.status == "completed" %}
+
+        {% if attempt.percentage >= 80 %}
+            <span class="score good">
+                {{ attempt.percentage|floatformat:1 }}%
+            </span>
+
+        {% elif attempt.percentage >= 60 %}
+            <span class="score mid">
+                {{ attempt.percentage|floatformat:1 }}%
+            </span>
+
+        {% else %}
+            <span class="score low">
+                {{ attempt.percentage|floatformat:1 }}%
+            </span>
+        {% endif %}
+
+    {% else %}
+        -
+    {% endif %}
+</td>
+
+<td>
+    {{ attempt.started_at|date:"d M Y, h:i A" }}
+</td>
+
+<td>
+{% if attempt.participant_profile.mobile %}
+    <a
+        class="mobile"
+        href="tel:{{ attempt.participant_profile.mobile }}">
+         Call
+    </a>
+{% elif attempt.participant_mobile %}
+    <a
+        class="mobile"
+        href="tel:{{ attempt.participant_mobile }}">
+         Call
+    </a>
+{% else %}
+    -
+{% endif %}
+</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="9" class="empty">
+    No Cyber Fraud Awareness test attempts found.
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
+</div>
+
+</div>
+</body>
+</html>

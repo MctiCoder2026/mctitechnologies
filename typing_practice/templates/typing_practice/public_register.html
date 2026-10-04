@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Continue Free | MCTI Typing Lab</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f6f8;font-family:Arial}.wrap{max-width:520px;margin:50px auto;padding:18px}.card{background:white;padding:30px;border-radius:20px;box-shadow:0 5px 25px #0002}h1 span{color:#ff7200}input,select{width:100%;padding:13px;margin:7px 0 14px;border:1px solid #ccc;border-radius:8px;font-size:16px}button{width:100%;border:0;background:#ff7200;color:white;padding:14px;border-radius:9px;font-weight:800;font-size:16px}.error{background:#fee2e2;padding:10px;border-radius:8px;color:#991b1b}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+<h1>Continue <span>FREE</span></h1>
+<p>Register your interest to continue your MCTI Typing Journey.</p>
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+<form method="post">
+{% csrf_token %}
+<label>Name</label>
+<input name="name" required maxlength="150">
+<label>Mobile Number</label>
+<input name="mobile" required inputmode="numeric" maxlength="15">
+<label>Preferred MCTI Center</label>
+<select name="branch">
+<option value="">Select Center</option>
+{% for value,label in branches %}
+<option value="{{ value }}">{{ label }}</option>
+{% endfor %}
+</select>
+<button type="submit">Register Free →</button>
+</form>
+</div></div>
+</body>
+</html>

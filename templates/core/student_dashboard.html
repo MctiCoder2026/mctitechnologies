@@ -598,6 +598,9 @@ body.menu-open{
 
     <div class="logo">
         <h2><span>MCTI</span> Technologies</h2>
+{% load student_rewards %}
+
+
         <p>Student Management System</p>
     </div>
 
@@ -630,6 +633,10 @@ body.menu-open{
         </a>
         <a href="{% url 'lms:my_courses' %}">
         📚 My Learning
+        </a>
+
+        <a href="{% url 'typing_practice:dashboard' %}">
+            ⌨️ Typing Practice
         </a>
         
         <a href="https://exam.maharashtracomputer.com"
@@ -716,12 +723,96 @@ body.menu-open{
         <div class="welcome-row">
 
             <div>
-                <h2>
+                
+{% load student_rewards %}
+<style>
+.sr-welcome-row {
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap:24px; width:100%; margin-bottom:18px;
+}
+.sr-welcome-copy {flex:1; min-width:0;}
+.sr-welcome-copy h1,.sr-welcome-copy h2 {margin-top:0;}
+.sr-wallet {
+    flex:0 1 440px; min-width:0; width:100%;
+    background:#fff; border:1px solid #e2e8f0;
+    border-left:4px solid #ff7200; border-radius:12px;
+    padding:14px 18px; color:#171717; box-sizing:border-box;
+}
+.sr-wallet-top {
+    display:flex; align-items:center; justify-content:space-between;
+    gap:14px; flex-wrap:wrap;
+}
+.sr-wallet-title {font-size:15px; font-weight:800;}
+.sr-wallet-balance {font-size:22px; font-weight:800; color:#ff7200;}
+.sr-wallet p {margin:7px 0 0; font-size:12px; line-height:1.5; color:#475569;}
+.sr-wallet summary {cursor:pointer; font-size:12px; font-weight:700; margin-top:8px;}
+.sr-wallet-history {padding:9px 0; border-bottom:1px solid #e2e8f0; font-size:12px;}
+@media(max-width:1050px) {
+    .sr-welcome-row {flex-direction:column; gap:12px;}
+    .sr-wallet {flex:auto; max-width:100%;}
+}
+</style>
+
+
+
+<style id="sr-three-columns">
+div:has(> .sr-welcome-row) {
+    display:block !important;
+    width:100% !important;
+    max-width:none !important;
+}
+.sr-welcome-row {
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) minmax(0,760px) !important;
+    gap:24px !important;
+    align-items:start !important;
+    width:100% !important;
+    max-width:none !important;
+}
+.sr-welcome-row > .sr-wallet {
+    display:grid;
+    grid-template-columns:180px minmax(0,1fr);
+    gap:20px;
+    width:100% !important;
+    max-width:none !important;
+    margin:0 !important;
+}
+.sr-points-column {border-right:1px solid #e2e8f0;padding-right:18px;}
+.sr-points-column strong {
+    display:block;font-size:28px;color:#ff7200;margin:6px 0;
+}
+.sr-instruction-column h3 {margin:0 0 6px;font-size:14px;}
+.sr-instruction-column p {margin:4px 0;font-size:12px;line-height:1.5;}
+@media(max-width:1200px) {
+    .sr-welcome-row {
+        grid-template-columns:minmax(0,1fr) !important;
+    }
+}
+@media(max-width:600px) {
+    .sr-welcome-row > .sr-wallet {
+        grid-template-columns:minmax(0,1fr);
+        gap:12px;
+    }
+    .sr-points-column {
+        border-right:0;border-bottom:1px solid #e2e8f0;
+        padding:0 0 12px;
+    }
+}
+</style>
+<div class="sr-welcome-row">
+    <div class="sr-welcome-copy">
+<h2>
                     Welcome, {{ student.name|default:student }} 👋
                 </h2>
+
+
                 <p>
                     Manage your course, fees, exams and placement support from MCTI One.
                 </p>
+    </div>
+    {% student_reward_wallet %}
+</div>
+
             </div>
 
         </div>

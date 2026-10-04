@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}Franchise Enquiries | MCTI Management{% endblock %}
+
+{% block content %}
+
+<style>
+.fr-wrap{
+    max-width:1250px;
+    margin:40px auto;
+    padding:0 20px;
+}
+.fr-head{
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    align-items:center;
+    margin-bottom:25px;
+}
+.fr-head h1{margin:0;font-size:30px;}
+.fr-head p{margin:6px 0 0;color:#666;}
+.fr-public{
+    background:#ff6a00;
+    color:#fff !important;
+    text-decoration:none;
+    padding:12px 18px;
+    border-radius:8px;
+    font-weight:700;
+}
+.fr-stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:25px;
+}
+.fr-stat{
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:12px;
+    padding:20px;
+}
+.fr-stat span{
+    display:block;
+    color:#777;
+    font-size:13px;
+}
+.fr-stat strong{
+    display:block;
+    font-size:28px;
+    margin-top:5px;
+}
+.fr-filter{
+    background:#fff;
+    padding:18px;
+    border:1px solid #eee;
+    border-radius:12px;
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+.fr-filter input,
+.fr-filter select{
+    padding:11px;
+    border:1px solid #ddd;
+    border-radius:7px;
+    min-width:180px;
+}
+.fr-filter input{flex:1;}
+.fr-filter button{
+    border:0;
+    background:#111;
+    color:#fff;
+    padding:11px 20px;
+    border-radius:7px;
+    cursor:pointer;
+}
+.fr-table-box{
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:12px;
+    overflow-x:auto;
+}
+.fr-table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:950px;
+}
+.fr-table th{
+    text-align:left;
+    background:#111;
+    color:#fff;
+    padding:14px;
+    font-size:13px;
+}
+.fr-table td{
+    padding:14px;
+    border-bottom:1px solid #eee;
+    vertical-align:top;
+}
+.fr-name{font-weight:800;}
+.fr-mobile{font-size:13px;color:#666;margin-top:4px;}
+.fr-status{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:20px;
+    background:#fff0e5;
+    color:#c45100;
+    font-size:12px;
+    font-weight:800;
+}
+.fr-empty{
+    text-align:center;
+    padding:60px 20px !important;
+    color:#777;
+}
+@media(max-width:750px){
+    .fr-stats{grid-template-columns:1fr 1fr;}
+    .fr-head{align-items:flex-start;flex-direction:column;}
+    .fr-filter{flex-direction:column;}
+    .fr-filter input,.fr-filter select{width:100%;box-sizing:border-box;}
+}
+</style>
+
+<div class="fr-wrap">
+
+    <div class="fr-head">
+        <div>
+            <h1>🤝 Franchise Enquiries</h1>
+            <p>Separate franchise partner pipeline — not connected to student enquiries.</p>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <a href="{% url 'management_dashboard' %}" class="fr-public"
+               style="background:#111;color:#fff;">
+                ← Management Dashboard
+            </a>
+
+            <a href="{% url 'franchise' %}" target="_blank" class="fr-public">
+                View Public Page →
+            </a>
+        </div>
+    </div>
+
+    <div class="fr-stats">
+
+        <div class="fr-stat">
+            <span>TOTAL LEADS</span>
+            <strong>{{ total_count }}</strong>
+        </div>
+
+        <div class="fr-stat">
+            <span>NEW</span>
+            <strong>{{ new_count }}</strong>
+        </div>
+
+        <div class="fr-stat">
+            <span>INTERESTED</span>
+            <strong>{{ interested_count }}</strong>
+        </div>
+
+        <div class="fr-stat">
+            <span>QUALIFIED</span>
+            <strong>{{ qualified_count }}</strong>
+        </div>
+
+    </div>
+
+    <form method="get" class="fr-filter">
+
+        <input
+            type="text"
+            name="q"
+            value="{{ search }}"
+            placeholder="Search name, mobile, city or state..."
+        >
+
+        <select name="status">
+            <option value="">All Status</option>
+
+            {% for value, label in status_choices %}
+                <option
+                    value="{{ value }}"
+                    {% if selected_status == value %}selected{% endif %}
+                >
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Search</button>
+
+    </form>
+
+    <div class="fr-table-box">
+
+        <table class="fr-table">
+
+            <thead>
+                <tr>
+                    <th>Partner</th>
+                    <th>Location</th>
+                    <th>Profession / Business</th>
+                    <th>Existing Institute</th>
+                    <th>Investment</th>
+                    <th>Status</th>
+                    <th>Received</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for enquiry in enquiries %}
+
+                <tr>
+
+                    <td>
+                        <div class="fr-name">
+                            <a href="{% url 'franchise_enquiry_detail' enquiry.id %}"
+                               style="color:#111;text-decoration:none;">
+                                {{ enquiry.name }}
+                            </a>
+                        </div>
+                        <div class="fr-mobile">{{ enquiry.mobile }}</div>
+
+                        {% if enquiry.email %}
+                        <div class="fr-mobile">{{ enquiry.email }}</div>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ enquiry.city }}
+                        {% if enquiry.state %}
+                            <br><small>{{ enquiry.state }}</small>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ enquiry.profession_business|default:"—" }}
+                    </td>
+
+                    <td>
+                        {% if enquiry.has_existing_institute %}
+                            Yes
+                        {% else %}
+                            No
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ enquiry.get_investment_range_display }}
+                    </td>
+
+                    <td>
+                        <span class="fr-status">
+                            {{ enquiry.get_status_display }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ enquiry.created_at|date:"d M Y" }}
+                        <br>
+                        <small>{{ enquiry.created_at|date:"h:i A" }}</small>
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="7" class="fr-empty">
+                        No franchise enquiries found yet.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

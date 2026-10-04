@@ -125,7 +125,7 @@ td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
     <table>
       <thead>
         <tr>
-          <th>Student</th><th>Course</th><th>Branch</th><th>Status</th><th>Marked By</th>
+          <th>Student</th><th>Course</th><th>Branch</th><th>Status</th><th>Marked By</th><th>Absent Message</th>
         </tr>
       </thead>
       <tbody>
@@ -140,9 +140,10 @@ td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
             {% else %}<span class="badge leave">Leave</span>{% endif %}
           </td>
           <td>{{ record.marked_by|default:"-" }}</td>
+<td>{% include "core/absence_whatsapp_widget.html" %}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" style="text-align:center;padding:30px;color:#6b7280">No attendance marked today.</td></tr>
+        <tr><td colspan="6" style="text-align:center;padding:30px;color:#6b7280">No attendance marked today.</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -153,5 +154,6 @@ td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
 </main>
     <script src="/static/js/staff_mobile.js" defer></script>
 
+{% include "core/absence_whatsapp_assets.html" %}
 </body>
 </html>

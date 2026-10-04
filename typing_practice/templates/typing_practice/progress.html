@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Typing Progress</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f6f8;font-family:Arial;color:#171717}.top{background:#111827;color:#fff;padding:18px 24px}.top a{color:#fff}.wrap{max-width:1000px;margin:auto;padding:28px 18px}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.card{background:#fff;padding:18px;border-radius:14px;box-shadow:0 3px 12px #0001}.card b{display:block;font-size:24px;color:#ff7200}.level{margin-top:12px;border-left:5px solid #ff7200}.pass{color:#16803a;font-weight:700}@media(max-width:700px){.stats{grid-template-columns:1fr 1fr}}
+
+.lab-back{
+    display:inline-flex !important;
+    align-items:center;
+    gap:7px;
+    background:#ff7200 !important;
+    color:#fff !important;
+    padding:10px 16px !important;
+    border-radius:9px;
+    text-decoration:none !important;
+    font-size:14px;
+    font-weight:800;
+    line-height:1.2;
+    box-shadow:0 2px 7px rgba(0,0,0,.18);
+}
+.lab-back:hover{
+    background:#e86500 !important;
+}
+</style>
+</head>
+<body>
+<div class="top"><a href="{% url 'typing_practice:dashboard' %}" class="lab-back">⌨️ Back to Typing Lab</a></div>
+<div class="wrap">
+<h1>📈 {{ student.name }}'s Typing Progress</h1>
+<div class="stats">
+<div class="card"><b>{{ total_minutes }}</b>Practice Minutes</div>
+<div class="card"><b>{{ practice_attempts }}</b>Practice Attempts</div>
+<div class="card"><b>{{ exam_attempts }}</b>Exam Attempts</div>
+<div class="card"><b>{{ exams_passed }}</b>Benchmarks</div>
+<div class="card"><b>{{ best_exam_wpm }}</b>Best Exam WPM</div>
+</div>
+
+<div class="card level">
+<h2>Certificate of Achievement</h2>
+{% if certificate_eligible %}
+<p class="pass">Congratulations! Your typing certificate is unlocked.</p>
+<a class="lab-back" href="{% url 'typing_practice:download_certificate' %}">
+Download Certificate PDF</a>
+{% else %}
+<p>Pass all active typing benchmark exams to unlock your certificate.</p>
+{% endif %}
+</div>
+<h2>Official Benchmark Progress</h2>
+{% for p in levels %}
+<div class="card level">
+<b style="font-size:18px">{{ p.lesson.order }}. {{ p.lesson.title }}</b>
+<p>{{ p.best_exam_wpm }} WPM · {{ p.best_exam_accuracy }}% accuracy · {{ p.exam_attempts }} exam attempt{{ p.exam_attempts|pluralize }}</p>
+{% if p.exam_passed %}<span class="pass">✓ Benchmark Achieved</span>{% else %}<span>Keep practising — take the exam when ready.</span>{% endif %}
+</div>
+{% empty %}
+<div class="card">No exam attempted yet. Practice freely and take your first exam when you feel ready.</div>
+{% endfor %}
+</div>
+</body>
+</html>
