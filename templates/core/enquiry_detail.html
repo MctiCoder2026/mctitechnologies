@@ -767,173 +767,76 @@ Lead Details | MCTI Technologies
          WHATSAPP COMPOSER
     ======================================== -->
 
-    <div class="mcti-detail-card mcti-whatsapp-composer">
 
-        <div class="mcti-detail-card-header">
+<div class="mcti-detail-card mcti-whatsapp-composer">
+  <div class="mcti-detail-card-header">
+    <span>WHATSAPP</span>
+    <h2>Message Composer</h2>
+    <p>Select a message, review the details and open WhatsApp.</p>
+  </div>
 
-            <span>
-                WHATSAPP
-            </span>
+  <div class="mcti-message-field">
+    <label for="whatsappTemplate">Message template</label>
+    <select id="whatsappTemplate">
+      <option value="welcome">1. Welcome &amp; Centre Address</option>
+      <option value="appointment">2. Appointment Scheduled</option>
+      <option value="afterVisit">3. Thank You After Visit</option>
+      <option value="approxFee">4. Approx Fee &amp; Scholarship</option>
+      <option value="followup1">5. Follow-up 1 — Guidance</option>
+      <option value="followup2">6. Follow-up 2 — Motivation</option>
+      <option value="offer">7. Current Offer</option>
+      <option value="decision">8. Final Decision</option>
+<option value="courseFeeDetails">9. Course Details &amp; Approx Fee</option>
+    </select>
+  </div>
 
-            <h2>
-                Message Composer
-            </h2>
-
-            <p>
-                Select a template, edit the message and open WhatsApp.
-            </p>
-
-        </div>
-
-
-        <!-- MESSAGE TEMPLATE -->
-
-        <div class="mcti-message-field">
-
-            <label for="whatsappTemplate">
-                Message Template
-            </label>
-
-            <select id="whatsappTemplate">
-<option value="new">01 · Welcome + Course + Approx Fee</option>
-<option value="standardFollowup1">02 · Follow-up 1 — Guidance</option>
-<option value="standardFollowup2">03 · Follow-up 2 — Centre Visit</option>
-<option value="standardFollowup3">04 · Follow-up 3 — Decision Support</option>
-<option value="standardAptitude">05 · Aptitude Assessment</option>
-<option value="standardScholarship">06 · Scholarship Assessment</option>
-<option value="standardClosing">07 · Admission / Closing</option>
-
-
-                
-
-                <option value="specialOffer">
-                    Special Offer + Career Kit
-                </option>
-
-                {% with staff_branch=request.user.staff_profile.branch %}
-                {% if is_admin or staff_branch == "kharghar" or staff_branch == "panvel" or staff_branch == "koperkhairane" or staff_branch == "kamothe" or staff_branch == "ghansoli" or staff_branch == "head_office" %}
-                <option value="kamotheAnniversaryOldEnquiry">
-                    Kamothe Anniversary | Old Enquiry | Scholarship
-                </option>
-                <option value="kamotheAnniversaryExistingStudent">
-                    Kamothe Anniversary | Existing Student | Upgrade
-                </option>
-                {% endif %}
-                {% endwith %}
-
-                <option value="scholarshipOffer">
-                    🎓 Scholarship Offer | 3 Oct Batch
-                </option>
-
-                <option value="sundayOpen">
-                    Sunday Open - Visit Today
-                </option>
-
-                <option value="followup1">
-                    1️⃣ Follow-up 1 — Purpose
-                </option>
-
-                <option value="followup2">
-                    2️⃣ Follow-up 2 — Visit / Call
-                </option>
-
-                <option value="finalDecision">
-                    3️⃣ Follow-up 3 — Final Decision
-                </option>
-
-                <option value="course">
-                    📚 Course Information
-                </option>
-
-                <option value="approxFee">
-                    💰 Approx. Course Fee
-                </option>
-
-                <option value="admission">
-                    🎓 Admission
-                </option>
-
-                <option value="fees">
-                    💰 Fees Reminder
-                </option>
-
-            <option value="counsellingAppointment">Counselling Appointment</option></select>
-<!-- MCTI_COUNSELLING_APPOINTMENT -->
-<div id="appointmentFields" hidden
-     style="margin:14px 0;padding:14px;border:1px solid #e2e8f0;
-            border-radius:10px;background:#f8fafc">
-    <strong style="display:block;margin-bottom:10px">Book Counselling Appointment</strong>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
-        <div>
-            <label for="appointmentDate">Appointment Date</label>
-            <input type="date" id="appointmentDate"
-                   style="width:100%;box-sizing:border-box;padding:10px">
-        </div>
-        <div>
-            <label for="appointmentTime">Appointment Time — IST</label>
-            <input type="time" id="appointmentTime"
-                   style="width:100%;box-sizing:border-box;padding:10px">
-        </div>
+  <div id="composerAppointment" hidden>
+    <div class="mcti-message-field">
+      <label for="composerDate">Appointment date</label>
+      <input id="composerDate" type="date">
     </div>
-    <small style="display:block;margin-top:9px;color:#64748b">
-        Name, course and centre details are filled automatically.
-        Select date and time, then send using the existing WhatsApp button.
-    </small>
+    <div class="mcti-message-field">
+      <label for="composerTime">Appointment time — IST</label>
+      <input id="composerTime" type="time">
+    </div>
+  </div>
+
+  <div id="composerFee" class="mcti-message-field" hidden>
+    <label for="composerFeeAmount">Approximate course fee — ₹</label>
+    <input id="composerFeeAmount" type="number"
+           min="0.01" step="0.01" placeholder="Enter approximate fee">
+  </div>
+
+  <div id="composerOffer" hidden>
+    <div class="mcti-message-field">
+      <label for="composerOfferText">Approved offer and terms</label>
+      <textarea id="composerOfferText" rows="3" maxlength="1000"
+                placeholder="Enter the applicable offer and terms"></textarea>
+    </div>
+    <div class="mcti-message-field">
+      <label for="composerOfferDate">Offer valid until</label>
+      <input id="composerOfferDate" type="date">
+    </div>
+  </div>
+
+
+
+  <div class="mcti-message-field">
+    <label for="whatsappMessage">Message preview — editable</label>
+    <textarea id="whatsappMessage" rows="12"></textarea>
+  </div>
+
+  <button id="openWhatsApp" type="button"
+          style="background:#ff7200;color:white;border:0;border-radius:8px;
+                 padding:12px 20px;font-weight:700;cursor:pointer">
+    Open WhatsApp
+  </button>
+  <p id="composerStatus" role="status"
+     style="font-size:13px;color:#64748b;margin-top:12px">
+    Send the message in WhatsApp, then record the actual follow-up result.
+  </p>
 </div>
 
-<div style="margin-top:16px;">
-<label for="standardApproxFee">Approved approx. fee range — review before sharing</label>
-<input id="standardApproxFee" type="text" maxlength="100"
-placeholder="Enter centre-approved amount or range"
-style="width:100%;padding:11px 12px;border:1px solid #d7dce3;border-radius:8px;">
-<small style="display:block;margin-top:6px;color:#64748b;">Used in Welcome message. Confirm the amount/range with your centre.</small>
-</div>
-<details style="margin-top:18px;padding:14px;background:#fff7f0;border-radius:9px;">
-<summary style="cursor:pointer;font-weight:700;">Standard Counselling Roadmap</summary>
-<ol style="padding-left:20px;line-height:1.8;margin-top:12px;">
-<li>First call: understand goal, current skill, preferred timing and course.</li>
-<li>Send Welcome with course link and approved approx. fee.</li>
-<li>Record the response and agree on the next follow-up date.</li>
-<li>Follow-up 1: clarify questions and course suitability.</li>
-<li>Follow-up 2: arrange a centre visit or counselling appointment.</li>
-<li>Follow-up 3: discuss concerns and the next decision.</li>
-<li>Offer Aptitude/Scholarship assessment where relevant.</li>
-<li>Closing: confirm course, batch, final fee and admission steps.</li>
-</ol>
-<p style="font-size:13px;color:#64748b;">Follow the agreed dates. Stop promotional follow-ups if the person declines. Record the actual outcome after each contact.</p>
-</details>
-
-
-        </div>
-
-
-        <!-- MESSAGE -->
-
-        <div class="mcti-message-field">
-
-            <label for="whatsappMessage">
-                Message
-            </label>
-
-            <textarea id="whatsappMessage"
-                      rows="7"></textarea>
-
-        </div>
-
-
-        <!-- OPEN WHATSAPP -->
-
-        <button type="button"
-                id="openWhatsApp"
-                class="mcti-whatsapp-send-btn">
-
-            <i class="fa-brands fa-whatsapp"></i>
-
-            Open WhatsApp
-
-        </button>
-
-    </div>
 
 
     <!-- ========================================
@@ -1116,693 +1019,310 @@ style="width:100%;padding:11px 12px;border:1px solid #d7dce3;border-radius:8px;"
      WHATSAPP JAVASCRIPT
 ======================================== -->
 
+
 <script>
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-
-        const templateSelect =
-            document.getElementById(
-                "whatsappTemplate"
-            );
-
-
-        const messageBox =
-            document.getElementById(
-                "whatsappMessage"
-            );
-
-
-        const whatsappButton =
-            document.getElementById(
-                "openWhatsApp"
-            );
-
-
-        const quickWhatsApp =
-            document.getElementById(
-                "quickWhatsApp"
-            );
-
-
-        const name =
-            "{{ enquiry.name|escapejs }}";
-
-
-        const course =
-            "{% if enquiry.course %}{{ enquiry.course.title|escapejs }}{% else %}our courses{% endif %}";
-
-
-        const courseUrl =
-            "{% if enquiry.course %}https://mctitechnologies.com{% url 'course_detail' slug=enquiry.course.slug %}{% else %}https://mctitechnologies.com/courses/{% endif %}";
-
-
-        const mobile =
-            "{{ enquiry.mobile|escapejs }}";
-
-
-        const branch =
-            "{% if branch_details %}{{ branch_details.name|escapejs }}{% else %}{{ enquiry.branch|default:'MCTI'|title|escapejs }}{% endif %}";
-
-
-        const branchAddress =
-            "{{ branch_details.address|default:''|escapejs }}";
-
-
-        const branchMap =
-            "{{ branch_details.google_map_url|default:''|escapejs }}";
-
-
-        const website =
-            branch.toLowerCase() === "nerul"
-                ? "www.mctitechnologies.com"
-                : "www.maharashthracomputer.com";
-
-
-        const demoOffer =
-            branch.toLowerCase() === "nerul"
-                ? "7 Days FREE Trial Classes"
-                : "2 Days FREE Demo Classes";
-
-
-        const careerKitUrl =
-            "https://mctitechnologies.com{% url 'career_tools:public_aptitude_start' %}";
-
-
-        const mapSection =
-            branchMap
-                ? "*Map:*\n" + branchMap + "\n\n"
-                : "";
-
-
-        /* ========================================
-           INTERNAL INDICATIVE FEE RANGES
-           CRM / WhatsApp guidance only
-        ======================================== */
-
-        const indicativeFeeRanges = {
-            "Advanced MS Office": "₹6,000 – ₹12,000",
-            "Advanced Excel": "₹7,000 – ₹15,000",
-            "Tally Prime with GST": "₹8,000 – ₹15,000",
-            "Power BI": "₹10,000 – ₹20,000",
-            "Data Analysis with AI": "₹20,000 – ₹40,000",
-            "Digital Marketing with AI": "₹15,000 – ₹30,000",
-            "Python Development": "₹15,000 – ₹30,000",
-            "Full Stack Development": "₹25,000 – ₹45,000",
-            "Cyber Security & Ethical Hacking": "₹25,000 – ₹45,000",
-            "Cloud Computing": "₹20,000 – ₹40,000",
-            "SAP FICO": "₹25,000 – ₹45,000",
-            "Artificial Intelligence & Machine Learning": "₹30,000 – ₹60,000",
-            "Graphic Design": "₹15,000 – ₹30,000",
-            "AI Tools & ChatGPT for Office Productivity": "₹5,000 – ₹10,000"
-        };
-
-        const indicativeFee =
-            indicativeFeeRanges[course] || "₹____ – ₹____";
-
-
-        /* ========================================
-           MESSAGE TEMPLATES
-        ======================================== */
-
-        const templates = {
-
-
-            new:
-            `Hello ${name} Ji,
-
-Thank you for contacting us.
-
-We have received your enquiry for the *${course}* course.
-
-*Special Welcome Offer*
-${demoOffer}
-FREE Aptitude Test through MCTI Career Kit
-Personal Career Guidance
-Special On-Spot Admission Benefit Available
-
-*Start Your Free Aptitude Test:*
-${careerKitUrl}
-
-Reply *DEMO* to book your free class.
-Reply *VISIT* to schedule your centre visit.
-
-*${branch} Branch*
-
-${mapSection}*Address:*
-${branchAddress || `${branch} Branch, Navi Mumbai`}
-
-*Please Visit:*
-10:00 AM to 8:30 PM (Mon–Sun)
-
-*Mobile:* 8655556219
-
-*MCTI Technologies*
-(An Initiative by Maharashtra Computer Training Institute)
-
-*Website:* ${website}
-
-*Our Locations*
-1. Kharghar
-2. Panvel
-3. Koperkhairane
-4. Kamothe
-5. Ghansoli
-6. Nerul`,
-
-
-            kamotheAnniversaryOldEnquiry:
-`*MCTI KAMOTHE – 1ST ANNIVERSARY*
-
-Hi ${name},
-
-You had earlier enquired about learning with MCTI. Let us help you restart your learning journey.
-
-*Explore the Scholarship Opportunity*
-Take the Scholarship Test and contact our counsellor to understand your eligibility and applicable course-fee benefit.
-
-*Scholarship Test:*
-https://mctitechnologies.com/assessment/scholarship/
-
-After completing the test, reply *DONE*.
-For counselling and batch details, reply *INTERESTED*.
-
-*MCTI | ${branch} Branch*
-_An Initiative by Maharashtra Computer Training Institute_`,
-
-            kamotheAnniversaryExistingStudent:
-`*MCTI KAMOTHE – 1ST ANNIVERSARY*
-
-Hi ${name},
-
-Already learning with MCTI? Explore your next skill and plan your course upgrade with our counsellor.
-
-Tell us your current course and the skill you want to learn next. We will guide you about suitable courses, available batches and applicable offers.
-
-Reply *UPGRADE* to request counselling.
-
-*MCTI | ${branch} Branch*
-_An Initiative by Maharashtra Computer Training Institute_`,
-
-            scholarshipOffer:
-`*MCTI SCHOLARSHIP OPPORTUNITY – LIMITED SEATS*
-
-Hi ${name},
-
-Thank you for contacting / visiting MCTI.
-
-Our *new batches are starting from 3rd October* and we are offering a limited Scholarship Opportunity to our recent enquiries.
-
-*SCHOLARSHIP BENEFIT*
-• Attempt the *MCTI Scholarship Test*
-• Get an eligible course-fee benefit based on your result
-• Scholarship benefit will be valid for *3 days after completing the test*
-
-*LIMITED SEATS – FIRST COME, FIRST SERVED*
-
-Students interested in joining the upcoming batch are requested to confirm their seat before the batch fills up.
-
-*Scholarship Test:*
-https://mctitechnologies.com/assessment/scholarship/
-
-*Already visited MCTI earlier?*
-You can still participate in this Scholarship Opportunity.
-
-After completing the test, reply *DONE* on WhatsApp. Our Career Counsellor will check your result and guide you about the applicable benefit and available batch.
-
-*Call / WhatsApp:* 8655556219
-
-*MCTI Technologies*
-_An Initiative of Maharashtra Computer Training Institute_`,
-
-
-            specialOffer:
-            `A special offer is available for your *${course}* enquiry.
-
-*${branch} Branch Welcome Offer*
-${demoOffer}
-
-*Career Benefit*
-FREE Aptitude Test through MCTI Career Kit
-Personal Career Guidance
-Special On-Spot Admission Benefit Available
-
-*Start Your Free Aptitude Test:*
-${careerKitUrl}
-
-Reply *DEMO* to book your free class.
-Reply *VISIT* to schedule your centre visit.
-Reply *ADMISSION* to know the admission benefit.
-
-`,
-
-
-            sundayOpen:
-            `*We Are OPEN Today - Sunday!*
-
-Just a quick update - *MCTI is OPEN today (Sunday).*
-
-I am personally available today for course counselling and admission guidance.
-
-If you were planning to visit, *today is a good time to come.*
-
-*Open Today: 10:00 AM - 8:30 PM*
-
-Reply *YES* if you are planning to visit today.
-
-*MCTI Technologies*
-An Initiative by Maharashtra Computer Training Institute`,
-
-
-            followup1:
-            `You had enquired about the *${course}* course.
-
-Please tell us the main purpose for choosing this course:
-
-1️⃣ Job
-2️⃣ Career Growth
-3️⃣ Business
-4️⃣ Only Course Details
-
-Please reply with the option number so our Career Counsellor can guide you correctly.`,
-
-
-            followup2:
-            `We can arrange *Free Career Counselling* to explain the syllabus, fees, duration and career opportunities for the *${course}* course.
-
-What would be convenient for you?
-
-1️⃣ Visit Centre Today
-2️⃣ Visit Centre Tomorrow
-3️⃣ Phone Call First
-4️⃣ Not Interested Right Now
-
-Please reply with the option number.`,
-
-
-            finalDecision:
-            `This is our final follow-up regarding your enquiry for the *${course}* course.
-
-Please share your decision:
-
-1️⃣ Want to Take Admission
-2️⃣ Need Demo/Counselling
-3️⃣ Contact Me Next Month
-4️⃣ No Plan Right Now
-
-Your reply will help us update your enquiry correctly.`,
-
-
-            course:
-            `Here are the details for the *${course}* course.
-
-You can view the complete course overview, syllabus and career information here:
-
-*View Course Details:*
-${courseUrl}
-
-Please reply with your preferred option:
-
-1. Course Fees
-2. Batch Timing
-3. Free Counselling
-4. Admission Process`,
-
-
-            approxFee:
-            `*Approx. Fee – ${course}*
-
-${indicativeFee}
-
-This is an approximate fee range for initial guidance.
-
-Final applicable fee may vary depending on the selected training plan, course duration, batch type and currently available offer.
-
-_Disclaimer: This is an indicative fee range only and is not a final quotation._
-
-For the current offer / exact applicable fee, reply *YES*.`,
-
-
-            admission:
-            `Hello ${name},
-
-Thank you for choosing MCTI Technologies.
-
-We are happy to assist you with your admission for ${course}.
-
-Please contact us to complete the admission process.`,
-
-
-            fees:
-            `Hello ${name},
-
-Greetings from MCTI Technologies.
-
-This is a gentle reminder regarding the pending fees for your course.
-
-Please contact us if you need any assistance.
-
-Thank you.`
-
-        };
-
-
-        /* ========================================
-           LOAD TEMPLATE
-        ======================================== */
-
-
-        // MCTI_STANDARD_COUNSELLING
-        const approxFeeInput = document.getElementById("standardApproxFee");
-        approxFeeInput.value = indicativeFee.includes("_") ? "" : indicativeFee;
-        const standardWebsite = "https://mctitechnologies.com";
-        const standardSignoff = `Team MCTI Technologies
-${branch}
-${standardWebsite}`;
-
-        function standardWelcome() {
-            const approvedFee = approxFeeInput.value.trim();
-            const feeLine = approvedFee
-                ? `*Approx. course fee:* ${approvedFee}
-Final fee will be confirmed by the centre based on the selected training plan and any applicable offer.`
-                : "Please contact our counsellor for the applicable course fee.";
-            return `Hello ${name},
-
-Welcome to *MCTI Technologies*!
-Thank you for enquiring about *${course}*.
-
-*Course details:*
-${courseUrl}
-
-${feeLine}
-
-What would you like to achieve through this course, and which batch timing would suit you?
-
-We will help you choose the right learning path.
-
-${standardSignoff}`;
-        }
-
-        Object.assign(templates, {
-            standardFollowup1: `Hello ${name},
-
-Following up on your enquiry about *${course}*.
-
-Have you had a chance to review the course details?
-${courseUrl}
-
-Please share any questions about the syllabus, practical learning, duration or fee. We will guide you based on your goal.
-
-${standardSignoff}`,
-            standardFollowup2: `Hello ${name},
-
-Would you like to visit our *${branch}* centre for counselling about *${course}*?
-
-We can discuss the learning plan, batch timing and applicable fee before you decide.
-
-Please share a convenient day and time so we can confirm an appointment.
-${branchMap ? "\nCentre map:\n" + branchMap + "\n" : ""}
-${standardSignoff}`,
-            standardFollowup3: `Hello ${name},
-
-Checking in regarding your *${course}* enquiry.
-
-Are you planning to start soon, considering a later date, or looking for another course?
-If timing, fee or course suitability is a concern, please let us know so we can guide you.
-
-If you prefer no further follow-up, please tell us and we will respect your preference.
-
-${standardSignoff}`,
-            standardAptitude: `Hello ${name},
-
-If you would like help choosing your learning direction, you can take our *Free Career / Aptitude Assessment*.
-
-Start here:
-${careerKitUrl}
-
-After completion, our counsellor can discuss your performance, strengths and areas to improve. The result is guidance to support your decision.
-
-${standardSignoff}`,
-            standardScholarship: `Hello ${name},
-
-You can explore the *MCTI Scholarship Assessment* for available course-fee benefits.
-
-Assessment link:
-https://mctitechnologies.com/assessment/scholarship/
-
-After the test, contact our counsellor to confirm eligibility, validity and applicable course benefits. Any scholarship benefit is subject to the current programme terms.
-
-${standardSignoff}`,
-            standardClosing: `Hello ${name},
-
-When you are ready to proceed with *${course}*, we can help you complete the next steps:
-
-1. Confirm your course and preferred batch.
-2. Review the final fee and available payment options.
-3. Complete admission and receive your student login details.
-
-Please reply with your preferred start date. Our counsellor will confirm the details before you proceed.
-
-${standardSignoff}`
-        });
-
-        approxFeeInput.addEventListener("input", function () {
-            if (templateSelect.value === "new") {
-                messageBox.value = standardWelcome();
-            }
-        });
-
-
-
-        const appointmentFields = document.getElementById("appointmentFields");
-        const appointmentDate = document.getElementById("appointmentDate");
-        const appointmentTime = document.getElementById("appointmentTime");
-
-        function indiaToday() {
-            const parts = new Intl.DateTimeFormat("en-GB", {
-                timeZone: "Asia/Kolkata",
-                year: "numeric", month: "2-digit", day: "2-digit"
-            }).formatToParts(new Date());
-            const get = type => parts.find(p => p.type === type).value;
-            return `${get("year")}-${get("month")}-${get("day")}`;
-        }
-        appointmentDate.min = indiaToday();
-
-        function appointmentMessage() {
-            let dateText = "[Select date]";
-            let timeText = "[Select time]";
-            if (appointmentDate.value) {
-                dateText = new Intl.DateTimeFormat("en-GB", {
-                    day: "2-digit", month: "short", year: "numeric",
-                    timeZone: "UTC"
-                }).format(new Date(appointmentDate.value + "T00:00:00Z"));
-            }
-            if (appointmentTime.value) {
-                const [hours, minutes] = appointmentTime.value.split(":");
-                const hour = Number(hours);
-                timeText = `${hour % 12 || 12}:${minutes} ${hour >= 12 ? "PM" : "AM"} IST`;
-            }
-            const addressLine = branchAddress.trim()
-                ? "\n" + branchAddress.trim() : "";
-            const mapLine = branchMap.trim()
-                ? "\n📌 Map: " + branchMap.trim() : "";
-
-            return `Hello ${name},
+document.addEventListener("DOMContentLoaded", function () {
+    const el = id => document.getElementById(id);
+    const select = el("whatsappTemplate");
+    const box = el("whatsappMessage");
+    const status = el("composerStatus");
+    const date = el("composerDate");
+    const time = el("composerTime");
+    const fee = el("composerFeeAmount");
+    const offer = el("composerOfferText");
+    const validity = el("composerOfferDate");
+
+    const name = "{{ enquiry.name|escapejs }}";
+    const course = "{% if enquiry.course %}{{ enquiry.course.title|escapejs }}{% else %}your preferred course{% endif %}";
+    const courseDetailsUrl = "{% if enquiry.course %}https://mctitechnologies.com{% url 'course_detail' slug=enquiry.course.slug %}{% else %}https://mctitechnologies.com/courses/{% endif %}";
+    const rawBranch = "{{ enquiry.branch|default:''|escapejs }}".trim().toLowerCase();
+    const branch = "{% if branch_details %}{{ branch_details.name|escapejs }}{% else %}{{ enquiry.branch|default:'Centre'|title|escapejs }}{% endif %}";
+    const address = "{{ branch_details.address|default:''|escapejs }}".trim();
+    const map = "{{ branch_details.google_map_url|default:''|escapejs }}".trim();
+    const mobile = "{{ enquiry.mobile|escapejs }}";
+    const institute = rawBranch === "nerul"
+        ? "MCTI Technologies"
+        : "Maharashtra Computer Training Institute";
+
+    function todayIndia() {
+        const parts = new Intl.DateTimeFormat("en-GB", {
+            timeZone:"Asia/Kolkata",
+            year:"numeric", month:"2-digit", day:"2-digit"
+        }).formatToParts(new Date());
+        const get = type => parts.find(p => p.type === type).value;
+        return `${get("year")}-${get("month")}-${get("day")}`;
+    }
+    date.min = todayIndia();
+    validity.min = todayIndia();
+
+    function displayDate(value) {
+        if (!value) return "[Select date]";
+        const d = new Date(value + "T00:00:00Z");
+        if (!Number.isFinite(d.getTime())) return "[Select date]";
+        return new Intl.DateTimeFormat("en-GB", {
+            day:"2-digit", month:"short", year:"numeric", timeZone:"UTC"
+        }).format(d);
+    }
+    function displayTime(value) {
+        if (!value) return "[Select time]";
+        const [h,m] = value.split(":");
+        const hour = Number(h);
+        return `${hour % 12 || 12}:${m} ${hour >= 12 ? "PM" : "AM"} IST`;
+    }
+    function buildMessage() {
+        const signoff = `Team ${institute} – ${branch}${rawBranch === "nerul"
+            ? "\nAn Initiative by Maharashtra Computer Training Institute" : ""}`;
+        const location = `${institute} – ${branch}${address
+            ? "\nAddress: " + address : ""}${map ? "\nGoogle Map: " + map : ""}`;
+
+        const messages = {
+            welcome: `Hello *${name}* ${String.fromCodePoint(0x1f44b)}
+
+Thank you for contacting *${institute}*.
+
+${String.fromCodePoint(0x1f393)} *Your Career. Our Commitment.*
+
+${String.fromCodePoint(0x2b50)} *2,250+ Google Reviews* across our Navi Mumbai centres.
+
+We'd be happy to guide you with:
+${String.fromCodePoint(0x2705)} Career-oriented computer courses
+${String.fromCodePoint(0x2705)} Course fees & batch timings
+${String.fromCodePoint(0x2705)} Career counselling & skill development
+
+${String.fromCodePoint(0x1f4da)} *Your Enquired Course: ${course}*
+
+Explore course details, syllabus & career opportunities:
+
+${String.fromCodePoint(0x1f517)} ${courseDetailsUrl}
+
+${String.fromCodePoint(0x1f9e0)} *Free Career Aptitude Test*
+Discover your career direction:
+https://mctitechnologies.com/career/aptitude/start/
+
+${String.fromCodePoint(0x1f4cd)} *Visit Our Centre*
+${location}
+
+${String.fromCodePoint(0x1f4c5)} Please share your preferred day and time to visit.
+
+We look forward to welcoming you!
+
+${signoff}`,
+
+            appointment: `Hello ${name},
 
 Your counselling appointment for *${course}* is confirmed.
 
-📅 ${dateText} | ⏰ ${timeText}
-📍 *MCTI Technologies – ${branch}*${addressLine}${mapLine}
+📅 ${displayDate(date.value)}
+⏰ ${displayTime(time.value)}
 
-Our counsellor will guide you on training, fees, batches and career benefits. Please arrive 5–10 minutes early.
+${location}
 
-Team MCTI Technologies
-${branch}
-https://mctitechnologies.com`;
-        }
+We’ll guide you on training, fees and batch timings. Please arrive 5–10 minutes early.
 
-        [appointmentDate, appointmentTime].forEach(input => {
-            input.addEventListener("input", function () {
-                if (templateSelect.value === "counsellingAppointment") {
-                    messageBox.value = appointmentMessage();
-                }
-            });
-        });
+Please reply to confirm your visit.
 
-        function updateMessage() {
+${signoff}`,
 
-            const selected =
-                templateSelect.value;
+            afterVisit: `Hello ${name},
 
-            messageBox.value =
-                selected === "counsellingAppointment"
-                    ? appointmentMessage()
-                    : (selected === "new" ? standardWelcome() : (templates[selected] || ""));
+Thank you for visiting *${institute} – ${branch}* to discuss *${course}*.
 
-            appointmentFields.hidden = selected !== "counsellingAppointment";
+Is there anything you would like us to clarify about the training, fees or batches?
 
-        }
+${signoff}`,
 
+            courseFeeDetails: `Hello ${name},
 
-        /* ========================================
-           LOG WHATSAPP ACTIVITY
-        ======================================== */
+As requested, here are the details for *${course}*.
 
-        function logWhatsAppActivity() {
+*Course details & syllabus:*
+${courseDetailsUrl}
 
-            fetch(
-                "{% url 'log_enquiry_whatsapp' enquiry.id %}",
-                {
-                    method: "POST",
+*Approximate course fee:* ₹${fee.value
+                ? Number(fee.value).toLocaleString("en-IN", {maximumFractionDigits:2})
+                : "[Enter fee]"}
 
-                    headers: {
+*Disclaimer:* This amount is indicative and is not a final quotation. The centre will confirm the final fee, course inclusions and payment terms for your selected training plan before admission.
 
-                        "X-CSRFToken":
-                            "{{ csrf_token }}",
+Please let us know if you need help with batch timings.
 
-                        "X-Requested-With":
-                            "XMLHttpRequest",
+${signoff}`,
 
-                        "Content-Type":
-                            "application/x-www-form-urlencoded"
+            approxFee: `Hello ${name},
 
-                    },
+The approximate fee for *${course}* is *₹${fee.value
+                ? Number(fee.value).toLocaleString("en-IN", {maximumFractionDigits:2})
+                : "[Enter fee]"}*.
 
-                    body:
-                        new URLSearchParams({
-                            message: messageBox.value.trim(),
-                            campaign_key: templateSelect.value
-                        })
+The final fee will be confirmed by the centre based on your selected training plan and applicable offer.
 
-                }
-            )
-            .catch(function(error) {
+🎓 Explore a scholarship benefit of *up to 50%*, subject to eligibility and current programme terms.
 
-                console.error(
-                    "WhatsApp activity error:",
-                    error
-                );
+Take the Scholarship Test:
+https://mctitechnologies.com/assessment/scholarship/
 
-            });
+Reply *DONE* after the test. Our counsellor will confirm your applicable benefit.
 
-        }
+${signoff}`,
 
+            followup1: `Hello ${name},
 
-        /* ========================================
-           OPEN WHATSAPP
-        ======================================== */
+Following up on your *${course}* enquiry.
 
-        function openWhatsApp() {
+Do you need any help with the syllabus, fees or batch timings?
 
-            if (templateSelect.value === "counsellingAppointment") {
-                if (!appointmentDate.value || !appointmentTime.value) {
-                    alert("Please select the appointment date and time.");
-                    (!appointmentDate.value ? appointmentDate : appointmentTime).focus();
-                    return;
-                }
-                const appointmentInstant = new Date(
-                    appointmentDate.value + "T" + appointmentTime.value + ":00+05:30"
-                );
-                if (
-                    !Number.isFinite(appointmentInstant.getTime())
-                    || appointmentInstant <= new Date()
-                ) {
-                    alert("Please select a future appointment date and time in IST.");
-                    appointmentDate.focus();
-                    return;
-                }
-            }
+${signoff}`,
 
+            followup2: `Hello ${name},
 
-            const message =
-                messageBox.value.trim();
+Building a new skill starts with regular practice. If *${course}* fits your goal, we can help you plan a suitable start.
 
+Are you considering joining this month or later?
 
-            if (!message) {
+${signoff}`,
 
-                alert(
-                    "Please enter a message."
-                );
+            offer: `Hello ${name},
 
-                return;
+Here is the current offer for *${course}*:
 
-            }
+${offer.value.trim() || "[Enter offer details and terms]"}
 
+Valid until: ${displayDate(validity.value)}
 
-            const encodedMessage =
-                encodeURIComponent(
-                    message
-                );
+Would you like us to explain the details?
 
+${signoff}`,
 
-            const whatsappUrl =
-                "https://wa.me/91"
-                + mobile.replace(/\D/g, "")
-                + "?text="
-                + encodedMessage;
+            decision: `Hello ${name},
 
+Please share your preference for *${course}*:
 
-            /*
-             * LOG ACTIVITY
-             */
+1. Ready to join
+2. Contact me later — please share a date
+3. Close my enquiry
 
-            logWhatsAppActivity();
+If you prefer no further messages, please let us know. We’ll respect your preference.
 
-
-            /*
-             * OPEN WHATSAPP
-             */
-
-            window.open(
-                whatsappUrl,
-                "_blank"
-            );
-
-        }
-
-
-        /* ========================================
-           TEMPLATE CHANGE
-        ======================================== */
-
-        templateSelect.addEventListener(
-            "change",
-            updateMessage
-        );
-
-
-        /* ========================================
-           COMPOSER WHATSAPP BUTTON
-        ======================================== */
-
-        whatsappButton.addEventListener(
-            "click",
-            openWhatsApp
-        );
-
-
-        /* ========================================
-           QUICK WHATSAPP BUTTON
-        ======================================== */
-
-        quickWhatsApp.addEventListener(
-            "click",
-            openWhatsApp
-        );
-
-
-        /* ========================================
-           INITIAL MESSAGE
-        ======================================== */
-
-        updateMessage();
-
+${signoff}`
+        };
+        return messages[select.value] || "";
     }
 
-);
+    function show(id, visible) {
+        el(id).hidden = !visible;
+        el(id).style.display = visible ? "" : "none";
+    }
+    function refresh() {
+        show("composerAppointment", select.value === "appointment");
+        show("composerFee", ["approxFee","courseFeeDetails"].includes(select.value));
+        show("composerOffer", select.value === "offer");
+        box.value = buildMessage();
+    }
+    select.addEventListener("change", refresh);
+    [date,time,fee,offer,validity].forEach(input => {
+        input.addEventListener("input", refresh);
+    });
 
+    async function recordActivity(message) {
+        status.textContent = "Recording WhatsApp activity…";
+        try {
+            const response = await fetch(
+                "{% url 'log_enquiry_whatsapp' enquiry.id %}", {
+                    method:"POST",
+                    credentials:"same-origin",
+                    headers:{
+                        "X-CSRFToken":"{{ csrf_token }}",
+                        "X-Requested-With":"XMLHttpRequest",
+                        "Content-Type":"application/x-www-form-urlencoded"
+                    },
+                    body:new URLSearchParams({
+                        message:message,
+                        campaign_key:""
+                    })
+                }
+            );
+            if (!response.ok ||
+                /\/(?:staff-login|student\/login|admin\/login)\//.test(response.url))
+                throw new Error("Activity not saved.");
+            status.textContent =
+                "WhatsApp opened and activity recorded. Send the message, then confirm the actual follow-up result.";
+        } catch (_) {
+            status.textContent =
+                "WhatsApp opened, but activity could not be recorded. Reload and check the activity history.";
+        }
+    }
+
+    function openWhatsApp(event) {
+        event.preventDefault();
+
+        if (["welcome","appointment"].includes(select.value) &&
+            (!rawBranch || !address || !map)) {
+            alert("Please configure this enquiry's centre, address and map first.");
+            return;
+        }
+
+        if (select.value === "appointment") {
+            if (!date.value || !time.value) {
+                alert("Select the appointment date and time.");
+                return;
+            }
+            const instant = new Date(
+                date.value + "T" + time.value + ":00+05:30"
+            );
+            if (!Number.isFinite(instant.getTime()) || instant <= new Date()) {
+                alert("Select a future appointment date and time in IST.");
+                return;
+            }
+        }
+
+        if (["approxFee","courseFeeDetails"].includes(select.value) &&
+            (!fee.value || !Number.isFinite(Number(fee.value)) ||
+             Number(fee.value) <= 0)) {
+            alert("Enter a valid approximate course fee.");
+            return;
+        }
+
+        if (select.value === "offer" &&
+            (!offer.value.trim() || !validity.value ||
+             validity.value < todayIndia())) {
+            alert("Enter approved offer details, terms and a valid expiry date.");
+            return;
+        }
+
+        let digits = mobile.replace(/\D/g,"");
+        if (digits.length === 12 && digits.startsWith("91"))
+            digits = digits.slice(2);
+        else if (digits.length === 11 && digits.startsWith("0"))
+            digits = digits.slice(1);
+
+        if (!/^[6-9]\d{9}$/.test(digits)) {
+            alert("Please correct the enquiry's Indian mobile number.");
+            return;
+        }
+
+        const message = box.value.trim();
+        if (!message || /\[(Select date|Select time|Enter fee|Enter offer)/.test(message)) {
+            alert("Complete the message before opening WhatsApp.");
+            return;
+        }
+
+        const popup = window.open("about:blank","_blank");
+        if (!popup) {
+            status.textContent = "Allow pop-ups for this site, then try again.";
+            return;
+        }
+        popup.opener = null;
+        popup.location.href =
+            "https://api.whatsapp.com/send?phone=91" + digits + "&text=" + encodeURIComponent(message);
+        recordActivity(message);
+    }
+
+    el("openWhatsApp").addEventListener("click", openWhatsApp);
+    const quick = el("quickWhatsApp");
+    if (quick) quick.addEventListener("click", openWhatsApp);
+    refresh();
+});
 </script>
+
 
 {% endblock %}
