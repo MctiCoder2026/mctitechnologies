@@ -6837,6 +6837,159 @@ def student_quick_view(request):
         "admission_detail",
         admission_id=admission.id
     )
+
+# ============================================================
+# PUBLIC EMPLOYER JOB SUBMISSION
+# ============================================================
+
+def guest_job_post(request):
+    from core.forms import GuestJobPostForm
+
+    if request.method == "POST":
+        form = GuestJobPostForm(request.POST)
+
+        if form.is_valid():
+            job = form.save(commit=False)
+            job.submission_source = "guest_employer"
+            job.approval_status = "pending"
+            job.status = "draft"
+            job.posted_by = None
+            job.posted_branch = ""
+            job.save()
+            form.save_m2m()
+
+            return render(
+                request,
+                "core/guest_job_success.html",
+                {"job": job}
+            )
+    else:
+        form = GuestJobPostForm()
+
+    return render(
+        request,
+        "core/guest_job_post.html",
+        {"form": form}
+    )
+
+
+
+# ============================================================
+# GUEST JOB APPROVAL — BRANCH RESTRICTED
+# ============================================================
+
+@user_passes_test(staff_or_admin, login_url="staff_login")
+def guest_job_approvals(request):
+
+    if request.user.is_superuser:
+        branch = None
+    else:
+        profile = StaffProfile.objects.filter(
+            user=request.user,
+            is_active=True
+        ).first()
+
+        if not profile:
+            return HttpResponseForbidden("Staff access required.")
+
+        branch = (
+            None if profile.branch == "head_office"
+            else profile.branch
+        )
+
+    jobs = JobPost.objects.filter(
+        submission_source="guest_employer"
+    ).select_related(
+        "verified_by"
+    ).order_by("-created_at")
+
+    if branch:
+        jobs = jobs.filter(verification_branch=branch)
+
+    return render(
+        request,
+        "core/guest_job_approvals.html",
+        {"jobs": jobs, "branch": branch}
+    )
+
+
+@user_passes_test(staff_or_admin, login_url="staff_login")
+def guest_job_review(request, job_id):
+    from django.http import HttpResponseForbidden
+    from django.utils import timezone
+    from django.db import transaction
+
+    if request.method != "POST":
+        return HttpResponseForbidden("POST required.")
+
+    with transaction.atomic():
+
+        job = get_object_or_404(
+            JobPost.objects.select_for_update(),
+            id=job_id,
+            submission_source="guest_employer"
+        )
+
+        if not request.user.is_superuser:
+            profile = StaffProfile.objects.filter(
+                user=request.user,
+                is_active=True
+            ).first()
+
+            if not profile:
+                return HttpResponseForbidden("Staff access required.")
+
+            if (
+                profile.branch != "head_office"
+                and profile.branch != job.verification_branch
+            ):
+                return HttpResponseForbidden(
+                    "This vacancy belongs to another branch."
+                )
+
+        if job.approval_status != "pending":
+            return HttpResponseForbidden(
+                "This job has already been reviewed."
+            )
+
+        action = request.POST.get("action", "").strip()
+        remarks = request.POST.get("remarks", "").strip()
+
+        if action not in ("approve", "reject"):
+            return HttpResponseForbidden("Invalid action.")
+
+        if not remarks:
+            return HttpResponseForbidden(
+                "Verification remarks are required."
+            )
+
+        if action == "approve":
+            job.approval_status = "approved"
+            job.status = "active"
+        else:
+            job.approval_status = "rejected"
+            job.status = "draft"
+
+        job.verified_by = request.user
+        job.verified_at = timezone.now()
+        job.verification_remarks = remarks
+        job.save(update_fields=[
+            "approval_status",
+            "status",
+            "verified_by",
+            "verified_at",
+            "verification_remarks",
+            "updated_at",
+        ])
+
+        messages.success(
+            request,
+            "Guest job reviewed successfully."
+        )
+
+        return redirect("guest_job_approvals")
+
+
 # ============================================================
 # PLACEMENT / JOB MANAGEMENT
 # ============================================================
@@ -6939,11 +7092,32 @@ def job_detail(request, job_id):
         id=job_id
     )
 
+    can_review_guest_job = False
+
+    if (
+        job.submission_source == "guest_employer"
+        and job.approval_status == "pending"
+    ):
+        if request.user.is_superuser:
+            can_review_guest_job = True
+        else:
+            profile = StaffProfile.objects.filter(
+                user=request.user,
+                is_active=True
+            ).first()
+
+            if profile and (
+                profile.branch == "head_office"
+                or profile.branch == job.verification_branch
+            ):
+                can_review_guest_job = True
+
     return render(
         request,
         "core/job_detail.html",
         {
             "job": job,
+            "can_review_guest_job": can_review_guest_job,
         }
     )
 
@@ -7036,7 +7210,8 @@ def student_jobs(request):
     jobs = (
         JobPost.objects
         .filter(
-            status="active"
+            status="active",
+            approval_status="approved"
         )
         .prefetch_related(
             "eligible_courses"

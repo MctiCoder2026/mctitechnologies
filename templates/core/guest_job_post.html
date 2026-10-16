@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Post a Job | MCTI Technologies</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f6f8;font-family:Arial,sans-serif;color:#222}
+header{background:#111;color:white;padding:20px;text-align:center}
+header strong{color:#ff4200}
+main{max-width:850px;margin:28px auto;padding:0 15px}
+.card{background:white;padding:28px;border-radius:14px;box-shadow:0 5px 25px #00000012}
+h1{font-size:27px;margin:0 0 10px}
+.subtitle{color:#666;margin-bottom:25px;line-height:1.6}
+.field{margin-bottom:20px}
+label{display:block;font-weight:600;margin-bottom:7px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #ccc;border-radius:7px;font:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid #ff4200;border-color:#ff4200}
+input[type=checkbox]{width:auto}
+.helptext{font-size:12px;color:#666}
+.errorlist{color:#c62828;font-size:13px;padding-left:18px}
+button{background:#ff4200;color:white;border:0;padding:15px 25px;border-radius:8px;font-weight:bold;font-size:16px;cursor:pointer;width:100%}
+button:hover{background:#df3900}
+.notice{background:#fff4ec;padding:15px;border-left:4px solid #ff4200;border-radius:5px;margin:20px 0}
+footer{text-align:center;color:#777;padding:25px;font-size:13px}
+@media(max-width:600px){.card{padding:18px}h1{font-size:23px}}
+</style>
+</head>
+<body>
+<header><strong>MCTI</strong> TECHNOLOGIES | PLACEMENT NETWORK</header>
+<main>
+<div class="card">
+<h1>Post a Job Opportunity</h1>
+<p class="subtitle">Are you hiring? Share your vacancy with skilled candidates through the MCTI Placement Network. Employer registration is free.</p>
+<div class="notice">Guest Employer Submission — Your vacancy will be published only after verification by the assigned MCTI branch.</div>
+<form method="post">
+{% csrf_token %}
+{{ form.non_field_errors }}
+{% for field in form %}
+<div class="field">
+<label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+{{ field }}
+{{ field.errors }}
+{% if field.help_text %}<p class="helptext">{{ field.help_text }}</p>{% endif %}
+</div>
+{% endfor %}
+<button type="submit">Submit Job for Verification →</button>
+</form>
+</div>
+</main>
+<footer>Powered by MCTI Technologies | Connecting Skills with Opportunities</footer>
+</body>
+</html>

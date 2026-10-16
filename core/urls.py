@@ -434,6 +434,26 @@ urlpatterns = [
     # ============================================================
 
     path(
+        "placement/post-job/",
+        views.guest_job_post,
+        name="guest_job_post"
+    ),
+
+    path(
+        "placement/approvals/",
+        views.guest_job_approvals,
+        name="guest_job_approvals"
+    ),
+
+    path(
+        "placement/approvals/<int:job_id>/review/",
+        views.guest_job_review,
+        name="guest_job_review"
+    ),
+
+
+
+    path(
         "placement/",
         views.job_list,
         name="job_list"

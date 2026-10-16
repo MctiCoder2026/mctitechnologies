@@ -1593,3 +1593,65 @@ class DailyExpenseCancelForm(
             }
         )
     )
+# ============================================================
+# GUEST EMPLOYER JOB POSTING
+# ============================================================
+
+class GuestJobPostForm(forms.ModelForm):
+
+    class Meta:
+        model = JobPost
+
+        fields = [
+            "title",
+            "company_name",
+            "location",
+            "salary",
+            "experience",
+            "required_skills",
+            "description",
+            "eligibility",
+            "eligible_courses",
+            "apply_link",
+            "contact_email",
+            "contact_mobile",
+            "last_date",
+            "verification_branch",
+        ]
+
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control"}),
+            "company_name": forms.TextInput(attrs={"class": "form-control"}),
+            "location": forms.TextInput(attrs={"class": "form-control"}),
+            "salary": forms.TextInput(attrs={"class": "form-control"}),
+            "experience": forms.TextInput(attrs={"class": "form-control"}),
+            "required_skills": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "description": forms.Textarea(attrs={"class": "form-control", "rows": 4}),
+            "eligibility": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "eligible_courses": forms.SelectMultiple(attrs={"class": "form-control"}),
+            "apply_link": forms.URLInput(attrs={"class": "form-control"}),
+            "contact_email": forms.EmailInput(attrs={"class": "form-control"}),
+            "contact_mobile": forms.TextInput(attrs={"class": "form-control"}),
+            "last_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "verification_branch": forms.Select(attrs={"class": "form-control"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["verification_branch"].required = True
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if not cleaned_data.get("contact_email") and not cleaned_data.get("contact_mobile"):
+            raise forms.ValidationError(
+                "Please provide an HR email address or contact mobile number."
+            )
+
+        if not cleaned_data.get("verification_branch"):
+            self.add_error(
+                "verification_branch",
+                "Please select an MCTI verification branch."
+            )
+
+        return cleaned_data

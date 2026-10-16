@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Job Submitted | MCTI Technologies</title>
+<style>
+body{background:#f5f6f8;font-family:Arial,sans-serif;text-align:center;margin:0;padding:50px 15px;color:#222}
+.card{background:white;max-width:550px;margin:auto;padding:35px;border-radius:15px;box-shadow:0 5px 25px #00000012}
+h1{color:#ff4200}
+a{display:inline-block;background:#ff4200;color:white;text-decoration:none;padding:13px 25px;border-radius:8px;margin-top:15px}
+p{line-height:1.7}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>✓ Job Submitted Successfully!</h1>
+<p>Thank you for sharing your job opportunity with MCTI Technologies.</p>
+<p><strong>Reference Number: MCTI-JOB-{{ job.id }}</strong></p>
+<p>Your submission is currently <strong>Pending Branch Verification</strong>.</p>
+<p>Once approved, the opportunity will automatically appear in the MCTI Student Placement Portal.</p>
+<a href="{% url 'guest_job_post' %}">Post Another Job</a>
+</div>
+</body>
+</html>

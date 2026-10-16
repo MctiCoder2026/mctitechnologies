@@ -1845,6 +1845,52 @@ class JobPost(models.Model):
         default="active"
     )
 
+    SUBMISSION_SOURCE_CHOICES = [
+        ("staff", "MCTI Staff"),
+        ("guest_employer", "Guest Employer"),
+    ]
+
+    APPROVAL_STATUS_CHOICES = [
+        ("approved", "Approved"),
+        ("pending", "Pending Verification"),
+        ("rejected", "Rejected"),
+    ]
+
+    submission_source = models.CharField(
+        max_length=30,
+        choices=SUBMISSION_SOURCE_CHOICES,
+        default="staff"
+    )
+
+    approval_status = models.CharField(
+        max_length=20,
+        choices=APPROVAL_STATUS_CHOICES,
+        default="approved"
+    )
+
+    verification_branch = models.CharField(
+        max_length=50,
+        choices=StaffProfile.BRANCH_CHOICES,
+        blank=True
+    )
+
+    verified_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="placement_jobs_verified"
+    )
+
+    verified_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    verification_remarks = models.TextField(
+        blank=True
+    )
+
     created_at = models.DateTimeField(
         auto_now_add=True
     )
@@ -2975,12 +3021,16 @@ class OutreachContact(models.Model):
         ("kharghar", "Kharghar"),
         ("panvel", "Panvel"),
         ("koperkhairane", "Koperkhairane"),
+        ("kamothe", "Kamothe"),
+        ("ghansoli", "Ghansoli"),
+        ("nerul", "Nerul"),
     ]
 
     CONTACT_TYPE_CHOICES = [
         ("old_student", "Old Student"),
         ("school", "School Contact"),
         ("college", "College Contact"),
+        ("marketing_lead", "Marketing Lead"),
         ("other", "Other"),
     ]
 
@@ -2989,6 +3039,7 @@ class OutreachContact(models.Model):
         ("contacted", "Contacted"),
         ("followup", "Follow Up"),
         ("interested", "Interested"),
+        ("visit_planned", "Visit Planned"),
         ("not_interested", "Not Interested"),
         ("converted", "Converted to Enquiry"),
         ("do_not_contact", "Do Not Contact"),
@@ -3052,6 +3103,43 @@ class OutreachContact(models.Model):
     source = models.CharField(
         max_length=100,
         blank=True
+    )
+
+    # Structured origin for assessment / campaign leads.
+    # Existing Outreach records remain valid with blank values.
+    source_type = models.CharField(
+        max_length=30,
+        blank=True,
+        db_index=True,
+        help_text="ai_ready, aptitude, scholarship, ssc, etc."
+    )
+
+    source_record_id = models.PositiveBigIntegerField(
+        null=True,
+        blank=True,
+        help_text="Original record ID in the source system"
+    )
+
+    pushed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="pushed_outreach_contacts"
+    )
+
+    pushed_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    interested_course = models.ForeignKey(
+        "Course",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="outreach_interested_contacts",
+        help_text="Course confirmed by branch after speaking with the lead"
     )
 
     permission_status = models.CharField(

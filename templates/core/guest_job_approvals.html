@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Job Approvals | MCTI Technologies</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f6f8;color:#222;font-family:Arial,sans-serif}
+header{background:#111;color:white;padding:20px}
+header strong{color:#ff4200}
+main{max-width:1050px;margin:25px auto;padding:0 15px}
+.card{background:white;padding:22px;margin:18px 0;border-radius:12px;box-shadow:0 3px 15px #0001}
+h1{font-size:26px}
+h2{margin-bottom:8px}
+.meta{color:#555;font-size:14px;line-height:1.8}
+.tag{display:inline-block;background:#fff0e8;color:#bd3900;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:bold}
+textarea{width:100%;padding:12px;border:1px solid #ccc;border-radius:7px;font:inherit;margin:12px 0}
+button{border:0;padding:12px 20px;color:white;border-radius:7px;font-weight:bold;cursor:pointer}
+.approve{background:#167d39}
+.reject{background:#b42318}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.notice{background:#fff4ec;padding:12px;border-radius:7px}
+@media(max-width:600px){.card{padding:16px}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<header><strong>MCTI</strong> TECHNOLOGIES | PLACEMENT MANAGEMENT</header>
+<main>
+<h1>Employer Job Verification</h1>
+<p class="meta">
+{% if branch %}
+Showing vacancies for {{ branch|title }}.
+{% else %}
+Head Office — All Branches
+{% endif %}
+</p>
+
+{% for message in messages %}
+<p class="notice">{{ message }}</p>
+{% endfor %}
+
+{% for job in jobs %}
+<section class="card">
+<span class="tag">{{ job.get_approval_status_display }}</span>
+<h2>{{ job.title }}</h2>
+<p><strong>{{ job.company_name }}</strong></p>
+
+<div class="meta">
+Branch: {{ job.get_verification_branch_display }}<br>
+Location: {{ job.location|default:"Not provided" }}<br>
+Salary: {{ job.salary|default:"Not provided" }}<br>
+Experience: {{ job.experience|default:"Not provided" }}<br>
+HR Mobile: {{ job.contact_mobile|default:"Not provided" }}<br>
+HR Email: {{ job.contact_email|default:"Not provided" }}<br>
+Last Date: {{ job.last_date|default:"Not specified" }}<br>
+Submitted: {{ job.created_at }}
+</div>
+
+<p><strong>Required Skills:</strong> {{ job.required_skills|linebreaksbr }}</p>
+<p><strong>Description:</strong> {{ job.description|linebreaksbr }}</p>
+<p><strong>Eligibility:</strong> {{ job.eligibility|linebreaksbr }}</p>
+
+{% if job.approval_status == "pending" %}
+<form method="post" action="{% url 'guest_job_review' job.id %}">
+{% csrf_token %}
+<label for="remarks-{{ job.id }}"><strong>Verification Remarks *</strong></label>
+<textarea id="remarks-{{ job.id }}" name="remarks" rows="3" required placeholder="Called HR and verified company, salary and vacancy details."></textarea>
+<div class="actions">
+<button class="approve" type="submit" name="action" value="approve">Approve & Publish</button>
+<button class="reject" type="submit" name="action" value="reject">Reject</button>
+</div>
+</form>
+{% else %}
+<p class="meta"><strong>Remarks:</strong> {{ job.verification_remarks|default:"—" }}</p>
+<p class="meta"><strong>Verified By:</strong> {{ job.verified_by|default:"—" }}</p>
+{% endif %}
+</section>
+{% empty %}
+<div class="card">No guest employer vacancies found.</div>
+{% endfor %}
+</main>
+</body>
+</html>
