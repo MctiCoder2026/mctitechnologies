@@ -2,83 +2,170 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Job Approvals | MCTI Technologies</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Employer Job Verification | MCTI Technologies</title>
 <style>
+:root{--orange:#ff4200;--black:#141414;--muted:#667085}
 *{box-sizing:border-box}
-body{margin:0;background:#f5f6f8;color:#222;font-family:Arial,sans-serif}
-header{background:#111;color:white;padding:20px}
-header strong{color:#ff4200}
-main{max-width:1050px;margin:25px auto;padding:0 15px}
-.card{background:white;padding:22px;margin:18px 0;border-radius:12px;box-shadow:0 3px 15px #0001}
-h1{font-size:26px}
-h2{margin-bottom:8px}
-.meta{color:#555;font-size:14px;line-height:1.8}
-.tag{display:inline-block;background:#fff0e8;color:#bd3900;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:bold}
-textarea{width:100%;padding:12px;border:1px solid #ccc;border-radius:7px;font:inherit;margin:12px 0}
-button{border:0;padding:12px 20px;color:white;border-radius:7px;font-weight:bold;cursor:pointer}
-.approve{background:#167d39}
-.reject{background:#b42318}
-.actions{display:flex;gap:10px;flex-wrap:wrap}
-.notice{background:#fff4ec;padding:12px;border-radius:7px}
-@media(max-width:600px){.card{padding:16px}h1{font-size:22px}}
+body{margin:0;background:#f5f6f8;color:#181818;font-family:Arial,Helvetica,sans-serif}
+a{text-decoration:none;color:inherit}
+.topbar{background:#111;color:#fff;padding:20px}
+.topinner{max-width:1120px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:15px}
+.brand{font-size:20px;font-weight:800}.brand span{color:var(--orange)}
+.toplabel{font-size:11px;letter-spacing:2px;color:#ccc}
+.hero{background:#161616;color:white;padding:48px 20px 90px;border-bottom:4px solid var(--orange)}
+.hero-inner{max-width:1120px;margin:auto}
+.eyebrow{color:#ff8055;font-size:12px;font-weight:800;letter-spacing:2px}
+.hero h1{font-size:clamp(28px,4vw,43px);margin:14px 0}
+.hero p{color:#ccc;line-height:1.7}
+.container{max-width:1120px;margin:-52px auto 60px;padding:0 18px;position:relative}
+.card{background:white;border:1px solid #eee;border-radius:17px;padding:27px;margin-bottom:20px;box-shadow:0 10px 35px #0000000b}
+.card h2{font-size:23px;margin:12px 0 7px}
+.company{font-weight:700;color:#444}
+.tag{display:inline-block;background:#fff0e8;color:#bd3900;border-radius:30px;padding:8px 13px;font-size:12px;font-weight:800}
+.meta-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:23px 0}
+.meta-item{background:#f8f9fb;border:1px solid #edf0f2;border-radius:9px;padding:13px;overflow-wrap:anywhere}
+.meta-item small{display:block;color:#777;margin-bottom:6px}
+.meta-item strong{font-size:13px}
+.section{border-top:1px solid #eee;padding-top:17px;margin-top:18px;line-height:1.7;overflow-wrap:anywhere}
+.section h3{font-size:14px;margin:0 0 8px}
+.section p{margin:0;color:#555;font-size:14px}
+.review{background:#fff8f4;border:1px solid #ffe0cf;border-radius:12px;padding:20px;margin-top:23px}
+.review label{display:block;font-weight:700;margin-bottom:10px}
+textarea{width:100%;border:1px solid #d5d9e0;border-radius:9px;padding:13px;font:inherit;resize:vertical}
+textarea:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px #ff420020}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:15px}
+button,.btn{border:0;border-radius:9px;padding:14px 20px;font-size:14px;font-weight:800;cursor:pointer}
+.approve{background:var(--orange);color:white}
+.reject{background:#242424;color:white}
+.approve:hover{background:#d83a00}
+.reject:hover{background:#444}
+.notice{background:#fff1e9;border-left:4px solid var(--orange);padding:15px;border-radius:8px;margin-bottom:20px}
+.empty{text-align:center;padding:45px;color:#666}
+.premium-footer{background:#111;color:white;padding:45px 20px 22px;border-top:4px solid var(--orange)}
+.footer-inner{max-width:1120px;margin:auto}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1.3fr 1fr;gap:30px}
+.premium-footer h2{font-size:21px;margin:0 0 12px}
+.premium-footer h2 span{color:var(--orange)}
+.premium-footer h3{font-size:14px;margin:0 0 15px}
+.premium-footer p,.premium-footer a{color:#bbb;font-size:13px;line-height:1.9}
+.premium-footer a{display:block;margin-bottom:8px}
+.premium-footer a:hover{color:var(--orange)}
+.footer-bottom{border-top:1px solid #333;margin-top:35px;padding-top:20px;color:#999;font-size:12px;display:flex;justify-content:space-between;gap:15px}
+.success-card{max-width:700px;margin:auto;text-align:center;padding:45px 30px}
+.success-icon{width:80px;height:80px;border-radius:50%;background:#fff0e8;color:var(--orange);font-size:45px;display:grid;place-items:center;margin:0 auto 22px}
+.success-card h2{font-size:30px}
+.reference{background:#f6f7f9;border:1px dashed #ccc;padding:20px;border-radius:12px;margin:25px 0;font-weight:800;font-size:20px;overflow-wrap:anywhere}
+.status{background:#fff2e9;color:#a73b0b;border-radius:30px;padding:9px 15px;font-size:12px;font-weight:800;display:inline-block}
+.success-card p{line-height:1.8;color:#555}
+.primary-link{display:inline-block;background:var(--orange);color:white;padding:15px 25px;border-radius:9px;font-weight:800;margin-top:18px}
+.primary-link:hover{background:#d83a00}
+@media(max-width:750px){
+.footer-grid{grid-template-columns:repeat(2,1fr)}
+.meta-grid{grid-template-columns:1fr}
+}
+@media(max-width:550px){
+.toplabel{display:none}
+.card{padding:19px}
+.footer-grid{grid-template-columns:1fr}
+.footer-bottom{flex-direction:column;text-align:center}
+.actions{flex-direction:column}
+button{width:100%}
+.success-card{padding:30px 18px}
+}
 </style>
 </head>
 <body>
-<header><strong>MCTI</strong> TECHNOLOGIES | PLACEMENT MANAGEMENT</header>
-<main>
-<h1>Employer Job Verification</h1>
-<p class="meta">
-{% if branch %}
-Showing vacancies for {{ branch|title }}.
-{% else %}
-Head Office — All Branches
-{% endif %}
-</p>
 
+<header class="topbar">
+<div class="topinner">
+<div class="brand"><span>MCTI</span> TECHNOLOGIES</div>
+<div class="toplabel">PLACEMENT NETWORK</div>
+</div>
+</header>
+
+<section class="hero">
+<div class="hero-inner">
+<div class="eyebrow">MCTI PLACEMENT MANAGEMENT</div>
+<h1>Employer Job Verification</h1>
+<p>{% if branch %}Reviewing vacancies for {{ branch|title }}.{% else %}Head Office — All Branches{% endif %}</p>
+</div>
+</section>
+<main class="container">
 {% for message in messages %}
-<p class="notice">{{ message }}</p>
+<div class="notice">{{ message }}</div>
 {% endfor %}
 
 {% for job in jobs %}
-<section class="card">
+<article class="card">
 <span class="tag">{{ job.get_approval_status_display }}</span>
 <h2>{{ job.title }}</h2>
-<p><strong>{{ job.company_name }}</strong></p>
+<div class="company">{{ job.company_name }}</div>
 
-<div class="meta">
-Branch: {{ job.get_verification_branch_display }}<br>
-Location: {{ job.location|default:"Not provided" }}<br>
-Salary: {{ job.salary|default:"Not provided" }}<br>
-Experience: {{ job.experience|default:"Not provided" }}<br>
-HR Mobile: {{ job.contact_mobile|default:"Not provided" }}<br>
-HR Email: {{ job.contact_email|default:"Not provided" }}<br>
-Last Date: {{ job.last_date|default:"Not specified" }}<br>
-Submitted: {{ job.created_at }}
+<div class="meta-grid">
+<div class="meta-item"><small>Verification Branch</small><strong>{{ job.get_verification_branch_display }}</strong></div>
+<div class="meta-item"><small>Job Location</small><strong>{{ job.location|default:"Not provided" }}</strong></div>
+<div class="meta-item"><small>Salary</small><strong>{{ job.salary|default:"Not provided" }}</strong></div>
+<div class="meta-item"><small>Experience</small><strong>{{ job.experience|default:"Not provided" }}</strong></div>
+<div class="meta-item"><small>HR Mobile</small><strong>{{ job.contact_mobile|default:"Not provided" }}</strong></div>
+<div class="meta-item"><small>HR Email</small><strong>{{ job.contact_email|default:"Not provided" }}</strong></div>
+<div class="meta-item"><small>Last Date</small><strong>{{ job.last_date|default:"Not specified" }}</strong></div>
+<div class="meta-item"><small>Submitted</small><strong>{{ job.created_at }}</strong></div>
 </div>
 
-<p><strong>Required Skills:</strong> {{ job.required_skills|linebreaksbr }}</p>
-<p><strong>Description:</strong> {{ job.description|linebreaksbr }}</p>
-<p><strong>Eligibility:</strong> {{ job.eligibility|linebreaksbr }}</p>
+<div class="section"><h3>Required Skills</h3><p>{{ job.required_skills|linebreaksbr }}</p></div>
+<div class="section"><h3>Job Description</h3><p>{{ job.description|linebreaksbr }}</p></div>
+<div class="section"><h3>Eligibility</h3><p>{{ job.eligibility|linebreaksbr }}</p></div>
 
 {% if job.approval_status == "pending" %}
-<form method="post" action="{% url 'guest_job_review' job.id %}">
+<form class="review" method="post" action="{% url 'guest_job_review' job.id %}">
 {% csrf_token %}
-<label for="remarks-{{ job.id }}"><strong>Verification Remarks *</strong></label>
-<textarea id="remarks-{{ job.id }}" name="remarks" rows="3" required placeholder="Called HR and verified company, salary and vacancy details."></textarea>
+<label for="remarks-{{ job.id }}">Verification Remarks *</label>
+<textarea id="remarks-{{ job.id }}" name="remarks" rows="3" required placeholder="Record your verification findings..."></textarea>
 <div class="actions">
-<button class="approve" type="submit" name="action" value="approve">Approve & Publish</button>
-<button class="reject" type="submit" name="action" value="reject">Reject</button>
+<button class="approve" type="submit" name="action" value="approve">Approve &amp; Publish</button>
+<button class="reject" type="submit" name="action" value="reject">Reject Vacancy</button>
 </div>
 </form>
 {% else %}
-<p class="meta"><strong>Remarks:</strong> {{ job.verification_remarks|default:"—" }}</p>
-<p class="meta"><strong>Verified By:</strong> {{ job.verified_by|default:"—" }}</p>
+<div class="section"><h3>Verification Remarks</h3><p>{{ job.verification_remarks|default:"—" }}</p></div>
+<div class="section"><h3>Verified By</h3><p>{{ job.verified_by|default:"—" }}</p></div>
 {% endif %}
-</section>
+</article>
 {% empty %}
-<div class="card">No guest employer vacancies found.</div>
+<div class="card empty">No guest employer vacancies found.</div>
 {% endfor %}
 </main>
+
+<footer class="premium-footer">
+<div class="footer-inner">
+<div class="footer-grid">
+<div>
+<h2><span>MCTI</span> TECHNOLOGIES</h2>
+<p>Empowering Careers. Connecting Talent.<br>Creating Opportunities.</p>
+</div>
+<div>
+<h3>Quick Links</h3>
+<a href="https://mctitechnologies.com/courses/">Explore Courses</a>
+<a href="{% url 'guest_job_post' %}">Post a Job</a>
+<a href="https://mctitechnologies.com/">MCTI Technologies</a>
+</div>
+<div>
+<h3>Our Centers</h3>
+<p>Kharghar (HO) · Panvel<br>Koperkhairane · Kamothe<br>Ghansoli · Nerul (Corporate Office)</p>
+</div>
+<div>
+<h3>Connect With Us</h3>
+<p>Employer Hiring &amp; Career Opportunities</p>
+<a href="tel:+918655556219">+91 86555 56219</a>
+</div>
+</div>
+<div class="footer-bottom">
+<span>© 2026 MCTI Technologies. All Rights Reserved.</span>
+<span>Connecting Skills with Opportunities</span>
+</div>
+</div>
+</footer>
+
 </body>
 </html>

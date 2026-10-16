@@ -2,24 +2,136 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Job Submitted | MCTI Technologies</title>
 <style>
-body{background:#f5f6f8;font-family:Arial,sans-serif;text-align:center;margin:0;padding:50px 15px;color:#222}
-.card{background:white;max-width:550px;margin:auto;padding:35px;border-radius:15px;box-shadow:0 5px 25px #00000012}
-h1{color:#ff4200}
-a{display:inline-block;background:#ff4200;color:white;text-decoration:none;padding:13px 25px;border-radius:8px;margin-top:15px}
-p{line-height:1.7}
+:root{--orange:#ff4200;--black:#141414;--muted:#667085}
+*{box-sizing:border-box}
+body{margin:0;background:#f5f6f8;color:#181818;font-family:Arial,Helvetica,sans-serif}
+a{text-decoration:none;color:inherit}
+.topbar{background:#111;color:#fff;padding:20px}
+.topinner{max-width:1120px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:15px}
+.brand{font-size:20px;font-weight:800}.brand span{color:var(--orange)}
+.toplabel{font-size:11px;letter-spacing:2px;color:#ccc}
+.hero{background:#161616;color:white;padding:48px 20px 90px;border-bottom:4px solid var(--orange)}
+.hero-inner{max-width:1120px;margin:auto}
+.eyebrow{color:#ff8055;font-size:12px;font-weight:800;letter-spacing:2px}
+.hero h1{font-size:clamp(28px,4vw,43px);margin:14px 0}
+.hero p{color:#ccc;line-height:1.7}
+.container{max-width:1120px;margin:-52px auto 60px;padding:0 18px;position:relative}
+.card{background:white;border:1px solid #eee;border-radius:17px;padding:27px;margin-bottom:20px;box-shadow:0 10px 35px #0000000b}
+.card h2{font-size:23px;margin:12px 0 7px}
+.company{font-weight:700;color:#444}
+.tag{display:inline-block;background:#fff0e8;color:#bd3900;border-radius:30px;padding:8px 13px;font-size:12px;font-weight:800}
+.meta-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:23px 0}
+.meta-item{background:#f8f9fb;border:1px solid #edf0f2;border-radius:9px;padding:13px;overflow-wrap:anywhere}
+.meta-item small{display:block;color:#777;margin-bottom:6px}
+.meta-item strong{font-size:13px}
+.section{border-top:1px solid #eee;padding-top:17px;margin-top:18px;line-height:1.7;overflow-wrap:anywhere}
+.section h3{font-size:14px;margin:0 0 8px}
+.section p{margin:0;color:#555;font-size:14px}
+.review{background:#fff8f4;border:1px solid #ffe0cf;border-radius:12px;padding:20px;margin-top:23px}
+.review label{display:block;font-weight:700;margin-bottom:10px}
+textarea{width:100%;border:1px solid #d5d9e0;border-radius:9px;padding:13px;font:inherit;resize:vertical}
+textarea:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px #ff420020}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:15px}
+button,.btn{border:0;border-radius:9px;padding:14px 20px;font-size:14px;font-weight:800;cursor:pointer}
+.approve{background:var(--orange);color:white}
+.reject{background:#242424;color:white}
+.approve:hover{background:#d83a00}
+.reject:hover{background:#444}
+.notice{background:#fff1e9;border-left:4px solid var(--orange);padding:15px;border-radius:8px;margin-bottom:20px}
+.empty{text-align:center;padding:45px;color:#666}
+.premium-footer{background:#111;color:white;padding:45px 20px 22px;border-top:4px solid var(--orange)}
+.footer-inner{max-width:1120px;margin:auto}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1.3fr 1fr;gap:30px}
+.premium-footer h2{font-size:21px;margin:0 0 12px}
+.premium-footer h2 span{color:var(--orange)}
+.premium-footer h3{font-size:14px;margin:0 0 15px}
+.premium-footer p,.premium-footer a{color:#bbb;font-size:13px;line-height:1.9}
+.premium-footer a{display:block;margin-bottom:8px}
+.premium-footer a:hover{color:var(--orange)}
+.footer-bottom{border-top:1px solid #333;margin-top:35px;padding-top:20px;color:#999;font-size:12px;display:flex;justify-content:space-between;gap:15px}
+.success-card{max-width:700px;margin:auto;text-align:center;padding:45px 30px}
+.success-icon{width:80px;height:80px;border-radius:50%;background:#fff0e8;color:var(--orange);font-size:45px;display:grid;place-items:center;margin:0 auto 22px}
+.success-card h2{font-size:30px}
+.reference{background:#f6f7f9;border:1px dashed #ccc;padding:20px;border-radius:12px;margin:25px 0;font-weight:800;font-size:20px;overflow-wrap:anywhere}
+.status{background:#fff2e9;color:#a73b0b;border-radius:30px;padding:9px 15px;font-size:12px;font-weight:800;display:inline-block}
+.success-card p{line-height:1.8;color:#555}
+.primary-link{display:inline-block;background:var(--orange);color:white;padding:15px 25px;border-radius:9px;font-weight:800;margin-top:18px}
+.primary-link:hover{background:#d83a00}
+@media(max-width:750px){
+.footer-grid{grid-template-columns:repeat(2,1fr)}
+.meta-grid{grid-template-columns:1fr}
+}
+@media(max-width:550px){
+.toplabel{display:none}
+.card{padding:19px}
+.footer-grid{grid-template-columns:1fr}
+.footer-bottom{flex-direction:column;text-align:center}
+.actions{flex-direction:column}
+button{width:100%}
+.success-card{padding:30px 18px}
+}
 </style>
 </head>
 <body>
-<div class="card">
-<h1>✓ Job Submitted Successfully!</h1>
-<p>Thank you for sharing your job opportunity with MCTI Technologies.</p>
-<p><strong>Reference Number: MCTI-JOB-{{ job.id }}</strong></p>
-<p>Your submission is currently <strong>Pending Branch Verification</strong>.</p>
-<p>Once approved, the opportunity will automatically appear in the MCTI Student Placement Portal.</p>
-<a href="{% url 'guest_job_post' %}">Post Another Job</a>
+
+<header class="topbar">
+<div class="topinner">
+<div class="brand"><span>MCTI</span> TECHNOLOGIES</div>
+<div class="toplabel">PLACEMENT NETWORK</div>
 </div>
+</header>
+
+<section class="hero">
+<div class="hero-inner">
+<div class="eyebrow">MCTI EMPLOYER CONNECT</div>
+<h1>Submission Received</h1>
+<p>Thank you for choosing the MCTI Placement Network.</p>
+</div>
+</section>
+<main class="container">
+<div class="card success-card">
+<div class="success-icon">✓</div>
+<h2>Job Submitted Successfully!</h2>
+<p>Your job opportunity has been received by MCTI Technologies.</p>
+<div class="reference">MCTI-JOB-{{ job.id }}</div>
+<span class="status">PENDING BRANCH VERIFICATION</span>
+<p>Our team will review your submission. Once approved, the vacancy will appear in the MCTI Student Placement Portal.</p>
+<a class="primary-link" href="{% url 'guest_job_post' %}">Post Another Job →</a>
+</div>
+</main>
+
+<footer class="premium-footer">
+<div class="footer-inner">
+<div class="footer-grid">
+<div>
+<h2><span>MCTI</span> TECHNOLOGIES</h2>
+<p>Empowering Careers. Connecting Talent.<br>Creating Opportunities.</p>
+</div>
+<div>
+<h3>Quick Links</h3>
+<a href="https://mctitechnologies.com/courses/">Explore Courses</a>
+<a href="{% url 'guest_job_post' %}">Post a Job</a>
+<a href="https://mctitechnologies.com/">MCTI Technologies</a>
+</div>
+<div>
+<h3>Our Centers</h3>
+<p>Kharghar (HO) · Panvel<br>Koperkhairane · Kamothe<br>Ghansoli · Nerul (Corporate Office)</p>
+</div>
+<div>
+<h3>Connect With Us</h3>
+<p>Employer Hiring &amp; Career Opportunities</p>
+<a href="tel:+918655556219">+91 86555 56219</a>
+</div>
+</div>
+<div class="footer-bottom">
+<span>© 2026 MCTI Technologies. All Rights Reserved.</span>
+<span>Connecting Skills with Opportunities</span>
+</div>
+</div>
+</footer>
+
 </body>
 </html>
