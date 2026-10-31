@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCTI Student Monitoring</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f6fa;color:#172033;font-family:Arial,sans-serif}
+header{background:#111827;color:white;padding:25px 4%}
+header h1{margin:8px 0}
+.brand{color:#ff7900;font-weight:bold}
+main{max-width:1500px;margin:auto;padding:24px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+.card,.panel,form{background:white;border:1px solid #e5e7eb;border-radius:14px;padding:18px}
+.card{border-top:4px solid #ff7900}
+.card small{color:#64748b}
+.card strong{display:block;font-size:29px;margin-top:10px}
+form{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+input,select,button{padding:11px;border-radius:8px;border:1px solid #cbd5e1}
+button,.btn{background:#ff7900;color:white;border:0;cursor:pointer;padding:11px;text-decoration:none;border-radius:8px}
+.panel{overflow-x:auto;margin-top:20px}
+table{width:100%;border-collapse:collapse;min-width:1000px}
+th{background:#111827;color:white}
+th,td{padding:13px;text-align:left;border-bottom:1px solid #eee}
+.note{margin-top:20px;color:#64748b;font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="brand">MCTI TECHNOLOGIES</div><h1>Student Monitoring Command Center</h1><p>Head Office | Attendance & Inactivity Analytics</p></header>
+<main>
+<form method="get">
+<input type="date" name="date" value="{{ selected_date|date:"Y-m-d" }}">
+<select name="branch"><option value="">All Branches</option>
+{% for key,name in branches %}<option value="{{ key }}" {% if branch_filter == key %}selected{% endif %}>{{ name }}</option>{% endfor %}
+</select>
+<button type="submit">Apply Filters</button>
+<a class="btn" href="/management-dashboard/">Back to Management</a>
+</form>
+
+<h2 style="margin-top:24px">CANCELLED FINANCIAL IMPACT</h2>
+<section class="cards">
+<div class="card" style="border-top:4px solid #ff7900">
+<small>CANCELLED FEE VALUE</small>
+<strong>₹{{ financial.cancelled_fee|floatformat:2 }}</strong>
+</div>
+<div class="card" style="border-top:4px solid #16a34a">
+<small>AMOUNT COLLECTED</small>
+<strong>₹{{ financial.collected|floatformat:2 }}</strong>
+</div>
+<div class="card" style="border-top:4px solid #dc2626">
+<small>POTENTIAL REVENUE LOSS</small>
+<strong>₹{{ financial.uncollected|floatformat:2 }}</strong>
+</div>
+</section>
+<p class="note">Financial impact of cancelled enrollments.
+Collected amount is gross receipts before any separately recorded refunds.
+Uncollected fees are potential revenue, not an accounting loss.</p>
+<h2>STUDENT ATTENDANCE & STATUS</h2>
+<section class="cards">
+<div class="card"><small>ACTIVE STUDENTS</small><strong>{{ totals.active_students }}</strong></div>
+<div class="card"><small>ACTIVE ENROLLMENTS</small><strong>{{ totals.active_enrollments }}</strong></div>
+<div class="card"><small>PRESENT</small><strong>{{ totals.present }}</strong></div>
+<div class="card"><small>ABSENT</small><strong>{{ totals.absent }}</strong></div>
+<div class="card"><small>LEAVE</small><strong>{{ totals.leave }}</strong></div>
+<div class="card"><small>INACTIVE 7+ DAYS</small><strong>{{ totals.inactive7 }}</strong></div>
+<div class="card"><small>INACTIVE 15+ DAYS</small><strong>{{ totals.inactive15 }}</strong></div>
+<div class="card"><small>INACTIVE 30+ DAYS</small><strong>{{ totals.inactive30 }}</strong></div>
+<div class="card"><small>NEVER PRESENT</small><strong>{{ totals.never }}</strong></div>
+<div class="card"><small>CANCELLED ENROLLMENTS</small><strong>{{ totals.cancelled }}</strong></div>
+<div class="card"><small>COMPLETED ENROLLMENTS</small><strong>{{ totals.completed }}</strong></div>
+</section>
+<h2>Branch Performance</h2>
+<div class="panel"><table>
+<tr><th>Branch</th><th>Students</th><th>Enrollments</th><th>Present</th><th>Absent</th><th>Leave</th><th>7+ Days</th><th>15+ Days</th><th>30+ Days</th><th>Never</th><th>Cancelled</th><th>Completed</th></tr>
+{% for r in rows %}
+<tr><td><b>{{ r.name }}</b></td><td>{{ r.active_students }}</td>
+<td><a href="{% url 'student_status_details' %}?branch={{ r.key }}&amp;date={{ selected_date|date:"Y-m-d" }}&amp;status=active" target="_blank">{{ r.active_enrollments }}</a></td>
+<td>{{ r.present }}</td><td>{{ r.absent }}</td><td>{{ r.leave }}</td>
+<td>{{ r.inactive7 }}</td>
+<td><a href="{% url 'student_status_details' %}?branch={{ r.key }}&amp;date={{ selected_date|date:"Y-m-d" }}&amp;status=inactive15" target="_blank">{{ r.inactive15 }}</a></td>
+<td>{{ r.inactive30 }}</td><td>{{ r.never }}</td>
+<td><a href="{% url 'student_status_details' %}?branch={{ r.key }}&amp;date={{ selected_date|date:"Y-m-d" }}&amp;status=cancelled" target="_blank">{{ r.cancelled }}</a></td>
+<td><a href="{% url 'student_status_details' %}?branch={{ r.key }}&amp;date={{ selected_date|date:"Y-m-d" }}&amp;status=completed" target="_blank">{{ r.completed }}</a></td></tr>
+{% endfor %}
+</table></div>
+<p class="note">Absent means recorded absence only. Inactivity is based on last present date. Cancelled and completed counts refer to enrollments.</p>
+</main>
+</body></html>

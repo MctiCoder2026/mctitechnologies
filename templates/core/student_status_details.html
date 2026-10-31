@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCTI | Student Status Details</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f6fa;color:#172033;font-family:Arial,sans-serif}
+header{background:#111827;color:#fff;padding:25px 4%}
+.brand{color:#ff7900;font-weight:bold}
+main{padding:24px;max-width:1500px;margin:auto}
+.panel{background:white;border:1px solid #e5e7eb;border-radius:14px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:1400px}
+th{background:#172033;color:white;text-align:left}
+th,td{padding:12px;border-bottom:1px solid #e5e7eb;vertical-align:top}
+tr:hover{background:#fff7ed}
+.btn{display:inline-block;background:#ff7900;color:white;padding:11px 16px;border-radius:8px;text-decoration:none;margin-bottom:18px}
+small{color:#64748b}
+.note{color:#64748b;font-size:13px;margin-top:18px}
+</style>
+</head>
+<body>
+<header>
+<div class="brand">MCTI TECHNOLOGIES</div>
+<h1>Student Status Details</h1>
+<p>{{ branch }} | {{ status|title }} | {{ records|length }} Enrollments</p>
+</header>
+<main>
+<a class="btn" href="{% url 'student_monitoring' %}">Back to Monitoring</a>
+<a class="btn" href="?branch={{ branch|lower }}&amp;status={{ status }}&amp;export=csv">Download CSV</a>
+<div class="panel">
+<table>
+<thead>
+<tr>
+<th>Student</th>
+<th>Mobile</th>
+<th>Course</th>
+<th>Enrollment Date</th>
+<th>Status</th>
+<th>Branch Remarks</th>
+<th>Cancellation Reason</th>
+<th>Cancelled By / Date</th>
+<th>Latest Attendance Remark</th><th>Last Present</th>
+<th>Inactive Days</th>
+</tr>
+</thead>
+<tbody>
+{% for row in records %}
+<tr>
+<td><strong>{{ row.enrollment.student.name }}</strong></td>
+<td>{{ row.enrollment.student.mobile|default:"—" }}</td>
+<td>{{ row.enrollment.course.title|default:"—" }}</td>
+<td>{{ row.enrollment.enrollment_date|date:"d M Y" }}</td>
+<td>{{ row.enrollment.get_status_display }}</td>
+<td>{{ row.enrollment.notes|default:"No remark"|linebreaksbr }}</td>
+<td>{{ row.enrollment.cancellation_reason|default:"—"|linebreaksbr }}</td>
+<td>
+{% if row.enrollment.cancelled_by %}{{ row.enrollment.cancelled_by.get_full_name|default:row.enrollment.cancelled_by.username }}{% else %}—{% endif %}
+{% if row.enrollment.cancelled_at %}
+<small>{{ row.enrollment.cancelled_at|date:"d M Y, h:i A" }}</small>
+{% endif %}
+</td>
+<td>
+{% if row.latest_attendance %}
+<strong>{{ row.latest_attendance.get_status_display }}</strong>
+<div>{{ row.latest_attendance.remarks|default:"No remark" }}</div>
+<small>
+{{ row.latest_attendance.attendance_date|date:"d M Y" }}
+{% if row.latest_attendance.marked_by %}
+| {{ row.latest_attendance.marked_by.get_full_name|default:row.latest_attendance.marked_by.username }}
+{% endif %}
+</small>
+{% else %}
+No attendance recorded
+{% endif %}
+</td>
+<td>{{ row.last_present|date:"d M Y"|default:"Never recorded" }}</td>
+<td>{{ row.inactive_days }}</td>
+</tr>
+{% empty %}
+<tr><td colspan="11">No matching enrollments found.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<p class="note">Inactive days are calculated from last recorded present attendance or enrollment date. This is an attendance indicator, not an official enrollment status.</p>
+</main>
+</body>
+</html>

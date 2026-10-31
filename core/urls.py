@@ -1,3 +1,5 @@
+from . import student_monitoring
+from . import student_status_details
 from . import employee_payroll
 from . import student_basic_details
 from django.urls import path, include
@@ -9,6 +11,8 @@ from . import views, fee_corrections
 from . import student_record_changes
 
 urlpatterns = [
+    path("management/student-monitoring/", student_monitoring.student_monitoring, name="student_monitoring"),
+    path("management/student-status-details/", student_status_details.student_status_details, name="student_status_details"),
     path("records/<str:kind>/<int:record_id>/change/", student_record_changes.change_record, name="student_record_change"),
     path("employee/payroll/", employee_payroll.manage_payroll, name="branch_employee_payroll"),
     path("employee/my-payroll/", employee_payroll.my_payroll, name="employee_my_payroll"),
