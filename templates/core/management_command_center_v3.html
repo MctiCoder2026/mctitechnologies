@@ -1299,6 +1299,152 @@ body.mcti-theme-light {
         </section>
 
 
+
+        <!-- MCTI V3 COURSE BUSINESS SECTION V1 -->
+        <details id="mcti-course-business" open
+          style="margin:20px 0;padding:20px;border-radius:16px;background:#141414;border:1px solid rgba(249,115,22,.35);color:#fff">
+
+          <summary style="cursor:pointer;font-size:18px;font-weight:800;color:#fb923c">
+            Course &amp; Business Intelligence
+          </summary>
+
+          <form method="get" action="{% url 'management_command_center_v3' %}"
+            style="display:flex;flex-wrap:wrap;gap:12px;margin:20px 0">
+
+            <select name="branch" aria-label="Branch"
+              style="padding:10px;border-radius:8px;min-width:150px">
+              <option value="all">All Branches</option>
+              {% for key,label in v3_branch_choices %}
+              <option value="{{ key }}" {% if course_business_filters.branch == key %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+
+            <select name="course" aria-label="Course"
+              style="padding:10px;border-radius:8px;min-width:180px;max-width:260px">
+              <option value="">All Courses</option>
+              {% for c in course_business_courses %}
+              <option value="{{ c.id }}" {% if course_business_filters.course == c.id|stringformat:"s" %}selected{% endif %}>{{ c.title }}</option>
+              {% endfor %}
+            </select>
+
+            <input type="date" name="start_date"
+              aria-label="Start date"
+              value="{{ course_business_filters.start_date }}"
+              style="padding:10px;border-radius:8px">
+
+            <input type="date" name="end_date"
+              aria-label="End date"
+              value="{{ course_business_filters.end_date }}"
+              style="padding:10px;border-radius:8px">
+
+            <button type="submit"
+              style="background:#f97316;color:#111;border:0;border-radius:8px;padding:10px 18px;font-weight:800;cursor:pointer">
+              Apply Filters
+            </button>
+
+            <a href="{% url 'management_command_center_v3' %}#mcti-course-business"
+              style="padding:10px;color:#fff;text-decoration:underline">Reset</a>
+          </form>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin-bottom:20px">
+            <div class="mcti-v3-kpi"><span>Admissions</span><strong>{{ course_business.totals.admissions }}</strong></div>
+            <div class="mcti-v3-kpi"><span>Business Billing</span><strong>₹{{ course_business.totals.billing|floatformat:0 }}</strong></div>
+            <div class="mcti-v3-kpi"><span>Total Collection</span><strong>₹{{ course_business.totals.collection|floatformat:0 }}</strong></div>
+            <div class="mcti-v3-kpi"><span>Eligible Collection</span><strong>₹{{ course_business.totals.eligible_collection|floatformat:0 }}</strong></div>
+            <div class="mcti-v3-kpi"><span>Current Cohort Outstanding</span><strong>₹{{ course_business.totals.outstanding|floatformat:0 }}</strong></div>
+            <div class="mcti-v3-kpi"><span>Displayed Courses Lifetime Outstanding</span><strong>₹{{ course_business.totals.lifetime_outstanding|floatformat:0 }}</strong></div>
+            <div class="mcti-v3-kpi"><span>Discounts</span><strong>₹{{ course_business.totals.discounts|floatformat:0 }}</strong></div>
+            <div class="mcti-v3-kpi"><span>Cancelled Collection</span><strong>₹{{ course_business.totals.cancelled_collection|floatformat:0 }}</strong></div>
+          </div>
+
+
+          <!-- MCTI V3 COURSE EXPORT BUTTONS V1 -->
+          <div style="display:flex;flex-wrap:wrap;gap:12px;margin:15px 0">
+
+            <a id="mcti-course-pdf"
+               href="{% url 'management_course_business_pdf' %}"
+               style="background:#f97316;color:#111;padding:11px 18px;border-radius:9px;font-weight:800;text-decoration:none">
+               Download PDF
+            </a>
+
+            <a id="mcti-course-excel"
+               href="{% url 'management_course_business_excel' %}"
+               style="background:#fff;color:#111;padding:11px 18px;border-radius:9px;font-weight:800;text-decoration:none">
+               Download Excel
+            </a>
+
+          </div>
+
+          <script>
+          (function () {
+              const form = document.querySelector(
+                  '#mcti-course-business form'
+              );
+              if (!form) return;
+
+              const params = new URLSearchParams(
+                  new FormData(form)
+              );
+
+              ['mcti-course-pdf', 'mcti-course-excel'].forEach(function (id) {
+                  const link = document.getElementById(id);
+                  if (link) {
+                      link.href = link.href.split('?')[0] + '?' + params.toString();
+                  }
+              });
+
+              form.addEventListener('change', function () {
+                  const updated = new URLSearchParams(new FormData(form));
+                  ['mcti-course-pdf', 'mcti-course-excel'].forEach(function (id) {
+                      const link = document.getElementById(id);
+                      if (link) {
+                          link.href = link.href.split('?')[0] + '?' + updated.toString();
+                      }
+                  });
+              });
+          })();
+          </script>
+
+          <div style="overflow-x:auto">
+            <table style="width:100%;min-width:950px;border-collapse:collapse;font-size:12px">
+              <thead>
+                <tr style="text-align:left;color:#fdba74">
+                  <th style="padding:10px">Course</th>
+                  <th>Admissions</th>
+                  <th>Enrollments</th>
+                  <th>Billing</th>
+                  <th>Collection</th>
+                  <th>Discounts</th>
+                  <th>Cohort Due</th>
+                  <th>Lifetime Due</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in course_business.rows %}
+                <tr style="border-top:1px solid rgba(255,255,255,.15)">
+                  <td style="padding:10px">{{ item.course }}</td>
+                  <td>{{ item.admissions }}</td>
+                  <td>{{ item.enrollments }}</td>
+                  <td>₹{{ item.billing|floatformat:0 }}</td>
+                  <td>₹{{ item.collection|floatformat:0 }}</td>
+                  <td>₹{{ item.discounts|floatformat:0 }}</td>
+                  <td>₹{{ item.outstanding|floatformat:0 }}</td>
+                  <td>₹{{ item.lifetime_outstanding|floatformat:0 }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" style="padding:16px">No matching records.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <p style="font-size:11px;color:#cbd5e1;margin-top:15px">
+            Billing uses enrollment date; collection uses payment date.
+            Outstanding reflects current unpaid balances, not historical month-end balances.
+            Cancelled receipts are included in total collection and separately disclosed.
+          </p>
+        </details>
+
         <!-- MCTI V3 CANCELLATION LOSS V1 -->
         <details class="mcti-v3-cancellation" style="margin:20px 0;padding:20px;border-radius:16px;background:#141414;border:1px solid rgba(249,115,22,.3);color:#fff">
 

@@ -713,3 +713,23 @@ urlpatterns += [
         name="management_command_center_v3",
     ),
 ]
+
+
+# MCTI V3 COURSE BUSINESS EXPORT ROUTES
+from .management_course_exports_v3 import (
+    download_course_business_pdf,
+    download_course_business_excel,
+)
+
+urlpatterns += [
+    path(
+        "management-command-center-v3/course-report/pdf/",
+        download_course_business_pdf,
+        name="management_course_business_pdf",
+    ),
+    path(
+        "management-command-center-v3/course-report/excel/",
+        download_course_business_excel,
+        name="management_course_business_excel",
+    ),
+]

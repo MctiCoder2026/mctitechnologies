@@ -65,6 +65,59 @@ def command_center_preview(request):
 
     context.update(command_center_context())
 
+    # MCTI V3 COURSE BUSINESS INTELLIGENCE
+    from .management_course_analytics_v3 import course_business_report
+    from .models import Course
+    from datetime import date
+
+    branch = request.GET.get("branch", "all")
+    course_value = request.GET.get("course", "")
+    start_value = request.GET.get("start_date", "")
+    end_value = request.GET.get("end_date", "")
+
+    allowed_branches = {
+        "all", "kharghar", "panvel", "koperkhairane",
+        "kamothe", "ghansoli", "nerul"
+    }
+    if branch not in allowed_branches:
+        branch = "all"
+
+    course_id = None
+    if course_value.isdigit():
+        candidate = int(course_value)
+        if Course.objects.filter(pk=candidate).exists():
+            course_id = candidate
+
+    def parse_date(value):
+        try:
+            return date.fromisoformat(value) if value else None
+        except ValueError:
+            return None
+
+    start_date = parse_date(start_value)
+    end_date = parse_date(end_value)
+
+    if start_date and end_date and start_date > end_date:
+        start_date, end_date = end_date, start_date
+
+    context["course_business"] = course_business_report(
+        branch=branch,
+        course_id=course_id,
+        start_date=start_date,
+        end_date=end_date,
+    )
+    context["course_business_filters"] = {
+        "branch": branch,
+        "course": str(course_id or ""),
+        "start_date": start_date.isoformat() if start_date else "",
+        "end_date": end_date.isoformat() if end_date else "",
+    }
+    context["course_business_courses"] = Course.objects.order_by("title")
+
+    from .management_analytics_v3 import BRANCHES
+    context["v3_branch_choices"] = BRANCHES
+
+
     return render(
         request,
         "core/management_command_center_v3.html",
