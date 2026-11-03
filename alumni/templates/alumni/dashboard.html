@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Alumni Connect | MCTI Technologies</title>
+<style>
+:root{--orange:#ff4200;--black:#111;--bg:#f4f5f7;--muted:#667085}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#171717;font-family:Arial,sans-serif}
+header{background:var(--black);color:white;padding:20px max(20px,calc((100% - 1400px)/2));border-bottom:4px solid var(--orange);font-weight:800;letter-spacing:.3px}
+header b{color:var(--orange)}
+main{max-width:1400px;margin:28px auto;padding:0 20px}
+h1{font-size:30px;margin:0 0 8px}
+.muted{color:var(--muted);line-height:1.5}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:24px 0}
+.card{background:white;border-radius:15px;padding:22px;box-shadow:0 4px 18px #1111110a}
+.metric{font-size:32px;color:var(--orange);font-weight:800;margin-top:12px}
+.filters{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:20px}
+input,select,textarea{font:inherit;border:1px solid #d7d9df;border-radius:8px;padding:10px;background:white;max-width:100%;min-width:0}
+.filters input{flex:1;min-width:150px}
+button,.btn{background:var(--orange);color:white;border:0;border-radius:8px;padding:11px 15px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
+button:hover,.btn:hover{background:#db3900}
+.btn-dark{background:var(--black)}
+.btn-wa{background:#167d39}
+.table-wrap{overflow:auto;padding:0}
+table{border-collapse:collapse;width:100%;min-width:1120px;font-size:13px}
+th{background:var(--black);color:white;text-align:left;padding:14px 12px;white-space:nowrap}
+td{padding:12px;border-bottom:1px solid #ececf0;vertical-align:top}
+tbody tr:hover{background:#fffaf7}
+.row-form{display:grid;gap:7px;min-width:175px}
+.row-form select,.row-form input,.row-form textarea{width:100%;font-size:12px}
+.row-form textarea{min-height:54px;resize:vertical}
+.consent{display:flex;gap:6px;align-items:center;font-size:11px;color:#555}
+.consent input{min-width:auto}
+.tag{display:inline-block;background:#fff0e9;color:#a93400;padding:6px 9px;border-radius:20px;font-weight:700;font-size:11px}
+.alert{padding:12px 15px;border-radius:8px;background:#fff0e9;margin:10px 0}
+.alert.success{background:#eaf7ee;color:#176534}
+.actions{display:grid;gap:8px;min-width:120px}
+.small{font-size:11px;color:var(--muted)}
+@media(max-width:650px){main{padding:0 12px;margin:20px auto}h1{font-size:24px}.cards{grid-template-columns:1fr;gap:10px}.card{padding:16px}.metric{font-size:28px}header{padding:18px 14px}}
+</style>
+
+<style>
+/* MCTI PREMIUM ALUMNI UI */
+:root {
+  --mcti-orange: #ff4b0b;
+  --mcti-black: #151515;
+  --mcti-muted: #64748b;
+  --mcti-border: #e8eaf0;
+  --mcti-bg: #f4f6fa;
+}
+body {
+  background: var(--mcti-bg) !important;
+  color: #202531;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+header {
+  background: var(--mcti-black) !important;
+  border-bottom: 4px solid var(--mcti-orange);
+  box-shadow: 0 5px 20px #11111112;
+}
+main {
+  width: min(1440px, 94%) !important;
+  max-width: 1440px !important;
+  margin: 30px auto !important;
+}
+h1, h2, h3 { letter-spacing: -.35px; color: #17191f; }
+.card {
+  background: #fff !important;
+  border: 1px solid var(--mcti-border);
+  border-radius: 16px !important;
+  box-shadow: 0 5px 22px #17203308;
+  padding: 22px !important;
+  margin-bottom: 20px;
+}
+input, select, textarea {
+  min-height: 43px;
+  border: 1px solid #dce1e9 !important;
+  border-radius: 9px !important;
+  background: #fff;
+  padding: 10px 13px !important;
+  color: #252936;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid #ff4b0b30;
+  border-color: var(--mcti-orange) !important;
+}
+button, .btn, a.btn, a.wa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  box-sizing: border-box;
+  background: var(--mcti-orange);
+  color: white !important;
+  text-decoration: none !important;
+  border: 0;
+  border-radius: 9px !important;
+  padding: 11px 17px !important;
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+button:hover, .btn:hover, a.btn:hover, a.wa:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 13px #ff4b0b30;
+}
+.btn-dark {
+  background: var(--mcti-black) !important;
+}
+.table-wrap {
+  overflow-x: auto;
+  padding: 12px !important;
+}
+table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: separate !important;
+  border-spacing: 0;
+  font-size: 13px;
+}
+thead th {
+  background: var(--mcti-black) !important;
+  color: white !important;
+  padding: 15px 13px !important;
+  text-align: left;
+  white-space: nowrap;
+}
+thead th:first-child { border-radius: 9px 0 0 9px; }
+thead th:last-child { border-radius: 0 9px 9px 0; }
+tbody td {
+  padding: 13px !important;
+  border-bottom: 1px solid #edf0f4 !important;
+  vertical-align: middle;
+}
+tbody tr:nth-child(even) { background: #fafbfc; }
+tbody tr:hover { background: #fff5ef; }
+.tag {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #fff0e9;
+  color: #b83b0b;
+  font-size: 12px;
+  font-weight: 700;
+}
+.muted { color: var(--mcti-muted); line-height: 1.7; }
+nav[aria-label^="Alumni pages"] {
+  background: #fff;
+  border: 1px solid var(--mcti-border);
+  border-radius: 13px;
+  padding: 14px 18px !important;
+  margin: 12px 0 18px;
+}
+nav[aria-label^="Alumni pages"] strong { color: #191b21; }
+a { text-underline-offset: 3px; }
+@media (max-width: 700px) {
+  main { width: 94% !important; margin: 18px auto !important; }
+  .card { padding: 15px !important; border-radius: 12px !important; }
+  nav[aria-label^="Alumni pages"] { justify-content: center !important; }
+}
+</style>
+
+</head>
+<body>
+<header><b>MCTI</b> TECHNOLOGIES | ALUMNI CONNECT</header>
+<main>
+
+<!-- MCTI_BACK_TO_BRANCH_DASHBOARD -->
+<div style="margin:0 0 20px">
+<a href="/branch-dashboard/" style="display:inline-flex;align-items:center;gap:8px;background:#171717;color:#fff;text-decoration:none;padding:12px 18px;border-radius:9px;font-weight:750;border-left:4px solid #ff4b0b">
+&#8592; Back to Dashboard
+</a>
+</div>
+
+<h1>Alumni Reconnect Dashboard</h1>
+<p class="muted">Historical Learners 2013–2025 · Independent Alumni Remarketing System</p>
+<div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin:18px 0">
+<a href="{% url 'alumni:import' %}" style="display:inline-block;background:#ff4200;color:#fff;text-decoration:none;padding:13px 20px;border-radius:9px;font-weight:800;box-shadow:0 4px 12px #ff420033">＋ Import Alumni Excel</a>
+</div>
+
+{% for message in messages %}
+<div class="alert {% if 'success' in message.tags %}success{% endif %}">{{ message }}</div>
+{% endfor %}
+
+<div class="cards">
+<div class="card">Total Alumni<div class="metric">{{ total }}</div></div>
+<div class="card">Currently Displayed<div class="metric">{{ contacts|length }}</div></div>
+<div class="card">Historical Branches<div class="metric">3</div></div>
+</div>
+
+<form method="get" class="card filters">
+{% if is_admin %}
+<select name="branch">
+<option value="">All Branches</option>
+{% for value,label in branches %}
+<option value="{{ value }}" {% if selected_branch == value %}selected{% endif %}>{{ label }}</option>
+{% endfor %}
+</select>
+{% endif %}
+<select name="year">
+<option value="">All Years</option>
+{% for y in years %}<option value="{{ y }}" {% if selected_year == y|stringformat:"s" %}selected{% endif %}>{{ y }}</option>{% endfor %}
+</select>
+<select name="status">
+<option value="">All Statuses</option>
+{% for value,label in statuses %}
+<option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+{% endfor %}
+</select>
+<input name="course" placeholder="Previous Course" value="{{ course }}">
+<input name="search" placeholder="Search name or mobile" value="{{ search }}">
+<button type="submit">Apply Filters</button>
+<a class="btn btn-dark" href="{% url 'alumni:dashboard' %}">Clear</a>
+</form>
+
+
+<nav aria-label="Alumni pages top" style="display:flex;justify-content:flex-end;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 4px">
+{% if prev_url %}<a class="btn btn-dark" href="{{ prev_url }}">← Previous</a>{% endif %}
+<strong>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</strong>
+<span class="muted">{{ filtered_total }} matching alumni</span>
+{% if next_url %}<a class="btn" href="{{ next_url }}">Next Page →</a>{% endif %}
+</nav>
+<div class="card table-wrap">
+<table>
+<thead><tr>
+<th>Name / Mobile</th><th>Branch</th><th>Year / Course</th>
+<th>Permission</th><th>Status</th><th>Follow-up</th><th>Remarks / Save</th><th>WhatsApp</th>
+</tr></thead>
+<tbody>
+{% for c in contacts %}
+<tr>
+<td><strong>{{ c.name }}</strong><br>{{ c.mobile }}<br><span class="small">ID {{ c.id }}</span></td>
+<td>{{ c.get_branch_display }}</td>
+<td>{{ c.admission_year|default:"—" }}<br>{{ c.previous_course|default:"—" }}</td>
+
+<td>
+<select name="permission_status" form="edit-{{ c.id }}">
+{% for value,label in permissions %}
+<option value="{{ value }}" {% if c.permission_status == value %}selected{% endif %}>{{ label }}</option>
+{% endfor %}
+</select>
+<label class="consent"><input type="checkbox" name="consent_confirmed" value="yes" form="edit-{{ c.id }}" {% if c.permission_status == "allowed" %}checked{% endif %}> Consent verified</label>
+</td>
+
+<td>
+<select name="status" form="edit-{{ c.id }}">
+{% for value,label in statuses %}
+<option value="{{ value }}" {% if c.status == value %}selected{% endif %}>{{ label }}</option>
+{% endfor %}
+</select>
+</td>
+
+<td><input type="date" name="followup_date" value="{{ c.followup_date|date:'Y-m-d' }}" form="edit-{{ c.id }}"></td>
+
+<td>
+<textarea name="remarks" maxlength="5000" placeholder="Call outcome / next action" form="edit-{{ c.id }}">{{ c.remarks }}</textarea>
+<div class="actions">
+<form id="edit-{{ c.id }}" method="post" action="{% url 'alumni:update_contact' c.id %}">
+{% csrf_token %}
+</form>
+<button type="submit" form="edit-{{ c.id }}">Save Update</button>
+</div>
+</td>
+
+<td>
+{% if c.permission_status == "allowed" and c.status != "do_not_contact" and c.normalized_mobile %}
+<a class="btn btn-wa" target="_blank" rel="noopener noreferrer" href="https://wa.me/91{{ c.normalized_mobile }}?text=Hello%20{{ c.name|urlencode }}%2C%20greetings%20from%20MCTI%20Technologies.%20We%20would%20love%20to%20reconnect%20with%20you.">WhatsApp</a>
+{% elif c.status == "do_not_contact" or c.permission_status == "declined" %}
+<span class="tag">Do not contact</span>
+{% else %}
+<a class="btn" target="_blank" rel="noopener noreferrer"
+href="https://wa.me/91{{ c.normalized_mobile }}?text=Namaste%20{{ c.name|urlencode }}%2C%20MCTI%20Technologies%20se%20greetings.%20Hum%20apne%20former%20students%20se%20reconnect%20kar%20rahe%20hain.%20Kya%20aap%20MCTI%20ke%20course%20updates%20aur%20career%20opportunities%20WhatsApp%20par%20receive%20karna%20chahenge%3F%20Aapki%20permission%20ke%20bina%20hum%20promotional%20messages%20nahi%20bhejenge.%20Reply%20YES%20if%20you%20agree%2C%20or%20NO%20if%20you%20do%20not.">Request Permission</a>
+{% endif %}
+{% if c.last_contacted_at %}<div class="small">Last contacted: {{ c.last_contacted_at|date:"d M Y" }}</div>{% endif %}
+</td>
+</tr>
+{% empty %}
+<tr><td colspan="8" style="text-align:center;padding:35px">No alumni records found.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<nav aria-label="Alumni pages" style="display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;padding:20px 0">
+{% if prev_url %}<a class="btn btn-dark" href="{{ prev_url }}">← Previous</a>{% endif %}
+<strong>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</strong>
+<span class="muted">{{ filtered_total }} matching alumni</span>
+{% if next_url %}<a class="btn" href="{{ next_url }}">Next →</a>{% endif %}
+</nav>
+<p class="muted">Showing {{ contacts|length }} records on this page. Use filters to narrow the alumni list. WhatsApp opens a pre-filled message; staff must review and send it. Only mark consent as verified after permission is actually obtained.</p>
+</main>
+</body>
+</html>

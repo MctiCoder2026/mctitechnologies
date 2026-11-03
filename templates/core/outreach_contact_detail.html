@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Marketing Outreach | {{ contact.name }}</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#f5f6f8;
+    color:#222;
+}
+
+.container{
+    max-width:900px;
+    margin:30px auto;
+    padding:0 18px;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.header h1{
+    margin:0;
+    font-size:26px;
+}
+
+.subtitle{
+    color:#666;
+    margin-top:5px;
+}
+
+.back-btn{
+    text-decoration:none;
+    background:#222;
+    color:#fff;
+    padding:10px 16px;
+    border-radius:7px;
+}
+
+.card{
+    background:#fff;
+    border-radius:12px;
+    padding:22px;
+    margin-bottom:18px;
+    box-shadow:0 2px 10px rgba(0,0,0,.06);
+}
+
+.info-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:16px;
+}
+
+.label{
+    font-size:12px;
+    color:#777;
+    text-transform:uppercase;
+    margin-bottom:5px;
+}
+
+.value{
+    font-size:16px;
+    font-weight:600;
+}
+
+.actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:20px;
+}
+
+.action-btn{
+    display:inline-block;
+    text-decoration:none;
+    border:0;
+    padding:11px 18px;
+    border-radius:7px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.call-btn{
+    background:#222;
+    color:#fff;
+}
+
+.whatsapp-btn{
+    background:#e8f7ed;
+    color:#126b32;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+}
+
+.form-group{
+    margin-bottom:16px;
+}
+
+.form-group.full{
+    grid-column:1 / -1;
+}
+
+label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:6px;
+}
+
+select,
+input[type="date"],
+textarea{
+    width:100%;
+    padding:11px;
+    border:1px solid #d6d6d6;
+    border-radius:7px;
+    background:#fff;
+    font-size:14px;
+}
+
+textarea{
+    min-height:130px;
+    resize:vertical;
+}
+
+.save-btn{
+    background:#f58220;
+    color:#fff;
+    border:0;
+    padding:12px 22px;
+    border-radius:7px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.message{
+    background:#fff4dd;
+    border-left:4px solid #f58220;
+    padding:12px 15px;
+    margin-bottom:15px;
+    border-radius:5px;
+}
+
+.source{
+    margin-top:16px;
+    padding-top:15px;
+    border-top:1px solid #eee;
+    color:#666;
+    font-size:13px;
+}
+
+@media(max-width:650px){
+    .header{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .info-grid,
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .form-group.full{
+        grid-column:auto;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <div>
+            <h1>Marketing Outreach</h1>
+            <div class="subtitle">
+                Lead Follow-up & Branch Outreach
+            </div>
+        </div>
+
+        <a href="{% url 'outreach_dashboard' %}" class="back-btn">
+            ← Outreach Dashboard
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card">
+
+        <div class="info-grid">
+
+            <div>
+                <div class="label">Student / Lead</div>
+                <div class="value">{{ contact.name }}</div>
+            </div>
+
+            <div>
+                <div class="label">Mobile</div>
+                <div class="value">{{ contact.mobile }}</div>
+            </div>
+
+            <div>
+                <div class="label">Branch</div>
+                <div class="value">
+                    {{ contact.get_branch_display }}
+                </div>
+            </div>
+
+            <div>
+                <div class="label">Lead Type</div>
+                <div class="value">
+                    {{ contact.get_contact_type_display }}
+                </div>
+            </div>
+
+            {% if contact.email %}
+            <div>
+                <div class="label">Email</div>
+                <div class="value">{{ contact.email }}</div>
+            </div>
+            {% endif %}
+
+            <div>
+                <div class="label">Current Status</div>
+                <div class="value">
+                    {{ contact.get_status_display }}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="actions">
+
+            <a
+                href="tel:{{ contact.mobile }}"
+                class="action-btn call-btn"
+            >
+                📞 Call
+            </a>
+
+            <a
+                href="https://wa.me/91{{ contact.normalized_mobile }}"
+                target="_blank"
+                rel="noopener"
+                class="action-btn whatsapp-btn"
+            >
+                WhatsApp
+            </a>
+
+        </div>
+
+        {% if contact.source %}
+        <div class="source">
+            Source: {{ contact.source }}
+        </div>
+        {% endif %}
+
+    </div>
+
+
+    <div class="card">
+
+        <h2 style="margin-top:0;">
+            Update Follow-up
+        </h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label>Status</label>
+
+                    <select name="status" required>
+
+                        {% for value,label in status_choices %}
+                            <option
+                                value="{{ value }}"
+                                {% if contact.status == value %}selected{% endif %}
+                            >
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Permission</label>
+
+                    <select name="permission_status" required>
+
+                        {% for value,label in permission_choices %}
+                            <option
+                                value="{{ value }}"
+                                {% if contact.permission_status == value %}selected{% endif %}
+                            >
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Follow-up Date</label>
+
+                    <input
+                        type="date"
+                        name="followup_date"
+                        value="{% if contact.followup_date %}{{ contact.followup_date|date:'Y-m-d' }}{% endif %}"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Interested Course *</label>
+
+                    <select name="interested_course">
+                        <option value="">Select Course</option>
+
+                        {% for course in courses %}
+                            <option
+                                value="{{ course.id }}"
+                                {% if contact.interested_course_id == course.id %}selected{% endif %}
+                            >
+                                {{ course.title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                </div>
+
+
+                <div class="form-group full">
+
+                    <label>Notes</label>
+
+                    <textarea
+                        name="notes"
+                        placeholder="Call discussion, student interest, visit plan, next action..."
+                    >{{ contact.notes|default:"" }}</textarea>
+
+                </div>
+
+            </div>
+
+            <button type="submit" class="save-btn">
+                Save Follow-up
+            </button>
+
+        </form>
+
+        <div style="
+            margin-top:24px;
+            padding-top:20px;
+            border-top:1px solid #eee;
+        ">
+
+            {% if contact.converted_enquiry %}
+
+                <div style="
+                    background:#eaf7ee;
+                    padding:14px;
+                    border-radius:8px;
+                    margin-bottom:12px;
+                ">
+                    ✓ This lead has been converted to CRM Enquiry
+                    #{{ contact.converted_enquiry.id }}.
+                </div>
+
+                <a
+                    href="{% url 'enquiry_detail' contact.converted_enquiry.id %}"
+                    class="action-btn call-btn"
+                >
+                    Open Enquiry →
+                </a>
+
+            {% else %}
+
+                <div style="
+                    font-size:13px;
+                    color:#666;
+                    margin-bottom:10px;
+                ">
+                    Select the interested course and mark the lead as
+                    Interested or Visit Planned before converting to the main Enquiry CRM.
+                </div>
+
+                <form
+                    method="post"
+                    action="{% url 'outreach_convert_to_enquiry' contact.id %}"
+                    onsubmit="return confirm('Convert this Marketing Outreach lead to CRM Enquiry?');"
+                >
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="save-btn"
+                        style="background:#222;"
+                    >
+                        Convert to Enquiry →
+                    </button>
+                </form>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

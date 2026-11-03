@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCTI | Corporate Network Dashboard</title>
+<style>
+:root{--orange:#f97316;--black:#171717;--muted:#71717a;--bg:#f5f5f5}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--black);font-family:Arial,sans-serif}
+header{background:#171717;color:#fff;padding:20px 4%;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{font-size:26px;font-weight:900;letter-spacing:.5px}
+.brand span{color:var(--orange)}
+.subtitle{font-size:12px;color:#d4d4d8;margin-top:5px}
+button{border:0;background:var(--orange);color:#fff;border-radius:9px;padding:12px 17px;font-weight:700;cursor:pointer}
+main{max-width:1450px;margin:auto;padding:28px 4%}
+.heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:24px}
+h1{font-size:29px;margin:0}
+.muted{color:var(--muted);font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:#fff;border-radius:15px;padding:22px;box-shadow:0 3px 15px #00000009}
+.kpi-label{font-size:13px;color:#666;font-weight:600}
+.kpi-value{font-size:39px;font-weight:900;margin-top:13px}
+.kpi-value.orange{color:var(--orange)}
+.section-title{margin:30px 0 16px;font-size:21px}
+.branches{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.branch-name{font-size:19px;font-weight:800;margin-bottom:18px}
+.stats{display:flex;justify-content:space-between;gap:12px}
+.stat-number{font-size:27px;font-weight:800;margin-top:6px}
+.stat-label{font-size:12px;color:#777}
+.progress{height:7px;background:#eee;border-radius:10px;overflow:hidden;margin-top:18px}
+.progress>div{height:100%;background:var(--orange);width:0;transition:width .5s}
+.footer{margin-top:28px;padding:18px 0;border-top:1px solid #ddd;font-size:12px;color:#666;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.error{display:none;background:#fff0ed;color:#a12713;padding:14px;border-radius:9px;margin-bottom:18px}
+@media(max-width:950px){.kpis{grid-template-columns:repeat(2,1fr)}.branches{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:580px){.kpis,.branches{grid-template-columns:1fr}h1{font-size:23px}.kpi-value{font-size:34px}}
+
+.header-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.walkin-btn{display:inline-block;background:#f97316;color:#fff;text-decoration:none;padding:12px 17px;border-radius:9px;font-size:14px;font-weight:800}
+.walkin-btn:hover{background:#ea580c}
+.fullscreen-btn{background:#3f3f46}
+.fullscreen-btn:hover{background:#52525b}
+@media(max-width:580px){.header-actions{width:100%}.walkin-btn,.fullscreen-btn{flex:1;text-align:center}}
+
+
+.walkin-report-btn{
+ display:inline-block;
+ background:#fff;
+ color:#171717;
+ text-decoration:none;
+ padding:12px 17px;
+ border-radius:9px;
+ font-size:14px;
+ font-weight:800;
+}
+.walkin-report-btn:hover{background:#ffedd5}
+@media(max-width:580px){
+ .walkin-report-btn{flex:1;text-align:center}
+}
+
+/* MCTI PREMIUM BRANCH CARDS V2 */.branches{gap:18px!important}.branches>.card{position:relative;overflow:hidden;background:linear-gradient(145deg,#fff 70%,#fff7f0)!important;border:1px solid #f0e5db!important;border-radius:20px!important;padding:24px!important;box-shadow:0 8px 26px rgba(0,0,0,.055)!important;transition:transform .2s,box-shadow .2s}.branches>.card:before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#f97316,#ffbf86)}.branches>.card:hover{transform:translateY(-4px);box-shadow:0 15px 35px rgba(0,0,0,.10)!important}.branches .branch-name{font-size:20px!important;font-weight:900!important;color:#181818!important;margin-bottom:18px!important}.branches .stats{background:#fafafa;border:1px solid #f0f0f0;border-radius:12px;padding:15px!important}.branches .stat-label{font-size:11px!important;letter-spacing:.5px;color:#777!important}.branches .stat-number{font-size:30px!important;font-weight:900!important;color:#181818!important}.branches .stats>div:last-child .stat-number{color:#f97316!important}.branches .progress{height:9px!important;border-radius:20px!important;background:#ececec!important;overflow:hidden;margin-top:17px!important}.branches .progress>div{height:100%;border-radius:20px;background:linear-gradient(90deg,#f97316,#ff9b45)!important}.branches .muted{font-size:12px!important;color:#666!important}@media(max-width:600px){.branches>.card{padding:17px!important}.branches .stat-number{font-size:25px!important}}</style>
+<style id="mcti-chart-css">.mcti-chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.mcti-chart-card{background:#fff;border:1px solid #e9e9e9;border-radius:18px;padding:23px;box-shadow:0 8px 25px #00000008;min-width:0}.mcti-chart-card h3{margin:0;font-size:17px;color:#171717}.mcti-chart-card>p{color:#888;font-size:12px;margin:8px 0 20px}.mcti-chart-row{display:grid;grid-template-columns:100px 1fr 65px;gap:8px;align-items:center;margin:13px 0;font-size:11px}.mcti-chart-track{height:9px;background:#eee;border-radius:8px;overflow:hidden;margin:3px 0}.mcti-chart-fill{height:100%;border-radius:8px;background:#f97316}.mcti-chart-fill.dark{background:#222}.mcti-chart-donut{width:180px;height:180px;border-radius:50%;display:grid;place-items:center}.mcti-chart-hole{width:120px;height:120px;background:white;border-radius:50%;display:grid;place-items:center;font-size:23px;font-weight:900}.mcti-chart-legend{display:grid;gap:8px;font-size:12px}.mcti-chart-legend i{display:inline-block;width:10px;height:10px;margin-right:8px;border-radius:3px}@media(max-width:850px){.mcti-chart-grid{grid-template-columns:1fr}}@media(max-width:450px){.mcti-chart-card{padding:15px}.mcti-chart-row{grid-template-columns:75px 1fr 55px}}</style>
+</head>
+<body>
+<header>
+ <div>
+  <div class="brand"><span>MCTI</span> TECHNOLOGIES</div>
+  <div class="subtitle">CORPORATE OFFICE | MAHARASHTRA COMPUTER TRAINING INSTITUTE</div>
+ </div>
+ <div class="header-actions">
+  <a id="walkin-report-btn" class="walkin-report-btn" href="{% url 'corporate_walkin_report' %}">Walk-in Analytics</a>
+  <a id="walkin-btn" class="walkin-btn" href="{% url 'corporate_walkin' %}">+ New Walk-in Enquiry</a>
+  <form method="post" action="{% url 'corporate_logout' %}" style="margin:0">{% csrf_token %}<button type="submit" class="walkin-report-btn" style="cursor:pointer;border:0">Logout</button></form>
+  <button class="fullscreen-btn" onclick="toggleFullScreen()">Full Screen Display</button>
+ </div>
+</header>
+
+<main>
+ <div class="heading">
+  <div>
+   <h1>Our Training Network</h1>
+   <div class="muted">Verified CRM records across six MCTI centers</div>
+  </div>
+  <div class="muted" id="updated">Connecting to live CRM...</div>
+ </div>
+
+ <div id="error" class="error">Unable to refresh data. Displayed figures may be outdated.</div>
+
+ <div class="kpis">
+  <div class="card"><div class="kpi-label">Total Network Enquiries</div><div id="total_enquiries" class="kpi-value">—</div></div>
+  <div class="card"><div class="kpi-label">Total Network Admissions</div><div id="total_admissions" class="kpi-value orange">—</div></div>
+  <div class="card"><div class="kpi-label">Today's Enquiries</div><div id="today_enquiries" class="kpi-value">—</div></div>
+  <div class="card"><div class="kpi-label">Today's Admissions</div><div id="today_admissions" class="kpi-value orange">—</div></div>
+ </div>
+
+ <h2 class="section-title">Center-wise Performance</h2>
+ <div class="branches" id="branches"></div>
+<section id="mcti-analytics-charts" style="margin:32px 0"><h2 style="font-size:24px;font-weight:900;margin-bottom:6px">Analytics Command Center</h2><p style="color:#777;margin-bottom:20px">Live performance across six training centers</p><div class="mcti-chart-grid"><div class="mcti-chart-card"><h3>Branch Performance</h3><p>Enquiries vs Admissions</p><div id="mcti-chart-branches"></div></div><div class="mcti-chart-card"><h3>Enquiry Distribution</h3><p>Share across six centers</p><div id="mcti-chart-donut"></div></div><div class="mcti-chart-card"><h3>Monthly Performance</h3><p>Current month</p><div id="mcti-chart-month"></div></div><div class="mcti-chart-card"><h3>Admission-to-Enquiry Ratio</h3><p>Volume ratio, not lead conversion</p><div id="mcti-chart-ratio"></div></div></div></section>
+
+
+</main>
+
+<script src="{% load static %}{% static 'core/js/corporate_charts.js' %}"></script>
+<script>
+const apiUrl="{% url 'corporate_dashboard_api' %}";
+const formatNumber=n=>Number(n||0).toLocaleString("en-IN");
+let busy=false;
+
+async function refreshDashboard(){
+ if(busy)return;
+ busy=true;
+ try{
+  const response=await fetch(apiUrl,{credentials:"same-origin",cache:"no-store"});
+  if(!response.ok)throw new Error("API "+response.status);
+  const data=await response.json();
+
+  for(const key of ["total_enquiries","total_admissions","today_enquiries","today_admissions"]){
+   document.getElementById(key).textContent=formatNumber(data[key]);
+  }
+
+  const max=Math.max(1,...data.branches.map(x=>x.enquiries));
+  document.getElementById("branches").innerHTML=data.branches.map(b=>`
+   <div class="card">
+    <div class="branch-name">${b.branch}</div>
+    <div class="stats">
+     <div><div class="stat-label">Enquiries</div><div class="stat-number">${formatNumber(b.enquiries)}</div></div>
+     <div><div class="stat-label">Admissions</div><div class="stat-number">${formatNumber(b.admissions)}</div></div>
+    </div>
+    <div class="progress"><div style="width:${Math.min(100,100*b.enquiries/max)}%"></div></div>
+    <div class="muted" style="margin-top:13px">Today: ${formatNumber(b.today_enquiries)} enquiries · ${formatNumber(b.today_admissions)} admissions</div>
+   </div>
+  `).join("");
+
+  if(window.renderCorporateCharts)window.renderCorporateCharts(data);
+   document.getElementById("updated").textContent="Last updated: "+data.updated_at+" IST";
+  document.getElementById("error").style.display="none";
+ }catch(e){
+  document.getElementById("error").style.display="block";
+  document.getElementById("updated").textContent="Live connection unavailable";
+ }finally{busy=false}
+}
+function toggleFullScreen(){
+ if(document.fullscreenElement){document.exitFullscreen()}
+ else{document.documentElement.requestFullscreen()}
+}
+refreshDashboard();
+setInterval(refreshDashboard,30000);
+</script>
+
+<style id="mcti-premium-footer-css">
+.mcti-premium-footer{
+ background:#171717;color:#c4c4c4;
+ margin-top:40px;padding:48px 5% 20px;
+ font-family:Arial,sans-serif;
+}
+.mcti-footer-inner{max-width:1450px;margin:auto}
+.mcti-footer-grid{
+ display:grid;grid-template-columns:2fr 1fr 1fr;
+ gap:45px;padding-bottom:35px;
+}
+.mcti-footer-brand{
+ color:#fff;font-size:24px;font-weight:900;
+ letter-spacing:.5px;
+}
+.mcti-footer-brand span{color:#f97316}
+.mcti-footer-tagline{
+ color:#f97316;font-size:12px;
+ font-weight:700;margin-top:8px;
+}
+.mcti-premium-footer p{
+ font-size:13px;line-height:1.8;
+ max-width:390px;margin:14px 0;
+}
+.mcti-premium-footer h3{
+ color:#fff;font-size:15px;
+ margin:4px 0 18px;
+}
+.mcti-premium-footer a{
+ display:block;color:#c4c4c4;
+ text-decoration:none;font-size:13px;
+ margin:12px 0;
+}
+.mcti-premium-footer a:hover{color:#f97316}
+.mcti-footer-bottom{
+ border-top:1px solid #393939;
+ padding-top:20px;
+ display:flex;justify-content:space-between;
+ gap:12px;flex-wrap:wrap;
+ font-size:12px;
+}
+@media(max-width:700px){
+ .mcti-footer-grid{grid-template-columns:1fr;gap:20px}
+ .mcti-premium-footer{padding:35px 6% 20px}
+ .mcti-footer-bottom{flex-direction:column}
+}
+</style>
+
+<footer class="mcti-premium-footer">
+ <div class="mcti-footer-inner">
+  <div class="mcti-footer-grid">
+   <div>
+    <div class="mcti-footer-brand"><span>MCTI</span> TECHNOLOGIES</div>
+    <div class="mcti-footer-tagline">Education | IT Solutions | AI | SaaS</div>
+    <p>Empowering learners and businesses through technology,
+    innovation and professional education.</p>
+   </div>
+   <div>
+    <h3>Corporate Office</h3>
+    <p>Nerul, Navi Mumbai<br>
+    Maharashtra, India</p>
+    <p>Six Training Centers Across Navi Mumbai</p>
+   </div>
+   <div>
+    <h3>Quick Access</h3>
+    <a href="{% url 'corporate_dashboard' %}">Network Dashboard</a>
+    <a href="{% url 'corporate_walkin' %}">New Walk-in Enquiry</a>
+    <a href="{% url 'corporate_walkin_report' %}">Walk-in Analytics</a>
+   </div>
+  </div>
+  <div class="mcti-footer-bottom">
+   <span>© 2026 MCTI Technologies. All Rights Reserved.</span>
+   <span>Professional Education • Technology • Innovation</span>
+  </div>
+ </div>
+</footer>
+
+
+</body>
+</html>

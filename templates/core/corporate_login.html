@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Corporate Login | MCTI Technologies</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;font-family:Arial,sans-serif;background:#f5f5f5;color:#171717}
+.left{width:52%;background:#171717;color:white;display:flex;flex-direction:column;justify-content:center;padding:8%}
+.logo{font-size:44px;font-weight:900;letter-spacing:1px}
+.logo span{color:#f97316}
+.tag{font-size:13px;letter-spacing:2px;color:#fb923c;font-weight:700;margin-top:15px}
+.left h1{font-size:37px;line-height:1.2;margin:45px 0 20px}
+.left p{color:#d4d4d8;font-size:16px;line-height:1.8;max-width:450px}
+.centers{margin-top:40px;font-size:13px;color:#a1a1aa;line-height:2}
+.right{width:48%;display:flex;justify-content:center;align-items:center;padding:30px}
+.panel{background:#fff;width:100%;max-width:430px;padding:45px;border-radius:20px;box-shadow:0 12px 45px #00000010}
+.panel h2{font-size:27px;margin:0 0 10px}
+.sub{color:#777;font-size:14px;margin-bottom:32px}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:9px}
+input{width:100%;padding:15px;border:1px solid #ddd;border-radius:9px;font-size:15px;margin-bottom:23px;outline:none}
+input:focus{border-color:#f97316}
+button{width:100%;background:#f97316;color:#fff;border:0;border-radius:9px;padding:16px;font-size:15px;font-weight:800;cursor:pointer}
+button:hover{background:#ea580c}
+.error{background:#fff0ed;color:#b42318;border-radius:8px;padding:12px;font-size:13px;margin-bottom:20px}
+.note{font-size:12px;color:#999;text-align:center;margin-top:25px}
+@media(max-width:800px){body{flex-direction:column}.left,.right{width:100%}.left{padding:40px 30px}.left h1{font-size:27px;margin:25px 0 10px}.centers{margin-top:15px}.right{padding:25px}.panel{padding:30px}}
+</style>
+</head>
+<body>
+<section class="left">
+ <div class="logo"><span>MCTI</span> TECHNOLOGIES</div>
+ <div class="tag">CORPORATE OFFICE • NERUL</div>
+ <h1>One Network.<br>Six Training Centers.<br>One Vision.</h1>
+ <p>Secure access to the MCTI Technologies corporate performance dashboard, powered by verified training-center CRM records.</p>
+ <div class="centers">KHARGHAR • PANVEL • KOPERKHAIRANE<br>KAMOTHE • GHANSOLI • NERUL</div>
+</section>
+
+<section class="right">
+ <div class="panel">
+  <h2>Corporate Login</h2>
+  <div class="sub">Authorized MCTI Corporate Office access only.</div>
+
+  {% if error %}
+  <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="{% url 'corporate_login' %}">
+   {% csrf_token %}
+   <label for="username">Username</label>
+   <input id="username" name="username" type="text" autocomplete="username" required autofocus>
+
+   <label for="password">Password</label>
+   <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+   <button type="submit">Access Corporate Dashboard</button>
+  </form>
+
+  <div class="note">MCTI Technologies | Secure Corporate Portal</div>
+ </div>
+</section>
+</body>
+</html>

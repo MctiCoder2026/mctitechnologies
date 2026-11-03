@@ -118,6 +118,39 @@ td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
 </style>
     <link rel="stylesheet" href="/static/css/staff_mobile.css">
 
+
+<style>
+/* MCTI_COMPACT_FEE_ACTIONS_V1 */
+td:has(.mcti-fee-language) > div {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 5px !important;
+    white-space: nowrap;
+}
+.mcti-fee-language {
+    display: inline-block !important;
+    width: 105px !important;
+    min-width: 105px !important;
+    max-width: 105px !important;
+    height: 30px !important;
+    padding: 3px 5px !important;
+    margin: 0 !important;
+    font-size: 11px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+    color: #111 !important;
+    flex: 0 0 105px !important;
+}
+td:has(.mcti-fee-language) {
+    vertical-align: middle !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+}
+</style>
+
 </head>
 
 <body>
@@ -310,7 +343,7 @@ td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
                                         class="action action-payment"
                                         href="{% url 'add_enrollment_fee_payment' row.enrollment.id %}"
                                     >
-                                        Add Payment
+                                        Fee +
                                     </a>
 
                                     {% if row.mobile and row.mobile != "-" %}
@@ -323,11 +356,25 @@ td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
                                     </a>
 
                                     {% if row.balance_fee > 0 %}
-                                    <a
+                                    <select class="mcti-fee-language"
+    aria-label="Choose WhatsApp reminder language"
+    data-mobile="{{ row.mobile }}"
+    data-name="{{ row.student_name }}"
+    data-course="{{ row.course }}"
+    data-total="{{ row.total_fee|floatformat:0 }}"
+    data-paid="{{ row.paid_fee|floatformat:0 }}"
+    data-pending="{{ row.balance_fee|floatformat:0 }}"
+    data-due="{{ row.next_due_date|date:'d M Y' }}">
+    <option value="">Language</option>
+    <option value="en">English</option>
+    <option value="mr">मराठी</option>
+    <option value="hi">हिंदी</option>
+</select>
+<a
                                         class="action action-whatsapp"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        href="https://wa.me/91{{ row.mobile }}?text=Dear%20{{ row.student_name|urlencode }},%20your%20pending%20fee%20is%20₹{{ row.balance_fee|floatformat:0 }}.{% if row.next_due_date %}%20Next%20due%20date:%20{{ row.next_due_date|date:'d M Y'|urlencode }}.{% endif %}%20Kindly%20make%20the%20payment%20at%20the%20earliest.%20-%20MCTI%20Technologies"
+                                        href="https://wa.me/91{{ row.mobile }}?text=Dear%20{{ row.student_name|urlencode }},%0A%0AThis%20is%20a%20reminder%20regarding%20your%20pending%20course%20fee.%0A%0ACourse:%20{{ row.course|urlencode }}%0A%0ATotal%20Fee:%20₹{{ row.total_fee|floatformat:0 }}%0APaid%20Fee:%20₹{{ row.paid_fee|floatformat:0 }}%0APending%20Fee:%20₹{{ row.balance_fee|floatformat:0 }}{% if row.next_due_date %}%0ANext%20Due%20Date:%20{{ row.next_due_date|date:'d M Y'|urlencode }}{% endif %}%0A%0AIMPORTANT%20NOTICE:%0ADelayed%20fee%20payment%20may%20affect%20your%20exam%20schedule,%20and%20LMS%20modules%20may%20be%20automatically%20locked%20until%20the%20required%20fees%20are%20paid.%0A%0AKindly%20clear%20your%20pending%20fees%20at%20the%20earliest%20to%20avoid%20any%20inconvenience.%0A%0ARegards,%0AMCTI%0AAccount%20Department"
                                         title="Send fee reminder on WhatsApp"
                                     >
                                         💬
@@ -363,6 +410,78 @@ td{padding:11px 9px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
 </main>
 
     <script src="/static/js/staff_mobile.js" defer></script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".mcti-fee-language").forEach(function (el) {
+        el.addEventListener("change", function () {
+            const lang = el.value;
+            if (!lang) return;
+            const d = el.dataset;
+
+            const content = {
+                en: {
+                    intro: "This is a reminder regarding your pending course fee.",
+                    labels: ["Course", "Total Fee", "Paid Fee", "Pending Fee", "Next Due Date"],
+                    notice: "IMPORTANT NOTICE:\nDelayed fee payment may affect your exam schedule, and LMS modules may be automatically locked until the required fees are paid.",
+                    closing: "Kindly clear your pending fees at the earliest.\n\nRegards,\nMCTI\nAccount Department"
+                },
+                mr: {
+                    intro: "आपल्या अभ्यासक्रमाच्या थकीत शुल्काबाबत ही आठवण आहे.",
+                    labels: ["अभ्यासक्रम", "एकूण शुल्क", "भरलेले शुल्क", "थकीत शुल्क", "पुढील देय तारीख"],
+                    notice: "महत्त्वाची सूचना:\nशुल्क भरण्यास विलंब झाल्यास परीक्षेच्या वेळापत्रकावर परिणाम होऊ शकतो आणि आवश्यक शुल्क भरेपर्यंत LMS मॉड्यूल्सचा प्रवेश आपोआप बंद होऊ शकतो.",
+                    closing: "कृपया थकीत शुल्क लवकरात लवकर भरा.\n\nधन्यवाद,\nMCTI\nलेखा विभाग"
+                },
+                hi: {
+                    intro: "आपके कोर्स की बकाया फीस के संबंध में यह रिमाइंडर है।",
+                    labels: ["कोर्स", "कुल फीस", "जमा फीस", "बकाया फीस", "अगली देय तारीख"],
+                    notice: "महत्वपूर्ण सूचना:\nफीस भुगतान में देरी से परीक्षा के समय पर असर पड़ सकता है और आवश्यक फीस जमा होने तक LMS मॉड्यूल्स का एक्सेस अपने आप बंद हो सकता है।",
+                    closing: "कृपया बकाया फीस जल्द से जल्द जमा करें।\n\nधन्यवाद,\nMCTI\nलेखा विभाग"
+                }
+            };
+
+            const m = content[lang];
+            if (!m) return;
+
+            const details = [
+                m.labels[0] + ": " + d.course,
+                m.labels[1] + ": ₹" + d.total,
+                m.labels[2] + ": ₹" + d.paid,
+                m.labels[3] + ": ₹" + d.pending
+            ];
+
+            if (d.due) details.push(m.labels[4] + ": " + d.due);
+
+            const message = [
+                "Hello " + d.name + ",",
+                m.intro,
+                details.join("\n"),
+                m.notice,
+                m.closing
+            ].join("\n\n");
+
+            let phone = (d.mobile || "").replace(/\D/g, "");
+            if (phone.startsWith("91") && phone.length === 12) {
+                phone = phone.slice(2);
+            }
+
+            if (!/^[6-9]\d{9}$/.test(phone)) {
+                alert("Invalid student mobile number.");
+                el.value = "";
+                return;
+            }
+
+            window.open(
+                "https://wa.me/91" + phone + "?text=" + encodeURIComponent(message),
+                "_blank",
+                "noopener,noreferrer"
+            );
+            el.value = "";
+        });
+    });
+});
+</script>
 
 </body>
 </html>

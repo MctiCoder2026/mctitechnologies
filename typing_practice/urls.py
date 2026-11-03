@@ -78,3 +78,10 @@ urlpatterns += [
     path("certificate/verify/<uuid:verification_token>/",
          views.verify_typing_certificate, name="verify_certificate"),
 ]
+
+from . import free_lab
+
+urlpatterns += [
+    path("free/progress/save/", free_lab.save_progress,
+         name="public_save_progress"),
+]

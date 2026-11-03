@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Walk-in Enquiry | MCTI Technologies</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f5f5;color:#171717;font-family:Arial,sans-serif}
+header{background:#171717;color:white;padding:20px 5%;display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.brand{font-size:25px;font-weight:900}
+.brand span{color:#f97316}
+.sub{font-size:12px;color:#ccc;margin-top:5px}
+a.back{color:white;text-decoration:none;background:#333;padding:12px 16px;border-radius:9px;font-size:13px}
+main{max-width:760px;margin:35px auto;padding:0 18px}
+.card{background:white;border-radius:18px;padding:35px;box-shadow:0 5px 25px #0000000b}
+h1{font-size:27px;margin:0 0 8px}
+.desc{color:#777;font-size:14px;margin-bottom:28px;line-height:1.6}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.field{margin-bottom:20px}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:9px}
+input,select,textarea{width:100%;padding:14px;border:1px solid #ddd;border-radius:9px;font-size:14px;background:white;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#f97316}
+textarea{min-height:95px;resize:vertical}
+button{background:#f97316;color:white;border:0;padding:16px 22px;border-radius:10px;font-weight:800;font-size:15px;cursor:pointer;width:100%}
+button:hover{background:#ea580c}
+.success{background:#ecfdf3;color:#067647;padding:15px;border-radius:9px;margin-bottom:20px;font-size:14px}
+.error{background:#fff0ed;color:#b42318;padding:15px;border-radius:9px;margin-bottom:20px;font-size:14px}
+.note{font-size:12px;color:#777;margin-top:18px;line-height:1.6}
+footer{text-align:center;color:#999;font-size:12px;padding:25px}
+@media(max-width:600px){.grid{grid-template-columns:1fr;gap:0}.card{padding:23px}h1{font-size:23px}}
+
+.duplicate-alert{background:#fff7ed;border:1px solid #fdba74;border-radius:10px;padding:16px;margin-bottom:20px;color:#9a3412}
+.duplicate-alert p{font-size:13px;line-height:1.6}
+.confirm-label{display:flex;align-items:flex-start;gap:10px;line-height:1.5;cursor:pointer}
+.confirm-label input{width:18px;height:18px;flex-shrink:0;margin:0;accent-color:#f97316}
+.check-error{color:#b42318;background:#fff0ed;padding:12px;border-radius:9px;margin-bottom:20px;font-size:13px}
+[hidden]{display:none!important}
+button:disabled{opacity:.55;cursor:not-allowed}
+
+</style>
+</head>
+<body>
+
+<header>
+ <div>
+  <div class="brand"><span>MCTI</span> TECHNOLOGIES</div>
+  <div class="sub">NERUL CORPORATE OFFICE | WALK-IN ENQUIRY</div>
+ </div>
+ <a class="back" href="{% url 'corporate_dashboard' %}">Back to Dashboard</a>
+</header>
+
+<main>
+<div class="card">
+ <h1>New Walk-in Enquiry</h1>
+ <div class="desc">Register a visitor at MCTI Corporate Office. The enquiry will be assigned to their preferred training center.</div>
+
+ {% for message in messages %}
+ <div class="success">{{ message }}</div>
+ {% endfor %}
+
+ {% if error %}
+ <div class="error">{{ error }}</div>
+ {% endif %}
+
+ <form method="post" action="{% url 'corporate_walkin' %}">
+ {% csrf_token %}
+
+ <div class="grid">
+  <div class="field">
+   <label for="name">Student / Visitor Name *</label>
+   <input id="name" name="name" type="text" maxlength="150" value="{{ request.POST.name|default:'' }}" required autocomplete="name">
+  </div>
+
+  <div class="field">
+   <label for="mobile">Mobile Number *</label>
+   <input id="mobile" name="mobile" type="tel" inputmode="numeric" pattern="[6-9][0-9]{9}" maxlength="10" value="{{ request.POST.mobile|default:'' }}" required autocomplete="tel">
+  </div>
+ </div>
+
+ <div id="duplicate-alert" class="duplicate-alert" role="alert" hidden>
+  <strong>Existing Enquiry Found</strong>
+  <p id="duplicate-message"></p>
+  <label class="confirm-label">
+   <input type="checkbox" id="confirm-duplicate"
+          name="confirm_duplicate" value="yes">
+   I have reviewed the existing enquiry warning and want to register a new enquiry.
+  </label>
+ </div>
+
+ <div id="mobile-check-error" class="check-error" hidden>
+  Unable to verify existing enquiries. Please retry before saving.
+ </div>
+
+ <div class="field">
+  <label for="course">Interested Course *</label>
+  <select id="course" name="course" required>
+   <option value="">Select Interested Course</option>
+   {% for course in courses %}
+   <option value="{{ course.id }}" {% if request.POST.course == course.id|stringformat:"s" %}selected{% endif %}>{{ course.title }}</option>
+   {% endfor %}
+  </select>
+ </div>
+
+ <div class="field">
+  <label for="branch">Preferred Training Center *</label>
+  <select id="branch" name="branch" required>
+   <option value="">Select Training Center</option>
+   {% for key, label in branches %}
+   <option value="{{ key }}" {% if request.POST.branch == key %}selected{% endif %}>{{ label }}</option>
+   {% endfor %}
+  </select>
+ </div>
+
+ <div class="field">
+  <label for="remarks">Visit Remarks (Optional)</label>
+  <textarea id="remarks" name="remarks" maxlength="1000" placeholder="Course requirements, preferred timing, counselling notes...">{{ request.POST.remarks|default:'' }}</textarea>
+ </div>
+
+ <button type="submit">Save Walk-in Enquiry</button>
+
+ <div class="note">
+  Source: Nerul Corporate Office — Walk-in.
+  The selected training center receives the enquiry in the existing CRM.
+  Visitor information is not displayed on the public-facing performance dashboard.
+ </div>
+ </form>
+</div>
+</main>
+
+
+
+<script>
+(function(){
+ const mobile=document.getElementById("mobile");
+ const alertBox=document.getElementById("duplicate-alert");
+ const alertMessage=document.getElementById("duplicate-message");
+ const confirmBox=document.getElementById("confirm-duplicate");
+ const errorBox=document.getElementById("mobile-check-error");
+ const form=mobile.closest("form");
+ const submit=form.querySelector('button[type="submit"]');
+ const api="{% url 'corporate_walkin_duplicate_check' %}";
+ const valid=/^[6-9][0-9]{9}$/;
+ let checkedMobile="";
+ let checking=false;
+ let timer=null;
+ let controller=null;
+
+ function updateButton(){
+  const number=mobile.value.trim();
+  const needsConfirmation=!alertBox.hidden && !confirmBox.checked;
+  submit.disabled=!valid.test(number) ||
+                  checkedMobile!==number ||
+                  checking || needsConfirmation ||
+                  !errorBox.hidden;
+ }
+
+ async function checkMobile(){
+  const number=mobile.value.trim();
+  if(controller)controller.abort();
+  controller=null;
+  checkedMobile="";
+  alertBox.hidden=true;
+  errorBox.hidden=true;
+  confirmBox.checked=false;
+
+  if(!valid.test(number)){
+   checking=false;
+   updateButton();
+   return;
+  }
+
+  checking=true;
+  updateButton();
+  const currentController=new AbortController();
+  controller=currentController;
+
+  try{
+   const response=await fetch(api+"?mobile="+encodeURIComponent(number),{
+    credentials:"same-origin",
+    cache:"no-store",
+    signal:currentController.signal
+   });
+   if(!response.ok)throw new Error("API unavailable");
+   const data=await response.json();
+   if(controller!==currentController || mobile.value.trim()!==number)return;
+   if(!data.valid)throw new Error("Invalid response");
+   checkedMobile=number;
+   if(data.duplicate){
+    alertMessage.textContent="This mobile number has "+data.count+
+      " existing enquiry record(s). Confirm before creating another.";
+    alertBox.hidden=false;
+   }
+  }catch(err){
+   if(err.name!=="AbortError" && controller===currentController){
+    errorBox.hidden=false;
+   }
+  }finally{
+   if(controller===currentController){
+    checking=false;
+    updateButton();
+   }
+  }
+ }
+
+ mobile.addEventListener("input",function(){
+  clearTimeout(timer);
+  if(controller)controller.abort();
+  checkedMobile="";
+  alertBox.hidden=true;
+  errorBox.hidden=true;
+  confirmBox.checked=false;
+  checking=false;
+  updateButton();
+  timer=setTimeout(checkMobile,400);
+ });
+ mobile.addEventListener("blur",function(){
+  if(checkedMobile!==mobile.value.trim()) {
+   clearTimeout(timer);
+   checkMobile();
+  }
+ });
+ confirmBox.addEventListener("change",updateButton);
+
+ form.addEventListener("submit",function(e){
+  updateButton();
+  if(submit.disabled){
+   e.preventDefault();
+  }
+ });
+
+ if(valid.test(mobile.value.trim()))checkMobile();
+ else updateButton();
+})();
+</script>
+
+
+<style id="mcti-premium-footer-css">
+.mcti-premium-footer{
+ background:#171717;color:#c4c4c4;
+ margin-top:40px;padding:48px 5% 20px;
+ font-family:Arial,sans-serif;
+}
+.mcti-footer-inner{max-width:1450px;margin:auto}
+.mcti-footer-grid{
+ display:grid;grid-template-columns:2fr 1fr 1fr;
+ gap:45px;padding-bottom:35px;
+}
+.mcti-footer-brand{
+ color:#fff;font-size:24px;font-weight:900;
+ letter-spacing:.5px;
+}
+.mcti-footer-brand span{color:#f97316}
+.mcti-footer-tagline{
+ color:#f97316;font-size:12px;
+ font-weight:700;margin-top:8px;
+}
+.mcti-premium-footer p{
+ font-size:13px;line-height:1.8;
+ max-width:390px;margin:14px 0;
+}
+.mcti-premium-footer h3{
+ color:#fff;font-size:15px;
+ margin:4px 0 18px;
+}
+.mcti-premium-footer a{
+ display:block;color:#c4c4c4;
+ text-decoration:none;font-size:13px;
+ margin:12px 0;
+}
+.mcti-premium-footer a:hover{color:#f97316}
+.mcti-footer-bottom{
+ border-top:1px solid #393939;
+ padding-top:20px;
+ display:flex;justify-content:space-between;
+ gap:12px;flex-wrap:wrap;
+ font-size:12px;
+}
+@media(max-width:700px){
+ .mcti-footer-grid{grid-template-columns:1fr;gap:20px}
+ .mcti-premium-footer{padding:35px 6% 20px}
+ .mcti-footer-bottom{flex-direction:column}
+}
+</style>
+
+<footer class="mcti-premium-footer">
+ <div class="mcti-footer-inner">
+  <div class="mcti-footer-grid">
+   <div>
+    <div class="mcti-footer-brand"><span>MCTI</span> TECHNOLOGIES</div>
+    <div class="mcti-footer-tagline">Education | IT Solutions | AI | SaaS</div>
+    <p>Empowering learners and businesses through technology,
+    innovation and professional education.</p>
+   </div>
+   <div>
+    <h3>Corporate Office</h3>
+    <p>Nerul, Navi Mumbai<br>
+    Maharashtra, India</p>
+    <p>Six Training Centers Across Navi Mumbai</p>
+   </div>
+   <div>
+    <h3>Quick Access</h3>
+    <a href="{% url 'corporate_dashboard' %}">Network Dashboard</a>
+    <a href="{% url 'corporate_walkin' %}">New Walk-in Enquiry</a>
+    <a href="{% url 'corporate_walkin_report' %}">Walk-in Analytics</a>
+   </div>
+  </div>
+  <div class="mcti-footer-bottom">
+   <span>© 2026 MCTI Technologies. All Rights Reserved.</span>
+   <span>Professional Education • Technology • Innovation</span>
+  </div>
+ </div>
+</footer>
+
+</body>
+</html>

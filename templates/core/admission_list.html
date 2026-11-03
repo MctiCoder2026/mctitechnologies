@@ -822,6 +822,17 @@ tbody tr:hover{
                     {% endfor %}
                 </select>
 
+                <select name="month"
+                    style="padding:10px 12px; border:1px solid #ddd; border-radius:6px;">
+                    <option value="">All Months</option>
+                    {% for number, name in admission_months %}
+                    <option value="{{ number }}"
+                        {% if admission_month == number|stringformat:"s" %}selected{% endif %}>
+                        {{ name }}
+                    </option>
+                    {% endfor %}
+                </select>
+
                 <button
                     type="submit"
                     class="search-btn"
@@ -830,7 +841,7 @@ tbody tr:hover{
                 </button>
 
 
-                {% if search or admission_year %}
+                {% if search or admission_year or admission_month %}
 
                 <a
                     href="{% url 'admission_list' %}"
@@ -977,6 +988,10 @@ tbody tr:hover{
                             </td>
 
                             <td>
+                                <strong title="Actual admission year">
+                                    {{ admission.admission_date|date:"Y" }}
+                                </strong>
+
                                 {% if request.user.is_superuser %}
 
                                 <form
@@ -1008,12 +1023,6 @@ tbody tr:hover{
                                         Mark
                                     </button>
                                 </form>
-
-                                {% else %}
-
-                                <strong>
-                                    {{ admission.admission_year|default:"-" }}
-                                </strong>
 
                                 {% endif %}
                             </td>

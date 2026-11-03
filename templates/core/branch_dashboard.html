@@ -365,6 +365,703 @@
 
     <link rel="stylesheet" href="/static/css/staff_mobile.css">
 
+
+<!-- MCTI_BRANCH_PREMIUM_FINAL_V1 -->
+<style>
+:root {
+  --mcti-orange: #ff4b0b;
+  --mcti-ink: #172033;
+  --mcti-navy: #111827;
+  --mcti-muted: #697586;
+  --mcti-border: #e6eaf0;
+  --mcti-bg: #f4f6fa;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--mcti-bg) !important;
+  color: var(--mcti-ink);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.sidebar {
+  background: linear-gradient(180deg,#111827 0%,#1b2435 100%) !important;
+  box-shadow: 5px 0 25px #11182712;
+}
+.sidebar a {
+  border-radius: 9px;
+  transition: background .18s ease, color .18s ease;
+}
+.sidebar a:hover { background: #ffffff12; }
+.main { min-width: 0; }
+.topbar {
+  background: #fff !important;
+  border-bottom: 1px solid var(--mcti-border);
+  box-shadow: 0 3px 16px #17203306;
+  min-height: 68px;
+}
+.content {
+  padding: clamp(18px,3vw,34px) !important;
+  max-width: 1800px;
+  margin-inline: auto;
+}
+.page-title {
+  color: var(--mcti-ink);
+  font-size: clamp(25px,2.4vw,34px) !important;
+  font-weight: 850 !important;
+  letter-spacing: -1px;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.page-subtitle {
+  color: var(--mcti-muted);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+.summary-grid {
+  gap: 18px !important;
+  align-items: stretch;
+}
+.summary-card {
+  position: relative;
+  overflow: hidden;
+  background: #fff !important;
+  border: 1px solid var(--mcti-border) !important;
+  border-radius: 16px !important;
+  padding: 23px !important;
+  box-shadow: 0 5px 22px #17203308 !important;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.summary-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--mcti-orange);
+}
+.summary-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px #17203312 !important;
+}
+.summary-card .label {
+  color: var(--mcti-muted);
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: .65px;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+.summary-card .value {
+  color: var(--mcti-ink);
+  font-size: clamp(26px,2.5vw,35px);
+  line-height: 1.25;
+  font-weight: 850;
+  letter-spacing: -1px;
+  margin: 10px 0;
+  overflow-wrap: anywhere;
+}
+.summary-card .subtext {
+  color: var(--mcti-muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+.filter-bar {
+  background: #fff;
+  border: 1px solid var(--mcti-border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 22px;
+  box-shadow: 0 4px 16px #17203306;
+}
+.filter-bar a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 14px;
+  margin: 3px;
+  border: 1px solid var(--mcti-border);
+  border-radius: 9px;
+  color: var(--mcti-ink);
+  background: #fff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+}
+.filter-bar a.active {
+  color: #fff !important;
+  background: var(--mcti-orange) !important;
+  border-color: var(--mcti-orange) !important;
+}
+input, select, textarea {
+  max-width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  color: var(--mcti-ink);
+  background: #fff;
+  border: 1px solid #dce3ec;
+  border-radius: 9px;
+}
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid #ff4b0b25;
+  border-color: var(--mcti-orange);
+}
+button, .btn, a.btn, input[type=submit] {
+  border-radius: 9px;
+  font-weight: 750;
+}
+.performance-grid {
+  gap: 20px;
+  align-items: stretch;
+}
+.performance-card, .table-card {
+  background: #fff !important;
+  border: 1px solid var(--mcti-border) !important;
+  border-radius: 16px !important;
+  padding: 22px !important;
+  box-shadow: 0 5px 22px #17203308 !important;
+  min-width: 0;
+}
+.performance-card.best {
+  border-top: 4px solid #16a36a !important;
+}
+.performance-card.attention {
+  border-top: 4px solid var(--mcti-orange) !important;
+}
+.performance-title {
+  color: var(--mcti-ink);
+  font-weight: 800;
+  font-size: 17px;
+  margin-bottom: 14px;
+}
+.performance-details {
+  color: var(--mcti-muted);
+  line-height: 1.8;
+}
+.performance-branch {
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 10px;
+  background: #f7f8fb;
+  border: 1px solid #edf0f5;
+}
+.table-card { margin-top: 22px; }
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+thead th {
+  padding: 14px 12px;
+  background: var(--mcti-navy);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  white-space: nowrap;
+}
+thead th:first-child { border-radius: 9px 0 0 9px; }
+thead th:last-child { border-radius: 0 9px 9px 0; }
+tbody td {
+  padding: 13px 12px;
+  border-bottom: 1px solid #edf0f5;
+  vertical-align: middle;
+}
+tbody tr:nth-child(even) { background: #fafbfc; }
+tbody tr:hover { background: #fff5ef; }
+.branch-name { font-weight: 750; color: var(--mcti-ink); }
+.number, .collection { font-variant-numeric: tabular-nums; }
+.conversion {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.conversion.good { background: #e7f8ef; color: #087443; }
+.conversion.average { background: #fff4df; color: #8b5b00; }
+.conversion.low { background: #ffebe7; color: #b42318; }
+.logout {
+  border-radius: 9px !important;
+  font-weight: 750;
+}
+a { text-underline-offset: 3px; }
+@media(max-width:900px) {
+  .content { padding: 18px !important; }
+  .summary-grid { gap: 12px !important; }
+  .summary-card { padding: 17px !important; }
+  .performance-grid { gap: 14px; }
+}
+@media(max-width:600px) {
+  .content { padding: 13px !important; }
+  .page-title { font-size: 25px !important; }
+  .summary-card { padding: 15px !important; border-radius: 12px !important; }
+  .summary-card .value { font-size: 25px; }
+  .performance-card, .table-card { padding: 14px !important; }
+  .topbar { padding-inline: 12px; }
+}
+</style>
+
+
+<!-- MCTI_TRUE_PREMIUM_LAYOUT_V2 -->
+<style>
+/* Shared dashboard: six branches, existing data and permissions preserved */
+.summary-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 18px !important;
+}
+.summary-grid > .filter-bar {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 0;
+}
+.summary-grid > .summary-card {
+  min-width: 0;
+  width: 100%;
+  min-height: 130px;
+}
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.custom-date-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+}
+.performance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.performance-card, .table-card {
+  min-width: 0;
+}
+.main { min-width: 0; }
+.content { width: 100%; }
+.mcti-alumni-float {
+  position: fixed !important;
+  top: auto !important;
+  right: 22px !important;
+  bottom: 24px !important;
+  z-index: 10000 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  writing-mode: horizontal-tb !important;
+  transform: none !important;
+  background: linear-gradient(135deg,#ff4b0b,#e83b00) !important;
+  color: #fff !important;
+  text-decoration: none !important;
+  font-size: 14px;
+  font-weight: 800 !important;
+  letter-spacing: .1px !important;
+  padding: 15px 22px !important;
+  border: 1px solid #ffffff45;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 26px #ff4b0b45;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.mcti-alumni-float:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 12px 32px #ff4b0b55;
+}
+@media (max-width: 1100px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 650px) {
+  .summary-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 13px !important;
+  }
+  .summary-grid > .filter-bar { grid-column: 1; }
+  .performance-grid { grid-template-columns: minmax(0, 1fr); }
+  .filter-bar, .custom-date-form { align-items: stretch; }
+  .mcti-alumni-float {
+    right: 12px !important;
+    bottom: 14px !important;
+    padding: 12px 16px !important;
+    border-radius: 12px !important;
+    font-size: 13px;
+  }
+}
+</style>
+
+
+<style>
+/* MCTI Premium Dashboard V3 */
+.mcti-welcome {
+  display:flex;justify-content:space-between;align-items:center;
+  gap:30px;padding:32px 36px;margin-bottom:22px;
+  border-radius:19px;overflow:hidden;
+  background:linear-gradient(110deg,#fff1e9 0%,#fff7f1 56%,#ffceae 100%);
+  border:1px solid #ffe2d0;
+  box-shadow:0 8px 25px #16203309;
+}
+.mcti-eyebrow{font-size:11px;letter-spacing:1.5px;font-weight:850;color:#ef4b0b;margin-bottom:12px}
+.mcti-welcome h1{font-size:clamp(23px,2.6vw,36px);line-height:1.25;color:#142033;letter-spacing:-.8px}
+.mcti-welcome h1 span{color:#ff4b0b}
+.mcti-welcome p{max-width:610px;line-height:1.7;color:#596477;margin-top:13px;font-size:14px}
+.mcti-welcome-side{display:flex;align-items:center;gap:18px;flex-shrink:0;color:#182236;font-size:14px;line-height:1.6}
+.mcti-welcome-symbol{width:100px;height:100px;display:grid;place-items:center;border-radius:23px;background:#141e30;color:#ff5a18;font-size:25px;font-weight:900;box-shadow:0 12px 25px #10182724}
+.summary-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:12px!important}
+.summary-grid>.filter-bar{grid-column:1/-1}
+.summary-grid>.summary-card{min-height:155px!important;padding:20px!important;border-radius:15px!important}
+.summary-card .value{font-size:clamp(23px,2.2vw,34px)!important}
+.summary-card:nth-child(5n+2){background:#f0f8ff!important}
+.summary-card:nth-child(5n+3){background:#effbf5!important}
+.summary-card:nth-child(5n+4){background:#fff8ec!important}
+.summary-card:nth-child(5n+5){background:#f8f2ff!important}
+.summary-card:nth-child(5n+6){background:#fff2f1!important}
+.mcti-analytics{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:17px;margin:23px 0}
+.mcti-panel{background:white;border:1px solid #e7eaf0;border-radius:17px;padding:24px;box-shadow:0 5px 20px #17203309;min-width:0}
+.mcti-panel-heading{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:22px}
+.mcti-panel-heading h3{font-size:17px;color:#152035}
+.mcti-panel-heading span{font-size:12px;color:#778093}
+.mcti-chart-row{display:grid;grid-template-columns:120px minmax(0,1fr) 85px;align-items:center;gap:12px;margin:16px 0}
+.mcti-chart-name{font-size:12px;font-weight:750;color:#253047}
+.mcti-chart-bars{display:grid;gap:5px}
+.mcti-track{height:10px;background:#f0f2f6;border-radius:20px;overflow:hidden}
+.mcti-bar{height:100%;border-radius:20px;min-width:0}
+.mcti-enquiry{background:#ff4b0b}
+.mcti-admission{background:#162033}
+.mcti-chart-values{text-align:right;font-size:12px;font-weight:750;color:#263047}
+.mcti-legend{display:flex;gap:18px;margin-top:22px;font-size:12px;color:#657083}
+.mcti-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.mcti-dot.orange{background:#ff4b0b}.mcti-dot.dark{background:#162033}
+.mcti-big-number{font-size:clamp(48px,5vw,76px);font-weight:900;color:#ff4b0b;letter-spacing:-3px;margin-top:30px}
+.mcti-conversion-panel>p{color:#657083;font-size:13px;margin:4px 0 25px}
+.mcti-conversion-track{height:13px;border-radius:20px;background:#f0f2f6;overflow:hidden}
+.mcti-conversion-track>div{height:100%;background:linear-gradient(90deg,#ff7b30,#ff4200);border-radius:20px}
+.mcti-conversion-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:28px}
+.mcti-conversion-stats>div{border:1px solid #edf0f4;border-radius:12px;padding:12px}
+.mcti-conversion-stats small{display:block;font-size:10px;color:#768093;margin-bottom:8px}
+.mcti-conversion-stats strong{font-size:20px;color:#172033}
+@media(max-width:1350px){
+.summary-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:1000px){
+.mcti-analytics{grid-template-columns:1fr}
+.mcti-welcome-side{display:none}
+.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:600px){
+.mcti-welcome{padding:22px 18px}
+.summary-grid{grid-template-columns:1fr!important}
+.mcti-panel{padding:17px}
+.mcti-chart-row{grid-template-columns:82px minmax(0,1fr) 65px;gap:7px}
+.mcti-chart-name{font-size:10px}
+.mcti-conversion-stats{grid-template-columns:1fr}
+.mcti-panel-heading{flex-direction:column;align-items:flex-start}
+}
+</style>
+
+
+<!-- MCTI_COMPACT_EXECUTIVE_V4 -->
+<style>
+/* Premium compact executive dashboard */
+:root {
+  --exec-orange: #ff4b0b;
+  --exec-ink: #142033;
+  --exec-border: #e9edf3;
+}
+html, body {
+  min-height: 100%;
+}
+body {
+  background: #f4f6fa !important;
+}
+.sidebar {
+  height: 100dvh !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+}
+.main {
+  min-width: 0;
+}
+.topbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 500 !important;
+  min-height: 56px !important;
+  padding: 10px 22px !important;
+  background: rgba(255,255,255,.97) !important;
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--exec-border);
+}
+.topbar h2 {
+  font-size: 17px !important;
+  font-weight: 800;
+}
+.content {
+  padding: 14px 20px 28px !important;
+  max-width: 1900px !important;
+}
+.mcti-welcome {
+  padding: 17px 24px !important;
+  margin-bottom: 12px !important;
+  min-height: 110px !important;
+  border-radius: 14px !important;
+}
+.mcti-eyebrow {
+  margin-bottom: 5px !important;
+  font-size: 10px !important;
+}
+.mcti-welcome h1 {
+  font-size: clamp(21px,2vw,29px) !important;
+}
+.mcti-welcome p {
+  margin-top: 5px !important;
+  line-height: 1.4 !important;
+  font-size: 12px !important;
+}
+.mcti-welcome-symbol {
+  width: 64px !important;
+  height: 64px !important;
+  font-size: 19px !important;
+  border-radius: 15px !important;
+}
+.mcti-welcome-side {
+  font-size: 12px !important;
+}
+.page-title {
+  font-size: 19px !important;
+  margin: 0 0 3px !important;
+}
+.page-subtitle {
+  font-size: 12px !important;
+  margin-bottom: 10px !important;
+  line-height: 1.4 !important;
+}
+.summary-grid {
+  grid-template-columns: repeat(5,minmax(0,1fr)) !important;
+  gap: 10px !important;
+}
+.summary-grid > .filter-bar {
+  grid-column: 1/-1 !important;
+  margin-bottom: 0 !important;
+  padding: 9px 13px !important;
+  min-height: 55px !important;
+}
+.filter-bar a {
+  padding: 7px 10px !important;
+  margin: 1px !important;
+  font-size: 11px !important;
+}
+.custom-date-form {
+  gap: 7px !important;
+}
+.custom-date-form input {
+  min-height: 32px !important;
+  padding: 5px 7px !important;
+  font-size: 11px !important;
+}
+.custom-date-form button {
+  padding: 8px 12px !important;
+  font-size: 11px !important;
+}
+.summary-grid > .summary-card {
+  min-height: 106px !important;
+  padding: 13px 15px !important;
+  border-radius: 12px !important;
+}
+.summary-card .label {
+  font-size: 10px !important;
+  line-height: 1.3 !important;
+}
+.summary-card .value {
+  font-size: clamp(22px,2vw,29px) !important;
+  margin: 5px 0 !important;
+}
+.summary-card .subtext {
+  font-size: 10px !important;
+  line-height: 1.35 !important;
+}
+.mcti-analytics {
+  gap: 12px !important;
+  margin: 12px 0 !important;
+}
+.mcti-panel {
+  padding: 15px 18px !important;
+  border-radius: 13px !important;
+}
+.mcti-panel-heading {
+  margin-bottom: 12px !important;
+}
+.mcti-panel-heading h3 {
+  font-size: 14px !important;
+}
+.mcti-chart-row {
+  margin: 9px 0 !important;
+}
+.mcti-track {
+  height: 7px !important;
+}
+.mcti-legend {
+  margin-top: 12px !important;
+}
+.mcti-big-number {
+  font-size: 45px !important;
+  margin-top: 12px !important;
+}
+.mcti-conversion-panel > p {
+  margin-bottom: 13px !important;
+}
+.mcti-conversion-stats {
+  margin-top: 14px !important;
+}
+.mcti-conversion-stats > div {
+  padding: 9px !important;
+}
+.performance-grid {
+  gap: 12px !important;
+}
+.performance-card {
+  padding: 14px 17px !important;
+  border-radius: 13px !important;
+}
+.performance-title {
+  font-size: 13px !important;
+  margin-bottom: 7px !important;
+}
+.performance-branch {
+  padding: 8px 11px !important;
+  margin-top: 5px !important;
+}
+.table-card {
+  margin-top: 12px !important;
+  padding: 14px !important;
+}
+.table-card th, .table-card td {
+  padding: 9px 11px !important;
+}
+@media (max-width: 1350px) {
+  .summary-grid {
+    grid-template-columns: repeat(3,minmax(0,1fr)) !important;
+  }
+}
+@media (max-width: 1000px) {
+  .summary-grid {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  }
+  .mcti-analytics {
+    grid-template-columns: 1fr !important;
+  }
+}
+@media (max-width: 600px) {
+  .topbar {
+    padding: 9px 12px !important;
+  }
+  .content {
+    padding: 12px !important;
+  }
+  .summary-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .mcti-welcome {
+    padding: 17px !important;
+  }
+  .mcti-panel {
+    padding: 13px !important;
+  }
+}
+</style>
+
+
+<style>
+/* MCTI Analytics Command Center V1 */
+body{background:#f2f5fa!important;color:#1b293c}
+.topbar{position:sticky!important;top:0!important;z-index:600!important;
+background:#fff!important;border-bottom:1px solid #e7ebf2;
+box-shadow:0 3px 15px #1422380b!important;min-height:60px!important}
+.content{max-width:1800px!important;padding:18px 24px 36px!important}
+.cc-header{background:#19263a;color:#fff;border-radius:17px;padding:27px 30px;
+display:flex;justify-content:space-between;align-items:center;gap:20px;
+box-shadow:0 9px 28px #1724391c}
+.cc-eyebrow{color:#ff925d;font-size:10px;font-weight:850;letter-spacing:1.5px}
+.cc-header h1{font-size:clamp(23px,2.7vw,35px);letter-spacing:-.8px;margin:8px 0}
+.cc-header p{font-size:12px;color:#b9c6d9;line-height:1.6}
+.cc-header-right{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.cc-live{font-size:10px;font-weight:850;color:#bde9d1}
+.cc-live span{display:inline-block;width:7px;height:7px;background:#3bdf91;
+border-radius:50%;margin-right:5px}
+.cc-header-link{padding:11px 14px;border-radius:9px;background:#ff521e;
+color:#fff!important;text-decoration:none;font-size:12px;font-weight:800}
+.cc-tabs{display:flex;gap:5px;overflow-x:auto;padding:12px 0 3px;
+border-bottom:1px solid #e1e7ef;margin-bottom:18px}
+.cc-tabs a{padding:10px 18px;text-decoration:none;color:#617087;
+font-size:12px;font-weight:800;white-space:nowrap;border-radius:9px}
+.cc-tabs a:hover,.cc-tabs a:first-child{background:#fff0e9;color:#e94a15}
+.cc-section-label{display:flex;justify-content:space-between;align-items:end;
+gap:15px;margin:18px 0 12px;scroll-margin-top:95px}
+.cc-section-label small,.cc-chart-heading small{font-size:10px;color:#f4511e;
+font-weight:850;letter-spacing:1.2px}
+.cc-section-label h2{font-size:18px;font-weight:850;margin-top:5px;color:#1b293c}
+.cc-section-label>span{font-size:11px;color:#7b8799}
+.summary-grid{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;
+gap:12px!important}
+.summary-grid>.filter-bar{grid-column:1/-1!important;margin:0!important;
+background:#fff!important;padding:11px 14px!important;border-radius:12px!important}
+.summary-grid>.summary-card{background:#fff!important;border:1px solid #e7ebf2!important;
+border-radius:13px!important;min-height:125px!important;padding:17px!important;
+box-shadow:0 4px 16px #14223809!important}
+.summary-card .label{font-size:10px!important;color:#7a879a}
+.summary-card .value{font-size:clamp(23px,2vw,32px)!important;margin:8px 0!important}
+.cc-analytics{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);
+gap:15px;margin:20px 0;scroll-margin-top:95px}
+.cc-chart-card{background:#fff;border:1px solid #e7ebf2;border-radius:15px;
+padding:22px;box-shadow:0 5px 19px #14223809;min-width:0}
+.cc-chart-heading{display:flex;justify-content:space-between;align-items:center;
+gap:12px;margin-bottom:16px}
+.cc-chart-heading h2{font-size:17px;color:#1b293c;margin-top:5px}
+.cc-chart-heading>span{font-size:11px;color:#778499}
+.cc-chart-scroll{width:100%;overflow-x:auto}
+.cc-donut-layout{display:flex;align-items:center;justify-content:center;gap:25px;
+min-height:230px}
+.cc-donut{width:165px;height:165px;flex-shrink:0;border-radius:50%;
+background:conic-gradient(#ff521e 0 var(--pct),#e9edf4 var(--pct) 100%);
+display:grid;place-items:center}
+.cc-donut>div{background:#fff;border-radius:50%;width:120px;height:120px;
+display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cc-donut strong{font-size:30px;color:#1b293c}
+.cc-donut small{font-size:11px;color:#7c8899}
+.cc-donut-stats{flex:1;min-width:0}
+.cc-donut-stats>div{display:flex;justify-content:space-between;gap:12px;
+padding:12px 0;border-bottom:1px solid #eef1f5}
+.cc-donut-stats span{font-size:11px;color:#728095}
+.cc-donut-stats strong{font-size:15px;color:#1b293c}
+.performance-grid{gap:15px!important}
+.performance-card,.table-card{background:#fff!important;
+border:1px solid #e7ebf2!important;border-radius:14px!important;
+box-shadow:0 5px 18px #14223809!important}
+.table-card{margin-top:0!important}
+@media(max-width:1400px){
+.summary-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:1100px){
+.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.cc-analytics{grid-template-columns:1fr}}
+@media(max-width:700px){
+.content{padding:12px!important}
+.cc-header{padding:20px;flex-direction:column;align-items:flex-start}
+.summary-grid{grid-template-columns:1fr!important}
+.cc-chart-card{padding:15px}
+.cc-donut-layout{flex-direction:column}
+.cc-donut-stats{width:100%}
+}
+</style>
+
 </head>
 
 <body>
@@ -401,18 +1098,104 @@
 
         <div class="content">
 
-            <h1 class="page-title">
-                Branch-wise Performance
-            </h1>
-{% load payroll_links %}
 
+<!-- MCTI_ANALYTICS_COMMAND_CENTER_V1 -->
+<section class="cc-header">
+  <div>
+    <div class="cc-eyebrow">MCTI TECHNOLOGIES / MANAGEMENT INTELLIGENCE</div>
+    <h1>Analytics Command Center</h1>
+    <p>Performance intelligence across enquiries, admissions and branches.</p>
+  </div>
+  <div class="cc-header-right">
+    <span class="cc-live"><span></span> LIVE DATABASE</span>
+    {% if can_access_outreach %}
+    <a href="/alumni/" class="cc-header-link">Alumni Connect ↗</a>
+    {% endif %}
+  </div>
+</section>
+<style>
+.cc-followup-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin:16px 0;align-items:stretch;width:100%}
+.cc-followup-layout #cc-assessment-followup{margin:0!important;min-width:0}
+.cc-attendance-action{background:#fff;border:1px solid #e5e7eb;border-left:4px solid #f97316;border-radius:14px;padding:18px;min-width:0}
+.cc-attendance-action h2{font-size:19px;margin:0 0 6px}
+.cc-attendance-action p{font-size:12px;color:#64748b;margin:0 0 14px}
+.cc-attendance-counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:15px}
+.cc-attendance-count{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:12px 8px;text-align:center}
+.cc-attendance-count strong{display:block;font-size:25px;color:#111827}
+.cc-attendance-count span{font-size:10px;color:#64748b;font-weight:700}
+.cc-attendance-link{display:block;text-align:center;background:#f97316;color:#fff!important;padding:12px;border-radius:9px;text-decoration:none;font-weight:800;font-size:12px}
+.cc-attendance-link:hover{background:#ea580c}
+.cc-attendance-note{font-size:10px;color:#64748b;margin-top:10px}
+@media(max-width:700px){.cc-followup-layout{grid-template-columns:1fr}}
+</style>
+<div class="cc-followup-layout">
+<section class="cc-attendance-action" style="border-left-color:#111827">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+<h2 style="margin:0">☀️ MCTI Daily Success</h2>
+<span style="font-size:10px;font-weight:800;color:#f97316">DAILY MOTIVATION</span>
+</div>
+<p style="margin:7px 0 12px">5 Good Practices for Center Staff & Owners</p>
 
+<div style="background:#fff7ed;border-radius:10px;padding:12px;margin-bottom:12px">
+<strong id="mcti-daily-quote" style="font-size:13px;line-height:1.5">
+Every student interaction is an opportunity to build trust.
+</strong>
+</div>
 
-            <p class="page-subtitle">
-                Compare enquiries, admissions,
-                collection and conversion across branches.
-            </p>
-            <div class="summary-grid">
+<div style="display:grid;gap:7px;font-size:12px;color:#334155">
+<div>✅ Start the day with a clear admission & service target</div>
+<div>✅ Contact new enquiries promptly</div>
+<div>✅ Follow up with students who haven't attended recently</div>
+<div>✅ Update CRM after every call or WhatsApp interaction</div>
+<div>✅ Review admissions, fee dues & tomorrow's priorities</div>
+</div>
+<div style="font-size:10px;color:#64748b;margin-top:12px">
+Small daily improvements create long-term success.
+</div>
+</section>
+
+<script>
+(function(){
+const quotes=[
+"Every student interaction is an opportunity to build trust.",
+"Consistency in follow-up creates confidence and admissions.",
+"Great service turns students into lifelong ambassadors.",
+"Today's discipline builds tomorrow's success.",
+"Listen first, guide honestly, and deliver quality training.",
+"Every unanswered enquiry deserves a thoughtful follow-up.",
+"A successful center grows through student satisfaction."
+];
+const d=new Date();
+const day=Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000);
+const el=document.getElementById("mcti-daily-quote");
+if(el)el.textContent=quotes[day%quotes.length];
+})();
+</script>
+{% if attendance_action_summary.allowed %}
+<section id="cc-attendance-action" class="cc-attendance-action">
+<h2>Student Attendance <span style="color:#f97316">— Action Needed</span></h2>
+<p>{{ attendance_action_summary.branch }} · Students not recently recorded present</p>
+<div class="cc-attendance-counts">
+<div class="cc-attendance-count"><strong>{{ attendance_action_summary.days3 }}</strong><span>3+ Days</span></div>
+<div class="cc-attendance-count"><strong>{{ attendance_action_summary.days5 }}</strong><span>5+ Days</span></div>
+<div class="cc-attendance-count"><strong>{{ attendance_action_summary.days7 }}</strong><span>7+ Days</span></div>
+</div>
+<a class="cc-attendance-link" href="{% url 'attendance_followup' %}?days=3">View Students &amp; Follow Up →</a>
+<div class="cc-attendance-note">Review flexible schedules before calling. Not a confirmed absent count.</div>
+</section>
+{% endif %}
+</div>
+<nav class="cc-tabs">
+  <a href="#cc-overview">Overview</a>
+  <a href="#cc-analytics">Analytics</a>
+  <a href="#cc-performance">Performance</a>
+  <a href="#cc-reports">Reports</a>
+</nav>
+<div id="cc-overview" class="cc-section-label">
+  <div><small>OVERVIEW</small><h2>Key Performance Indicators</h2></div>
+  <span>Selected reporting period</span>
+</div>
+<div class="summary-grid">
               <div class="filter-bar">
 
     <a
@@ -609,7 +1392,7 @@
 
 </div>
 <!-- BUSINESS LEADS -->
-<div class="performance-card" style="margin-bottom:25px; border-left:5px solid #f97316;">       
+<div class="performance-card" style="margin-bottom:25px; border-left:5px solid #f97316;">
 
     <div class="performance-title">
         Business Leads
@@ -658,6 +1441,78 @@
 
 </div>
 
+
+
+<style>
+.mcti-conversion-two-column {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:16px;
+    margin:20px 0;
+    align-items:stretch;
+}
+.mcti-conversion-two-column > div {
+    min-width:0;
+    height:100%;
+}
+@media(max-width:900px) {
+    .mcti-conversion-two-column {
+        grid-template-columns:minmax(0,1fr);
+    }
+}
+</style>
+
+<section class="mcti-conversion-two-column">
+<div class="mcti-panel mcti-conversion-panel">
+    <div class="mcti-panel-heading">
+      <h3>Conversion Overview</h3>
+      <span>Current selected period</span>
+    </div>
+    <div class="mcti-big-number">{{ overall_conversion_rate }}%</div>
+    <p>Overall enquiry conversion rate</p>
+    <div class="mcti-conversion-track">
+      <div style="width:{{ overall_conversion_rate }}%"></div>
+    </div>
+    <div class="mcti-conversion-stats">
+      <div><small>Total Enquiries</small><strong>{{ overall_enquiries }}</strong></div>
+      <div><small>Converted Leads</small><strong>{{ overall_converted }}</strong></div>
+      <div><small>Admissions</small><strong>{{ overall_admissions }}</strong></div>
+    </div>
+  </div>
+
+<div class="cc-chart-card">
+    <div class="cc-chart-heading">
+      <div>
+        <small>CONVERSION INTELLIGENCE</small>
+        <h2>Admission Conversion</h2>
+      </div>
+    </div>
+    <div class="cc-donut-layout">
+      <div class="cc-donut"
+           style="--pct:{{ overall_conversion_rate|default:0 }}%">
+        <div>
+          <strong>{{ overall_conversion_rate }}%</strong>
+          <small>Conversion</small>
+        </div>
+      </div>
+      <div class="cc-donut-stats">
+        <div><span>Enquiries</span><strong>{{ overall_enquiries }}</strong></div>
+        <div><span>Converted Leads</span><strong>{{ overall_converted }}</strong></div>
+        <div><span>Admissions</span><strong>{{ overall_admissions }}</strong></div>
+        <div><span>Active Students</span><strong>{{ overall_active_students }}</strong></div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+
+
+
+<div id="cc-performance" class="cc-section-label">
+  <div><small>MANAGEMENT INSIGHTS</small><h2>Branch Performance</h2></div>
+</div>
 <div class="performance-grid">
 
     <!-- BEST PERFORMING BRANCH -->
@@ -760,7 +1615,11 @@
     </div>
 
 </div>
-            <div class="table-card">
+
+<div id="cc-reports" class="cc-section-label">
+  <div><small>DETAILED REPORTING</small><h2>Branch-wise Reports</h2></div>
+</div>
+<div class="table-card">
 
                 <div class="table-responsive">
 
@@ -919,6 +1778,7 @@
 
 {% load student_birthdays %}
 {% student_birthday_popup %}
+
 </body>
 
 </html>

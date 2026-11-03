@@ -232,155 +232,13 @@ Enquiry Dashboard | MCTI Technologies
          SEARCH & FILTER
     ======================================== -->
 
-    <div class="mcti-filter-card">
-
-        <form method="GET"
-              class="mcti-filter-form">
-
-
-            <div class="mcti-filter-field">
-
-                <label>
-                    Search
-                </label>
-
-                <input type="text"
-                       name="search"
-                       value="{{ search }}"
-                       placeholder="Name, mobile or email">
-
-            </div>
-
-
-            <div class="mcti-filter-field">
-
-                <label>
-                    Status
-                </label>
-
-                <select name="status">
-
-                    <option value="">
-                        All Status
-                    </option>
-
-                    <option value="new"
-                        {% if status_filter == "new" %}selected{% endif %}>
-                        New
-                    </option>
-
-                    <option value="contacted"
-                        {% if status_filter == "contacted" %}selected{% endif %}>
-                        Contacted
-                    </option>
-
-                    <option value="followup"
-                        {% if status_filter == "followup" %}selected{% endif %}>
-                        Follow Up
-                    </option>
-
-                    <option value="converted"
-                        {% if status_filter == "converted" %}selected{% endif %}>
-                        Converted
-                    </option>
-
-                    <option value="closed"
-                        {% if status_filter == "closed" %}selected{% endif %}>
-                        Closed
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div class="mcti-filter-field">
-
-                <label>
-                    Assigned To
-                </label>
-
-                <select name="assigned_to">
-
-                    <option value="">
-                        All Staff
-                    </option>
-
-                    {% for staff in assigned_staff %}
-
-                        <option value="{{ staff }}"
-                            {% if assigned_filter == staff %}selected{% endif %}>
-
-                            {{ staff }}
-
-                        </option>
-
-                    {% endfor %}
-
-                </select>
-
-            </div>
-
-
-            <div class="mcti-filter-field">
-
-                <label>
-                    Follow-up
-                </label>
-
-                <select name="followup">
-
-                    <option value="">
-                        All Leads
-                    </option>
-
-                    <option value="today"
-                        {% if followup_filter == "today" %}selected{% endif %}>
-                        Today's Follow-ups
-                    </option>
-
-                    <option value="overdue"
-                        {% if followup_filter == "overdue" %}selected{% endif %}>
-                        Overdue
-                    </option>
-
-                    <option value="upcoming"
-                        {% if followup_filter == "upcoming" %}selected{% endif %}>
-                        Upcoming
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <button type="submit"
-                    class="mcti-filter-btn">
-
-                Search
-
-            </button>
-
-
-            <a href="{% url 'enquiry_dashboard' %}"
-               class="mcti-clear-btn">
-
-                Clear
-
-            </a>
-
-        </form>
-
-    </div>
-
-
     <!-- ========================================
          TODAY'S FOLLOW-UPS
     ======================================== -->
 
     <div class="mcti-followup-list-card">
 
-        <div class="mcti-list-header">
+        <div class="mcti-list-header mcti-collapse-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="mcti-today-body" data-mcti-target="mcti-today-body">
 
             <div>
 
@@ -398,7 +256,9 @@ Enquiry Dashboard | MCTI Technologies
                 {{ todays_followups|length }}
             </strong>
 
+            <span class="mcti-collapse-arrow" aria-hidden="true">&#9662;</span>
         </div>
+        <div id="mcti-today-body" class="mcti-collapse-body" hidden>
 
 
         {% if todays_followups %}
@@ -502,6 +362,7 @@ Enquiry Dashboard | MCTI Technologies
 
         {% endif %}
 
+        </div><!-- MCTI_COLLAPSE_BODY -->
     </div>
 
 
@@ -511,7 +372,7 @@ Enquiry Dashboard | MCTI Technologies
 
     <div class="mcti-followup-list-card mcti-overdue-card">
 
-        <div class="mcti-list-header">
+        <div class="mcti-list-header mcti-collapse-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="mcti-overdue-body" data-mcti-target="mcti-overdue-body">
 
             <div>
 
@@ -529,7 +390,9 @@ Enquiry Dashboard | MCTI Technologies
                 {{ overdue_followups|length }}
             </strong>
 
+            <span class="mcti-collapse-arrow" aria-hidden="true">&#9662;</span>
         </div>
+        <div id="mcti-overdue-body" class="mcti-collapse-body" hidden>
 
 
         {% if overdue_followups %}
@@ -647,6 +510,7 @@ Enquiry Dashboard | MCTI Technologies
 
         {% endif %}
 
+        </div><!-- MCTI_COLLAPSE_BODY -->
     </div>
 
 
@@ -654,7 +518,15 @@ Enquiry Dashboard | MCTI Technologies
          RECENT ENQUIRIES
     ======================================== -->
 
-    <div class="mcti-enquiry-table-card">
+
+<!-- MCTI_ENQUIRY_CARD_SPACING_V1 -->
+<style>
+.mcti-enquiry-table-card {
+    margin-top: 20px !important;
+}
+</style>
+
+<div class="mcti-enquiry-table-card">
 
         <div class="mcti-table-heading">
 
@@ -665,7 +537,13 @@ Enquiry Dashboard | MCTI Technologies
                 </span>
 
                 <h2>
+                    {% if enquiry_view == "closed" %}
+                    Closed Enquiries
+                    {% elif enquiry_view == "converted" %}
+                    Converted Enquiries
+                    {% else %}
                     Latest Enquiries
+                    {% endif %}
                 </h2>
 
             </div>
@@ -678,7 +556,238 @@ Enquiry Dashboard | MCTI Technologies
         </div>
 
 
-        {% if enquiries %}
+
+
+
+
+<!-- MCTI_ENQUIRY_COMPACT_SEARCH_V1 -->
+<div class="mcti-compact-search">
+    <form method="get" action="{% url 'enquiry_dashboard' %}">
+        <input type="hidden" name="view" value="{{ enquiry_view }}">
+        <input type="hidden" name="month" value="{{ selected_month }}">
+        <input type="text"
+               name="search"
+               value="{{ search }}"
+               placeholder="Search student / enquiry name"
+               aria-label="Search student name">
+        <button type="submit">Search</button>
+        <a href="{% url 'enquiry_dashboard' %}?view={{ enquiry_view|urlencode }}&amp;month={{ selected_month|urlencode }}">
+            Clear
+        </a>
+    </form>
+</div>
+<style>
+.mcti-compact-search {
+    padding:12px 16px 4px;
+    background:#fff;
+}
+.mcti-compact-search form {
+    display:flex;
+    align-items:center;
+    gap:9px;
+    flex-wrap:wrap;
+}
+.mcti-compact-search input[type="text"] {
+    width:320px;
+    max-width:100%;
+    min-height:40px;
+    padding:9px 13px;
+    border:1px solid #d1d5db;
+    border-radius:9px;
+    font-size:13px;
+    background:#fff;
+    color:#111;
+    box-sizing:border-box;
+}
+.mcti-compact-search button {
+    min-height:40px;
+    padding:9px 18px;
+    background:#f97316;
+    color:#fff;
+    border:0;
+    border-radius:9px;
+    font-weight:700;
+    cursor:pointer;
+}
+.mcti-compact-search a {
+    color:#111;
+    font-size:13px;
+    font-weight:600;
+    text-decoration:none;
+    padding:9px;
+}
+@media(max-width:600px) {
+    .mcti-compact-search input[type="text"] {
+        flex:1 1 100%;
+        width:100%;
+    }
+}
+</style>
+
+<!-- MCTI_ENQUIRY_PREMIUM_LAYOUT_V1 -->
+<style>
+.mcti-enquiry-toolbar {
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    padding:14px 16px;
+    margin:12px 0 0;
+    background:#fff;
+    border-bottom:1px solid #e5e7eb;
+}
+.mcti-enquiry-toolbar > a {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:38px;
+    box-sizing:border-box;
+    font-size:13px;
+    white-space:nowrap;
+}
+.mcti-enquiry-toolbar > div {
+    margin-left:auto;
+}
+.mcti-enquiry-toolbar form {
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.mcti-enquiry-export-toolbar {
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:0 0 12px;
+    padding:10px 16px;
+    background:#fff;
+}
+.mcti-enquiry-export-toolbar > a {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    min-height:34px;
+    box-sizing:border-box;
+    white-space:nowrap;
+}
+@media(max-width:900px) {
+    .mcti-enquiry-toolbar > div {
+        margin-left:0;
+        width:100%;
+        justify-content:flex-start;
+    }
+    .mcti-enquiry-export-toolbar {
+        justify-content:flex-start;
+    }
+}
+@media(max-width:600px) {
+    .mcti-enquiry-toolbar {
+        padding:12px;
+        gap:6px;
+    }
+    .mcti-enquiry-toolbar > a {
+        flex:1 1 auto;
+        padding:9px 10px !important;
+        font-size:12px;
+    }
+    .mcti-enquiry-toolbar > div {
+        gap:6px !important;
+    }
+    .mcti-enquiry-toolbar form {
+        flex:1;
+    }
+    #mcti-month-table {
+        min-width:0 !important;
+        width:100%;
+    }
+    .mcti-enquiry-export-toolbar {
+        padding:10px 12px;
+        gap:6px;
+    }
+    .mcti-enquiry-export-toolbar > a {
+        font-size:12px !important;
+        padding:8px 10px !important;
+    }
+}
+</style>
+<!-- MCTI_ENQUIRY_TABS_V2 -->
+<div class="mcti-enquiry-toolbar">
+    <a href="?month={{ selected_month|urlencode }}&amp;view=active&amp;search={{ search|urlencode }}&amp;assigned_to={{ assigned_filter|urlencode }}&amp;followup={{ followup_filter|urlencode }}"
+       style="padding:10px 18px;border-radius:9px;font-weight:700;text-decoration:none;
+       {% if enquiry_view == 'active' %}background:#f97316;color:#fff;{% else %}background:#f3f4f6;color:#111;{% endif %}">
+       Active Enquiries
+    </a>
+    <a href="?month={{ selected_month|urlencode }}&amp;view=closed&amp;search={{ search|urlencode }}&amp;assigned_to={{ assigned_filter|urlencode }}"
+       style="padding:10px 18px;border-radius:9px;font-weight:700;text-decoration:none;
+       {% if enquiry_view == 'closed' %}background:#f97316;color:#fff;{% else %}background:#f3f4f6;color:#111;{% endif %}">
+       Closed Enquiries
+    </a>
+
+    <!-- MCTI_ENQUIRY_CONVERTED_TAB_V1 -->
+    <a href="?month={{ selected_month|urlencode }}&amp;view=converted&amp;search={{ search|urlencode }}&amp;assigned_to={{ assigned_filter|urlencode }}"
+       style="padding:10px 18px;border-radius:9px;font-weight:700;text-decoration:none;
+       {% if enquiry_view == 'converted' %}background:#f97316;color:#fff;{% else %}background:#f3f4f6;color:#111;{% endif %}">
+       Converted Enquiries
+    </a>
+
+    <!-- MCTI_ENQUIRY_MONTH_POSITION_V2 -->
+    <div style="margin-left:auto;display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
+        <label for="mcti-month-table" style="font-size:13px;font-weight:700;color:#111;">
+            Enquiry Month
+        </label>
+        <form method="get" action="{% url 'enquiry_dashboard' %}"
+              style="display:flex;align-items:center;gap:8px;margin:0;">
+            <input type="hidden" name="view" value="{{ enquiry_view }}">
+            <select id="mcti-month-table"
+                    name="month"
+                    aria-label="Enquiry Month"
+                    style="min-width:185px;padding:10px 12px;border:1px solid #d1d5db;border-radius:9px;background:#fff;color:#111;font-weight:600;"
+                    onchange="this.form.submit()">
+            <option value="">All Months</option>
+            {% for value, label in available_months %}
+            <option value="{{ value }}" {% if selected_month == value %}selected{% endif %}>
+                {{ label }}
+            </option>
+            {% endfor %}
+            </select>
+            <button type="submit"
+                    style="padding:10px 13px;border:0;border-radius:8px;background:#f97316;color:#fff;font-weight:700;cursor:pointer;">
+                Go
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- MCTI_ENQUIRY_EXPORT_BUTTON_V1 -->
+<div class="mcti-enquiry-export-toolbar">
+    <span style="font-size:13px;font-weight:700;color:#444;">
+        Export:
+    </span>
+
+    <a href="{% url 'export_enquiries_excel' %}?month={{ selected_month|urlencode }}&amp;view=active&amp;search={{ search|urlencode }}&amp;assigned_to={{ assigned_filter|urlencode }}&amp;followup={{ followup_filter|urlencode }}"
+       style="background:#111;color:#fff;padding:9px 13px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;">
+        <i class="fa-solid fa-file-excel"></i> Active
+    </a>
+
+    <a href="{% url 'export_enquiries_excel' %}?month={{ selected_month|urlencode }}&amp;view=closed&amp;search={{ search|urlencode }}&amp;assigned_to={{ assigned_filter|urlencode }}"
+       style="background:#111;color:#fff;padding:9px 13px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;">
+        <i class="fa-solid fa-file-excel"></i> Closed
+    </a>
+
+    <a href="{% url 'export_enquiries_excel' %}?month={{ selected_month|urlencode }}&amp;view=all&amp;search={{ search|urlencode }}&amp;assigned_to={{ assigned_filter|urlencode }}"
+       style="background:#f97316;color:#fff;padding:9px 13px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;">
+        <i class="fa-solid fa-download"></i> All Excel
+    </a>
+
+    <a href="{% url 'export_enquiries_excel' %}?month={{ selected_month|urlencode }}&amp;view=converted&amp;search={{ search|urlencode }}&amp;assigned_to={{ assigned_filter|urlencode }}"
+       style="background:#111;color:#fff;padding:9px 13px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;">
+        <i class="fa-solid fa-file-excel"></i> Converted
+    </a>
+</div>
+
+{% if enquiries %}
 
             <div class="mcti-table-wrapper">
 
@@ -687,6 +796,7 @@ Enquiry Dashboard | MCTI Technologies
                     <thead>
                         <tr>
                             <th>Name</th>
+<th>Mobile Number</th>
                             <th>Course</th>
                             <th>Branch</th>
                             <th>Status</th>
@@ -705,6 +815,20 @@ Enquiry Dashboard | MCTI Technologies
                                     <strong>{{ enquiry.name }}</strong>
 
                                 </td>
+<!-- MCTI_ENQUIRY_MOBILE_COLUMN_V1 -->
+<td>
+{% if enquiry.mobile %}
+<a href="tel:{{ enquiry.mobile }}"
+   style="color:#e96500;font-weight:700;text-decoration:none;white-space:nowrap;"
+   title="Call {{ enquiry.mobile }}">
+<i class="fa-solid fa-phone"></i>
+{{ enquiry.mobile }}
+</a>
+{% else %}
+—
+{% endif %}
+</td>
+
 
                                 <td>
                                     {% if enquiry.course %}
@@ -719,7 +843,12 @@ Enquiry Dashboard | MCTI Technologies
                                 </td>
 
                                 <td>
-                                    <form method="POST"
+                                    {% if enquiry.status == "converted" %}
+<span style="color:#15803d;font-weight:700;">
+&#10003; Converted
+</span>
+{% else %}
+<form method="POST"
                                           action="{% url 'update_enquiry_status' enquiry.id %}">
                                         {% csrf_token %}
 
@@ -742,11 +871,6 @@ Enquiry Dashboard | MCTI Technologies
                                                 Follow Up
                                             </option>
 
-                                            <option value="converted"
-                                                {% if enquiry.status == "converted" %}selected{% endif %}>
-                                                Converted
-                                            </option>
-
                                             <option value="closed"
                                                 {% if enquiry.status == "closed" %}selected{% endif %}>
                                                 Closed
@@ -754,6 +878,7 @@ Enquiry Dashboard | MCTI Technologies
 
                                         </select>
                                     </form>
+{% endif %}
                                 </td>
 
                                 <td>
@@ -784,7 +909,11 @@ Enquiry Dashboard | MCTI Technologies
             <div class="mcti-no-enquiries">
 
                 <h3>
-                    No enquiries yet
+                    {% if enquiry_view == "closed" %}
+                    No closed enquiries
+                    {% else %}
+                    No active enquiries
+                    {% endif %}
                 </h3>
 
                 <p>
@@ -939,4 +1068,56 @@ All Enquiries / Assign Leads</a>
 <a style="margin:0 12px" href="?{{ enquiry_page_query }}&amp;page={{ enquiry_page.next_page_number }}">Next →</a>
 {% endif %}
 </div>
+<!-- MCTI_FOLLOWUP_COLLAPSE_V1 -->
+<style>
+.mcti-collapse-toggle {
+    cursor: pointer;
+    user-select: none;
+}
+.mcti-collapse-toggle:focus-visible {
+    outline: 2px solid #f97316;
+    outline-offset: 3px;
+}
+.mcti-collapse-arrow {
+    display: inline-block;
+    margin-left: 12px;
+    color: #f97316;
+    font-size: 20px;
+    transition: transform .2s ease;
+}
+.mcti-collapse-toggle[aria-expanded="false"]
+.mcti-collapse-arrow {
+    transform: rotate(-90deg);
+}
+.mcti-collapse-body[hidden] {
+    display: none !important;
+}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(
+        ".mcti-collapse-toggle[data-mcti-target]"
+    ).forEach(function (header) {
+        function toggle() {
+            const body = document.getElementById(
+                header.dataset.mctiTarget
+            );
+            if (!body) return;
+            const expanded =
+                header.getAttribute("aria-expanded") === "true";
+            body.hidden = expanded;
+            header.setAttribute(
+                "aria-expanded", String(!expanded)
+            );
+        }
+        header.addEventListener("click", toggle);
+        header.addEventListener("keydown", function (event) {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                toggle();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

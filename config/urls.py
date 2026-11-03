@@ -57,6 +57,7 @@ urlpatterns = [
     path('koperkhairane/', branch_landing, {'slug': 'koperkhairane'}, name='koperkhairane'),
     path('local/', include('local_site.urls')),
     path("admin/", admin.site.urls),
+    path("alumni/", include("alumni.urls")),
     path("", include("core.urls")),
     path("lms/", include("lms.urls")),
     path("typing/", include("typing_practice.urls")),
@@ -77,5 +78,3 @@ if settings.DEBUG:
             settings.MEDIA_URL,
             document_root=settings.MEDIA_ROOT
         )
-
-

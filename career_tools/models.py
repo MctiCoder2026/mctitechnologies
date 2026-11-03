@@ -216,7 +216,7 @@ class ResumeCertification(models.Model):
 
     def __str__(self):
         return self.certification_name
-    
+
     # =========================================================
 # APTITUDE TEST
 # =========================================================
@@ -671,3 +671,40 @@ class CareerCompassAnswer(models.Model):
 
     def __str__(self):
         return f"{self.attempt.profile.full_name} - Compass Q{self.question_id}"
+
+
+class AssessmentBranchAssignment(models.Model):
+    """HO branch override for a completed assessment attempt."""
+    kind = models.CharField(max_length=20)
+    attempt_id = models.PositiveBigIntegerField()
+    branch = models.CharField(max_length=30)
+    assigned_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="assessment_assignments_made")
+    assigned_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["kind", "attempt_id"], name="mcti_assess_unique_assignment")]
+
+
+class AssessmentBranchAssignmentLog(models.Model):
+    kind = models.CharField(max_length=20)
+    attempt_id = models.PositiveBigIntegerField()
+    old_branch = models.CharField(max_length=30, blank=True)
+    new_branch = models.CharField(max_length=30)
+    changed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="assessment_assignment_changes")
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+
+class AssessmentFollowUp(models.Model):
+    """Staff activity against an assessment attempt, independent of Enquiry."""
+    kind = models.CharField(max_length=20, db_index=True)
+    attempt_id = models.PositiveBigIntegerField(db_index=True)
+    branch = models.CharField(max_length=30, db_index=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="assessment_followups")
+    action = models.CharField(max_length=20, choices=[("whatsapp_opened", "WhatsApp opened"), ("outcome", "Follow-up outcome")])
+    result = models.CharField(max_length=25, blank=True, choices=[("contacted", "Contacted"), ("sent", "Message sent (staff confirmed)"), ("no_answer", "No answer"), ("interested", "Interested"), ("not_interested", "Not interested")])
+    notes = models.TextField(blank=True)
+    next_followup = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at", "-pk"]

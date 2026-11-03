@@ -1,0 +1,56 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Free registration | MCTI</title><style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f5f5;color:#171717;font-family:Arial,sans-serif}
+header{background:#111;color:white;padding:20px}
+header a{color:white;text-decoration:none;font-weight:800}
+.orange{color:#ff7200}
+main{max-width:1050px;margin:auto;padding:28px 18px 50px}
+.hero{background:#111;color:white;padding:30px;border-radius:16px}
+.hero p{color:#ddd;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+.card{background:white;border:1px solid #e5e5e5;border-radius:14px;padding:22px}
+.btn,button{display:inline-block;background:#ff7200;color:white;border:0;
+padding:12px 17px;border-radius:8px;text-decoration:none;font-weight:700;
+cursor:pointer;margin:5px 5px 5px 0}
+.secondary{background:#111}
+small,.muted{color:#666;line-height:1.6}
+input,select,textarea{width:100%;border:1px solid #ccc;border-radius:8px;
+padding:13px;font:16px Arial;margin:8px 0 16px}
+label{font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:20px 0}
+.stat{background:#111;color:white;border-radius:9px;padding:15px;text-align:center}
+.stat b{display:block;color:#ff7200;font-size:24px}
+.source{font:22px/1.8 monospace;padding:18px;background:#f5f5f5;
+border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere}
+.good{color:#15803d}.bad{color:#b91c1c;background:#fee2e2}
+.current{background:#ff7200;color:white}
+.notice{background:#fff1e6;border-radius:9px;padding:16px;margin-top:18px}
+.error{background:#fee2e2;color:#991b1b;padding:12px;border-radius:8px}
+@media(max-width:750px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:500px){.grid{grid-template-columns:1fr}
+.stats{grid-template-columns:1fr 1fr}.hero{padding:22px}.source{font-size:18px}}
+</style></head><body><header><a href="{% url 'typing_practice:public_typing' %}">MCTI <span class="orange">English Typing Lab</span></a></header><main>
+<div class="card" style="max-width:540px;margin:auto">
+<h1>Join the <span class="orange">free Typing Lab</span></h1>
+<p>Unlock all five free lessons. No password required for guest practice.</p>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form method="post">{% csrf_token %}
+<label for="guest-name">Name</label>
+<input id="guest-name" name="name" required minlength="2" maxlength="100"
+autocomplete="name" value="{{ entered_name }}">
+<label for="guest-mobile">Mobile number</label>
+<input id="guest-mobile" name="mobile" required maxlength="18"
+inputmode="tel" autocomplete="tel" value="{{ entered_mobile }}">
+<label for="guest-branch">Preferred centre</label>
+<select id="guest-branch" name="branch" required>
+<option value="">Select centre</option>
+{% for value,label in branches %}
+<option value="{{ value }}" {% if entered_branch == value %}selected{% endif %}>{{ label }}</option>
+{% endfor %}
+</select>
+<p class="muted">By registering, you agree that your selected MCTI centre may contact you about training.</p>
+<button type="submit">Register & start practising →</button>
+</form>
+<a href="{% url 'typing_practice:public_typing' %}">← Back to free lessons</a>
+</div>
+</main></body></html>

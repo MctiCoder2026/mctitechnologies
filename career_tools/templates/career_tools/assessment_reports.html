@@ -42,13 +42,19 @@ small{color:#666}.summary{display:flex;gap:10px;flex-wrap:wrap}.badge{padding:10
 <div class="panel">
 <h2>Performance — {{ total }} records</h2>
 <div style="overflow-x:auto"><table>
-<thead><tr><th>Date</th><th>Assessment</th><th>Name / Mobile</th><th>Branch</th><th>Score</th><th>Performance</th><th>Profile</th></tr></thead>
+<thead><tr><th>Date</th><th>Assessment</th><th>Name / Mobile</th><th>Branch</th><th>Score</th><th>Performance</th><th>Profile</th><th>WhatsApp / Follow-up</th>{% if management %}<th>Assign Branch</th>{% endif %}</tr></thead>
 <tbody>{% for r in page %}<tr>
 <td>{{ r.date|date:"d M Y, h:i A" }}</td><td>{{ r.label }}</td>
 <td><b>{{ r.name }}</b><br>{{ r.mobile }}</td><td>{{ r.branch|title }}</td>
 <td>{% if r.score != None %}{{ r.score }}%{% else %}—{% endif %}</td>
 <td>{{ r.detail }}</td><td>{% if r.url %}<a href="{{ r.url }}">View</a>{% else %}—{% endif %}</td>
-</tr>{% empty %}<tr><td colspan="7">No records found. Try another date range.</td></tr>{% endfor %}</tbody>
+<td>{% if r.kind != "hiring" and r.branch != "unassigned" and r.branch != "head_office" %}
+<form method="post" action="{% url 'career_tools:assessment_followup' %}" target="_blank" style="margin-bottom:8px">{% csrf_token %}<input type="hidden" name="kind" value="{{ r.kind }}"><input type="hidden" name="attempt_id" value="{{ r.id }}"><input type="hidden" name="action" value="whatsapp"><button type="submit" class="btn" style="background:#128c7e">WhatsApp ↗</button></form>
+<details><summary style="cursor:pointer;color:#d65a00">Record follow-up</summary><form method="post" action="{% url 'career_tools:assessment_followup' %}" style="margin-top:8px">{% csrf_token %}<input type="hidden" name="kind" value="{{ r.kind }}"><input type="hidden" name="attempt_id" value="{{ r.id }}"><input type="hidden" name="action" value="outcome"><select name="result" required><option value="">Select result</option><option value="contacted">Contacted</option><option value="sent">WhatsApp sent (confirmed)</option><option value="no_answer">No answer</option><option value="interested">Interested</option><option value="not_interested">Not interested</option></select><input type="date" name="next_followup" aria-label="Next follow-up date"><input name="notes" maxlength="2000" required placeholder="Remarks (required)"><button class="btn orange" type="submit">Save</button></form></details>
+{% if r.followup %}<small>Latest: {{ r.followup.get_result_display }} by {{ r.followup.created_by.username }}<br>{{ r.followup.created_at|date:"d M, h:i A" }} · Next: {{ r.followup.next_followup|default:"Closed" }}</small>{% endif %}
+{% else %}—{% endif %}</td>
+{% if management %}<td>{% if r.kind != "hiring" %}<form method="post" action="{% url 'career_tools:assign_assessment_branch' %}">{% csrf_token %}<input type="hidden" name="kind" value="{{ r.kind }}"><input type="hidden" name="attempt_id" value="{{ r.id }}"><select name="branch" required>{% for b in branches %}{% if b != "unassigned" and b != "head_office" %}<option value="{{ b }}" {% if r.branch == b %}selected{% endif %}>{{ b|title }}</option>{% endif %}{% endfor %}</select><button type="submit">Assign</button></form>{% else %}—{% endif %}</td>{% endif %}
+</tr>{% empty %}<tr><td colspan="{% if management %}9{% else %}8{% endif %}">No records found. Try another date range.</td></tr>{% endfor %}</tbody>
 </table></div>
 <p>{% if page.has_previous %}<a href="?{{ params }}&page={{ page.previous_page_number }}">← Previous</a>{% endif %}
  Page {{ page.number }} / {{ page.paginator.num_pages }}

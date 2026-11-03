@@ -267,9 +267,9 @@ td{
 
     <div class="header">
         <div>
-            <h1>�� Outreach Dashboard</h1>
+            <h1>Marketing Outreach Dashboard</h1>
             <div class="subtitle">
-                Old Students • School Contacts • College Contacts
+                Marketing Leads • Old Students • School & College Contacts
             </div>
         </div>
 
@@ -362,6 +362,9 @@ td{
                     <option value="koperkhairane">
                         Koperkhairane
                     </option>
+                    <option value="kamothe">Kamothe</option>
+                    <option value="ghansoli">Ghansoli</option>
+                    <option value="nerul">Nerul</option>
                 </select>
 
             {% else %}
@@ -375,6 +378,12 @@ td{
                             Panvel
                         {% elif selected_branch == "koperkhairane" %}
                             Koperkhairane
+                        {% elif selected_branch == "kamothe" %}
+                            Kamothe
+                        {% elif selected_branch == "ghansoli" %}
+                            Ghansoli
+                        {% elif selected_branch == "nerul" %}
+                            Nerul
                         {% endif %}
                     </strong>
                 </div>
@@ -428,7 +437,7 @@ td{
 
             {% if is_outreach_admin %}
             <select name="branch">
-                <option value="">All 3 Branches</option>
+                <option value="">All 6 Branches</option>
 
                 <option value="kharghar"
                     {% if selected_branch == "kharghar" %}selected{% endif %}>
@@ -443,6 +452,21 @@ td{
                 <option value="koperkhairane"
                     {% if selected_branch == "koperkhairane" %}selected{% endif %}>
                     Koperkhairane
+                </option>
+
+                <option value="kamothe"
+                    {% if selected_branch == "kamothe" %}selected{% endif %}>
+                    Kamothe
+                </option>
+
+                <option value="ghansoli"
+                    {% if selected_branch == "ghansoli" %}selected{% endif %}>
+                    Ghansoli
+                </option>
+
+                <option value="nerul"
+                    {% if selected_branch == "nerul" %}selected{% endif %}>
+                    Nerul
                 </option>
             </select>
             {% else %}
@@ -475,6 +499,7 @@ td{
                     <th>Permission</th>
                     <th>Status</th>
                     <th>Follow Up</th>
+                    <th>Action</th>
                 </tr>
             </thead>
 
@@ -534,12 +559,25 @@ td{
                         {{ contact.followup_date|default:"-" }}
                     </td>
 
+                    <td>
+                        <a href="{% url 'outreach_contact_detail' contact.id %}"
+                           style="display:inline-block;
+                                  text-decoration:none;
+                                  background:#222;
+                                  color:#fff;
+                                  padding:7px 11px;
+                                  border-radius:6px;
+                                  white-space:nowrap;">
+                            Open Lead →
+                        </a>
+                    </td>
+
                 </tr>
 
                 {% empty %}
 
                 <tr>
-                    <td colspan="8" class="empty">
+                    <td colspan="9" class="empty">
                         No outreach contacts found.
                     </td>
                 </tr>

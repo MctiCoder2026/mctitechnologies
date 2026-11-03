@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Corporate Walk-in Report | MCTI Technologies</title>
+<style>
+:root{--orange:#f97316;--black:#171717;--muted:#71717a}
+*{box-sizing:border-box}
+body{margin:0;background:#f5f5f5;color:var(--black);font-family:Arial,sans-serif}
+header{background:var(--black);color:white;padding:19px 4%;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.brand{font-size:25px;font-weight:900}.brand span{color:var(--orange)}
+.subtitle{font-size:12px;color:#ccc;margin-top:5px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-block;text-decoration:none;background:var(--orange);color:white;padding:12px 16px;border-radius:9px;font-size:13px;font-weight:700;border:0;cursor:pointer}
+.btn.dark{background:#3f3f46}
+main{max-width:1450px;margin:auto;padding:28px 4%}
+h1{font-size:28px;margin:0 0 8px}
+.desc{font-size:13px;color:var(--muted);margin-bottom:25px}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.card,.panel{background:white;border-radius:14px;padding:22px;box-shadow:0 3px 15px #00000009}
+.kpi-label{font-size:12px;color:#666;font-weight:700}
+.kpi-value{font-size:35px;font-weight:900;margin-top:12px}
+.orange{color:var(--orange)}
+h2{font-size:20px;margin:30px 0 16px}
+.filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;align-items:end}
+label{display:block;font-size:12px;font-weight:700;margin-bottom:7px}
+input,select{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;background:white;font-size:13px}
+.filter-actions{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap}
+.branches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.branch-name{font-size:17px;font-weight:800;margin-bottom:16px}
+.stats{display:flex;justify-content:space-between;gap:12px}
+.number{font-size:27px;font-weight:900}
+.small{font-size:12px;color:#777;margin-top:5px}
+.progress{height:7px;background:#eee;border-radius:10px;overflow:hidden;margin-top:17px}
+.bar{height:100%;background:var(--orange)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:850px;font-size:13px}
+th,td{text-align:left;padding:14px 12px;border-bottom:1px solid #eee}
+th{background:#fafafa;color:#555;font-size:12px}
+tr:hover td{background:#fffaf5}
+.status{display:inline-block;padding:6px 10px;border-radius:20px;background:#f4f4f5;font-size:11px;font-weight:700}
+.status.converted{background:#dcfce7;color:#166534}
+.status.new{background:#ffedd5;color:#9a3412}
+.empty{text-align:center;color:#888;padding:30px}
+footer{text-align:center;color:#888;font-size:12px;padding:30px 15px}
+@media(max-width:1050px){.kpis{grid-template-columns:repeat(3,1fr)}.branches{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.kpis{grid-template-columns:repeat(2,1fr)}.branches,.filters{grid-template-columns:1fr}.card,.panel{padding:17px}.kpi-value{font-size:29px}h1{font-size:23px}}
+</style>
+</head>
+<body>
+
+<header>
+ <div>
+  <div class="brand"><span>MCTI</span> TECHNOLOGIES</div>
+  <div class="subtitle">NERUL CORPORATE OFFICE | WALK-IN ANALYTICS</div>
+ </div>
+ <div class="actions">
+  <a class="btn" href="{% url 'corporate_walkin' %}">+ New Walk-in</a>
+  <a class="btn dark" href="{% url 'corporate_dashboard' %}">Network Dashboard</a>
+ </div>
+</header>
+
+<main>
+ <h1>Corporate Walk-in Analytics</h1>
+ <div class="desc">Track enquiries generated at Nerul Corporate Office and assigned to MCTI training centers.</div>
+
+ <div class="kpis">
+  <div class="card"><div class="kpi-label">Total Walk-ins</div><div class="kpi-value">{{ total }}</div></div>
+  <div class="card"><div class="kpi-label">Today's Walk-ins</div><div class="kpi-value orange">{{ today_count }}</div></div>
+  <div class="card"><div class="kpi-label">This Month</div><div class="kpi-value">{{ month_count }}</div></div>
+  <div class="card"><div class="kpi-label">Converted</div><div class="kpi-value orange">{{ converted }}</div></div>
+  <div class="card"><div class="kpi-label">Conversion Rate</div><div class="kpi-value">{{ conversion_rate }}%</div></div>
+ </div>
+
+ <h2>Filter Walk-in Enquiries</h2>
+ <div class="panel">
+  <form method="get">
+   <div class="filters">
+    <div>
+     <label for="branch">Training Center</label>
+     <select id="branch" name="branch">
+      <option value="">All Centers</option>
+      {% for key, label in branches %}
+      <option value="{{ key }}" {% if selected_branch == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+     </select>
+    </div>
+    <div>
+     <label for="status">Enquiry Status</label>
+     <select id="status" name="status">
+      <option value="">All Statuses</option>
+      {% for key, label in statuses %}
+      <option value="{{ key }}" {% if selected_status == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+     </select>
+    </div>
+    <div>
+     <label for="from">From Date</label>
+     <input id="from" type="date" name="from" value="{{ date_from }}">
+    </div>
+    <div>
+     <label for="to">To Date</label>
+     <input id="to" type="date" name="to" value="{{ date_to }}">
+    </div>
+   </div>
+   <div class="filter-actions">
+    <button class="btn" type="submit">Apply Filters</button>
+    <a class="btn dark" href="{% url 'corporate_walkin_report' %}">Reset</a>
+   </div>
+  </form>
+ </div>
+
+ <h2>Training Center Performance</h2>
+ <div class="branches">
+  {% for b in branch_stats %}
+  <div class="card">
+   <div class="branch-name">{{ b.name }}</div>
+   <div class="stats">
+    <div><div class="number">{{ b.total }}</div><div class="small">Walk-in Leads</div></div>
+    <div><div class="number orange">{{ b.converted }}</div><div class="small">Converted</div></div>
+   </div>
+   <div class="progress">
+    <div class="bar" style="width:{% widthratio b.total total 100 %}%"></div>
+   </div>
+  </div>
+  {% endfor %}
+ </div>
+
+ <h2>Recent Walk-in Enquiries</h2>
+ <div class="panel table-wrap">
+  <table>
+   <thead>
+    <tr>
+     <th>Enquiry ID</th>
+     <th>Visit Date</th>
+     <th>Visitor Name</th>
+     <th>Mobile</th>
+     <th>Interested Course</th>
+     <th>Training Center</th>
+     <th>Status</th>
+    </tr>
+   </thead>
+   <tbody>
+    {% for e in recent %}
+    <tr>
+     <td>#{{ e.id }}</td>
+     <td>{{ e.created_at|date:"d M Y, h:i A" }}</td>
+     <td>{{ e.name }}</td>
+     <td>{{ e.mobile }}</td>
+     <td>{{ e.course.title|default:"—" }}</td>
+     <td>{{ e.branch|title }}</td>
+     <td>
+      <span class="status {{ e.status }}">{{ e.get_status_display }}</span>
+     </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" class="empty">No walk-in enquiries found for these filters.</td></tr>
+    {% endfor %}
+   </tbody>
+  </table>
+ </div>
+ <div class="desc" style="margin-top:14px">
+  Showing up to 50 latest matching enquiries. Conversion includes CRM-converted status or linked admissions.
+  Counts reflect the selected filters.
+ </div>
+</main>
+
+
+
+<style id="mcti-premium-footer-css">
+.mcti-premium-footer{
+ background:#171717;color:#c4c4c4;
+ margin-top:40px;padding:48px 5% 20px;
+ font-family:Arial,sans-serif;
+}
+.mcti-footer-inner{max-width:1450px;margin:auto}
+.mcti-footer-grid{
+ display:grid;grid-template-columns:2fr 1fr 1fr;
+ gap:45px;padding-bottom:35px;
+}
+.mcti-footer-brand{
+ color:#fff;font-size:24px;font-weight:900;
+ letter-spacing:.5px;
+}
+.mcti-footer-brand span{color:#f97316}
+.mcti-footer-tagline{
+ color:#f97316;font-size:12px;
+ font-weight:700;margin-top:8px;
+}
+.mcti-premium-footer p{
+ font-size:13px;line-height:1.8;
+ max-width:390px;margin:14px 0;
+}
+.mcti-premium-footer h3{
+ color:#fff;font-size:15px;
+ margin:4px 0 18px;
+}
+.mcti-premium-footer a{
+ display:block;color:#c4c4c4;
+ text-decoration:none;font-size:13px;
+ margin:12px 0;
+}
+.mcti-premium-footer a:hover{color:#f97316}
+.mcti-footer-bottom{
+ border-top:1px solid #393939;
+ padding-top:20px;
+ display:flex;justify-content:space-between;
+ gap:12px;flex-wrap:wrap;
+ font-size:12px;
+}
+@media(max-width:700px){
+ .mcti-footer-grid{grid-template-columns:1fr;gap:20px}
+ .mcti-premium-footer{padding:35px 6% 20px}
+ .mcti-footer-bottom{flex-direction:column}
+}
+</style>
+
+<footer class="mcti-premium-footer">
+ <div class="mcti-footer-inner">
+  <div class="mcti-footer-grid">
+   <div>
+    <div class="mcti-footer-brand"><span>MCTI</span> TECHNOLOGIES</div>
+    <div class="mcti-footer-tagline">Education | IT Solutions | AI | SaaS</div>
+    <p>Empowering learners and businesses through technology,
+    innovation and professional education.</p>
+   </div>
+   <div>
+    <h3>Corporate Office</h3>
+    <p>Nerul, Navi Mumbai<br>
+    Maharashtra, India</p>
+    <p>Six Training Centers Across Navi Mumbai</p>
+   </div>
+   <div>
+    <h3>Quick Access</h3>
+    <a href="{% url 'corporate_dashboard' %}">Network Dashboard</a>
+    <a href="{% url 'corporate_walkin' %}">New Walk-in Enquiry</a>
+    <a href="{% url 'corporate_walkin_report' %}">Walk-in Analytics</a>
+   </div>
+  </div>
+  <div class="mcti-footer-bottom">
+   <span>© 2026 MCTI Technologies. All Rights Reserved.</span>
+   <span>Professional Education • Technology • Innovation</span>
+  </div>
+ </div>
+</footer>
+
+</body>
+</html>

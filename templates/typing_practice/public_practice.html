@@ -1,0 +1,116 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Free typing practice | MCTI</title><style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f5f5;color:#171717;font-family:Arial,sans-serif}
+header{background:#111;color:white;padding:20px}
+header a{color:white;text-decoration:none;font-weight:800}
+.orange{color:#ff7200}
+main{max-width:1050px;margin:auto;padding:28px 18px 50px}
+.hero{background:#111;color:white;padding:30px;border-radius:16px}
+.hero p{color:#ddd;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+.card{background:white;border:1px solid #e5e5e5;border-radius:14px;padding:22px}
+.btn,button{display:inline-block;background:#ff7200;color:white;border:0;
+padding:12px 17px;border-radius:8px;text-decoration:none;font-weight:700;
+cursor:pointer;margin:5px 5px 5px 0}
+.secondary{background:#111}
+small,.muted{color:#666;line-height:1.6}
+input,select,textarea{width:100%;border:1px solid #ccc;border-radius:8px;
+padding:13px;font:16px Arial;margin:8px 0 16px}
+label{font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:20px 0}
+.stat{background:#111;color:white;border-radius:9px;padding:15px;text-align:center}
+.stat b{display:block;color:#ff7200;font-size:24px}
+.source{font:22px/1.8 monospace;padding:18px;background:#f5f5f5;
+border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere}
+.good{color:#15803d}.bad{color:#b91c1c;background:#fee2e2}
+.current{background:#ff7200;color:white}
+.notice{background:#fff1e6;border-radius:9px;padding:16px;margin-top:18px}
+.error{background:#fee2e2;color:#991b1b;padding:12px;border-radius:8px}
+@media(max-width:750px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:500px){.grid{grid-template-columns:1fr}
+.stats{grid-template-columns:1fr 1fr}.hero{padding:22px}.source{font-size:18px}}
+</style></head><body><header><a href="{% url 'typing_practice:public_typing' %}">MCTI <span class="orange">English Typing Lab</span></a></header><main>
+<div class="card">
+<h1>{{ lesson.title }}</h1>
+<p>Type the text below. Use both hands and focus on accuracy.</p>
+<div class="stats">
+<div class="stat"><b id="wpm">0</b>WPM</div>
+<div class="stat"><b id="accuracy">100%</b>Accuracy</div>
+<div class="stat"><b id="errors">0</b>Errors</div>
+<div class="stat"><b id="seconds">0</b>Seconds</div>
+</div>
+<div class="source" id="source"></div>
+<label for="typing-input">Your practice</label>
+<textarea id="typing-input" rows="4" spellcheck="false"
+autocorrect="off" autocapitalize="off" autocomplete="off"
+placeholder="Click here and start typing…"></textarea>
+<button id="restart" type="button">Restart</button>
+<a class="btn secondary" href="{% url 'typing_practice:public_typing' %}">All free lessons</a>
+<div id="result" class="notice" hidden></div>
+<form id="result-form" hidden>{% csrf_token %}</form>
+</div>
+</main>
+<script>
+const source="{{ lesson.content|escapejs }}";
+const slug="{{ lesson.slug|escapejs }}";
+const input=document.getElementById("typing-input");
+const box=document.getElementById("source");
+let started=0,ended=0,timer=null,finished=false;
+function metrics(){
+ const seconds=started?Math.max(1,Math.ceil(((ended||Date.now())-started)/1000)):0;
+ let correct=0;
+ [...input.value].forEach((c,i)=>{if(c===source[i])correct++});
+ const errors=input.value.length-correct;
+ return {seconds,errors,
+ wpm:seconds?Math.round(correct*12/seconds):0,
+ accuracy:input.value.length?Math.round(correct*100/input.value.length):100};
+}
+function draw(){
+ box.replaceChildren();
+ [...source].forEach((c,i)=>{
+  const span=document.createElement("span");span.textContent=c;
+  span.className=i<input.value.length?
+   (input.value[i]===c?"good":"bad"):
+   (i===input.value.length?"current":"");
+  box.appendChild(span);
+ });
+ const m=metrics();
+ document.getElementById("wpm").textContent=m.wpm;
+ document.getElementById("accuracy").textContent=m.accuracy+"%";
+ document.getElementById("errors").textContent=m.errors;
+ document.getElementById("seconds").textContent=m.seconds;
+}
+async function finish(){
+ finished=true;ended=Date.now();clearInterval(timer);input.disabled=true;draw();
+ const m=metrics(), result=document.getElementById("result");
+ result.hidden=false;
+ result.textContent="Practice complete: "+m.wpm+" WPM · "+m.accuracy+"% accuracy.";
+ const data=new FormData(document.getElementById("result-form"));
+ data.set("slug",slug);data.set("seconds",m.seconds);data.set("errors",m.errors);
+ try{
+  const response=await fetch("{% url 'typing_practice:public_save_progress' %}",{
+   method:"POST",body:data,credentials:"same-origin"
+  });
+  result.textContent+=response.ok?
+   " Result saved for this browser session. Choose another lesson or restart.":
+   " Result could not be saved. You can still practise again.";
+ }catch(e){result.textContent+=" Result could not be saved. You can still practise again."}
+}
+input.maxLength=source.length;
+input.addEventListener("paste",e=>e.preventDefault());
+input.addEventListener("drop",e=>e.preventDefault());
+input.addEventListener("input",()=>{
+ if(finished)return;
+ if(!started && input.value.length){started=Date.now();timer=setInterval(draw,500)}
+ draw();
+ if(input.value.length===source.length)finish();
+});
+document.getElementById("restart").onclick=()=>{
+ clearInterval(timer);started=0;ended=0;finished=false;
+ input.disabled=false;input.value="";
+ document.getElementById("result").hidden=true;
+ draw();input.focus();
+};
+draw();
+</script>
+</body></html>

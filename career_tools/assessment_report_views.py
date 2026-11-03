@@ -5,14 +5,20 @@ from xml.sax.saxutils import escape
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
-from django.db.models import CharField, Value
+from django.db import transaction
+from django.db.models import CharField, Value, OuterRef, Subquery
 from django.db.models.functions import Coalesce, Lower, NullIf, Trim
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.views.decorators.http import require_POST
+from django.db.models import Count, Q, Max
+from urllib.parse import quote
+import re
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import AptitudeAttempt, CareerCompassAttempt
+from .models import (AptitudeAttempt, CareerCompassAttempt, AssessmentBranchAssignment, AssessmentBranchAssignmentLog, AssessmentFollowUp)
 from assessments.models import AssessmentAttempt, HiringApplication
 
 BRANCHES = (
@@ -26,6 +32,7 @@ KINDS = {
     "scholarship": "Scholarship",
     "cyber": "Cyber Awareness",
     "hiring": "Hiring",
+    "ssc": "SSC Practice",
 }
 
 
@@ -34,6 +41,13 @@ def _branch_expression(*fields):
         *[NullIf(Trim(field), Value("")) for field in fields],
         Value("unassigned"), output_field=CharField(),
     )))
+
+
+def _assigned_branch(kind, fallback):
+    override = AssessmentBranchAssignment.objects.filter(
+        kind=kind, attempt_id=OuterRef("pk")
+    ).values("branch")[:1]
+    return Coalesce(Subquery(override, output_field=CharField()), fallback, output_field=CharField())
 
 
 def _related(obj, name):
@@ -91,10 +105,10 @@ def _collect(start, end, branch, selected_kind, management, search):
     if selected_kind in ("", "aptitude"):
         qs = AptitudeAttempt.objects.filter(status="completed").select_related(
             "profile", "profile__enquiry", "profile__student"
-        ).annotate(report_branch=_branch_expression(
+        ).annotate(report_branch=_assigned_branch("aptitude", _branch_expression(
             "profile__preferred_branch", "profile__enquiry__branch",
             "profile__student__branch",
-        ))
+        )))
         for a in _filter(qs, "completed_at", start, end, branch).iterator():
             detail = (
                 f"Correct: {a.correct_answers}/{a.total_questions}; "
@@ -113,10 +127,10 @@ def _collect(start, end, branch, selected_kind, management, search):
         qs = CareerCompassAttempt.objects.filter(
             status="completed"
         ).select_related("profile", "profile__enquiry", "profile__student").annotate(
-            report_branch=_branch_expression(
+            report_branch=_assigned_branch("compass", _branch_expression(
                 "profile__preferred_branch", "profile__enquiry__branch",
                 "profile__student__branch",
-            )
+            ))
         )
         for a in _filter(qs, "completed_at", start, end, branch).iterator():
             detail = (
@@ -138,7 +152,7 @@ def _collect(start, end, branch, selected_kind, management, search):
         ],
         "cyber": ["mcti-cyber-fraud-awareness-2026"],
     }
-    for kind in ("ai", "scholarship", "cyber"):
+    for kind in ("ai", "scholarship", "cyber", "ssc"):
         if selected_kind not in ("", kind):
             continue
         qs = AssessmentAttempt.objects.filter(status="completed").select_related(
@@ -147,15 +161,19 @@ def _collect(start, end, branch, selected_kind, management, search):
         )
         if kind == "scholarship":
             qs = qs.filter(scholarship_result__isnull=False)
+        elif kind == "ssc":
+            qs = qs.filter(assessment__assessment_type="exam_preparation", assessment__slug__startswith="ssc-")
         else:
             qs = qs.filter(assessment__slug__in=slugs[kind])
-        qs = qs.annotate(report_branch=_branch_expression(
+        qs = qs.annotate(report_branch=_assigned_branch(kind, _branch_expression(
             "scholarship_result__preferred_branch",
             "participant_profile__enquiry__branch",
-        ))
+        )))
         for a in _filter(qs, "completed_at", start, end, branch).iterator():
             result = _related(a, "result")
             detail = f"Marks: {a.score}/{a.total_marks}"
+            if kind == "ssc":
+                detail += f"; Subject: {a.assessment.title}"
             if result:
                 detail += f"; Result: {result.result_title or result.result_band}"
             scholarship = _related(a, "scholarship_result")
@@ -334,6 +352,15 @@ def assessment_reports(request):
         {"key": key, "label": label, "count": sum(r["kind"] == key for r in rows)}
         for key, label in KINDS.items() if management or key != "hiring"
     ]
+    latest = {}
+    for item in AssessmentFollowUp.objects.filter(
+        kind__in=[r["kind"] for r in rows],
+        attempt_id__in=[r["id"] for r in rows], action="outcome"
+    ).order_by("-created_at", "-pk"):
+        latest.setdefault((item.kind, item.attempt_id), item)
+    for row in rows:
+        candidate = latest.get((row["kind"], row["id"]))
+        row["followup"] = candidate if candidate and candidate.branch == row["branch"] else None
     response = render(request, "career_tools/assessment_reports.html", {
         "page": Paginator(rows, 50).get_page(request.GET.get("page")),
         "total": len(rows), "cards": cards,
@@ -345,3 +372,219 @@ def assessment_reports(request):
     })
     response["Cache-Control"] = "private, no-store"
     return response
+
+
+@login_required(login_url="staff_login")
+def assign_assessment_branch(request):
+    if request.method != "POST":
+        return HttpResponseBadRequest("POST required")
+    user = request.user
+    if not user.is_active or not (user.is_staff or user.is_superuser):
+        return HttpResponseForbidden("Staff access required")
+    staff = _related(user, "staff_profile")
+    management = user.is_superuser or bool(
+        staff and staff.is_active and (staff.branch or "").strip().lower() == "head_office"
+    )
+    if not management:
+        return HttpResponseForbidden("HO only")
+    kind = request.POST.get("kind", "").strip()
+    branch = request.POST.get("branch", "").strip().lower()
+    if kind not in ("aptitude", "compass", "ai", "scholarship", "cyber", "ssc"):
+        return HttpResponseBadRequest("Invalid assessment")
+    if branch not in BRANCHES or branch == "head_office":
+        return HttpResponseBadRequest("Invalid destination branch")
+    try:
+        attempt_id = int(request.POST.get("attempt_id", ""))
+        if attempt_id < 1:
+            raise ValueError()
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Invalid attempt ID")
+    if kind == "aptitude":
+        exists = AptitudeAttempt.objects.filter(pk=attempt_id, status="completed").exists()
+    elif kind == "compass":
+        exists = CareerCompassAttempt.objects.filter(pk=attempt_id, status="completed").exists()
+    else:
+        qs = AssessmentAttempt.objects.filter(pk=attempt_id, status="completed")
+        if kind == "ssc":
+            qs = qs.filter(assessment__assessment_type="exam_preparation", assessment__slug__startswith="ssc-")
+        elif kind == "ai":
+            qs = qs.filter(assessment__slug__in=["ai-ready-maharashtra-2026", "ai-ready-maharashtra-2026-marathi"])
+        elif kind == "cyber":
+            qs = qs.filter(assessment__slug="mcti-cyber-fraud-awareness-2026")
+        elif kind == "scholarship":
+            qs = qs.filter(scholarship_result__isnull=False)
+        exists = qs.exists()
+    if not exists:
+        return HttpResponseBadRequest("Completed assessment not found")
+    with transaction.atomic():
+        # Serialize concurrent updates for this attempt with an advisory lock.
+        from django.db import connection
+        lock_key = f"mcti_assessment:{kind}:{attempt_id}"
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", [lock_key])
+        record, created = AssessmentBranchAssignment.objects.get_or_create(
+            kind=kind, attempt_id=attempt_id,
+            defaults={"branch": branch, "assigned_by": user},
+        )
+        old_branch = "" if created else record.branch
+        if created or old_branch != branch:
+            if not created:
+                record.branch = branch
+                record.assigned_by = user
+                record.save(update_fields=["branch", "assigned_by", "assigned_at"])
+            AssessmentBranchAssignmentLog.objects.create(
+                kind=kind, attempt_id=attempt_id, old_branch=old_branch,
+                new_branch=branch, changed_by=user,
+            )
+    return redirect("career_tools:assessment_reports")
+
+
+FOLLOWUP_RESULTS = {"contacted", "sent", "no_answer", "interested", "not_interested"}
+
+
+def _followup_access(request, kind, attempt_id):
+    user = request.user
+    if not user.is_active or not (user.is_staff or user.is_superuser):
+        return None
+    staff = _related(user, "staff_profile")
+    management = user.is_superuser or bool(staff and staff.is_active and (staff.branch or "").strip().lower() == "head_office")
+    if not management and not (staff and staff.is_active and staff.branch):
+        return None
+    if kind not in KINDS or kind == "hiring":
+        return None
+    branch = "" if management else staff.branch.strip().lower()
+    rows = _collect(None, None, branch, kind, management, "")
+    for row in rows:
+        if row["id"] == attempt_id and row["kind"] == kind:
+            return row
+    return None
+
+
+@login_required(login_url="staff_login")
+@require_POST
+def assessment_followup(request):
+    kind = request.POST.get("kind", "").strip()
+    try:
+        attempt_id = int(request.POST.get("attempt_id", ""))
+        if attempt_id <= 0:
+            raise ValueError()
+    except ValueError:
+        return HttpResponseBadRequest("Invalid attempt")
+    row = _followup_access(request, kind, attempt_id)
+    if row is None or row["branch"] not in BRANCHES:
+        return HttpResponseForbidden("Assessment is not assigned to your branch")
+    action = request.POST.get("action", "")
+    if action == "whatsapp":
+        mobile = re.sub(r"\D", "", str(row["mobile"] or ""))
+        if len(mobile) == 12 and mobile.startswith("91"):
+            mobile = mobile[2:]
+        if len(mobile) != 10 or mobile[0] not in "6789":
+            return HttpResponseBadRequest("Valid mobile number unavailable")
+        AssessmentFollowUp.objects.create(kind=kind, attempt_id=attempt_id, branch=row["branch"], created_by=request.user, action="whatsapp_opened")
+        if kind == "ssc":
+            from local_site.models import Branch
+
+            centre = Branch.objects.filter(
+                slug__iexact=row["branch"],
+                is_active=True
+            ).first()
+
+            centre_details = ""
+            if centre:
+                centre_details = (
+                    f"\n\n📍 *Your MCTI Centre: {centre.name}*\n"
+                    f"🏢 *Address:* {centre.address.strip()}"
+                )
+                if centre.google_map_url:
+                    centre_details += (
+                        f"\n🗺️ *Google Maps:* {centre.google_map_url.strip()}"
+                    )
+
+            message = (
+                f"🎓 *Hello {row['name']},*\n\n"
+                "⭐ *इयत्ता १० वीच्या बोर्ड परीक्षेसाठी मनःपूर्वक शुभेच्छा!* 🌸\n\n"
+                "तुमची मेहनत, नियमित सराव आणि आत्मविश्वास तुम्हाला नक्कीच यश मिळवून देईल! ⭐\n\n"
+                "📚 *सराव सुरूच ठेवा!*\n"
+                "MCTI च्या मोफत SSC Online Practice Test वर नियमित सराव करा.\n\n"
+                "📝 *Free SSC Practice Test:*\n"
+                "https://mctitechnologies.com/ssc-exam-preparation/\n\n"
+                "🎁 *तुमचे Scholarship Coupon जपून ठेवा!*\n"
+                "बोर्ड परीक्षेनंतर उन्हाळ्याच्या सुट्टीत MCTI च्या Computer व Career-Oriented Courses मध्ये प्रवेश घेताना या कूपनद्वारे विशेष शिष्यवृत्ती मिळवण्याची संधी आहे.\n\n"
+                "💪 *नियमित सराव करा आणि यशस्वी व्हा!*\n\n"
+                "🧡 *Maharashtra Computer Training Institute (MCTI)*"
+            )
+            if row["branch"].strip().lower() == "kharghar":
+                review_message = (
+                "⭐ आमचा मोफत SSC Practice उपक्रम उपयुक्त वाटला असेल, तर Google वर तुमचा अनुभव शेअर करा.\n"
+                "👉 *Google Review:*\n"
+                "https://maps.app.goo.gl/YTDBzs4AQMCoEEnMA?g_st=ic\n\n"
+                )
+                message += "\n\n" + review_message.strip()
+            message += centre_details
+        else:
+            message = f"Hello {row['name']}, this is Maharashtra Computer Training Institute. Thank you for participating in our {row['label']} assessment. We would like to guide you on courses and career opportunities. Please reply when convenient."
+        if kind == "ssc":
+            from django.http import HttpResponse
+            from django.utils.html import escape
+            import json
+
+            phone = "91" + mobile
+            encoded_message = json.dumps(message, ensure_ascii=True)
+            encoded_phone = json.dumps(phone)
+
+            response = HttpResponse(
+                '<!doctype html><html><head><meta charset="utf-8">'
+                '<meta name="referrer" content="no-referrer">'
+                '<title>Opening WhatsApp</title></head><body>'
+                '<p>Opening WhatsApp...</p>'
+                '<script>'
+                'const phone=' + encoded_phone + ';'
+                'const message=' + encoded_message + ';'
+                'const url="https://api.whatsapp.com/send?phone="'
+                '+phone+"&text="+encodeURIComponent(message);'
+                'window.location.replace(url);'
+                '</script>'
+                '<p>If WhatsApp does not open, please return to CRM and try again.</p>'
+                '</body></html>',
+                content_type="text/html; charset=utf-8"
+            )
+        else:
+            response = redirect("https://wa.me/91" + mobile + "?text=" + quote(message))
+        response["Cache-Control"] = "no-store"
+        return response
+    if action != "outcome":
+        return HttpResponseBadRequest("Invalid action")
+    result = request.POST.get("result", "")
+    notes = request.POST.get("notes", "").strip()
+    if result not in FOLLOWUP_RESULTS or not notes or len(notes) > 2000:
+        return HttpResponseBadRequest("Choose an outcome and add notes (up to 2000 characters)")
+    next_date = None
+    if result != "not_interested":
+        value = request.POST.get("next_followup", "").strip()
+        try:
+            next_date = date.fromisoformat(value)
+            if next_date <= timezone.localdate():
+                raise ValueError()
+        except ValueError:
+            return HttpResponseBadRequest("Next follow-up date must be in the future")
+    AssessmentFollowUp.objects.create(kind=kind, attempt_id=attempt_id, branch=row["branch"], created_by=request.user, action="outcome", result=result, notes=notes, next_followup=next_date)
+    messages.success(request, "Assessment follow-up saved")
+    return redirect("career_tools:assessment_reports")
+
+
+def assessment_followup_summary(user, start_date=None, end_date=None):
+    staff = _related(user, "staff_profile")
+    management = user.is_superuser or bool(staff and staff.is_active and (staff.branch or "").strip().lower() == "head_office")
+    qs = AssessmentFollowUp.objects.all()
+    if not management:
+        if not staff or not staff.is_active or not staff.branch:
+            return {"allowed": False}
+        qs = qs.filter(branch=staff.branch.strip().lower())
+    if start_date:
+        qs = qs.filter(created_at__date__gte=start_date)
+    if end_date:
+        qs = qs.filter(created_at__date__lte=end_date)
+    stats = qs.aggregate(opened=Count("pk", filter=Q(action="whatsapp_opened")), completed=Count("pk", filter=Q(action="outcome")), interested=Count("pk", filter=Q(action="outcome", result="interested")))
+    branch_rows = list(qs.values("branch").annotate(opened=Count("pk", filter=Q(action="whatsapp_opened")), completed=Count("pk", filter=Q(action="outcome")), interested=Count("pk", filter=Q(result="interested", action="outcome"))).order_by("branch"))
+    staff_rows = list(qs.values("created_by__username", "branch").annotate(opened=Count("pk", filter=Q(action="whatsapp_opened")), completed=Count("pk", filter=Q(action="outcome"))).order_by("-completed", "-opened")[:30])
+    return {"allowed": True, "management": management, "stats": stats, "branch_rows": branch_rows, "staff_rows": staff_rows}

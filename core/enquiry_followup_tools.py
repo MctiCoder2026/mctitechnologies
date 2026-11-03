@@ -153,7 +153,7 @@ def complete_enquiry_followup(request, enquiry_id):
         enquiry = get_object_or_404(Enquiry.objects.select_for_update(), pk=enquiry_id)
         if not user_can_access_enquiry(user, enquiry):
             return HttpResponseForbidden("Another branch enquiry.")
-        if enquiry.status in ("converted", "closed"):
+        if enquiry.status in ("converted", "closed") or hasattr(enquiry, "admission"):
             error = "This enquiry is already converted or closed."
         if error:
             messages.error(request, error)
@@ -223,7 +223,7 @@ def schedule_action_followup(enquiry_id, user, action, campaign_key=None):
     )
     with transaction.atomic():
         enquiry = Enquiry.objects.select_for_update().get(pk=enquiry_id)
-        if enquiry.status in ("converted", "closed"):
+        if enquiry.status in ("converted", "closed") or hasattr(enquiry, "admission"):
             return enquiry.followup_date
         old_date = enquiry.followup_date
         next_date = timezone.localdate() + timedelta(days=days)

@@ -221,11 +221,25 @@ def get_mia_module_position(enrollment, module):
 def get_package_module_position(enrollment, module):
     from .models import LMSModule
 
-    course_ids = list(
-        enrollment.course.included_courses.filter(is_active=True)
-        .order_by("display_order", "pk")
-        .values_list("pk", flat=True)
-    )
+    if enrollment.course_id == 5:
+        # Data Analysis with AI: fixed package-specific sequence.
+        # Do not change global Course.display_order.
+        sequence = (1, 17, 14, 15)
+        included = set(
+            enrollment.course.included_courses.filter(is_active=True)
+            .values_list("pk", flat=True)
+        )
+        course_ids = [
+            course_id for course_id in sequence
+            if course_id in included
+        ]
+    else:
+        course_ids = list(
+            enrollment.course.included_courses.filter(is_active=True)
+            .order_by("display_order", "pk")
+            .values_list("pk", flat=True)
+        )
+
     if module.course_id not in course_ids:
         raise ValueError("Module is not part of this active package.")
 
@@ -244,8 +258,10 @@ def get_package_module_position(enrollment, module):
 
 
 def get_module_fee_access(student, module):
+    from decimal import Decimal
+    from .models import LMSModule
+
     enrollment = get_lms_enrollment(student, module.course)
-    position = module.order or 0
     grouped = bool(
         enrollment
         and enrollment.course.is_package
@@ -254,7 +270,9 @@ def get_module_fee_access(student, module):
 
     if grouped:
         try:
-            position, total = get_package_module_position(enrollment, module)
+            position, total = get_package_module_position(
+                enrollment, module
+            )
         except ValueError as exc:
             return {
                 "allowed": False,
@@ -263,55 +281,74 @@ def get_module_fee_access(student, module):
                 "enrollment": enrollment,
                 "message": str(exc),
             }
-        halfway = max(5, (total + 1) // 2)
-        required = 0 if position <= 5 else 50 if position <= halfway else 100
+        free_modules = 5
     else:
-        required = 0 if position <= 4 else 50 if position == 5 else 100
-
-    if required == 0:
-        return {
-            "allowed": True,
-            "required_percent": 0,
-            "paid_percent": 0,
-            "enrollment": enrollment,
-            "message": "",
-        }
+        ids = list(
+            LMSModule.objects.filter(
+                course=module.course,
+                is_active=True
+            ).order_by("order", "pk").values_list("pk", flat=True)
+        )
+        total = len(ids)
+        if module.pk not in ids:
+            return {
+                "allowed": False,
+                "required_percent": 100,
+                "paid_percent": 0,
+                "enrollment": enrollment,
+                "message": "Inactive module.",
+            }
+        position = ids.index(module.pk) + 1
+        free_modules = 4
 
     if enrollment is None:
-        return {
-            "allowed": False,
-            "required_percent": required,
-            "paid_percent": 0,
-            "enrollment": None,
-            "message": "Active enrollment not found for this course.",
-        }
+        paid_percent = Decimal("0")
+        unlocked = min(total, free_modules)
+    else:
+        final_fee = Decimal(str(enrollment.final_fee or 0))
+        paid_fee = max(
+            Decimal("0"),
+            Decimal(str(enrollment.total_paid or 0))
+        )
 
-    final_fee = enrollment.final_fee or 0
-    paid_fee = enrollment.total_paid or 0
-    if final_fee <= 0:
-        return {
-            "allowed": True,
-            "required_percent": 0,
-            "paid_percent": 100,
-            "enrollment": enrollment,
-            "message": "",
-        }
+        if final_fee <= 0:
+            paid_percent = Decimal("100")
+        else:
+            paid_percent = min(
+                Decimal("100"),
+                paid_fee * Decimal("100") / final_fee
+            )
 
-    allowed = paid_fee * 100 >= final_fee * required
-    label = (
-        f"Package module {position}"
-        if grouped else "This module"
+        proportional = int(
+            Decimal(total) * paid_percent / Decimal("100")
+        )
+        unlocked = min(
+            total,
+            max(free_modules, proportional)
+        )
+
+    allowed = position <= unlocked
+
+    required_percent = (
+        0 if position <= free_modules
+        else min(100, int(
+            (Decimal(position) * Decimal("100")
+             / Decimal(total)).to_integral_value(
+                rounding="ROUND_CEILING"
+            )
+        ))
     )
+
     return {
         "allowed": allowed,
-        "required_percent": required,
-        "paid_percent": round(float(paid_fee / final_fee * 100), 2),
+        "required_percent": required_percent,
+        "paid_percent": round(float(paid_percent), 2),
         "enrollment": enrollment,
         "message": (
             "" if allowed else
-            f"{label} requires {required}% of the "
-            + ("total package fee" if grouped else "course fee")
-            + " to be paid."
+            f"Module {position} is locked. "
+            f"{unlocked} of {total} modules are currently "
+            f"available based on fee received."
         ),
     }
 
@@ -564,6 +601,59 @@ def module_topics(request, module_id):
         if not first_progress.is_unlocked:
             first_progress.is_unlocked = True
             first_progress.save()
+
+    # MCTI_LMS_MODULE_PROGRESSION_RECOVERY_V1
+    # Recover a missing first-topic unlock after the previous
+    # active module was fully completed and the current module
+    # passed its fee-access check above.
+    if topics and first_module and module.id != first_module.id:
+
+        previous_module = (
+            LMSModule.objects.filter(
+                course=module.course,
+                is_active=True,
+                order__lt=module.order
+            ).order_by("-order").first()
+        )
+
+        if previous_module:
+
+            previous_topics = list(
+                LMSTopic.objects.filter(
+                    module=previous_module,
+                    is_active=True
+                ).values_list("id", flat=True)
+            )
+
+            if previous_topics:
+
+                completed_count = (
+                    StudentTopicProgress.objects.filter(
+                        student=student,
+                        topic_id__in=previous_topics,
+                        is_completed=True
+                    ).count()
+                )
+
+                if completed_count == len(previous_topics):
+
+                    first_topic = topics[0]
+
+                    first_progress, created = (
+                        StudentTopicProgress.objects.get_or_create(
+                            student=student,
+                            topic=first_topic,
+                            defaults={
+                                "is_unlocked": True
+                            }
+                        )
+                    )
+
+                    if not first_progress.is_unlocked:
+                        first_progress.is_unlocked = True
+                        first_progress.save(
+                            update_fields=["is_unlocked"]
+                        )
 
     topic_data = []
 

@@ -198,6 +198,22 @@ button:hover {
 
         </form>
 
+{% if enrollment.status == "active" and enrollment.balance_fee > 0 %}
+<div style="margin:18px 0;padding:16px;background:#fff7ed;border:1px solid #fdba74;border-radius:10px">
+    <div style="font-weight:800;color:#9a3412;margin-bottom:7px">
+        Early Fee Payment Discount
+    </div>
+    <p style="margin:0 0 12px;color:#444;font-size:14px">
+        Request a discount for early fee payment. Head Office approval is required.
+    </p>
+    <a href="{% url 'early_discount_request' enrollment.id %}"
+       style="display:inline-block;background:#f58220;color:#111;padding:11px 16px;border-radius:7px;text-decoration:none;font-weight:800">
+        Request Early Discount
+    </a>
+</div>
+{% endif %}
+
+
     </div>
 
 </div>

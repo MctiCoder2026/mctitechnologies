@@ -1,0 +1,62 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Free English Typing Lab | MCTI</title><style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f5f5;color:#171717;font-family:Arial,sans-serif}
+header{background:#111;color:white;padding:20px}
+header a{color:white;text-decoration:none;font-weight:800}
+.orange{color:#ff7200}
+main{max-width:1050px;margin:auto;padding:28px 18px 50px}
+.hero{background:#111;color:white;padding:30px;border-radius:16px}
+.hero p{color:#ddd;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+.card{background:white;border:1px solid #e5e5e5;border-radius:14px;padding:22px}
+.btn,button{display:inline-block;background:#ff7200;color:white;border:0;
+padding:12px 17px;border-radius:8px;text-decoration:none;font-weight:700;
+cursor:pointer;margin:5px 5px 5px 0}
+.secondary{background:#111}
+small,.muted{color:#666;line-height:1.6}
+input,select,textarea{width:100%;border:1px solid #ccc;border-radius:8px;
+padding:13px;font:16px Arial;margin:8px 0 16px}
+label{font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:20px 0}
+.stat{background:#111;color:white;border-radius:9px;padding:15px;text-align:center}
+.stat b{display:block;color:#ff7200;font-size:24px}
+.source{font:22px/1.8 monospace;padding:18px;background:#f5f5f5;
+border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere}
+.good{color:#15803d}.bad{color:#b91c1c;background:#fee2e2}
+.current{background:#ff7200;color:white}
+.notice{background:#fff1e6;border-radius:9px;padding:16px;margin-top:18px}
+.error{background:#fee2e2;color:#991b1b;padding:12px;border-radius:8px}
+@media(max-width:750px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:500px){.grid{grid-template-columns:1fr}
+.stats{grid-template-columns:1fr 1fr}.hero{padding:22px}.source{font-size:18px}}
+</style></head><body><header><a href="{% url 'typing_practice:public_typing' %}">MCTI <span class="orange">English Typing Lab</span></a></header><main>
+<div class="hero">
+<h1>Learn to type with confidence</h1>
+<p>Five free English lessons. Start with the keyboard basics, then practise words and sentences.</p>
+{% if registered %}
+<p>Welcome, {{ guest_name }}. All five free lessons are available.</p>
+{% else %}
+<a class="btn" href="{% url 'typing_practice:public_register' %}">Register free · Unlock all 5 lessons</a>
+{% endif %}
+<a class="btn secondary" href="{% url 'student_login' %}">Student login</a>
+</div>
+<div class="grid">
+{% for row in rows %}
+<div class="card">
+<small>FREE LESSON {{ row.lesson.order }}</small>
+<h2>{{ row.lesson.title }}</h2>
+<p>{{ row.lesson.target_wpm }} WPM · {{ row.lesson.target_accuracy }}% accuracy target</p>
+{% if row.result %}
+<p><b>Last result:</b> {{ row.result.wpm }} WPM · {{ row.result.accuracy }}%</p>
+{% endif %}
+<a class="btn" href="{% url 'typing_practice:public_practice' row.lesson.slug %}">
+{% if not registered and row.lesson.order > 2 %}Register to practise{% else %}Practise now{% endif %}
+</a>
+</div>
+{% endfor %}
+<div class="card"><small>FREE GAME</small><h2>Letter Rush</h2>
+<p>Practise your keyboard reflexes.</p>
+<a class="btn" href="{% url 'typing_practice:public_game' %}">Play now</a></div>
+</div>
+<p class="muted">Guest results stay in this browser session. Student exams, certificates and permanent progress are available through student login.</p>
+</main></body></html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCTI | Student Learning Command Center</title>
+<style>
+:root{--orange:#f97316;--black:#171717;--muted:#64748b;--border:#e5e7eb}
+*{box-sizing:border-box}
+body{margin:0;background:#f5f6f8;font-family:Arial,sans-serif;color:#171717}
+header{background:#171717;color:white;padding:20px 5%;border-bottom:5px solid var(--orange)}
+header h1{font-size:25px;margin:6px 0}
+header p{color:#d1d5db;margin:0;font-size:13px}
+main{max-width:1500px;margin:auto;padding:24px}
+a{color:#c2410c}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:20px 0}
+.kpi{background:white;border:1px solid var(--border);border-radius:14px;padding:20px}
+.kpi strong{font-size:29px;display:block;margin-top:8px}
+.kpi span{font-size:12px;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:10px;background:white;padding:15px;border-radius:12px;margin-bottom:18px}
+input,select,button{padding:11px;border:1px solid #d1d5db;border-radius:8px;font:inherit}
+button{background:var(--orange);color:white;border:0;font-weight:bold;cursor:pointer}
+.table-wrap{overflow:auto;background:white;border-radius:14px;border:1px solid var(--border)}
+table{border-collapse:collapse;width:100%;min-width:1050px}
+th{background:#fff7ed;text-align:left;font-size:12px;color:#7c2d12}
+th,td{padding:13px;border-bottom:1px solid #eee;vertical-align:top}
+td{font-size:13px}
+.small{font-size:11px;color:var(--muted)}
+.progress{height:9px;background:#e5e7eb;border-radius:10px;overflow:hidden;margin:7px 0}
+.fill{height:100%;background:var(--orange)}
+.pill{padding:5px 9px;border-radius:20px;background:#f1f5f9;font-size:11px;font-weight:bold;display:inline-block}
+.warn{background:#fef2f2;color:#b91c1c}
+.good{background:#ecfdf5;color:#166534}
+details{margin-top:8px}
+summary{cursor:pointer;color:#c2410c;font-weight:bold;font-size:12px}
+.notice{font-size:12px;color:#64748b;margin:12px 0}
+@media(max-width:1000px){.kpis{grid-template-columns:repeat(2,1fr)}main{padding:12px}}
+</style>
+</head>
+<body>
+<header>
+<div style="font-size:12px;color:#fb923c;font-weight:bold">MCTI TECHNOLOGIES · LMS ANALYTICS</div>
+<h1>Student Learning Command Center</h1>
+<p>Course-wise learning progress · Classroom verification · Branch monitoring</p>
+</header>
+<main>
+<div>
+{% if admin %}
+<a href="{% url 'management_dashboard' %}">← Back to Dashboard</a>
+{% else %}
+<a href="{% url 'branch_dashboard' %}">← Back to Dashboard</a>
+{% endif %}
+</div>
+<section class="kpis">
+<div class="kpi"><span>ACTIVE STUDENTS</span><strong>{{ unique_student_count }}</strong></div>
+<div class="kpi"><span>ACTIVE ENROLLMENTS</span><strong>{{ enrollment_count }}</strong></div>
+<div class="kpi"><span>OVERALL LMS PROGRESS</span><strong>{{ progress_percentage }}%</strong></div>
+<div class="kpi"><span>NO LMS ACTIVITY 7+ DAYS</span><strong>{{ pending_attention }}</strong></div>
+<div class="kpi"><span>LMS TOPICS 100% DONE</span><strong>{{ completion_ready }}</strong></div>
+</section>
+<form class="filters" method="get">
+<input name="q" value="{{ search }}" placeholder="Student name, mobile, enrollment no.">
+{% if admin %}
+<select name="branch">
+<option value="">All branches</option>
+{% for b in branches %}<option value="{{ b }}" {% if selected_branch == b %}selected{% endif %}>{{ b|title }}</option>{% endfor %}
+</select>
+{% endif %}
+<select name="course">
+<option value="">All courses</option>
+{% for c in courses %}<option value="{{ c.id }}" {% if selected_course == c.id|stringformat:"s" %}selected{% endif %}>{{ c.title }}</option>{% endfor %}
+</select>
+<button type="submit">Apply Filters</button>
+<a href="{% url 'lms:management_student_progress' %}" style="align-self:center">Reset</a>
+</form>
+{% if limited %}<p class="notice">Showing first 500 enrollments. Narrow filters to see more.</p>{% endif %}
+<p class="notice">LMS quiz completion and classroom trainer verification are separate. No automatic course completion or absence marking.</p>
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>Student</th><th>Branch</th><th>Course</th><th>Modules</th><th>Topics</th><th>LMS Progress</th><th>Last LMS Activity</th><th>Trainer Verification</th><th>Action</th>
+</tr></thead>
+<tbody>
+{% for row in rows %}
+<tr>
+<td><strong>{{ row.enrollment.student.name }}</strong><div class="small">{{ row.enrollment.student.mobile }}</div><div class="small">{{ row.enrollment.enrollment_number }}</div></td>
+<td>{{ row.enrollment.branch|default:row.enrollment.student.branch|title }}</td>
+<td>{{ row.enrollment.course.title }}</td>
+<td>{{ row.completed_modules }}/{{ row.module_count }}
+<details><summary>View modules</summary>
+{% for m in row.module_details %}
+<div class="small" style="margin:7px 0">{{ m.title }}: {{ m.completed }}/{{ m.total }} {% if m.done %}✓{% endif %}</div>
+{% empty %}<div class="small">No active LMS modules</div>{% endfor %}
+</details>
+</td>
+<td>{{ row.completed_topics }}/{{ row.total_topics }}</td>
+<td><strong>{{ row.percentage }}%</strong><div class="progress"><div class="fill" style="width:{{ row.percentage }}%"></div></div>
+{% if row.completion_ready %}<span class="pill good">LMS Topics Complete</span>{% elif row.needs_attention %}<span class="pill warn">Follow Up</span>{% endif %}
+</td>
+<td>{% if row.last_activity %}{{ row.last_activity|date:"d M Y" }}{% else %}No quiz activity{% endif %}
+<div class="small">{{ row.inactive_days }} days since activity/enrollment</div></td>
+<td>Submitted: {{ row.teaching.submitted }}<div class="small">Staff approved: {{ row.teaching.approved }}</div><div class="small">Trainer confirmed: {{ row.teaching.verified }}</div></td>
+<td>{% if row.enrollment.student.admission_id %}
+<a href="{% url 'admission_detail' row.enrollment.student.admission_id %}" target="_blank" rel="noopener noreferrer">Admission ↗</a>
+{% else %}
+<span class="small">Not linked</span>
+{% endif %}</td>
+</tr>
+{% empty %}
+<tr><td colspan="9" style="text-align:center;padding:40px">No matching active enrollments found.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</main>
+</body>
+</html>

@@ -53,7 +53,7 @@ class Stream(models.Model):
     def __str__(self):
 
         return self.name
-    
+
 class Course(models.Model):
 
     title = models.CharField(
@@ -978,6 +978,24 @@ class Enrollment(models.Model):
         null=True
     )
 
+    cancelled_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    cancelled_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cancelled_enrollments"
+    )
+
+    cancellation_reason = models.TextField(
+        blank=True,
+        default=""
+    )
+
     created_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -1223,6 +1241,8 @@ class FeePayment(models.Model):
         )
     )
 
+        self.previous_paid = previous_paid
+
         if self.enrollment:
 
             total_fee = self.enrollment.final_fee
@@ -1246,7 +1266,7 @@ class FeePayment(models.Model):
         # BALANCE AFTER PAYMENT
         # ----------------------------------------------------
 
-        if self.student.admission:
+        if not self.enrollment and self.student.admission:
 
             total_fee = (
                 self.student.admission.total_fee
@@ -1263,7 +1283,7 @@ class FeePayment(models.Model):
                 0
             )
 
-        else:
+        elif not self.enrollment:
 
             self.balance_after_payment = 0
 
@@ -1381,7 +1401,7 @@ def sync_enrollment_from_admission(
 
         enrollment.branch = instance.branch
         enrollment.standard_fee = instance.total_fee
-        enrollment.final_fee = instance.total_fee
+        enrollment.final_fee = instance.total_fee - enrollment.discount_amount
         enrollment.created_by = instance.created_by
 
         enrollment.save(
@@ -3543,3 +3563,84 @@ class StudentRecordChangeAudit(models.Model):
 
     class Meta:
         ordering = ["-changed_at", "-pk"]
+
+
+# ============================================================
+# EARLY FEE PAYMENT DISCOUNT - HO APPROVAL
+# ============================================================
+
+class EarlyFeeDiscountRequest(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+        ("applied", "Applied"),
+        ("expired", "Expired"),
+    ]
+
+    enrollment = models.ForeignKey(
+        Enrollment,
+        on_delete=models.PROTECT,
+        related_name="early_discount_requests",
+    )
+    requested_by = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name="early_discount_requests",
+    )
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+    )
+    reason = models.TextField()
+    proposed_payment_date = models.DateField()
+    due_date_at_request = models.DateField()
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="pending",
+        db_index=True,
+    )
+    requested_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+    reviewed_by = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="reviewed_early_discounts",
+    )
+    reviewed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+    review_note = models.TextField(
+        blank=True,
+        default="",
+    )
+    applied_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+    )
+
+    class Meta:
+        ordering = ["-requested_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["enrollment"],
+                condition=models.Q(status="pending"),
+                name="unique_pending_early_discount",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(amount__gt=0),
+                name="positive_early_discount_amount",
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.enrollment.enrollment_number} "
+            f"- {self.amount} - {self.status}"
+        )

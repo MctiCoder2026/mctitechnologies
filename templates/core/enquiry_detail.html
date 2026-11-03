@@ -648,7 +648,7 @@ Lead Details | MCTI Technologies
                  CONTACT ACTIONS
             ======================================== -->
 
-            
+
 {% if enquiry.status != "converted" and enquiry.status != "closed" %}
 
 {% endif %}
@@ -677,7 +677,7 @@ Lead Details | MCTI Technologies
                         id="quickWhatsApp"
                         class="mcti-whatsapp-btn"
                         title="WhatsApp"><i class="fa-brands fa-whatsapp"></i><span>WhatsApp</span></button>
-                {% if enquiry.status != "converted" %}
+                {% if not enquiry.admission %}
 
     <a href="{% url 'create_admission' enquiry.id %}"
        class="mcti-save-btn"
@@ -713,7 +713,7 @@ Lead Details | MCTI Technologies
 
         {% if request.user.is_superuser and enquiry.status != "converted" %}
 
-            
+
 
         {% endif %}
 
@@ -722,10 +722,10 @@ Lead Details | MCTI Technologies
              FOLLOW-UP
         ======================================== -->
 
-        
+
 <div class="mcti-followup-column">
 {% if enquiry.status != "converted" and enquiry.status != "closed" %}
-<div class="mcti-detail-card mcti-result-card">
+<details class="mcti-detail-card mcti-result-card mcti-accordion"><summary>Record Result</summary><div class="mcti-accordion-content">
 <div class="mcti-detail-card-header"><span>FOLLOW-UP ACTION</span><h2 id="record-followup-result" style="scroll-margin-top:100px;">Record Result</h2><p>Save the conversation outcome and your next follow-up date.</p></div>
 <form method="post" action="{% url 'complete_enquiry_followup' enquiry.id %}">
 {% csrf_token %}
@@ -744,8 +744,11 @@ Lead Details | MCTI Technologies
 <div><button style="background:#ff7200;color:white;border:0;padding:12px 18px;border-radius:8px;">Save Follow-up Result</button></div>
 </form>
 </div>
+</details>
 {% endif %}
-<div class="mcti-detail-card mcti-schedule-card">
+<details class="mcti-detail-card mcti-schedule-card mcti-accordion">
+<summary>Change Follow-up Schedule</summary>
+<div class="mcti-accordion-content">
 
 <div class="mcti-schedule-details"><h3 class="mcti-schedule-title">Change Follow-up Schedule</h3>
 <p class="mcti-ui-help">Use this to edit the schedule only. To record a call or message outcome, use Record Result above.</p>
@@ -755,19 +758,16 @@ Lead Details | MCTI Technologies
 <button type="submit" class="mcti-save-btn">Save Schedule</button>
 </form>
 </div>
-
 </div>
-</div>
-
-
-    </div>
-
+</details>
 
     <!-- ========================================
          WHATSAPP COMPOSER
     ======================================== -->
 
 
+</div><!-- end mcti-followup-column -->
+<div class="mcti-composer-column">
 <div class="mcti-detail-card mcti-whatsapp-composer">
   <div class="mcti-detail-card-header">
     <span>WHATSAPP</span>
@@ -776,6 +776,16 @@ Lead Details | MCTI Technologies
   </div>
 
   <div class="mcti-message-field">
+
+  <div class="mcti-message-field">
+    <label for="whatsappLanguage">Message Language</label>
+    <select id="whatsappLanguage">
+      <option value="en">English</option>
+      <option value="mr">मराठी (Marathi)</option>
+      <option value="hi">हिंदी (Hindi)</option>
+    </select>
+  </div>
+
     <label for="whatsappTemplate">Message template</label>
     <select id="whatsappTemplate">
       <option value="welcome">1. Welcome &amp; Centre Address</option>
@@ -836,6 +846,7 @@ Lead Details | MCTI Technologies
     Send the message in WhatsApp, then record the actual follow-up result.
   </p>
 </div>
+</div><!-- end mcti-composer-column -->
 
 
 
@@ -843,7 +854,7 @@ Lead Details | MCTI Technologies
          ACTIVITY TIMELINE
     ======================================== -->
 
-    
+
 {% if request.user.is_superuser and enquiry.status != "converted" %}
 <details class="mcti-danger-details">
 <summary>Admin tools · Delete dummy enquiry</summary>
@@ -1015,6 +1026,9 @@ Lead Details | MCTI Technologies
 
 </section>
 
+{% load static %}
+<script src="{% static 'js/mcti_enquiry_languages.js' %}"></script>
+<!-- MCTI_ENQUIRY_LANGUAGE_INTEGRATION_V1 -->
 <!-- ========================================
      WHATSAPP JAVASCRIPT
 ======================================== -->
@@ -1024,6 +1038,7 @@ Lead Details | MCTI Technologies
 document.addEventListener("DOMContentLoaded", function () {
     const el = id => document.getElementById(id);
     const select = el("whatsappTemplate");
+    const language = el("whatsappLanguage");
     const box = el("whatsappMessage");
     const status = el("composerStatus");
     const date = el("composerDate");
@@ -1205,7 +1220,27 @@ If you prefer no further messages, please let us know. We’ll respect your pref
 
 ${signoff}`
         };
-        return messages[select.value] || "";
+        const englishMessage = messages[select.value] || "";
+        if (language.value === "en") return englishMessage;
+
+        const amount = fee.value
+            ? Number(fee.value).toLocaleString("en-IN", {maximumFractionDigits:2})
+            : "[Enter fee]";
+
+        const data = {
+            name, institute, branch, course, courseDetailsUrl,
+            location, signoff,
+            date: displayDate(date.value),
+            time: displayTime(time.value),
+            amount,
+            offer: offer.value.trim() || "[Enter offer details and terms]",
+            validity: displayDate(validity.value)
+        };
+
+        if (!window.MCTIEnquiryLanguages) return englishMessage;
+        return window.MCTIEnquiryLanguages.build(
+            language.value, select.value, data
+        ) || englishMessage;
     }
 
     function show(id, visible) {
@@ -1219,6 +1254,7 @@ ${signoff}`
         box.value = buildMessage();
     }
     select.addEventListener("change", refresh);
+    language.addEventListener("change", refresh);
     [date,time,fee,offer,validity].forEach(input => {
         input.addEventListener("input", refresh);
     });
@@ -1324,5 +1360,191 @@ ${signoff}`
 });
 </script>
 
+
+
+<!-- MCTI_ENQUIRY_DETAIL_ACCORDION_V2 -->
+<style>
+.mcti-followup-column {
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    min-width:0;
+}
+.mcti-accordion {
+    overflow:hidden;
+}
+.mcti-accordion > summary {
+    list-style:none;
+    cursor:pointer;
+    padding:20px 22px;
+    font-size:17px;
+    font-weight:800;
+    color:#171717;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+.mcti-accordion > summary::-webkit-details-marker {
+    display:none;
+}
+.mcti-accordion > summary::after {
+    content:"+";
+    color:#ff7200;
+    font-size:24px;
+}
+.mcti-accordion[open] > summary::after {
+    content:"−";
+}
+.mcti-accordion-content {
+    padding:0 22px 22px;
+}
+.mcti-accordion > summary:focus-visible {
+    outline:2px solid #ff7200;
+    outline-offset:-3px;
+}
+</style>
+
+
+<!-- MCTI_ACTIVITY_COLLAPSE_V1 -->
+<style>
+.mcti-activity-toggle {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    width:100%;
+    border:0;
+    background:#fff;
+    color:#171717;
+    padding:18px 22px;
+    border-radius:12px;
+    font-size:17px;
+    font-weight:800;
+    cursor:pointer;
+    text-align:left;
+}
+.mcti-activity-toggle::after {
+    content:"+";
+    font-size:24px;
+    color:#ff7200;
+}
+.mcti-activity-toggle[aria-expanded="true"]::after {
+    content:"−";
+}
+.mcti-activity-card.mcti-activity-closed {
+    display:none !important;
+}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const card = document.querySelector(".mcti-activity-card");
+    if (!card) return;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "mcti-activity-toggle";
+    button.textContent = "Activity Timeline";
+    button.setAttribute("aria-expanded", "false");
+
+    const parent = card.parentNode;
+    parent.insertBefore(button, card);
+    card.classList.add("mcti-activity-closed");
+
+    button.addEventListener("click", function () {
+        const closed = card.classList.toggle("mcti-activity-closed");
+        button.setAttribute("aria-expanded", String(!closed));
+    });
+});
+</script>
+
+
+<!-- MCTI_ACTIVITY_GAP_FIX_V1 -->
+<style>
+@media (min-width: 769px) {
+    .mcti-detail-grid {
+        align-items: start !important;
+    }
+    .mcti-detail-grid > * {
+        min-height: 0;
+    }
+    .mcti-activity-toggle {
+        margin-top: 0 !important;
+    }
+}
+</style>
+
+
+<!-- MCTI_DETAIL_LAYOUT_V3 -->
+<style>
+@media (min-width:851px) {
+    .mcti-detail-grid {
+        display:grid!important;
+        grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)!important;
+        gap:16px 24px!important;
+        align-items:start!important;
+    }
+    .mcti-detail-grid > .mcti-detail-card:first-child {
+        grid-column:1!important;
+        grid-row:1!important;
+    }
+    .mcti-detail-grid > .mcti-followup-column {
+        grid-column:2!important;
+        grid-row:1 / span 3!important;
+        display:flex!important;
+        flex-direction:column!important;
+        gap:16px!important;
+    }
+    .mcti-detail-grid > .mcti-activity-toggle {
+        grid-column:1!important;
+        grid-row:2!important;
+        margin:0!important;
+    }
+    .mcti-detail-grid > .mcti-activity-card {
+        grid-column:1!important;
+        grid-row:3!important;
+        margin:0!important;
+    }
+}
+</style>
+
+
+<!-- MCTI_DETAIL_FINAL_LAYOUT_V4 -->
+<style>
+@media(min-width:851px) {
+    .mcti-detail-grid {
+        display:grid!important;
+        grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)!important;
+        gap:16px 24px!important;
+        align-items:start!important;
+    }
+    .mcti-detail-grid > .mcti-detail-card:first-child {
+        grid-column:1!important;
+        grid-row:1!important;
+    }
+    .mcti-detail-grid > .mcti-followup-column {
+        grid-column:1!important;
+        grid-row:2!important;
+    }
+    .mcti-detail-grid > .mcti-composer-column {
+        grid-column:2!important;
+        grid-row:1 / span 5!important;
+    }
+    .mcti-detail-grid > .mcti-activity-toggle {
+        grid-column:1!important;
+        grid-row:3!important;
+        margin:0!important;
+    }
+    .mcti-detail-grid > .mcti-activity-card {
+        grid-column:1!important;
+        grid-row:4!important;
+        margin:0!important;
+    }
+}
+.mcti-composer-column {
+    min-width:0;
+}
+.mcti-composer-column .mcti-whatsapp-composer {
+    margin-bottom:0!important;
+}
+</style>
 
 {% endblock %}

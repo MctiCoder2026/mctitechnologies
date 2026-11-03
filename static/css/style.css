@@ -7174,7 +7174,7 @@ body > main {
         max-width: 280px;
         text-align: center;
     }
-    
+
 
 }
 
@@ -10051,3 +10051,152 @@ section.hero + section.divisions{
     }
 }
 
+
+
+/* MCTI ENQUIRY PREMIUM V2 - SCOPED */
+.mcti-dashboard {
+    padding: 30px 22px 55px;
+    background: #f5f6f8;
+}
+.mcti-dashboard .mcti-dashboard-container {
+    max-width: 1440px;
+}
+.mcti-dashboard .mcti-dashboard-header {
+    margin-bottom: 20px;
+    gap: 16px;
+}
+.mcti-dashboard .mcti-dashboard-header h1 {
+    font-size: clamp(25px, 2.5vw, 34px);
+    font-weight: 800;
+    letter-spacing: -.8px;
+    color: #111111;
+}
+.mcti-dashboard .mcti-dashboard-header p {
+    font-size: 13px;
+}
+.mcti-dashboard .mcti-stat-grid {
+    grid-template-columns: repeat(6, minmax(0,1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+.mcti-dashboard .mcti-stat-card {
+    min-width: 0;
+    padding: 17px 16px;
+    border-radius: 14px;
+    border: 1px solid #e9eaed;
+    border-top: 3px solid #ff6b00;
+    box-shadow: 0 3px 12px rgba(0,0,0,.035);
+}
+.mcti-dashboard .mcti-stat-card strong {
+    margin-top: 6px;
+    font-size: 29px;
+    font-weight: 800;
+    color: #151515;
+}
+.mcti-dashboard .mcti-stat-card:nth-child(5) {
+    border-top-color: #15803d;
+    background: #f5fff8;
+}
+.mcti-dashboard .mcti-stat-card:nth-child(5) strong {
+    color: #15803d;
+}
+.mcti-dashboard .mcti-followup-section {
+    margin-bottom: 18px;
+}
+.mcti-dashboard .mcti-followup-grid {
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 12px;
+}
+.mcti-dashboard .mcti-followup-card {
+    min-width: 0;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.035);
+}
+.mcti-dashboard .mcti-filter-card {
+    padding: 15px;
+    margin-bottom: 18px;
+    border-radius: 14px;
+}
+.mcti-dashboard .mcti-filter-form {
+    grid-template-columns: minmax(180px,2fr) repeat(3,minmax(115px,1fr)) auto auto;
+    gap: 10px;
+    align-items: end;
+}
+.mcti-dashboard .mcti-filter-form input,
+.mcti-dashboard .mcti-filter-form select {
+    height: 40px;
+    border-radius: 8px;
+}
+.mcti-dashboard .mcti-filter-btn,
+.mcti-dashboard .mcti-clear-btn {
+    height: 40px;
+}
+.mcti-dashboard .mcti-followup-list-card,
+.mcti-dashboard .mcti-enquiry-table-card {
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.035);
+}
+.mcti-dashboard .mcti-table-heading {
+    padding: 17px 20px;
+}
+.mcti-dashboard .mcti-table-heading h2 {
+    font-size: 19px;
+}
+.mcti-dashboard .mcti-enquiry-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #fff3e9;
+    color: #252525;
+    padding: 12px 15px;
+}
+.mcti-dashboard .mcti-enquiry-table td {
+    padding: 12px 15px;
+}
+.mcti-dashboard .mcti-enquiry-table tbody tr:nth-child(even) {
+    background: #fafafa;
+}
+.mcti-dashboard .mcti-enquiry-table tbody tr:hover {
+    background: #fff7ef;
+}
+.mcti-dashboard .mcti-status-select {
+    border-radius: 8px;
+    border: 1px solid #e2e4e8;
+}
+@media (max-width: 1100px) {
+    .mcti-dashboard .mcti-stat-grid {
+        grid-template-columns: repeat(3,minmax(0,1fr));
+    }
+    .mcti-dashboard .mcti-filter-form {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+    }
+}
+@media (max-width: 700px) {
+    .mcti-dashboard {
+        padding: 20px 12px 40px;
+    }
+    .mcti-dashboard .mcti-stat-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 9px;
+    }
+    .mcti-dashboard .mcti-stat-card {
+        padding: 13px 12px;
+    }
+    .mcti-dashboard .mcti-stat-card strong {
+        font-size: 24px;
+    }
+    .mcti-dashboard .mcti-followup-grid {
+        grid-template-columns: 1fr;
+    }
+    .mcti-dashboard .mcti-filter-form {
+        grid-template-columns: 1fr;
+    }
+    .mcti-dashboard .mcti-table-heading {
+        padding: 14px;
+    }
+}
+@media (max-width: 380px) {
+    .mcti-dashboard .mcti-stat-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+    }
+}

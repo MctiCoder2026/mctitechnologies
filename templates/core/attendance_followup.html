@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Student Attendance Follow-up | MCTI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f6fa;color:#172033;font-family:Arial,sans-serif}
+header{background:#111827;color:white;padding:22px 5%;display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.brand{font-size:23px;font-weight:900}.brand span{color:#f97316}
+header p{margin:5px 0 0;color:#cbd5e1;font-size:12px}
+.container{max-width:1450px;margin:auto;padding:25px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+h1{font-size:24px;margin:0 0 6px}
+.subtitle{color:#64748b;font-size:13px}
+.btn{background:#f97316;color:white;border:0;border-radius:9px;padding:11px 16px;text-decoration:none;font-size:12px;font-weight:700;cursor:pointer}
+.btn.dark{background:#111827}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:22px 0}
+.card{background:white;border:1px solid #e2e8f0;border-radius:14px;padding:20px;border-top:4px solid #f97316}
+.card small{display:block;color:#64748b;font-weight:700;font-size:11px}
+.card strong{display:block;font-size:29px;margin-top:10px}
+.panel{background:white;border:1px solid #e2e8f0;border-radius:14px;padding:20px;margin-bottom:20px}
+.filters{display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:12px;align-items:end}
+label{display:block;font-size:11px;font-weight:700;margin-bottom:6px}
+input,select{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px;background:white}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th{text-align:left;background:#f8fafc;color:#475569;font-size:11px;padding:13px 11px;white-space:nowrap}
+td{padding:12px 11px;border-bottom:1px solid #edf2f7;vertical-align:middle}
+.name{font-weight:800}
+.muted{color:#64748b;font-size:11px}
+.pill{display:inline-block;border-radius:30px;padding:6px 10px;font-size:11px;font-weight:800;background:#fff7ed;color:#c2410c}
+.pill.high{background:#fee2e2;color:#991b1b}
+.wa{background:#15803d;color:white;padding:9px 12px;border-radius:8px;text-decoration:none;font-size:11px;font-weight:700;display:inline-block}
+.lang{min-width:90px;padding:8px}
+.empty{text-align:center;padding:45px;color:#64748b}
+.note{background:#fff7ed;border:1px solid #fed7aa;padding:12px;border-radius:9px;font-size:12px;color:#9a3412;margin-bottom:18px}
+@media(max-width:850px){.filters{grid-template-columns:1fr 1fr}.cards{grid-template-columns:1fr 1fr}}
+@media(max-width:550px){.container{padding:14px}.filters,.cards{grid-template-columns:1fr}h1{font-size:20px}}
+</style>
+</head>
+<body>
+<header>
+<div><div class="brand"><span>MCTI</span> Technologies</div><p>Student Engagement & Attendance Monitoring</p></div>
+<a class="btn dark" href="{% url 'attendance_report' %}">Attendance Report</a>
+</header>
+<div class="container">
+<div class="top">
+<div><h1>Student Attendance Follow-up</h1><div class="subtitle">Identify students who have not attended recently · {{ today|date:"d M Y" }}</div></div>
+<a class="btn dark" href="{% url 'attendance_dashboard' %}">Attendance Dashboard</a>
+</div>
+
+<div class="cards">
+<div class="card"><small>STUDENTS REQUIRING REVIEW</small><strong>{{ total }}</strong></div>
+<div class="card"><small>SELECTED PERIOD</small><strong>{% if days == 0 %}Today{% else %}{{ days }}+ Days{% endif %}</strong></div>
+<div class="card"><small>BRANCH</small><strong style="font-size:19px">{% if branch_filter %}{{ branch_filter|title }}{% else %}All Branches{% endif %}</strong></div>
+</div>
+
+<div class="note">Students listed here have no recorded Present attendance within the selected period. This does not mean they were officially marked absent. Staff should verify their flexible class schedule before contacting them.</div>
+
+<div class="panel">
+<form class="filters" method="get">
+<div><label>BRANCH</label>
+{% if is_admin %}
+<select name="branch">
+{% for value,label in branches %}
+<option value="{{ value }}" {% if branch_filter == value %}selected{% endif %}>{{ label }}</option>
+{% endfor %}
+</select>
+{% else %}
+<input value="{{ branch_filter|title }}" disabled>
+{% endif %}
+</div>
+<div><label>INACTIVITY</label>
+<select name="days">
+<option value="0" {% if days == 0 %}selected{% endif %}>Not Attended Today</option>
+<option value="2" {% if days == 2 %}selected{% endif %}>2+ Days</option>
+<option value="3" {% if days == 3 %}selected{% endif %}>3+ Days</option>
+<option value="5" {% if days == 5 %}selected{% endif %}>5+ Days</option>
+<option value="7" {% if days == 7 %}selected{% endif %}>7+ Days</option>
+</select></div>
+<div><label>SEARCH STUDENT</label><input name="search" value="{{ search }}" placeholder="Name, mobile or student ID"></div>
+<button class="btn" type="submit">Apply Filters</button>
+</form>
+</div>
+
+<div class="panel">
+<div class="table-wrap">
+<table>
+<thead><tr><th>#</th><th>Student</th><th>Branch</th><th>Last Present</th><th>Days Since Attendance</th><th>WhatsApp Follow-up</th></tr></thead>
+<tbody>
+{% for row in rows %}
+<tr>
+<td>{{ forloop.counter }}</td>
+<td><div class="name">{{ row.student.name }}</div><div class="muted">{{ row.student.student_id }}</div></td>
+<td>{{ row.student.branch|title }}</td>
+<td>{% if row.last_present %}{{ row.last_present|date:"d M Y" }}{% else %}<span class="muted">Never recorded</span>{% endif %}</td>
+<td><span class="pill {% if row.inactive_days >= 7 %}high{% endif %}">{{ row.inactive_days }} days</span></td>
+<td>
+<div class="followup-wa" data-name="{{ row.student.name }}" data-mobile="{{ row.student.mobile }}" data-days="{{ row.inactive_days }}">
+<select class="lang" aria-label="WhatsApp language"><option value="en">English</option><option value="hi">हिन्दी</option><option value="mr">मराठी</option></select>
+<a class="wa" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+</div>
+</td>
+</tr>
+{% empty %}
+<tr><td colspan="6" class="empty">No students found for the selected filters.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<script>
+document.querySelectorAll(".followup-wa").forEach(function(box){
+const link=box.querySelector(".wa"),select=box.querySelector(".lang");
+let phone=(box.dataset.mobile||"").replace(/\D/g,"");
+if(phone.length===12&&phone.startsWith("91"))phone=phone.slice(2);
+else if(phone.length===11&&phone.startsWith("0"))phone=phone.slice(1);
+if(!/^[6-9]\d{9}$/.test(phone)){link.style.display="none";return;}
+function update(){
+const name=box.dataset.name||"Student";
+const messages={
+en:`Hello ${name}, greetings from MCTI Technologies. We noticed you haven't attended your classes recently. Please let us know when you plan to attend next or if you need any assistance. — Team MCTI`,
+hi:`नमस्ते ${name}, MCTI Technologies की ओर से शुभकामनाएँ। हमने देखा कि आप हाल ही में क्लास में नहीं आए हैं। कृपया बताएं कि आप अगली क्लास में कब आएंगे या आपको किसी सहायता की आवश्यकता है। — टीम MCTI`,
+mr:`नमस्कार ${name}, MCTI Technologies कडून शुभेच्छा. आपण अलीकडे वर्गात उपस्थित नसल्याचे दिसून आले. कृपया पुढील वर्गाला कधी येणार आहात किंवा काही मदत हवी असल्यास कळवा. — टीम MCTI`
+};
+link.href="https://wa.me/91"+phone+"?text="+encodeURIComponent(messages[select.value]);
+}
+select.addEventListener("change",update);update();
+});
+</script>
+</body>
+</html>

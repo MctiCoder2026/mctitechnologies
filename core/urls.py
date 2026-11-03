@@ -1,18 +1,93 @@
-from . import student_monitoring
-from . import student_status_details
+from . import corporate_dashboard
+from . import attendance_followup
 from . import employee_payroll
 from . import student_basic_details
 from django.urls import path, include
 from django.views.generic import TemplateView
 
 from . import views, fee_corrections
+from . import enrollment_cancellation
 
 
 from . import student_record_changes
 
+from . import student_monitoring
+from . import student_status_details
+from . import early_fee_discount
+
 urlpatterns = [
+    path(
+        "enquiries/export-excel/",
+        views.export_enquiries_excel,
+        name="export_enquiries_excel",
+    ),
+
+    path(
+        "fees/early-discount/<int:enrollment_id>/",
+        early_fee_discount.request_discount,
+        name="early_discount_request",
+    ),
+    path(
+        "management/early-discount-approvals/",
+        early_fee_discount.discount_approvals,
+        name="early_discount_approvals",
+    ),
+    path(
+        "management/early-discount/<int:request_id>/review/",
+        early_fee_discount.review_discount,
+        name="early_discount_review",
+    ),
+
     path("management/student-monitoring/", student_monitoring.student_monitoring, name="student_monitoring"),
     path("management/student-status-details/", student_status_details.student_status_details, name="student_status_details"),
+    path(
+        "corporate/walkin/report/",
+        corporate_dashboard.corporate_walkin_report,
+        name="corporate_walkin_report",
+    ),
+
+    path(
+        "corporate/walkin/check-mobile/",
+        corporate_dashboard.corporate_walkin_duplicate_check,
+        name="corporate_walkin_duplicate_check",
+    ),
+
+    path(
+        "corporate/walkin/",
+        corporate_dashboard.corporate_walkin,
+        name="corporate_walkin",
+    ),
+
+    path("corporate/login/", corporate_dashboard.corporate_login, name="corporate_login"),
+    path("corporate/logout/", corporate_dashboard.corporate_logout, name="corporate_logout"),
+    path(
+        "corporate/dashboard/",
+        corporate_dashboard.corporate_dashboard,
+        name="corporate_dashboard",
+    ),
+    path(
+        "corporate/dashboard/api/",
+        corporate_dashboard.corporate_dashboard_api,
+        name="corporate_dashboard_api",
+    ),
+
+    path(
+        "attendance/follow-up/",
+        attendance_followup.attendance_followup,
+        name="attendance_followup"
+    ),
+
+    path(
+        "enrollment/<int:enrollment_id>/status/",
+        enrollment_cancellation.update_enrollment_status,
+        name="update_enrollment_status",
+    ),
+    path(
+        "reports/left-cancelled-fees/",
+        enrollment_cancellation.cancelled_fee_report,
+        name="cancelled_fee_report",
+    ),
+
     path("records/<str:kind>/<int:record_id>/change/", student_record_changes.change_record, name="student_record_change"),
     path("employee/payroll/", employee_payroll.manage_payroll, name="branch_employee_payroll"),
     path("employee/my-payroll/", employee_payroll.my_payroll, name="employee_my_payroll"),
@@ -193,6 +268,12 @@ urlpatterns = [
     ),
 
     path(
+        "enquiry/<int:enquiry_id>/push-outreach/",
+        views.push_enquiry_to_outreach,
+        name="push_enquiry_to_outreach"
+    ),
+
+    path(
         "enquiry/<int:enquiry_id>/call/",
         views.log_enquiry_call,
         name="log_enquiry_call"
@@ -314,9 +395,35 @@ urlpatterns = [
 
 
     path(
+        "marketing-leads/",
+        views.marketing_lead_distribution,
+        name="marketing_lead_distribution"
+    ),
+
+    path("marketing-leads/bulk-push/", views.bulk_push_marketing_leads, name="bulk_push_marketing_leads"),
+
+    path(
+        "marketing-leads/<str:source_type>/<int:source_id>/push/",
+        views.push_marketing_lead_to_outreach,
+        name="push_marketing_lead_to_outreach"
+    ),
+
+    path(
         "outreach/",
         views.outreach_dashboard,
         name="outreach_dashboard"
+    ),
+
+    path(
+        "outreach/<int:contact_id>/",
+        views.outreach_contact_detail,
+        name="outreach_contact_detail"
+    ),
+
+    path(
+        "outreach/<int:contact_id>/convert/",
+        views.outreach_convert_to_enquiry,
+        name="outreach_convert_to_enquiry"
     ),
 
 
@@ -593,4 +700,16 @@ from .receipt_deletion import delete_receipt
 urlpatterns += [
     path("fee-payments/<int:payment_id>/delete/",
          delete_receipt, name="delete_fee_receipt"),
+]
+
+
+# MCTI EXECUTIVE COMMAND CENTER V3 PREVIEW ROUTE
+from .management_command_center_v3 import command_center_preview
+
+urlpatterns += [
+    path(
+        "management-command-center-v3/",
+        command_center_preview,
+        name="management_command_center_v3",
+    ),
 ]

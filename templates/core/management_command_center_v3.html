@@ -1,0 +1,2004 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MCTI Management Dashboard</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --primary:#ff6b00;
+    --primary-dark:#e85d00;
+    --primary-light:#fff2e8;
+
+    --dark:#111827;
+    --dark2:#1f2937;
+
+    --bg:#f5f7fb;
+    --white:#ffffff;
+
+    --border:#e5e7eb;
+    --muted:#6b7280;
+
+    --green:#16a34a;
+    --blue:#2563eb;
+    --purple:#7c3aed;
+    --red:#dc2626;
+}
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--bg);
+    color:var(--dark);
+}
+
+/* ==============================
+   LAYOUT
+============================== */
+
+.dashboard{
+    display:flex;
+    min-height:100vh;
+}
+
+/* ==============================
+   SIDEBAR
+============================== */
+
+.sidebar{
+    width:250px;
+    background:var(--dark);
+    color:white;
+    padding:24px 18px;
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+
+    /* Allow full menu access on desktop */
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+    scrollbar-width:thin;
+}
+
+.logo{
+    margin-bottom:35px;
+}
+
+.logo h2{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.logo h2 span{
+    color:var(--primary);
+}
+
+.logo p{
+    font-size:11px;
+    color:#9ca3af;
+}
+
+.menu-title{
+    font-size:10px;
+    color:#6b7280;
+    letter-spacing:1px;
+    margin:22px 10px 10px;
+}
+
+.menu a{
+    display:flex;
+    align-items:center;
+    gap:11px;
+
+    text-decoration:none;
+    color:#d1d5db;
+
+    padding:12px 13px;
+    border-radius:9px;
+
+    margin-bottom:6px;
+
+    font-size:13px;
+    font-weight:700;
+
+    transition:0.2s;
+}
+
+.menu a:hover{
+    background:#2b3545;
+    color:white;
+}
+
+.menu a.active{
+    background:var(--primary);
+    color:white;
+}
+
+.admin-link{
+    margin-top:25px;
+    border-top:1px solid #374151;
+    padding-top:20px;
+}
+
+/* ==============================
+   MAIN
+============================== */
+
+.main{
+    margin-left:250px;
+    width:calc(100% - 250px);
+}
+
+/* ==============================
+   TOPBAR
+============================== */
+
+.topbar{
+    height:76px;
+    background:white;
+    border-bottom:1px solid var(--border);
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 30px;
+
+    position:sticky;
+    top:0;
+    z-index:10;
+}
+
+.topbar-left h1{
+    font-size:21px;
+    margin-bottom:4px;
+}
+
+.topbar-left p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.user-box{
+    display:flex;
+    align-items:center;
+    gap:11px;
+}
+
+.user-avatar{
+    width:39px;
+    height:39px;
+    border-radius:50%;
+
+    background:var(--primary);
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-weight:800;
+}
+
+.user-info strong{
+    display:block;
+    font-size:12px;
+}
+
+.user-info span{
+    font-size:10px;
+    color:var(--muted);
+}
+.logout-btn{
+    text-decoration:none;
+    background:#fee2e2;
+    color:var(--red);
+
+    padding:9px 13px;
+    border-radius:8px;
+
+    font-size:11px;
+    font-weight:700;
+
+    transition:0.2s;
+}
+
+.logout-btn:hover{
+    background:var(--red);
+    color:white;
+}
+
+/* ==============================
+   CONTENT
+============================== */
+
+.content{
+    padding:28px;
+}
+
+/* ==============================
+   WELCOME
+============================== */
+
+.welcome{
+    background:linear-gradient(135deg, var(--dark), #273449);
+    color:white;
+
+    border-radius:17px;
+    padding:25px 28px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    margin-bottom:24px;
+}
+
+.welcome h2{
+    font-size:23px;
+    margin-bottom:7px;
+}
+
+.welcome p{
+    color:#d1d5db;
+    font-size:12px;
+}
+
+.welcome-badge{
+    background:var(--primary);
+    padding:10px 15px;
+    border-radius:9px;
+
+    font-size:11px;
+    font-weight:800;
+}
+
+/* ==============================
+   STAT CARDS
+============================== */
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin-bottom:25px;
+}
+
+.stat-card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    box-shadow:0 4px 14px rgba(0,0,0,0.04);
+}
+
+.stat-info span{
+    color:var(--muted);
+    font-size:11px;
+    display:block;
+    margin-bottom:8px;
+}
+
+.stat-info strong{
+    font-size:26px;
+}
+
+.stat-icon{
+    width:48px;
+    height:48px;
+    border-radius:12px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:22px;
+}
+
+.orange{
+    background:#fff2e8;
+    color:var(--primary);
+}
+
+.green{
+    background:#dcfce7;
+    color:var(--green);
+}
+
+.blue{
+    background:#dbeafe;
+    color:var(--blue);
+}
+
+.purple{
+    background:#ede9fe;
+    color:var(--purple);
+}
+
+/* ==============================
+   MAIN GRID
+============================== */
+
+.main-grid{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:20px;
+}
+
+/* ==============================
+   PANEL
+============================== */
+
+.panel{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:22px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,0.04);
+}
+
+.panel-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.panel-header h3{
+    font-size:16px;
+}
+
+.panel-header span{
+    font-size:10px;
+    color:var(--muted);
+}
+
+/* ==============================
+   QUICK ACTIONS
+============================== */
+
+.quick-actions{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+}
+
+.action-card{
+    text-decoration:none;
+
+    border:1px solid var(--border);
+    border-radius:12px;
+
+    padding:17px;
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    color:var(--dark);
+
+    transition:0.2s;
+}
+
+.action-card:hover{
+    border-color:var(--primary);
+    background:var(--primary-light);
+    transform:translateY(-2px);
+}
+
+.action-icon{
+    width:42px;
+    height:42px;
+
+    border-radius:10px;
+
+    background:var(--primary-light);
+    color:var(--primary);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:20px;
+}
+
+.action-card strong{
+    display:block;
+    font-size:12px;
+    margin-bottom:4px;
+}
+
+.action-card span{
+    font-size:10px;
+    color:var(--muted);
+}
+
+/* ==============================
+   SYSTEM BOX
+============================== */
+
+.system-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:14px 0;
+    border-bottom:1px solid var(--border);
+}
+
+.system-item:last-child{
+    border-bottom:none;
+}
+
+.system-item span{
+    font-size:12px;
+}
+
+.system-item strong{
+    font-size:12px;
+}
+
+.status-good{
+    color:var(--green);
+}
+
+/* ==============================
+   FEE
+============================== */
+
+.fee-box{
+    margin-top:20px;
+    background:var(--dark);
+    color:white;
+
+    padding:19px;
+    border-radius:13px;
+}
+
+.fee-box span{
+    color:#9ca3af;
+    font-size:10px;
+}
+
+.fee-box h2{
+    margin-top:8px;
+    color:var(--primary);
+    font-size:25px;
+}
+
+/* ==============================
+   MOBILE
+============================== */
+
+@media(max-width:900px){
+
+    .sidebar{
+        /*
+         * Keep sidebar rendered.
+         * staff_mobile.css moves it off-screen and
+         * .mobile-open slides it into view.
+         */
+        display:block;
+        overflow-y:auto;
+        overflow-x:hidden;
+        -webkit-overflow-scrolling:touch;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+    }
+
+    .stats-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .main-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+
+/* ==============================
+   MANAGEMENT TOPBAR - MOBILE FIX
+============================== */
+
+@media(max-width:900px){
+
+    .topbar{
+        height:auto;
+        min-height:118px;
+        padding:12px 14px 12px 68px !important;
+
+        display:grid;
+        grid-template-columns:1fr;
+        align-items:start;
+        gap:10px;
+    }
+
+    .topbar-left{
+        width:100%;
+        min-width:0;
+    }
+
+    .topbar-left h1{
+        font-size:20px;
+        line-height:1.2;
+        margin:0 0 4px;
+        white-space:normal;
+    }
+
+    .topbar-left p{
+        margin:0;
+        font-size:12px;
+        line-height:1.3;
+    }
+
+    .user-box{
+        width:100%;
+        min-width:0;
+
+        display:grid;
+        grid-template-columns:40px minmax(0,1fr) auto;
+        align-items:center;
+        gap:10px;
+    }
+
+    .user-avatar{
+        width:40px;
+        height:40px;
+        flex:none;
+    }
+
+    .user-info{
+        min-width:0;
+    }
+
+    .user-info strong{
+        display:block;
+        font-size:13px;
+
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+    }
+
+    .user-info span{
+        display:block;
+        margin-top:2px;
+        font-size:11px;
+    }
+
+    .logout-btn{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+
+        padding:9px 12px;
+        margin:0;
+
+        white-space:nowrap;
+        flex:none;
+    }
+}
+
+@media(max-width:600px){
+
+    .content{
+        padding:15px;
+    }
+
+    .topbar{
+        padding:0 15px;
+    }
+
+    .stats-grid{
+        grid-template-columns:1fr;
+    }
+
+    .quick-actions{
+        grid-template-columns:1fr;
+    }
+
+    .welcome{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
+}
+
+
+/* MCTI Executive Command Center V3 */
+.mcti-executive{background:linear-gradient(115deg,#111827,#242424);color:#fff;border-radius:18px;padding:24px;margin-bottom:24px;box-shadow:0 12px 30px rgba(17,24,39,.12)}
+.mcti-executive-head{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin-bottom:20px}
+.mcti-executive-head h2{font-size:24px;margin:5px 0}.mcti-executive-head p{color:#cbd5e1;font-size:12px}
+.mcti-v3-tag{background:#ff6b00;color:#fff;padding:8px 12px;border-radius:9px;font-weight:700;font-size:12px}
+.mcti-v3-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.mcti-v3-kpi{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.13);border-radius:12px;padding:16px;min-width:0}
+.mcti-v3-kpi span{display:block;color:#cbd5e1;font-size:11px;margin-bottom:8px}.mcti-v3-kpi strong{display:block;font-size:23px;overflow-wrap:anywhere}
+.mcti-v3-foot{color:#cbd5e1;font-size:11px;margin-top:15px}
+@media(max-width:900px){.mcti-v3-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:500px){.mcti-v3-grid{grid-template-columns:1fr}.mcti-executive{padding:16px}}
+
+
+/* MCTI V3 Collapsible Operations */
+.mcti-v3-operations{
+    margin-top:18px;
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    overflow:hidden;
+}
+.mcti-v3-operations summary{
+    padding:17px 20px;
+    cursor:pointer;
+    font-weight:700;
+    color:#111827;
+    list-style:none;
+}
+.mcti-v3-operations summary::-webkit-details-marker{
+    display:none;
+}
+.mcti-v3-operations summary::after{
+    content:"+";
+    float:right;
+    color:#ff6b00;
+    font-size:20px;
+}
+.mcti-v3-operations[open] summary::after{
+    content:"−";
+}
+.mcti-v3-operations .main-grid{
+    padding:15px;
+    margin-top:0;
+}
+
+
+/* MCTI V3 FIXED EXECUTIVE HEADER */
+.topbar{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:#ffffff;
+    border-bottom:1px solid #e5e7eb;
+    box-shadow:0 3px 14px rgba(17,24,39,.05);
+}
+.topbar-left h1{
+    font-size:19px;
+    font-weight:800;
+    letter-spacing:-.4px;
+}
+.content{
+    padding-top:18px;
+}
+.mcti-executive{
+    margin-bottom:16px;
+}
+.mcti-v3-kpi{
+    padding:13px 15px;
+}
+.mcti-v3-kpi strong{
+    font-size:21px;
+}
+
+
+/* MCTI V3 FINANCIAL CHARTS */
+.mcti-v3-charts{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:16px;
+    margin-top:20px;
+}
+.mcti-v3-chart{
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:12px;
+    padding:16px;
+    min-width:0;
+}
+.mcti-v3-chart h3{
+    font-size:14px;
+    margin-bottom:15px;
+    color:#fff;
+}
+.mcti-v3-bar-row{
+    display:grid;
+    grid-template-columns:105px minmax(0,1fr) 85px;
+    align-items:center;
+    gap:10px;
+    margin:10px 0;
+    font-size:11px;
+}
+.mcti-v3-bar-label{
+    color:#e5e7eb;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.mcti-v3-bar-track{
+    height:12px;
+    background:rgba(255,255,255,.13);
+    border-radius:20px;
+    overflow:hidden;
+}
+.mcti-v3-bar-fill{
+    display:block;
+    height:100%;
+    border-radius:20px;
+    background:linear-gradient(90deg,#ff6b00,#ffb347);
+}
+.mcti-v3-bar-fill.outstanding{
+    background:linear-gradient(90deg,#ef4444,#fca5a5);
+}
+.mcti-v3-bar-value{
+    text-align:right;
+    color:#fff;
+    font-variant-numeric:tabular-nums;
+}
+@media(max-width:1100px){
+    .mcti-v3-charts{grid-template-columns:1fr}
+}
+@media(max-width:500px){
+    .mcti-v3-bar-row{
+        grid-template-columns:78px minmax(0,1fr) 70px;
+        gap:6px;
+        font-size:10px;
+    }
+}
+
+
+/* MCTI_V3_FINANCIAL_FORMAT_V1 */
+.mcti-executive{
+    padding:18px 20px;
+    margin-bottom:14px;
+}
+.mcti-executive-head{
+    margin-bottom:14px;
+}
+.mcti-executive-head h2{
+    font-size:21px;
+}
+.mcti-v3-grid{
+    gap:10px;
+}
+.mcti-v3-kpi{
+    padding:12px 14px;
+}
+.mcti-v3-kpi span{
+    margin-bottom:5px;
+}
+.mcti-v3-kpi strong{
+    font-size:21px;
+    letter-spacing:-.4px;
+}
+.mcti-v3-charts{
+    gap:12px;
+    margin-top:14px;
+}
+.mcti-v3-chart{
+    padding:14px;
+}
+.mcti-v3-chart h3{
+    margin-bottom:10px;
+}
+.mcti-v3-bar-row{
+    margin:8px 0;
+}
+
+
+/* MCTI V3 MANAGEMENT ALERTS */
+.mcti-v3-alerts{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+    margin-top:14px;
+}
+.mcti-v3-alert{
+    border:1px solid rgba(255,255,255,.15);
+    border-left:3px solid #fb923c;
+    background:rgba(255,255,255,.07);
+    border-radius:10px;
+    padding:12px 14px;
+    min-width:0;
+}
+.mcti-v3-alert span{
+    display:block;
+    color:#fdba74;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.5px;
+}
+.mcti-v3-alert strong{
+    display:block;
+    font-size:17px;
+    margin:5px 0;
+}
+.mcti-v3-alert small{
+    color:#e5e7eb;
+    font-size:11px;
+}
+@media(max-width:700px){
+    .mcti-v3-alerts{grid-template-columns:1fr}
+}
+
+
+/* MCTI V3 THEME SWITCHER V1 */
+body.mcti-theme-dark {
+    --bg:#0b1019;
+    --white:#171f2c;
+    --dark:#f3f4f6;
+    --dark2:#d1d5db;
+    --border:#354052;
+    --muted:#aeb9ca;
+    --primary-light:#392519;
+    --green:#4ade80;
+    --blue:#93c5fd;
+    --purple:#c4b5fd;
+    --red:#fca5a5;
+    background:var(--bg);
+    color:var(--dark);
+}
+body.mcti-theme-light {
+    --bg:#f5f7fb;
+    --white:#ffffff;
+    --dark:#111827;
+    --dark2:#1f2937;
+    --border:#e5e7eb;
+    --muted:#6b7280;
+    --primary-light:#fff2e8;
+}
+.mcti-theme-dark .sidebar {
+    background:#101722;
+    color:#fff;
+    border-right:1px solid #354052;
+}
+.mcti-theme-light .sidebar {
+    background:#111827;
+    color:#fff;
+}
+.mcti-theme-dark .topbar {
+    background:#171f2c;
+    border-color:#354052;
+    box-shadow:0 3px 14px rgba(0,0,0,.22);
+}
+.mcti-theme-light .topbar {
+    background:#fff;
+}
+.mcti-theme-dark .panel,
+.mcti-theme-dark .mcti-v3-operations,
+.mcti-theme-dark .action-card {
+    background:#171f2c;
+    border-color:#354052;
+    color:#f3f4f6;
+}
+.mcti-theme-dark .mcti-v3-operations summary,
+.mcti-theme-dark .action-card {
+    color:#f3f4f6;
+}
+.mcti-theme-dark .action-card:hover {
+    background:#263245;
+}
+.mcti-theme-dark .fee-box {
+    background:#101722;
+    color:#fff;
+}
+.mcti-theme-dark .logout-btn {
+    background:#40252a;
+    color:#fca5a5;
+}
+.mcti-theme-dark .mcti-v3-mission {
+    background:linear-gradient(110deg,#151515,#292019)!important;
+    color:#fff!important;
+}
+.mcti-theme-light .mcti-v3-mission {
+    background:linear-gradient(110deg,#fff,#fff3e8)!important;
+    border-color:#fed7aa!important;
+    color:#111827!important;
+}
+.mcti-theme-light .mcti-v3-mission h2 {
+    color:#111827!important;
+}
+.mcti-theme-light .mcti-v3-mission p {
+    color:#374151!important;
+}
+.mcti-theme-light .mcti-v3-mission div[style*="color:#fdba74"] {
+    color:#c2410c!important;
+}
+.mcti-theme-light .mcti-v3-mission div[style*="color:#cbd5e1"] {
+    color:#64748b!important;
+}
+.mcti-theme-dark .mcti-executive {
+    background:linear-gradient(115deg,#111827,#242424);
+    color:#fff;
+}
+.mcti-theme-light .mcti-executive {
+    background:linear-gradient(115deg,#fff,#fff7ed);
+    color:#111827;
+    border:1px solid #fed7aa;
+}
+.mcti-theme-light .mcti-executive-head h2,
+.mcti-theme-light .mcti-v3-kpi strong,
+.mcti-theme-light .mcti-v3-chart h3,
+.mcti-theme-light .mcti-v3-bar-value {
+    color:#111827;
+}
+.mcti-theme-light .mcti-executive-head p,
+.mcti-theme-light .mcti-v3-kpi span,
+.mcti-theme-light .mcti-v3-foot,
+.mcti-theme-light .mcti-v3-bar-label,
+.mcti-theme-light .mcti-v3-alert small {
+    color:#475569;
+}
+.mcti-theme-light .mcti-v3-kpi,
+.mcti-theme-light .mcti-v3-chart,
+.mcti-theme-light .mcti-v3-alert {
+    background:#fff;
+    border-color:#e5e7eb;
+}
+.mcti-theme-light .mcti-v3-alert {
+    border-left-color:#f97316;
+}
+.mcti-theme-light .mcti-v3-alert span {
+    color:#c2410c;
+}
+.mcti-theme-light .mcti-v3-bar-track {
+    background:#e5e7eb;
+}
+.mcti-theme-light .mcti-executive table {
+    color:#111827;
+}
+.mcti-theme-light .mcti-executive table tr {
+    border-color:#e5e7eb!important;
+}
+.mcti-theme-light .mcti-executive table tr[style*="color:#fdba74"] {
+    color:#c2410c!important;
+}
+.mcti-theme-light .mcti-v3-cancellation {
+    background:#fff!important;
+    color:#111827!important;
+    border-color:#fed7aa!important;
+}
+.mcti-theme-light .mcti-v3-cancellation summary,
+.mcti-theme-light .mcti-v3-cancellation small[style*="color:#fdba74"] {
+    color:#c2410c!important;
+}
+.mcti-theme-light .mcti-v3-cancellation summary span,
+.mcti-theme-light .mcti-v3-cancellation small,
+.mcti-theme-light .mcti-v3-cancellation p {
+    color:#64748b!important;
+}
+.mcti-theme-light .mcti-v3-cancellation div[style*="background:#242424"],
+.mcti-theme-light .mcti-v3-cancellation div[style*="background:#382018"] {
+    background:#fff7ed!important;
+    border:1px solid #fed7aa;
+}
+.mcti-theme-light .mcti-v3-cancellation h3 {
+    color:#111827!important;
+}
+.mcti-theme-light .mcti-v3-cancellation table {
+    color:#111827;
+}
+.mcti-theme-light .mcti-v3-cancellation table tr {
+    border-color:#e5e7eb!important;
+}
+.mcti-theme-light .mcti-v3-cancellation table tr[style*="color:#fdba74"] {
+    color:#c2410c!important;
+}
+.mcti-theme-toggle {
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:9px 12px;
+    background:var(--white);
+    color:var(--dark);
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+    white-space:nowrap;
+}
+.mcti-theme-toggle:hover {
+    border-color:#f97316;
+}
+@media(max-width:600px) {
+    .mcti-theme-toggle {
+        padding:8px;
+        font-size:11px;
+    }
+}
+
+</style>
+
+    <link rel="stylesheet" href="/static/css/staff_mobile.css">
+
+</head>
+
+<body class="mcti-theme-dark">
+
+<div class="dashboard">
+
+<!-- ============================
+     SIDEBAR
+============================ -->
+
+{% load crm_navigation %}
+{% crm_sidebar %}
+
+
+<!-- ============================
+     MAIN
+============================ -->
+
+<main class="main">
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+        <div class="topbar-left">
+
+            <h1>
+                Executive Command Center
+            </h1>
+
+
+{% load payroll_links %}
+
+
+
+            <p>
+                MCTI Technologies Administration
+            </p>
+
+        </div>
+
+
+
+        <!-- MCTI V3 THEME CONTROL -->
+        <button type="button"
+                id="mcti-v3-theme-toggle"
+                class="mcti-theme-toggle"
+                aria-label="Switch dashboard theme"
+                aria-pressed="true">☀ Light Mode</button>
+
+<div class="user-box">
+
+            <div class="user-avatar">
+
+                {{ request.user.username|first|upper }}
+
+            </div>
+
+            <div class="user-info">
+
+                <strong>
+                    {{ request.user.username }}
+                </strong>
+
+                <span>
+
+                    {% if request.user.is_superuser %}
+                        Administrator
+                    {% else %}
+                        Staff
+                    {% endif %}
+
+                </span>
+
+            </div>
+            <a href="{% url 'staff_logout' %}" class="logout-btn">
+            Logout
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- CONTENT -->
+
+    <div class="content">
+
+
+
+        <!-- MCTI V3 CEO MISSION 5 CRORE -->
+        <section class="mcti-v3-mission"
+                 aria-label="MCTI CEO Mission"
+                 style="background:linear-gradient(110deg,#151515,#292019);border:1px solid rgba(249,115,22,.35);border-radius:14px;padding:17px 22px;margin-bottom:15px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.10)">
+
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap">
+
+            <div style="min-width:0">
+              <div style="font-size:10px;letter-spacing:1.5px;color:#fdba74;font-weight:700;margin-bottom:5px">
+                MCTI TECHNOLOGIES · CEO VISION
+              </div>
+
+              <h2 style="margin:0 0 7px;font-size:clamp(23px,3vw,33px);line-height:1.15;font-weight:900;color:#fff">
+                MISSION <span style="color:#fb923c">₹5 CRORE</span>
+              </h2>
+
+              <p style="margin:0;color:#e5e7eb;font-size:12px;line-height:1.6">
+                Every Enquiry Matters. Every Admission Counts.
+                Every Student's Success Builds MCTI.
+              </p>
+            </div>
+
+            <div style="text-align:right">
+              <div style="font-size:11px;color:#fdba74;font-weight:700;white-space:nowrap">
+                6 BRANCHES · ONE VISION
+              </div>
+              <div style="font-size:10px;color:#cbd5e1;margin-top:5px">
+                ONE TEAM · ONE MISSION
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- MCTI V3 LIVE ANALYTICS -->
+        <section class="mcti-executive" aria-label="Executive Analytics">
+          <div class="mcti-v3-grid">
+            <div class="mcti-v3-kpi">
+              <span>Total Collection</span>
+              <strong>₹{{ v3.total_collection|floatformat:0 }}</strong>
+            </div>
+            <div class="mcti-v3-kpi">
+              <span>Total Outstanding</span>
+              <strong>₹{{ v3.total_outstanding|floatformat:0 }}</strong>
+            </div>
+            <div class="mcti-v3-kpi">
+              <span>Verified CRM Conversion</span>
+              <strong>{{ v3.verified_conversion_rate|floatformat:2 }}%</strong>
+            </div>
+            <div class="mcti-v3-kpi">
+              <span>Total Admissions</span>
+              <strong>{{ v3.total_admissions }}</strong>
+            </div>
+            <div class="mcti-v3-kpi">
+              <span>Eligible Enquiries</span>
+              <strong>{{ v3.total_enquiries }}</strong>
+            </div>
+            <div class="mcti-v3-kpi">
+              <span>Cancelled Enrollment Collection</span>
+              <strong>₹{{ v3.cancelled_collection|floatformat:0 }}</strong>
+            </div>
+          </div>
+
+          <!-- MCTI V3 MANAGEMENT ALERTS -->
+          <div class="mcti-v3-alerts">
+            <div class="mcti-v3-alert">
+              <span>FEE RECOVERY PRIORITY</span>
+              <strong>{{ v3_top_outstanding_branch.branch }}</strong>
+              <small>
+                ₹{{ v3_top_outstanding_branch.outstanding|floatformat:0 }}
+                outstanding
+              </small>
+            </div>
+
+            <div class="mcti-v3-alert">
+              <span>CONVERSION REVIEW</span>
+              <strong>{{ v3_lowest_conversion_branch.branch }}</strong>
+              <small>
+                {{ v3_lowest_conversion_branch.crm_conversion.verified_conversion_rate|floatformat:2 }}%
+                verified conversion
+              </small>
+            </div>
+
+            <div class="mcti-v3-alert">
+              <span>TOP COLLECTION</span>
+              <strong>{{ v3_top_collection_branch.branch }}</strong>
+              <small>
+                ₹{{ v3_top_collection_branch.collection|floatformat:0 }}
+                collected
+              </small>
+            </div>
+          </div>
+
+          <!-- MCTI V3 FINANCIAL CHARTS -->
+          <div class="mcti-v3-charts">
+
+            <div class="mcti-v3-chart">
+              <h3>Branch Collection</h3>
+
+              {% for branch in v3_branches %}
+              <div class="mcti-v3-bar-row">
+                <span class="mcti-v3-bar-label"
+                      title="{{ branch.branch }}">
+                  {{ branch.branch }}
+                </span>
+                <div class="mcti-v3-bar-track">
+                  <span class="mcti-v3-bar-fill"
+                        style="width:{% widthratio branch.collection v3_top_collection_branch.collection 100 %}%">
+                  </span>
+                </div>
+                <span class="mcti-v3-bar-value">
+                  ₹{{ branch.collection|floatformat:0 }}
+                </span>
+              </div>
+              {% endfor %}
+            </div>
+
+            <div class="mcti-v3-chart">
+              <h3>Branch Outstanding</h3>
+
+              {% for branch in v3_branches %}
+              <div class="mcti-v3-bar-row">
+                <span class="mcti-v3-bar-label"
+                      title="{{ branch.branch }}">
+                  {{ branch.branch }}
+                </span>
+                <div class="mcti-v3-bar-track">
+                  <span class="mcti-v3-bar-fill outstanding"
+                        style="width:{% widthratio branch.outstanding v3_top_outstanding_branch.outstanding 100 %}%">
+                  </span>
+                </div>
+                <span class="mcti-v3-bar-value">
+                  ₹{{ branch.outstanding|floatformat:0 }}
+                </span>
+              </div>
+              {% endfor %}
+            </div>
+
+          </div>
+
+          <div style="overflow-x:auto;margin-top:22px">
+            <h3 style="margin-bottom:12px;font-size:16px">
+              Six-Branch Performance
+            </h3>
+            <table style="width:100%;border-collapse:collapse;min-width:690px;font-size:12px">
+              <thead>
+                <tr style="color:#fdba74;text-align:left">
+                  <th style="padding:10px">Branch</th>
+                  <th style="padding:10px">Enquiries</th>
+                  <th style="padding:10px">Admissions</th>
+                  <th style="padding:10px">Collection</th>
+                  <th style="padding:10px">Outstanding</th>
+                  <th style="padding:10px">Verified Conversion</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for branch in v3_branches %}
+                <tr style="border-top:1px solid rgba(255,255,255,.15)">
+                  <td style="padding:10px">{{ branch.branch }}</td>
+                  <td style="padding:10px">{{ branch.enquiries }}</td>
+                  <td style="padding:10px">{{ branch.admissions }}</td>
+                  <td style="padding:10px">₹{{ branch.collection|floatformat:0 }}</td>
+                  <td style="padding:10px">₹{{ branch.outstanding|floatformat:0 }}</td>
+                  <td style="padding:10px">
+                    {{ branch.crm_conversion.verified_conversion_rate|floatformat:2 }}%
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <p class="mcti-v3-foot">
+            Lifetime analytics. Collections include historical payments on cancelled
+            enrollments; those payments are separately disclosed above.
+            Outstanding excludes cancelled enrollments.
+            Migration-period comparisons require additional validation.
+          </p>
+        </section>
+
+
+        <!-- MCTI V3 CANCELLATION LOSS V1 -->
+        <details class="mcti-v3-cancellation" style="margin:20px 0;padding:20px;border-radius:16px;background:#141414;border:1px solid rgba(249,115,22,.3);color:#fff">
+
+          <summary style="cursor:pointer;font-size:17px;font-weight:700;color:#fdba74">
+            Cancelled Admissions &amp; Revenue Loss
+            <span style="font-size:11px;color:#aaa;font-weight:400">
+              — Click to view details
+            </span>
+          </summary>
+
+          <div style="margin-top:20px">
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:20px">
+
+            <div style="background:#242424;padding:15px;border-radius:12px">
+              <small style="color:#bbb">Cancelled Enrollments</small>
+              <div style="font-size:25px;font-weight:800">
+                {{ v3.total_cancelled_count }}
+              </div>
+            </div>
+
+            <div style="background:#242424;padding:15px;border-radius:12px">
+              <small style="color:#bbb">Cancelled Fee Value</small>
+              <div style="font-size:23px;font-weight:800" data-v3-money>
+                ₹{{ v3.total_cancelled_fee|floatformat:2 }}
+              </div>
+            </div>
+
+            <div style="background:#242424;padding:15px;border-radius:12px">
+              <small style="color:#bbb">Amount Received</small>
+              <div style="font-size:23px;font-weight:800;color:#86efac" data-v3-money>
+                ₹{{ v3.total_cancelled_received|floatformat:2 }}
+              </div>
+            </div>
+
+            <div style="background:#382018;padding:15px;border-radius:12px">
+              <small style="color:#fdba74">Potential Revenue Loss</small>
+              <div style="font-size:25px;font-weight:800;color:#fb923c" data-v3-money>
+                ₹{{ v3.total_potential_loss|floatformat:2 }}
+              </div>
+            </div>
+
+          </div>
+
+          <h3 style="font-size:15px;margin:0 0 15px;color:#fff">
+            Branch-wise Potential Revenue Loss
+          </h3>
+
+          {% for branch in v3_branches %}
+          <div class="mcti-v3-bar-row">
+            <span class="mcti-v3-bar-label" title="{{ branch.branch }}">
+              {{ branch.branch }}
+            </span>
+            <div class="mcti-v3-bar-track">
+              <span class="mcti-v3-bar-fill outstanding"
+                    style="width:{% if v3_top_cancellation_loss_branch.potential_loss %}{% widthratio branch.potential_loss v3_top_cancellation_loss_branch.potential_loss 100 %}{% else %}0{% endif %}%">
+              </span>
+            </div>
+            <span class="mcti-v3-bar-value" data-v3-money>
+              ₹{{ branch.potential_loss|floatformat:2 }}
+            </span>
+          </div>
+          {% endfor %}
+
+          <div style="overflow-x:auto;margin-top:20px">
+            <table style="width:100%;border-collapse:collapse;min-width:650px;font-size:12px">
+              <thead>
+                <tr style="color:#fdba74;text-align:left">
+                  <th style="padding:10px">Branch</th>
+                  <th style="padding:10px">Cancelled</th>
+                  <th style="padding:10px">Fee Value</th>
+                  <th style="padding:10px">Received</th>
+                  <th style="padding:10px">Potential Loss</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for branch in v3_branches %}
+                <tr style="border-top:1px solid rgba(255,255,255,.12)">
+                  <td style="padding:10px">{{ branch.branch }}</td>
+                  <td style="padding:10px">{{ branch.cancelled_count }}</td>
+                  <td style="padding:10px" data-v3-money>₹{{ branch.cancelled_fee|floatformat:2 }}</td>
+                  <td style="padding:10px" data-v3-money>₹{{ branch.cancelled_received|floatformat:2 }}</td>
+                  <td style="padding:10px;color:#fb923c;font-weight:700" data-v3-money>
+                    ₹{{ branch.potential_loss|floatformat:2 }}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <p style="font-size:11px;color:#aaa;margin:14px 0 0">
+            Potential loss = unpaid cancelled enrollment fee, calculated per enrollment.
+            This is not confirmed accounting loss. Received amounts remain part of recorded collection.
+          </p>
+
+                  </div>
+        </details>
+
+        <!-- V3: LEGACY WELCOME AND DUPLICATE KPI REMOVED -->
+
+        <!-- MCTI V3 COLLAPSIBLE OPERATIONS -->
+        <details class="mcti-v3-operations">
+          <summary>Operations &amp; Management Tools</summary>
+        <!-- MAIN GRID -->
+
+        <div class="main-grid">
+
+
+            <!-- QUICK ACTION -->
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <h3>
+                        Quick Actions
+                    </h3>
+
+                    <span>
+                        Daily Operations
+                    </span>
+
+                </div>
+
+
+                <div class="quick-actions">
+
+
+                    <a
+                        href="{% url 'enquiry_dashboard' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            📞
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                View Enquiries
+                            </strong>
+
+                            <span>
+                                Manage leads & follow-ups
+                            </span>
+
+                        </div>
+
+                    </a>
+
+                    <a
+                        href="{% url 'marketing_lead_distribution' %}"
+                        class="action-card"
+                    >
+                        <div class="action-icon">
+                            📣
+                        </div>
+
+                        <div>
+                            <strong>
+                                Marketing Lead Distribution
+                            </strong>
+
+                            <span>
+                                Review AI, Aptitude, Scholarship & SSC leads and assign to centers
+                            </span>
+                        </div>
+                    </a>
+
+
+                    {% if request.user.is_superuser %}
+                    <a
+                        href="{% url 'marketing_activity_dashboard' %}"
+                        class="action-card"
+                    >
+                        <div class="action-icon">
+                            &#128227;
+                        </div>
+
+                        <div>
+                            <strong>
+                                Marketing Activity
+                            </strong>
+
+                            <span>
+                                Monitor branch, staff & campaign participation
+                            </span>
+                        </div>
+                    </a>
+                    {% endif %}
+
+
+                    <a
+                        href="{% url 'ai_ready_report' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            🤖
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                AI Ready Maharashtra
+                            </strong>
+
+                            <span>
+                                Review AI quiz participants & decide lead distribution
+                            </span>
+
+                        </div>
+
+                    </a>
+
+                    <a
+                        href="{% url 'assessments:hiring_hr_dashboard' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            👥
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                HR & Hiring
+                            </strong>
+
+                            <span>
+                                Review candidates, assessments & hiring decisions
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    <a
+                        href="{% url 'career_tools:quick_career_enquiry' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            &#127919;
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Start Career Enquiry
+                            </strong>
+
+                            <span>
+                                Add details, suggest courses and generate report
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    <a
+                        href="{% url 'business_lead_list' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            🏢
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Business Leads
+                            </strong>
+
+                            <span>
+                                Review, assign & follow up business enquiries
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    {% if request.user.is_superuser %}
+                    <a
+                        href="{% url 'franchise_enquiry_list' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            🤝
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Franchise Enquiries
+                            </strong>
+
+                            <span>
+                                Review potential MCTI franchise partners
+                            </span>
+
+                        </div>
+
+                    </a>
+                    {% endif %}
+
+
+                    <a
+                        href="/contact/"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            ➕
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Add Enquiry
+                            </strong>
+
+                            <span>
+                                Create a new lead
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    <a
+                        href="{% url 'fee_payment_list' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            💳
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Payment History
+                            </strong>
+
+                            <span>
+                                View student payments
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    <a
+                        href="{% url 'fee_due_report' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            📅
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Fee Due Report
+                            </strong>
+
+                            <span>
+                                Track overdue & upcoming fees
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    <a
+                        href="{% url 'attendance_dashboard' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            📋
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Attendance
+                            </strong>
+
+                            <span>
+                                Mark and review student attendance
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    <a
+                        href="{% url 'job_list' %}"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            💼
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Placement / Jobs
+                            </strong>
+
+                            <span>
+                                Post and manage job opportunities
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    {% if request.user.is_superuser %}
+
+                    <a
+                        href="/admin/"
+                        class="action-card"
+                    >
+
+                        <div class="action-icon">
+                            ⚙️
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Backend Admin
+                            </strong>
+
+                            <span>
+                                Django administration
+                            </span>
+
+                        </div>
+
+                    </a>
+
+                    {% endif %}
+
+
+                </div>
+
+            </div>
+
+
+            <!-- SYSTEM -->
+
+            <div>
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <h3>
+                            System Overview
+                        </h3>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Enquiry System
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Admission System
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Fee Collection
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Attendance System
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Placement & Jobs
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Fee Due Tracking
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Business Lead CRM
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="system-item">
+
+                        <span>
+                            Student Portal
+                        </span>
+
+                        <strong class="status-good">
+                            ● Active
+                        </strong>
+
+                    </div>
+
+
+                    <div class="fee-box">
+
+                        <span>
+                            TOTAL COLLECTION
+                        </span>
+
+                        <h2>
+                            ₹{{ total_collected|floatformat:2 }}
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        </details>
+    </div>
+
+</main>
+
+</div>
+
+    <script src="/static/js/staff_mobile.js" defer></script>
+
+{% load student_birthdays %}
+{% student_birthday_popup %}
+
+<script>
+/* MCTI V3 Financial Formatting */
+(function(){
+    const root = document.querySelector(".mcti-executive");
+    if(!root) return;
+
+    const formatMoney = (value, compact) => {
+        if(!Number.isFinite(value)) return null;
+
+        if(compact && Math.abs(value) >= 10000000)
+            return "₹" + (value/10000000).toFixed(2) + "Cr";
+
+        if(compact && Math.abs(value) >= 100000)
+            return "₹" + (value/100000).toFixed(2) + "L";
+
+        return "₹" + new Intl.NumberFormat("en-IN",{
+            maximumFractionDigits:0
+        }).format(value);
+    };
+
+    root.querySelectorAll("strong, .mcti-v3-bar-value, td, p")
+        .forEach(el => {
+            if(el.children.length) return;
+
+            const raw = el.textContent.trim();
+
+            if(!/^₹[\d,]+(?:\.\d+)?$/.test(raw)) return;
+
+            const amount = Number(raw.slice(1).replace(/,/g,""));
+
+            const compact = el.closest(".mcti-v3-kpi") !== null
+                && el.tagName === "STRONG";
+
+            const formatted = formatMoney(amount,compact);
+
+            if(formatted){
+                el.title = "₹" + new Intl.NumberFormat("en-IN",{
+                    maximumFractionDigits:2
+                }).format(amount);
+                el.textContent = formatted;
+            }
+        });
+})();
+</script>
+
+
+<script>
+/* MCTI V3 THEME SWITCHER V1 */
+(function(){
+    const key = "mcti-v3-theme";
+    const body = document.body;
+    const button = document.getElementById("mcti-v3-theme-toggle");
+    if (!button) return;
+
+    function applyTheme(mode) {
+        const dark = mode !== "light";
+        body.classList.toggle("mcti-theme-dark", dark);
+        body.classList.toggle("mcti-theme-light", !dark);
+        button.textContent = dark ? "☀ Light Mode" : "☾ Dark Mode";
+        button.setAttribute("aria-pressed", String(dark));
+        button.setAttribute("aria-label",
+            dark ? "Switch to light mode" : "Switch to dark mode");
+    }
+
+    let saved = "dark";
+    try {
+        saved = localStorage.getItem(key) || "dark";
+    } catch (error) {}
+
+    applyTheme(saved);
+
+    button.addEventListener("click", function(){
+        const next = body.classList.contains("mcti-theme-dark")
+            ? "light" : "dark";
+        applyTheme(next);
+        try {
+            localStorage.setItem(key, next);
+        } catch (error) {}
+    });
+})();
+</script>
+
+</body>
+</html>

@@ -917,6 +917,26 @@ body{
 
                     </a>
 
+                    <a
+                        href="{% url 'marketing_lead_distribution' %}"
+                        class="action-card"
+                    >
+                        <div class="action-icon">
+                            📣
+                        </div>
+
+                        <div>
+                            <strong>
+                                Marketing Lead Distribution
+                            </strong>
+
+                            <span>
+                                Review AI, Aptitude, Scholarship & SSC leads and assign to centers
+                            </span>
+                        </div>
+                    </a>
+
+
                     {% if request.user.is_superuser %}
                     <a
                         href="{% url 'marketing_activity_dashboard' %}"

@@ -603,6 +603,172 @@ body {
 
 }
 
+
+/* MCTI RECEIPT A4 FINAL PRINT */
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 6mm;
+    }
+
+    html, body {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+    }
+
+    .page {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .actions {
+        display: none !important;
+    }
+
+    .receipt {
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+    }
+
+    .header {
+        padding: 12px 18px !important;
+    }
+
+    .receipt-title {
+        padding: 10px 16px !important;
+    }
+
+    .section {
+        padding: 12px 18px 0 !important;
+    }
+
+    .section-title {
+        margin-bottom: 8px !important;
+        padding-bottom: 5px !important;
+    }
+
+    .student-grid {
+        gap: 7px !important;
+    }
+
+    .field {
+        padding: 7px !important;
+    }
+
+    .field-label {
+        margin-bottom: 3px !important;
+    }
+
+    .payment-table th {
+        padding: 7px !important;
+    }
+
+    .payment-table td {
+        padding: 8px !important;
+    }
+
+    .summary {
+        margin-top: 9px !important;
+    }
+
+    .summary-row {
+        padding: 7px 11px !important;
+    }
+
+    .status-box {
+        margin-top: 8px !important;
+    }
+
+    .footer {
+        padding: 12px 18px !important;
+    }
+
+    .remarks {
+        margin-bottom: 8px !important;
+        padding: 8px 10px !important;
+    }
+
+    .digital-receipt-note {
+        margin-top: 6px !important;
+        padding: 8px 10px !important;
+    }
+
+    .thank-you {
+        margin-top: 8px !important;
+        padding-top: 7px !important;
+    }
+
+    .student-grid,
+    .field,
+    .payment-table,
+    .summary-box,
+    .status-box,
+    .digital-receipt-note {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+</style>
+
+
+<style>
+@media print {
+    #mctiReceiptComposer,
+    #mctiReceiptComposerToggle {
+        display: none !important;
+    }
+}
+</style>
+
+
+<style>
+/* MCTI_RECEIPT_LAYOUT_V5 */
+
+.actions {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 950px !important;
+    margin: 0 auto 16px !important;
+}
+
+#mctiReceiptComposerToggle {
+    flex: 0 0 auto !important;
+}
+
+#mctiReceiptComposer {
+    clear: both !important;
+    flex: none !important;
+    position: relative !important;
+    max-width: 950px !important;
+    width: 100% !important;
+    margin: 0 auto 18px !important;
+}
+
+#mctiReceiptComposer[hidden] {
+    display: none !important;
+}
+
+@media print {
+    .actions,
+    #mctiReceiptComposer,
+    #mctiReceiptComposerToggle {
+        display: none !important;
+    }
+}
 </style>
 
 </head>
@@ -637,23 +803,48 @@ Change Receipt Date</a>
 >
     🖨 Print Receipt
 </button>
-<a
-    href="https://wa.me/91{{ payment.student.mobile }}?text=Hello%20{{ payment.student.name|urlencode }}%2C%0A%0AThank%20you%20for%20your%20payment%20to%20MCTI%20Technologies.%0A%0AReceipt%20No%3A%20{{ payment.receipt_number|urlencode }}%0AAmount%20Paid%3A%20Rs.%20{{ payment.amount|urlencode }}%0A%0AThank%20you%2C%0AMCTI%20Technologies"
-    target="_blank"
-    style="
-        display:inline-block;
-        padding:12px 20px;
-        background:#25D366;
-        color:#ffffff;
-        border-radius:8px;
-        text-decoration:none;
-        font-weight:700;
-        font-size:14px;
-    "
->
-    WhatsApp Receipt
-</a>
 
+
+
+<button type="button" id="mctiReceiptComposerToggle"
+    style="border:0;border-radius:7px;padding:11px 18px;background:#111;color:#fff;font-weight:700;cursor:pointer;">
+    💬 WhatsApp Composer
+</button>
+
+</div>
+
+<!-- MCTI_RECEIPT_COMPOSER_V3 -->
+<div id="mctiReceiptComposer" hidden
+     data-mobile="{{ payment.student.mobile|escape }}"
+     data-name="{{ payment.student.name|escape }}"
+     data-receipt="{{ payment.receipt_number|escape }}"
+     data-amount="{{ payment.amount|escape }}"
+     style="display:none;box-sizing:border-box;max-width:950px;width:100%;margin:0 auto 18px;padding:16px;border:1px solid #e5e5e5;border-radius:12px;background:#fff;color:#111;">
+
+    <div style="font-size:17px;font-weight:800;margin-bottom:12px;">
+        WhatsApp Message Composer
+    </div>
+
+    <label for="mctiReceiptLanguage" style="display:block;font-weight:600;margin-bottom:5px;">
+        Message Language
+    </label>
+    <select id="mctiReceiptLanguage"
+            style="width:100%;padding:10px;border:1px solid #ccc;border-radius:7px;margin-bottom:12px;">
+        <option value="en">English</option>
+        <option value="mr">मराठी</option>
+        <option value="hi">हिंदी</option>
+    </select>
+
+    <label for="mctiReceiptMessage" style="display:block;font-weight:600;margin-bottom:5px;">
+        Message Preview — Editable
+    </label>
+    <textarea id="mctiReceiptMessage" rows="10"
+              style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:14px;line-height:1.6;"></textarea>
+
+    <button type="button" id="mctiReceiptSend"
+            style="margin-top:12px;padding:12px 20px;background:#25D366;color:#fff;border:0;border-radius:8px;font-weight:700;cursor:pointer;">
+        Send WhatsApp
+    </button>
 </div>
 
 <!-- =========================
@@ -797,7 +988,13 @@ Change Receipt Date</a>
 
         <span class="field-value">
 
-            {% if payment.student.course %}
+            {% if receipt_courses %}
+                {% for enrollment in receipt_courses %}
+                    <div>
+                        {{ forloop.counter }}. {{ enrollment.course.title }}
+                    </div>
+                {% endfor %}
+            {% elif payment.student.course %}
                 {{ payment.student.course.title }}
             {% else %}
                 -
@@ -848,7 +1045,6 @@ Change Receipt Date</a>
 
 <div class="section">
 
-```
 <div class="section-title">
     PAYMENT DETAILS
 </div>
@@ -948,7 +1144,7 @@ Change Receipt Date</a>
         <div class="summary-row balance">
 
             <span>
-                Balance Fee
+                Course Balance Fee
             </span>
 
             <span>
@@ -1042,6 +1238,102 @@ Change Receipt Date</a>
 </div>
 
 </div>
+
+
+
+<script>
+/* MCTI_RECEIPT_COMPOSER_V3 */
+document.addEventListener("DOMContentLoaded", function () {
+    const root = document.getElementById("mctiReceiptComposer");
+    if (!root) return;
+
+    /* MCTI_RECEIPT_COMPACT_LAYOUT_V4 */
+    const toggle = document.getElementById("mctiReceiptComposerToggle");
+    if (toggle) {
+        toggle.addEventListener("click", function () {
+            const opening = root.hidden;
+            root.hidden = !opening;
+            root.style.display = opening ? "block" : "none";
+            toggle.textContent = opening
+                ? "✕ Close Composer"
+                : "💬 WhatsApp Composer";
+        });
+    }
+
+
+    const language = document.getElementById("mctiReceiptLanguage");
+    const message = document.getElementById("mctiReceiptMessage");
+    const send = document.getElementById("mctiReceiptSend");
+    const d = root.dataset;
+
+    const templates = {
+        en: `Hello ${d.name},
+
+Thank you for your payment to MCTI Technologies.
+
+Receipt No: ${d.receipt}
+Amount Paid: Rs. ${d.amount}
+
+Thank you,
+MCTI Technologies`,
+
+        mr: `नमस्कार ${d.name},
+
+MCTI Technologies मध्ये फी भरल्याबद्दल धन्यवाद.
+
+पावती क्रमांक: ${d.receipt}
+भरलेली रक्कम: ₹${d.amount}
+
+धन्यवाद,
+MCTI Technologies`,
+
+        hi: `नमस्ते ${d.name},
+
+MCTI Technologies में फीस का भुगतान करने के लिए धन्यवाद।
+
+रसीद संख्या: ${d.receipt}
+भुगतान की गई राशि: ₹${d.amount}
+
+धन्यवाद,
+MCTI Technologies`
+    };
+
+    function refresh() {
+        message.value = templates[language.value] || templates.en;
+    }
+
+    language.addEventListener("change", refresh);
+
+    send.addEventListener("click", function () {
+        let phone = (d.mobile || "").replace(/\D/g, "");
+
+        if (phone.length === 12 && phone.startsWith("91"))
+            phone = phone.slice(2);
+        else if (phone.length === 11 && phone.startsWith("0"))
+            phone = phone.slice(1);
+
+        if (!/^[6-9]\d{9}$/.test(phone)) {
+            alert("Invalid student mobile number.");
+            return;
+        }
+
+        const text = message.value.trim();
+        if (!text) {
+            alert("Please enter a WhatsApp message.");
+            return;
+        }
+
+        window.open(
+            "https://wa.me/91" + phone + "?text=" + encodeURIComponent(text),
+            "_blank",
+            "noopener,noreferrer"
+        );
+    });
+
+    refresh();
+});
+</script>
+
 
 </body>
 

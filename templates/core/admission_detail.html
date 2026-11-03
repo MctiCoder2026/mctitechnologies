@@ -716,6 +716,16 @@ body {
 
 </style>
 
+
+<style>
+@media print {
+    #mctiAdmissionComposer,
+    #mctiAdmissionComposerToggle {
+        display:none !important;
+    }
+}
+</style>
+
 </head>
 
 <body>
@@ -761,14 +771,13 @@ body {
     </a>
     {% endif %}
 
-    <a
-        href="https://wa.me/91{{ admission.mobile }}?text=Congratulations%2C%20{{ admission.student_name|urlencode }}%21%0A%0AYour%20admission%20at%20MCTI%20Technologies%20has%20been%20successfully%20confirmed.%20Welcome%20to%20MCTI%21%0A%0ASTUDENT%20LOGIN%20DETAILS%0AStudent%20ID%3A%20{{ admission.admission_number|urlencode }}%0APassword%3A%20Your%20registered%20mobile%20number%0A%0ALOGIN%20TO%20STUDENT%20PORTAL%0Ahttps%3A%2F%2Fmctitechnologies.com%2Fstudent%2Flogin%2F%0A%0AHOW%20TO%20USE%20YOUR%20STUDENT%20PORTAL%0A1.%20Login%20using%20your%20Student%20ID%20and%20password.%0A2.%20Open%20My%20Courses%20to%20access%20your%20enrolled%20course.%0A3.%20Study%20LMS%20topics%20and%20complete%20quizzes.%0A4.%20Login%20regularly%20for%20Attendance.%0A5.%20Track%20your%20course%20progress.%0A%0APlease%20keep%20your%20Student%20ID%20safe%20for%20future%20use.%0A%0AWishing%20you%20success%20in%20your%20learning%20and%20career%21%0A%0ARegards%2C%0AMCTI%20Technologies%0AAn%20Initiative%20by%20Maharashtra%20Computer%20Training%20Institute"
-        target="_blank"
+
+<button type="button" id="mctiAdmissionComposerToggle"
         class="btn"
-        style="background:#25D366;color:#ffffff;"
-    >
-        📲 WhatsApp Welcome
-    </a>
+        style="background:#111;color:#fff;border:0;cursor:pointer;">
+    📲 WhatsApp Welcome
+</button>
+
 
     <button
         onclick="window.print()"
@@ -781,6 +790,40 @@ body {
 
 
 </div>
+
+
+<!-- MCTI_ADMISSION_COMPOSER_V1 -->
+<section id="mctiAdmissionComposer" hidden
+    data-mobile="{{ admission.mobile|escape }}"
+    data-name="{{ admission.student_name|escape }}"
+    data-admission="{{ admission.admission_number|escape }}"
+    style="display:none;box-sizing:border-box;width:100%;margin:0 0 18px;padding:18px;background:#fff;border:1px solid #e5e5e5;border-radius:12px;color:#111;">
+
+    <div style="font-size:18px;font-weight:800;margin-bottom:12px;">
+        WhatsApp Admission Welcome Composer
+    </div>
+
+    <label for="mctiAdmissionLanguage" style="display:block;font-weight:700;margin-bottom:6px;">
+        Message Language
+    </label>
+    <select id="mctiAdmissionLanguage"
+        style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;margin-bottom:12px;">
+        <option value="en">English</option>
+        <option value="mr">मराठी</option>
+        <option value="hi">हिंदी</option>
+    </select>
+
+    <label for="mctiAdmissionMessage" style="display:block;font-weight:700;margin-bottom:6px;">
+        Message Preview — Editable
+    </label>
+    <textarea id="mctiAdmissionMessage" rows="15"
+        style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:14px;line-height:1.6;"></textarea>
+
+    <button type="button" id="mctiAdmissionSend"
+        style="margin-top:12px;padding:12px 20px;background:#25D366;color:#fff;border:0;border-radius:8px;font-weight:700;cursor:pointer;">
+        Send WhatsApp
+    </button>
+</section>
 
 <!-- =========================
      ADMISSION HEADER
@@ -1171,7 +1214,84 @@ body {
 
             </div>
 
-            {% if enrollment.balance_fee > 0 %}
+            {% if enrollment.status == "cancelled" %}
+                <div style="margin-top:14px;padding:14px;background:#fff1f0;border:1px solid #f5c2c0;border-radius:9px">
+                    <strong style="color:#a61b1b">Student Left / Cancelled</strong>
+                    <div style="margin-top:7px">
+                        <strong>Reason:</strong>
+                        {{ enrollment.cancellation_reason|default:"Not recorded"|linebreaksbr }}
+                    </div>
+                    <div style="margin-top:5px;font-size:12px;color:#666">
+                        {{ enrollment.cancelled_at|date:"d M Y, h:i A"|default:"Historical cancellation" }}
+                        {% if enrollment.cancelled_by %}
+                            | By {{ enrollment.cancelled_by.get_full_name|default:enrollment.cancelled_by.username }}
+                        {% endif %}
+                    </div>
+                    {% if is_admin %}
+                    <form method="post" action="{% url 'update_enrollment_status' enrollment.id %}" style="margin-top:12px">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="reactivate">
+                        <button type="submit" onclick="return confirm('Reactivate this enrollment?')"
+                            style="background:#15803d;color:white;border:0;padding:10px 16px;border-radius:7px;cursor:pointer;font-weight:700">
+                            Reactivate Enrollment
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            {% elif enrollment.status == "completed" %}
+                <div style="margin-top:14px;padding:14px;background:#ecfdf5;border:1px solid #86efac;border-radius:9px">
+                    <strong style="color:#166534">Course Completed</strong>
+                    <p style="font-size:12px;color:#475569">
+                        This course is excluded from current attendance.
+                    </p>
+                    {% if is_admin %}
+                    <form method="post" action="{% url 'update_enrollment_status' enrollment.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="reopen_completed">
+                        <button type="submit" onclick="return confirm('Reactivate this completed course?')"
+                            style="background:#15803d;color:white;border:0;padding:10px 16px;border-radius:7px;cursor:pointer;font-weight:700">
+                            Reactivate Completed Course
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            {% elif enrollment.status == "active" %}
+                <form method="post" action="{% url 'update_enrollment_status' enrollment.id %}"
+                    style="margin-top:14px;padding:14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:9px"
+                    onsubmit="return confirm('Mark this enrollment as Left / Cancelled?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="cancel">
+                    <label for="cancel_reason_{{ enrollment.id }}"
+                        style="display:block;font-weight:700;margin-bottom:7px">
+                        Student Left / Cancelled — Reason
+                    </label>
+                    <textarea id="cancel_reason_{{ enrollment.id }}" name="reason" required maxlength="2000"
+                        placeholder="Enter reason for leaving the course..."
+                        style="width:100%;box-sizing:border-box;min-height:65px;padding:10px;border:1px solid #ddd;border-radius:7px"></textarea>
+                    <button type="submit"
+                        style="margin-top:9px;background:#c2410c;color:white;border:0;padding:10px 16px;border-radius:7px;cursor:pointer;font-weight:700">
+                        Mark as Left / Cancelled
+                    </button>
+                </form>
+                <form method="post" action="{% url 'update_enrollment_status' enrollment.id %}"
+                    style="margin-top:12px;padding:14px;background:#ecfdf5;border:1px solid #86efac;border-radius:9px"
+                    onsubmit="return confirm('Mark this course as Completed?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="complete">
+                    <label style="display:block;font-weight:700;margin-bottom:7px">
+                        Course Completion Note
+                    </label>
+                    <textarea name="reason" required minlength="10" maxlength="2000"
+                        placeholder="Enter completion details..."
+                        style="width:100%;box-sizing:border-box;min-height:65px;padding:10px;border:1px solid #ddd;border-radius:7px"></textarea>
+                    <button type="submit"
+                        style="margin-top:9px;background:#15803d;color:white;border:0;padding:10px 16px;border-radius:7px;cursor:pointer;font-weight:700">
+                        Mark Course Completed
+                    </button>
+                </form>
+            {% endif %}
+
+            {% if enrollment.status != "cancelled" and enrollment.balance_fee > 0 %}
 
                 <a
                     href="{% url 'add_enrollment_fee_payment' enrollment.id %}"
@@ -1393,6 +1513,147 @@ body {
 </div>
 
 </div>
+
+
+<script>
+/* MCTI_ADMISSION_COMPOSER_V1 */
+document.addEventListener("DOMContentLoaded", function () {
+    const root = document.getElementById("mctiAdmissionComposer");
+    const toggle = document.getElementById("mctiAdmissionComposerToggle");
+    const language = document.getElementById("mctiAdmissionLanguage");
+    const preview = document.getElementById("mctiAdmissionMessage");
+    const send = document.getElementById("mctiAdmissionSend");
+
+    if (!root || !toggle || !language || !preview || !send) return;
+
+    const d = root.dataset;
+    const login = "https://mctitechnologies.com/student/login/";
+
+    const messages = {
+        en: `Congratulations, ${d.name}!
+
+Your admission at MCTI Technologies has been successfully confirmed. Welcome to MCTI!
+
+STUDENT LOGIN DETAILS
+Student ID: ${d.admission}
+Password: Your registered mobile number
+
+LOGIN TO STUDENT PORTAL
+${login}
+
+HOW TO USE YOUR STUDENT PORTAL
+1. Login using your Student ID and password.
+2. Open My Courses to access your enrolled course.
+3. Study LMS topics and complete quizzes.
+4. Login regularly for Attendance.
+5. Track your course progress.
+
+Please keep your Student ID safe for future use.
+
+Wishing you success in your learning and career!
+
+Regards,
+MCTI Technologies
+An Initiative by Maharashtra Computer Training Institute`,
+
+        mr: `अभिनंदन, ${d.name}!
+
+MCTI Technologies मध्ये तुमचा प्रवेश यशस्वीरीत्या निश्चित झाला आहे. MCTI मध्ये तुमचे स्वागत आहे!
+
+विद्यार्थी लॉगिन तपशील
+विद्यार्थी आयडी: ${d.admission}
+पासवर्ड: तुमचा नोंदणीकृत मोबाईल क्रमांक
+
+विद्यार्थी पोर्टल लॉगिन
+${login}
+
+विद्यार्थी पोर्टल कसे वापरावे
+1. विद्यार्थी आयडी आणि पासवर्ड वापरून लॉगिन करा.
+2. My Courses मध्ये तुमचा अभ्यासक्रम पाहा.
+3. LMS मधील धडे शिका आणि क्विझ पूर्ण करा.
+4. उपस्थितीसाठी नियमित लॉगिन करा.
+5. अभ्यासक्रमातील प्रगती तपासा.
+
+तुमचा विद्यार्थी आयडी सुरक्षित ठेवा.
+
+तुमच्या शिक्षणासाठी आणि करिअरसाठी हार्दिक शुभेच्छा!
+
+धन्यवाद,
+MCTI Technologies
+महाराष्ट्र कॉम्प्युटर ट्रेनिंग इन्स्टिट्यूटचा उपक्रम`,
+
+        hi: `बधाई हो, ${d.name}!
+
+MCTI Technologies में आपका एडमिशन सफलतापूर्वक कन्फर्म हो गया है। MCTI में आपका स्वागत है!
+
+स्टूडेंट लॉगिन विवरण
+स्टूडेंट आईडी: ${d.admission}
+पासवर्ड: आपका रजिस्टर्ड मोबाइल नंबर
+
+स्टूडेंट पोर्टल लॉगिन
+${login}
+
+स्टूडेंट पोर्टल का उपयोग कैसे करें
+1. स्टूडेंट आईडी और पासवर्ड से लॉगिन करें।
+2. My Courses में अपना कोर्स देखें।
+3. LMS के टॉपिक्स पढ़ें और क्विज़ पूरे करें।
+4. अटेंडेंस के लिए नियमित लॉगिन करें।
+5. अपने कोर्स की प्रगति देखें।
+
+अपनी स्टूडेंट आईडी सुरक्षित रखें।
+
+आपकी पढ़ाई और करियर के लिए शुभकामनाएँ!
+
+धन्यवाद,
+MCTI Technologies
+महाराष्ट्र कंप्यूटर ट्रेनिंग इंस्टीट्यूट की एक पहल`
+    };
+
+    function refresh() {
+        preview.value = messages[language.value] || messages.en;
+    }
+
+    language.addEventListener("change", refresh);
+
+    toggle.addEventListener("click", function () {
+        const opening = root.hidden;
+        root.hidden = !opening;
+        root.style.display = opening ? "block" : "none";
+        toggle.textContent = opening
+            ? "✕ Close WhatsApp Composer"
+            : "📲 WhatsApp Welcome";
+        if (opening) refresh();
+    });
+
+    send.addEventListener("click", function () {
+        let phone = (d.mobile || "").replace(/\D/g, "");
+
+        if (phone.length === 12 && phone.startsWith("91"))
+            phone = phone.slice(2);
+        else if (phone.length === 11 && phone.startsWith("0"))
+            phone = phone.slice(1);
+
+        if (!/^[6-9]\d{9}$/.test(phone)) {
+            alert("Invalid student mobile number.");
+            return;
+        }
+
+        const text = preview.value.trim();
+        if (!text) {
+            alert("Please enter a WhatsApp message.");
+            return;
+        }
+
+        window.open(
+            "https://wa.me/91" + phone + "?text=" + encodeURIComponent(text),
+            "_blank",
+            "noopener,noreferrer"
+        );
+    });
+
+    refresh();
+});
+</script>
 
 </body>
 

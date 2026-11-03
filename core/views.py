@@ -134,6 +134,29 @@ def mark_student_attendance(request):
             "message": "Location not received."
         }, status=400)
 
+    # Validate GPS coordinates before attendance processing.
+    from math import isfinite
+
+    try:
+        latitude_value = float(latitude)
+        longitude_value = float(longitude)
+    except (TypeError, ValueError, OverflowError):
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid GPS coordinates."
+        }, status=400)
+
+    if not (
+        isfinite(latitude_value)
+        and isfinite(longitude_value)
+        and -90 <= latitude_value <= 90
+        and -180 <= longitude_value <= 180
+    ):
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid GPS coordinates."
+        }, status=400)
+
     # --------------------------------------------------------
     # CHECK IF ATTENDANCE ALREADY EXISTS TODAY
     # --------------------------------------------------------
@@ -156,30 +179,35 @@ def mark_student_attendance(request):
     # FIND NEAREST ACTIVE BRANCH
     # --------------------------------------------------------
 
-    matched_branch = None
-    matched_distance = None
+    # Home Branch Only attendance policy
+    home_branch = (student.branch or "").strip()
 
-    branches = BranchLocation.objects.filter(
+    if not home_branch:
+        return JsonResponse({
+            "success": False,
+            "message": "Your home branch is not assigned. Contact your centre."
+        }, status=403)
+
+    matched_branch = BranchLocation.objects.filter(
+        branch_name__iexact=home_branch,
         is_active=True
+    ).first()
+
+    if not matched_branch:
+        return JsonResponse({
+            "success": False,
+            "message": "Your registered branch GPS is unavailable."
+        }, status=403)
+
+    matched_distance = calculate_distance_meters(
+        latitude,
+        longitude,
+        matched_branch.latitude,
+        matched_branch.longitude
     )
 
-    for branch in branches:
-
-        distance = calculate_distance_meters(
-            latitude,
-            longitude,
-            branch.latitude,
-            branch.longitude
-        )
-
-        if distance <= branch.radius_meters:
-
-            if (
-                matched_distance is None
-                or distance < matched_distance
-            ):
-                matched_branch = branch
-                matched_distance = distance
+    if matched_distance > matched_branch.radius_meters:
+        matched_branch = None
 
     if not matched_branch:
         return JsonResponse({
@@ -859,6 +887,9 @@ def _get_outreach_import_branch(request):
         "kharghar",
         "panvel",
         "koperkhairane",
+        "kamothe",
+        "ghansoli",
+        "nerul",
     }
 
     if is_admin_user(request.user):
@@ -880,13 +911,16 @@ def _get_outreach_import_branch(request):
     return None
 
 
-@login_required
+@login_required(login_url="staff_login")
 def outreach_download_template(request):
 
     allowed_branches = {
         "kharghar",
         "panvel",
         "koperkhairane",
+        "kamothe",
+        "ghansoli",
+        "nerul",
     }
 
     if (
@@ -952,7 +986,7 @@ def outreach_download_template(request):
     return response
 
 
-@login_required
+@login_required(login_url="staff_login")
 def outreach_import_preview(request):
 
     if request.method != "POST":
@@ -1302,7 +1336,7 @@ def outreach_import_preview(request):
     )
 
 
-@login_required
+@login_required(login_url="staff_login")
 def outreach_import(request):
 
     if request.method != "POST":
@@ -1679,18 +1713,21 @@ def outreach_import(request):
     )
 
 
-@login_required
+@login_required(login_url="staff_login")
 def outreach_dashboard(request):
 
     allowed_branches = [
         "kharghar",
         "panvel",
         "koperkhairane",
+        "kamothe",
+        "ghansoli",
+        "nerul",
     ]
 
     user_branch = get_user_branch(request.user)
 
-    # HO/Admin can view all three outreach branches.
+    # HO/Admin can view all outreach branches.
     if is_admin_user(request.user):
         contacts = OutreachContact.objects.filter(
             branch__in=allowed_branches
@@ -1711,8 +1748,7 @@ def outreach_dashboard(request):
         if user_branch not in allowed_branches:
             messages.error(
                 request,
-                "Outreach is currently available only for "
-                "Kharghar, Panvel and Koperkhairane."
+                "Marketing Outreach is not configured for your branch."
             )
             return redirect("branch_dashboard")
 
@@ -1805,6 +1841,352 @@ def outreach_dashboard(request):
         "core/outreach_dashboard.html",
         context
     )
+
+
+
+
+@login_required(login_url="staff_login")
+def outreach_convert_to_enquiry(request, contact_id):
+
+    if request.method != "POST":
+        return redirect(
+            "outreach_contact_detail",
+            contact_id=contact_id
+        )
+
+    contact = get_object_or_404(
+        OutreachContact,
+        id=contact_id
+    )
+
+    admin_access = is_admin_user(request.user)
+    user_branch = get_user_branch(request.user)
+
+    # Branch security
+    if not admin_access:
+        if (
+            not user_branch
+            or contact.branch.strip().lower()
+            != user_branch.strip().lower()
+        ):
+            return HttpResponseForbidden(
+                "You cannot convert this outreach lead."
+            )
+
+    # Already converted through Outreach.
+    if contact.converted_enquiry_id:
+
+        contact.status = "converted"
+        contact.save(
+            update_fields=[
+                "status",
+                "updated_at",
+            ]
+        )
+
+        messages.info(
+            request,
+            (
+                "This Marketing Outreach lead is already linked "
+                "to an Enquiry."
+            )
+        )
+
+        return redirect(
+            "enquiry_detail",
+            enquiry_id=contact.converted_enquiry_id
+        )
+
+    # Convert only after branch qualifies the lead
+    # and confirms the actual course interest.
+    if contact.status not in {"interested", "visit_planned"}:
+        messages.error(
+            request,
+            "Mark the lead as Interested or Visit Planned before converting."
+        )
+        return redirect(
+            "outreach_contact_detail",
+            contact_id=contact.id
+        )
+
+    if not contact.interested_course_id:
+        messages.error(
+            request,
+            "Select the Interested Course before converting to Enquiry."
+        )
+        return redirect(
+            "outreach_contact_detail",
+            contact_id=contact.id
+        )
+
+    normalized_mobile = _normalize_outreach_mobile(
+        contact.mobile
+    )
+
+    # First check whether this person already exists in CRM.
+    existing_enquiry = None
+
+    for enquiry in (
+        Enquiry.objects
+        .filter(mobile__isnull=False)
+        .order_by("-created_at")
+    ):
+        if (
+            _normalize_outreach_mobile(enquiry.mobile)
+            == normalized_mobile
+        ):
+            existing_enquiry = enquiry
+            break
+
+    if existing_enquiry:
+
+        # Preserve an existing CRM course choice. Only fill it when blank.
+        if not existing_enquiry.course_id:
+            existing_enquiry.course = contact.interested_course
+            existing_enquiry.save(
+                update_fields=["course"]
+            )
+
+        contact.converted_enquiry = existing_enquiry
+        contact.status = "converted"
+        contact.save(
+            update_fields=[
+                "converted_enquiry",
+                "status",
+                "updated_at",
+            ]
+        )
+
+        EnquiryActivity.objects.create(
+            enquiry=existing_enquiry,
+            created_by=request.user,
+            activity_type="note",
+            message=(
+                "Marketing Outreach linked to existing enquiry "
+                f"from {contact.get_branch_display()}."
+            ),
+        )
+
+        messages.success(
+            request,
+            (
+                "Existing CRM Enquiry found. "
+                "Marketing Outreach lead linked successfully."
+            )
+        )
+
+        return redirect(
+            "enquiry_detail",
+            enquiry_id=existing_enquiry.id
+        )
+
+    # No CRM enquiry exists: create a fresh enquiry.
+    enquiry = Enquiry.objects.create(
+        name=contact.name,
+        mobile=contact.mobile,
+        email=contact.email or None,
+        branch=contact.branch,
+        course=contact.interested_course,
+        status="new",
+        followup_date=contact.followup_date,
+        followup_notes=contact.notes or "",
+        message=(
+            "Converted from Marketing Outreach. "
+            f"Source: {contact.source or 'Marketing Outreach'}"
+        ),
+    )
+
+    EnquiryActivity.objects.create(
+        enquiry=enquiry,
+        created_by=request.user,
+        activity_type="note",
+        message=(
+            "Created from Marketing Outreach "
+            f"#{contact.id} by {request.user.username}."
+        ),
+    )
+
+    contact.converted_enquiry = enquiry
+    contact.status = "converted"
+    contact.save(
+        update_fields=[
+            "converted_enquiry",
+            "status",
+            "updated_at",
+        ]
+    )
+
+    messages.success(
+        request,
+        (
+            f"{contact.name} converted to CRM Enquiry "
+            f"#{enquiry.id} successfully."
+        )
+    )
+
+    return redirect(
+        "enquiry_detail",
+        enquiry_id=enquiry.id
+    )
+
+
+
+@login_required(login_url="staff_login")
+def outreach_contact_detail(request, contact_id):
+
+    contact = get_object_or_404(
+        OutreachContact,
+        id=contact_id
+    )
+
+    admin_access = is_admin_user(request.user)
+    user_branch = get_user_branch(request.user)
+
+    # Branch staff can work only on their own outreach leads.
+    if not admin_access:
+        if (
+            not user_branch
+            or contact.branch.strip().lower()
+            != user_branch.strip().lower()
+        ):
+            return HttpResponseForbidden(
+                "You cannot access this outreach lead."
+            )
+
+    valid_statuses = {
+        value
+        for value, label in OutreachContact.STATUS_CHOICES
+    }
+
+    valid_permissions = {
+        value
+        for value, label in OutreachContact.PERMISSION_CHOICES
+    }
+
+    if request.method == "POST":
+
+        status = request.POST.get(
+            "status",
+            contact.status
+        ).strip()
+
+        permission_status = request.POST.get(
+            "permission_status",
+            contact.permission_status
+        ).strip()
+
+        followup_date = request.POST.get(
+            "followup_date",
+            ""
+        ).strip()
+
+        notes = request.POST.get(
+            "notes",
+            ""
+        ).strip()
+
+        interested_course_id = request.POST.get(
+            "interested_course",
+            ""
+        ).strip()
+
+        interested_course = None
+
+        if interested_course_id:
+            try:
+                interested_course = Course.objects.get(
+                    id=interested_course_id,
+                    is_active=True,
+                )
+            except (Course.DoesNotExist, ValueError):
+                messages.error(
+                    request,
+                    "Invalid course selected."
+                )
+                return redirect(
+                    "outreach_contact_detail",
+                    contact_id=contact.id
+                )
+
+        if status not in valid_statuses:
+            messages.error(
+                request,
+                "Invalid outreach status."
+            )
+            return redirect(
+                "outreach_contact_detail",
+                contact_id=contact.id
+            )
+
+        if permission_status not in valid_permissions:
+            messages.error(
+                request,
+                "Invalid permission status."
+            )
+            return redirect(
+                "outreach_contact_detail",
+                contact_id=contact.id
+            )
+
+        contact.status = status
+        contact.permission_status = permission_status
+        contact.interested_course = interested_course
+        contact.notes = notes
+
+        if followup_date:
+            try:
+                from datetime import datetime
+                contact.followup_date = datetime.strptime(
+                    followup_date,
+                    "%Y-%m-%d"
+                ).date()
+            except ValueError:
+                messages.error(
+                    request,
+                    "Invalid follow-up date."
+                )
+                return redirect(
+                    "outreach_contact_detail",
+                    contact_id=contact.id
+                )
+        else:
+            contact.followup_date = None
+
+        if status in {
+            "contacted",
+            "followup",
+            "interested",
+            "visit_planned",
+            "not_interested",
+        }:
+            contact.last_contacted_at = timezone.now()
+
+        contact.save()
+
+        messages.success(
+            request,
+            "Marketing Outreach lead updated successfully."
+        )
+
+        return redirect(
+            "outreach_contact_detail",
+            contact_id=contact.id
+        )
+
+    return render(
+        request,
+        "core/outreach_contact_detail.html",
+        {
+            "contact": contact,
+            "status_choices": OutreachContact.STATUS_CHOICES,
+            "permission_choices": OutreachContact.PERMISSION_CHOICES,
+            "courses": Course.objects.filter(
+                is_active=True
+            ).order_by("title"),
+            "is_outreach_admin": admin_access,
+        }
+    )
+
 
 
 @login_required
@@ -2165,6 +2547,8 @@ def branch_dashboard(request):
         "custom_end": custom_end,
         "is_admin": admin_access,
         "can_view_financials": can_view_financials,
+        "assessment_followup": __import__("career_tools.assessment_report_views", fromlist=["assessment_followup_summary"]).assessment_followup_summary(request.user, start_date, end_date),
+        "attendance_action_summary": __import__("core.attendance_dashboard_summary", fromlist=["attendance_action_summary"]).attendance_action_summary(request.user),
         "can_access_outreach": (
             admin_access
             or user_branch in {
@@ -2991,8 +3375,12 @@ def fee_due_report(request):
                     )
 
                 next_due_date = (
-                    enrollment_date
-                    + timedelta(days=31)
+                    (max(
+                        (p.payment_date for p in enrollment.fee_payments.all()
+                         if p.payment_date),
+                        default=enrollment_date
+                    ))
+                    + timedelta(days=30)
                 )
 
                 days_remaining = (
@@ -3164,9 +3552,23 @@ def attendance_dashboard(request):
     if not admin_access:
         branch_filter = forced_branch
 
-    students = Student.objects.filter(status="active")
+    eligible_student_ids = (
+        Student.objects.filter(
+            status="active",
+            enrollments__status="active",
+            enrollments__enrollment_date__lte=today,
+        )
+        .values_list("id", flat=True)
+        .distinct()
+    )
+
+    students = Student.objects.filter(
+        id__in=eligible_student_ids
+    )
+
     records = Attendance.objects.filter(
-        attendance_date=today, student__status="active"
+        attendance_date=today,
+        student_id__in=eligible_student_ids,
     )
 
     if branch_filter:
@@ -3243,7 +3645,12 @@ def mark_attendance(request):
 
     students = (
         Student.objects
-        .filter(status="active")
+        .filter(
+            status="active",
+            enrollments__status="active",
+            enrollments__enrollment_date__lte=attendance_date,
+        )
+        .distinct()
         .select_related("course")
         .order_by("name")
     )
@@ -4339,8 +4746,9 @@ def student_dashboard(request):
             admission_date = admission_date.date()
 
         next_due_date = (
-            admission_date
-            + timedelta(days=31)
+            (payments.first().payment_date if payments.exists()
+             else admission_date)
+            + timedelta(days=30)
         )
 
         today = timezone.localdate()
@@ -4849,7 +5257,298 @@ def contact_success(request):
 # ENQUIRY DASHBOARD
 # ============================================================
 
+@login_required(login_url="staff_login")
+def push_enquiry_to_outreach(request, enquiry_id):
+
+    if not is_admin_user(request.user):
+        return HttpResponseForbidden(
+            "Power User / Head Office access required."
+        )
+
+    if request.method != "POST":
+        return redirect("enquiry_dashboard")
+
+    enquiry = get_object_or_404(
+        Enquiry,
+        id=enquiry_id
+    )
+
+    branch = (
+        request.POST.get("branch", "")
+        .strip()
+        .lower()
+    )
+
+    allowed_branches = {
+        "kharghar",
+        "panvel",
+        "koperkhairane",
+        "kamothe",
+        "ghansoli",
+        "nerul",
+    }
+
+    if branch not in allowed_branches:
+        messages.error(
+            request,
+            "Please select a valid branch."
+        )
+        return redirect("enquiry_dashboard")
+
+    normalized_mobile = _normalize_outreach_mobile(
+        enquiry.mobile
+    )
+
+    if len(normalized_mobile) != 10:
+        messages.error(
+            request,
+            "Lead cannot be pushed because mobile number is invalid."
+        )
+        return redirect("enquiry_dashboard")
+
+    contact = (
+        OutreachContact.objects
+        .filter(
+            normalized_mobile=normalized_mobile
+        )
+        .first()
+    )
+
+    source_label = f"CRM Enquiry #{enquiry.id}"
+
+    if contact:
+        old_branch = contact.branch
+
+        contact.branch = branch
+
+        if not contact.email and enquiry.email:
+            contact.email = enquiry.email
+
+        if not contact.source:
+            contact.source = source_label
+        elif source_label not in contact.source:
+            contact.source = (
+                f"{contact.source} | {source_label}"
+            )[:100]
+
+        contact.notes = (
+            (contact.notes or "")
+            + (
+                f"\nPushed from CRM Enquiry #{enquiry.id} "
+                f"by {request.user.username}."
+            )
+        ).strip()
+
+        contact.save()
+
+        if old_branch != branch:
+            messages.success(
+                request,
+                (
+                    f"{enquiry.name} already existed in Marketing Outreach. "
+                    f"Lead reassigned to {branch.replace('_', ' ').title()}."
+                )
+            )
+        else:
+            messages.info(
+                request,
+                (
+                    f"{enquiry.name} is already in "
+                    f"{branch.replace('_', ' ').title()} Marketing Outreach."
+                )
+            )
+
+    else:
+        OutreachContact.objects.create(
+            name=enquiry.name,
+            mobile=enquiry.mobile,
+            normalized_mobile=normalized_mobile,
+            email=enquiry.email,
+            branch=branch,
+            contact_type="other",
+            source=source_label,
+            permission_status="unknown",
+            status="new",
+            notes=(
+                f"Pushed from CRM Enquiry #{enquiry.id} "
+                f"by {request.user.username}."
+            ),
+            created_by=request.user,
+        )
+
+        messages.success(
+            request,
+            (
+                f"{enquiry.name} pushed to "
+                f"{branch.replace('_', ' ').title()} Marketing Outreach."
+            )
+        )
+
+    return redirect("enquiry_dashboard")
+
+
+
+# MCTI_ENQUIRY_XLSX_EXPORT_V1
 @login_required
+
+# MCTI_ENQUIRY_MONTH_FILTER_V1
+def mcti_enquiry_month(request):
+    from datetime import datetime
+    value = request.GET.get("month", "").strip()
+    if not value:
+        return ""
+    try:
+        parsed = datetime.strptime(value, "%Y-%m")
+        if parsed.strftime("%Y-%m") == value:
+            return value
+    except ValueError:
+        pass
+    return ""
+
+def export_enquiries_excel(request):
+    from io import BytesIO
+    from django.http import HttpResponse, HttpResponseForbidden
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from openpyxl.utils import get_column_letter
+    from django.utils import timezone
+
+    if is_admin_user(request.user):
+        qs = Enquiry.objects.all()
+    else:
+        branch = get_user_branch(request.user)
+        if not branch:
+            return HttpResponseForbidden("Branch access required.")
+        qs = Enquiry.objects.filter(branch__iexact=branch)
+
+    qs = qs.exclude(
+        message__icontains="MCTI AI Ready Maharashtra"
+    )
+
+    selected_month = mcti_enquiry_month(request)
+    if selected_month:
+        year, month = map(int, selected_month.split("-"))
+        qs = qs.filter(created_at__year=year, created_at__month=month)
+
+    export_type = request.GET.get("view", "active")
+    if export_type not in ("active", "closed", "converted", "all"):
+        export_type = "active"
+
+    if export_type == "closed":
+        qs = qs.filter(status="closed")
+    elif export_type == "converted":
+        qs = qs.filter(status="converted")
+    elif export_type == "active":
+        qs = qs.exclude(status__in=("closed", "converted"))
+
+    search = request.GET.get("search", "").strip()
+    if search:
+        qs = qs.filter(
+            Q(name__icontains=search) |
+            Q(mobile__icontains=search) |
+            Q(email__icontains=search)
+        )
+
+    status = request.GET.get("status", "").strip()
+    if status:
+        qs = qs.filter(status=status)
+
+    assigned = request.GET.get("assigned_to", "").strip()
+    if is_admin_user(request.user) and assigned.isdigit():
+        qs = qs.filter(assigned_user_id=int(assigned))
+
+    followup = request.GET.get("followup", "").strip()
+    today = timezone.localdate()
+
+    if followup == "today":
+        qs = qs.filter(followup_date=today).exclude(
+            status__in=("converted", "closed")
+        )
+    elif followup == "overdue":
+        qs = qs.filter(followup_date__lt=today).exclude(
+            status__in=("converted", "closed")
+        )
+    elif followup == "upcoming":
+        qs = qs.filter(followup_date__gt=today).exclude(
+            status__in=("converted", "closed")
+        )
+
+    qs = qs.select_related(
+        "course", "assigned_user"
+    ).order_by("-created_at", "-pk")
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "MCTI Enquiries"
+
+    headers = [
+        "Name", "Mobile Number", "Email", "Course",
+        "Branch", "Status", "Follow-up Date",
+        "Enquiry Date", "Assigned Staff"
+    ]
+    ws.append(headers)
+
+    for cell in ws[1]:
+        cell.fill = PatternFill(
+            "solid", fgColor="F97316"
+        )
+        cell.font = Font(
+            bold=True, color="FFFFFF"
+        )
+        cell.alignment = Alignment(
+            horizontal="center"
+        )
+
+    for e in qs.iterator(chunk_size=500):
+        created = timezone.localtime(e.created_at) if e.created_at else None
+        assigned_name = ""
+        if e.assigned_user:
+            assigned_name = (
+                e.assigned_user.get_full_name()
+                or e.assigned_user.username
+            )
+
+        ws.append([
+            e.name or "",
+            str(e.mobile or ""),
+            e.email or "",
+            e.course.title if e.course else "",
+            e.branch or "",
+            e.get_status_display(),
+            str(e.followup_date or ""),
+            created.strftime("%d-%m-%Y %H:%M") if created else "",
+            assigned_name
+        ])
+
+    widths = [28, 20, 32, 35, 20, 18, 20, 24, 28]
+    for i, width in enumerate(widths, 1):
+        ws.column_dimensions[get_column_letter(i)].width = width
+
+    ws.freeze_panes = "A2"
+    ws.auto_filter.ref = ws.dimensions
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    response = HttpResponse(
+        output.getvalue(),
+        content_type=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        )
+    )
+    filename = (
+        f"MCTI_Enquiries_{export_type}_"
+        f"{timezone.localdate():%Y%m%d}.xlsx"
+    )
+    response["Content-Disposition"] = (
+        f'attachment; filename="{filename}"'
+    )
+    response["Cache-Control"] = "private, no-store"
+    return response
+
+
 def enquiry_dashboard(request):
 
     today = timezone.localdate()
@@ -4892,6 +5591,11 @@ def enquiry_dashboard(request):
 
     # --------------------------------------------------------
     enquiries = enquiries.exclude(message__icontains="MCTI AI Ready Maharashtra")
+
+    available_months = [
+        (d.strftime("%Y-%m"), d.strftime("%B %Y"))
+        for d in enquiries.order_by().dates("created_at", "month", order="DESC")
+    ]
 
     # CAREER KIT STATUS
     # --------------------------------------------------------
@@ -5060,6 +5764,29 @@ def enquiry_dashboard(request):
         .count()
     )
 
+    # MCTI_ENQUIRY_ACTIVE_CLOSED_V1
+    selected_month = mcti_enquiry_month(request)
+    if selected_month:
+        year, month = map(int, selected_month.split("-"))
+        enquiries = enquiries.filter(
+            created_at__year=year,
+            created_at__month=month
+        )
+
+    enquiry_view = request.GET.get("view", "active")
+    # MCTI_ENQUIRY_CONVERTED_TAB_V1
+    if enquiry_view not in ("active", "closed", "converted"):
+        enquiry_view = "active"
+
+    if enquiry_view == "closed":
+        enquiries = enquiries.filter(status="closed")
+    elif enquiry_view == "converted":
+        enquiries = enquiries.filter(status="converted")
+    else:
+        enquiries = enquiries.exclude(
+            status__in=("closed", "converted")
+        )
+
     from django.core.paginator import Paginator
     enquiry_page = Paginator(
         enquiries.order_by("-created_at", "-pk"), 100
@@ -5068,8 +5795,18 @@ def enquiry_dashboard(request):
     enquiry_page_params.pop("page", None)
     enquiries = enquiry_page.object_list
 
+    # MCTI_FOLLOWUP_MONTH_SCOPE_V2
+    followup_month_queryset = count_queryset
+
+    if selected_month:
+        year, month = map(int, selected_month.split("-"))
+        followup_month_queryset = count_queryset.filter(
+            created_at__year=year,
+            created_at__month=month
+        )
+
     todays_followups = (
-        count_queryset
+        followup_month_queryset
         .select_related(
             "course",
             "assigned_user"
@@ -5089,7 +5826,7 @@ def enquiry_dashboard(request):
     )
 
     overdue_followups = (
-        count_queryset
+        followup_month_queryset
         .select_related(
             "course",
             "assigned_user"
@@ -5109,7 +5846,7 @@ def enquiry_dashboard(request):
     )
 
     upcoming_followups = (
-        count_queryset
+        followup_month_queryset
         .filter(
             followup_date__gt=today
         )
@@ -5160,6 +5897,9 @@ def enquiry_dashboard(request):
             "closed": closed,
             "enquiries": enquiries,
             "enquiry_page": enquiry_page,
+            "selected_month": selected_month,
+        "available_months": available_months,
+        "enquiry_view": enquiry_view,
             "enquiry_page_query": enquiry_page_params.urlencode(),
             "todays_followups": todays_followups,
             "overdue_followups": overdue_followups,
@@ -5202,6 +5942,12 @@ def update_enquiry_status(
         )
 
     if request.method == "POST":
+        if hasattr(enquiry, "admission"):
+            messages.error(
+                request,
+                "This enquiry already has an admission and must remain Converted."
+            )
+            return redirect("enquiry_dashboard")
 
         old_status = (
             enquiry.status
@@ -5210,6 +5956,14 @@ def update_enquiry_status(
         old_status_display = (
             enquiry.get_status_display()
         )
+
+        if request.POST.get("status") == "converted":
+            messages.error(
+                request,
+                "Please use Convert to Admission. "
+                "An enquiry can be converted only after creating an admission."
+            )
+            return redirect("enquiry_dashboard")
 
         form = EnquiryStatusForm(
             request.POST,
@@ -5316,13 +6070,41 @@ def enquiry_detail(
                 )
 
                 updated_enquiry = (
-                    assignment_form.save()
+                    assignment_form.save(commit=False)
                 )
 
-                new_staff = (
-                    updated_enquiry
-                    .assigned_user
-                )
+                new_staff = updated_enquiry.assigned_user
+                old_branch = enquiry.branch or ""
+
+                if new_staff:
+                    new_branch = get_user_branch(new_staff)
+
+                    if not new_branch:
+                        messages.error(
+                            request,
+                            "Selected staff has no active branch. Assignment not saved."
+                        )
+                        return redirect(
+                            "enquiry_detail",
+                            enquiry_id=enquiry.id
+                        )
+
+                    updated_enquiry.branch = new_branch
+
+                updated_enquiry.save()
+                assignment_form.save_m2m()
+
+                if old_branch != (updated_enquiry.branch or ""):
+                    EnquiryActivity.objects.create(
+                        enquiry=updated_enquiry,
+                        activity_type="note",
+                        message=(
+                            f"Enquiry branch changed from "
+                            f"{old_branch or 'Unassigned'} to "
+                            f"{updated_enquiry.branch}."
+                        ),
+                        created_by=request.user
+                    )
 
                 if old_staff != new_staff:
 
@@ -5376,6 +6158,9 @@ def enquiry_detail(
             if form.is_valid():
 
                 updated_enquiry = form.save(commit=False)
+                if hasattr(updated_enquiry, "admission"):
+                    updated_enquiry.status = "converted"
+                    updated_enquiry.followup_date = None
                 if updated_enquiry.status in ("converted", "closed"):
                     updated_enquiry.followup_date = None
                 else:
@@ -6115,9 +6900,15 @@ def admission_list(request):
         )
 
     if admission_year.isdigit():
-
         admissions = admissions.filter(
-            admission_year=int(admission_year)
+            admission_date__year=int(admission_year)
+        )
+
+    admission_month = request.GET.get("month", "").strip()
+
+    if admission_month.isdigit() and 1 <= int(admission_month) <= 12:
+        admissions = admissions.filter(
+            admission_date__month=int(admission_month)
         )
 
     if search:
@@ -6151,6 +6942,13 @@ def admission_list(request):
             "admissions": admissions,
             "search": search,
             "admission_year": admission_year,
+            "admission_month": admission_month,
+            "admission_months": [
+                (1, "January"), (2, "February"), (3, "March"),
+                (4, "April"), (5, "May"), (6, "June"),
+                (7, "July"), (8, "August"), (9, "September"),
+                (10, "October"), (11, "November"), (12, "December")
+            ],
             "admission_years": [2022, 2024, 2025, 2026],
         }
     )
@@ -6405,10 +7203,18 @@ def fee_receipt(
         Decimal("0")
     )
 
+    receipt_courses = list(
+        payment.student.enrollments
+        .filter(status__in=["active", "completed", "hold"])
+        .select_related("course")
+        .order_by("id")
+    )
+
     return render(
         request,
         "core/fee_receipt.html",
         {
+            "receipt_courses": receipt_courses,
             "payment": payment,
             "current_total_paid": current_total_paid,
             "current_balance": current_balance,
@@ -6677,6 +7483,19 @@ def add_enrollment_fee_payment(
 
     student = enrollment.student
 
+    # Cancelled enrollment: block direct fee payment access.
+    if enrollment.status == "cancelled":
+        messages.error(
+            request,
+            "Fee collection is disabled for Left / Cancelled enrollments."
+        )
+        if student.admission_id:
+            return redirect(
+                "admission_detail",
+                admission_id=student.admission_id
+            )
+        return redirect("student_list")
+
     # --------------------------------------------------------
     # BRANCH PERMISSION
     # --------------------------------------------------------
@@ -6744,30 +7563,105 @@ def add_enrollment_fee_payment(
             payment.enrollment = enrollment
             payment.collected_by = request.user
 
-            if payment.amount > enrollment.balance_fee:
-
-                form.add_error(
-                    "amount",
-                    (
-                        "Payment cannot be greater "
-                        "than enrollment balance."
-                    )
+            with transaction.atomic():
+                enrollment = Enrollment.objects.select_for_update().get(
+                    pk=enrollment.pk
                 )
+                payment.enrollment = enrollment
 
-            else:
+                if (
+                    enrollment.status != "active"
+                    or payment.amount <= 0
+                    or payment.amount > enrollment.balance_fee
+                ):
+                    form.add_error(
+                        "amount",
+                        "Invalid payment or insufficient enrollment balance."
+                    )
+                else:
+                    from decimal import Decimal
+                    from django.utils import timezone
+                    from .models import EarlyFeeDiscountRequest
 
-                payment.save()
+                    today = timezone.localdate()
+                    balance = enrollment.balance_fee
 
-                if student.admission:
-
-                    return redirect(
-                        "admission_detail",
-                        admission_id=student.admission.id
+                    approved = (
+                        EarlyFeeDiscountRequest.objects
+                        .select_for_update()
+                        .filter(
+                            enrollment=enrollment,
+                            status="approved",
+                            applied_amount=0,
+                            proposed_payment_date__gte=today,
+                            due_date_at_request__gt=today,
+                            reviewed_at__date__lte=today,
+                        )
+                        .order_by("reviewed_at", "id")
+                        .first()
                     )
 
-                return redirect(
-                    "fee_payment_list"
-                )
+                    # Expire unused approvals after their valid payment window.
+                    EarlyFeeDiscountRequest.objects.filter(
+                        enrollment=enrollment,
+                        status="approved",
+                        applied_amount=0,
+                        proposed_payment_date__lt=today,
+                    ).update(status="expired")
+
+                    EarlyFeeDiscountRequest.objects.filter(
+                        enrollment=enrollment,
+                        status="approved",
+                        applied_amount=0,
+                        due_date_at_request__lte=today,
+                    ).update(status="expired")
+
+                    discount_applied = False
+
+                    from .early_fee_discount import _due_date
+                    current_due = _due_date(enrollment)
+
+                    if (
+                        approved
+                        and today < current_due
+                        and approved.amount < balance
+                    ):
+                        net_payable = balance - approved.amount
+
+                        if payment.amount == net_payable:
+                            enrollment.discount_amount += approved.amount
+                            enrollment.final_fee -= approved.amount
+                            enrollment.save(
+                                update_fields=["discount_amount", "final_fee"]
+                            )
+                            approved.applied_amount = approved.amount
+                            approved.status = "applied"
+                            approved.save(update_fields=["applied_amount", "status"])
+                            discount_applied = True
+
+                    payment.save()
+
+                    if enrollment.balance_fee <= 0:
+                        EarlyFeeDiscountRequest.objects.filter(
+                            enrollment=enrollment,
+                            status="approved",
+                            applied_amount=0,
+                        ).update(status="expired")
+
+                    if discount_applied:
+                        messages.success(
+                            request,
+                            "HO-approved early payment discount applied successfully."
+                        )
+
+                    if student.admission:
+                        return redirect(
+                            "admission_detail",
+                            admission_id=student.admission.id
+                        )
+
+                    return redirect("fee_payment_list")
+
 
     else:
 
@@ -9351,6 +10245,679 @@ def franchise_enquiry_detail(request, enquiry_id):
 # ============================================================
 # AI READY MAHARASHTRA REPORT — HO / SUPERUSER ONLY
 # ============================================================
+
+
+def _auto_assign_pushed_assessments(contact):
+    """Assign eligible completed assessments for a newly pushed marketing lead."""
+    from career_tools.models import (
+        AssessmentBranchAssignment,
+        AssessmentBranchAssignmentLog,
+        AptitudeAttempt,
+    )
+    from assessments.models import AssessmentAttempt, ScholarshipResult
+
+    candidates = []
+
+    if contact.source_type == "ai_ready":
+        candidates = list(
+            AssessmentAttempt.objects.filter(
+                pk=contact.source_record_id,
+                status="completed",
+                assessment__slug__in=[
+                    "ai-ready-maharashtra-2026",
+                    "ai-ready-maharashtra-2026-marathi",
+                ],
+            ).values_list("pk", flat=True)
+        )
+        kind = "ai"
+
+    elif contact.source_type == "aptitude":
+        candidates = list(
+            AptitudeAttempt.objects.filter(
+                profile_id=contact.source_record_id,
+                status="completed",
+            ).values_list("pk", flat=True)
+        )
+        kind = "aptitude"
+
+    elif contact.source_type == "scholarship":
+        candidates = list(
+            ScholarshipResult.objects.filter(
+                pk=contact.source_record_id,
+                attempt__status="completed",
+                attempt__assessment__slug="mcti-scholarship-test-2026",
+            ).values_list("attempt_id", flat=True)
+        )
+        kind = "scholarship"
+
+    elif contact.source_type == "ssc":
+        from assessments.branch_sync import sync_mobile
+        return sync_mobile(contact.normalized_mobile or contact.mobile)
+
+    else:
+        return 0
+
+    created_count = 0
+
+    for attempt_id in set(candidates):
+        assignment, created = AssessmentBranchAssignment.objects.get_or_create(
+            kind=kind,
+            attempt_id=attempt_id,
+            defaults={
+                "branch": contact.branch,
+                "assigned_by": contact.pushed_by,
+            },
+        )
+
+        if not created:
+            if assignment.branch != contact.branch:
+                raise ValueError(
+                    f"Assessment {kind}:{attempt_id} already belongs to "
+                    f"{assignment.branch}; cannot silently transfer."
+                )
+            continue
+
+        AssessmentBranchAssignmentLog.objects.create(
+            kind=kind,
+            attempt_id=attempt_id,
+            old_branch="",
+            new_branch=contact.branch,
+            changed_by=contact.pushed_by,
+        )
+        created_count += 1
+
+    return created_count
+
+
+@login_required(login_url="staff_login")
+@transaction.atomic
+def push_marketing_lead_to_outreach(request, source_type, source_id):
+
+    if not is_admin_user(request.user):
+        return HttpResponseForbidden(
+            "Only Power User / Head Office can distribute marketing leads."
+        )
+
+    if request.method != "POST":
+        return redirect("marketing_lead_distribution")
+
+    allowed_branches = {
+        "kharghar",
+        "panvel",
+        "koperkhairane",
+        "kamothe",
+        "ghansoli",
+        "nerul",
+    }
+
+    allowed_sources = {
+        "ai_ready",
+        "aptitude",
+        "scholarship",
+        "ssc",
+    }
+
+    source_type = (source_type or "").strip().lower()
+    branch = request.POST.get("branch", "").strip().lower()
+
+    if source_type not in allowed_sources:
+        messages.error(request, "Invalid marketing lead source.")
+        return redirect("marketing_lead_distribution")
+
+    if branch not in allowed_branches:
+        messages.error(request, "Please select a valid branch.")
+        return redirect("marketing_lead_distribution")
+
+    # Never create the same source record twice.
+    existing = (
+        OutreachContact.objects
+        .filter(
+            contact_type="marketing_lead",
+            source_type=source_type,
+            source_record_id=source_id,
+        )
+        .first()
+    )
+
+    if existing:
+        messages.info(
+            request,
+            (
+                f"{existing.name} is already pushed to "
+                f"{existing.get_branch_display()} Marketing Outreach."
+            )
+        )
+        return redirect("marketing_lead_distribution")
+
+    name = ""
+    mobile = ""
+    email = ""
+    source_label = ""
+    notes = ""
+
+    # --------------------------------------------------------
+    # AI READY
+    # --------------------------------------------------------
+    if source_type == "ai_ready":
+        from assessments.models import AssessmentAttempt
+
+        obj = get_object_or_404(
+            AssessmentAttempt.objects.select_related(
+                "participant_profile",
+                "assessment",
+            ),
+            id=source_id,
+            assessment__slug__in=[
+                "ai-ready-maharashtra-2026",
+                "ai-ready-maharashtra-2026-marathi",
+            ],
+        )
+
+        profile = getattr(obj, "participant_profile", None)
+
+        name = obj.participant_name
+        mobile = obj.participant_mobile
+        email = obj.participant_email or ""
+        source_label = "AI Ready Maharashtra"
+
+        details = []
+        if profile:
+            if profile.city:
+                details.append(f"City: {profile.city}")
+            if profile.institution_name:
+                details.append(
+                    f"Institution: {profile.institution_name}"
+                )
+            if profile.career_interest:
+                details.append(
+                    f"Initial interest: {profile.career_interest}"
+                )
+
+        notes = " | ".join(details)
+
+    # --------------------------------------------------------
+    # CAREER / APTITUDE
+    # --------------------------------------------------------
+    elif source_type == "aptitude":
+        from career_tools.models import CareerProfile
+
+        obj = get_object_or_404(
+            CareerProfile,
+            id=source_id,
+        )
+
+        name = obj.full_name
+        mobile = obj.mobile
+        email = obj.email or ""
+        source_label = "Career / Aptitude"
+
+        details = []
+        if obj.city:
+            details.append(f"City: {obj.city}")
+        if obj.career_interest:
+            details.append(
+                f"Initial interest: {obj.career_interest}"
+            )
+        if obj.preferred_job_role:
+            details.append(
+                f"Job role: {obj.preferred_job_role}"
+            )
+
+        notes = " | ".join(details)
+
+    # --------------------------------------------------------
+    # SCHOLARSHIP
+    # --------------------------------------------------------
+    elif source_type == "scholarship":
+        from assessments.models import ScholarshipResult
+
+        obj = get_object_or_404(
+            ScholarshipResult.objects.select_related(
+                "attempt",
+                "attempt__participant_profile",
+            ),
+            id=source_id,
+            attempt__assessment__slug="mcti-scholarship-test-2026",
+        )
+
+        profile = getattr(
+            obj.attempt,
+            "participant_profile",
+            None,
+        )
+
+        name = obj.attempt.participant_name
+        mobile = obj.attempt.participant_mobile
+        email = obj.attempt.participant_email or ""
+        source_label = "Scholarship"
+
+        details = [
+            f"Scholarship: {obj.scholarship_percentage}%"
+        ]
+
+        if obj.selected_course:
+            details.append(
+                f"Initial course: {obj.selected_course}"
+            )
+
+        if profile and profile.city:
+            details.append(f"City: {profile.city}")
+
+        notes = " | ".join(details)
+
+    # --------------------------------------------------------
+    # SSC PRACTICE
+    # --------------------------------------------------------
+    elif source_type == "ssc":
+        from exam_preparation.models import SSCStudent
+
+        obj = get_object_or_404(
+            SSCStudent,
+            id=source_id,
+        )
+
+        name = obj.full_name
+        mobile = obj.mobile
+        email = ""
+        source_label = "SSC Practice"
+
+        details = []
+        if obj.city:
+            details.append(f"City: {obj.city}")
+        if obj.school_name:
+            details.append(f"School: {obj.school_name}")
+
+        notes = " | ".join(details)
+
+    normalized_mobile = _normalize_outreach_mobile(mobile)
+
+    if len(normalized_mobile) != 10:
+        messages.error(
+            request,
+            (
+                f"Cannot push {name or 'lead'}: "
+                "valid 10-digit mobile number not found."
+            )
+        )
+        return redirect("marketing_lead_distribution")
+
+    contact = OutreachContact.objects.create(
+        name=name,
+        mobile=mobile,
+        normalized_mobile=normalized_mobile,
+        email=email or None,
+        branch=branch,
+        contact_type="marketing_lead",
+        source=source_label,
+        source_type=source_type,
+        source_record_id=source_id,
+        pushed_by=request.user,
+        pushed_at=timezone.now(),
+        permission_status="unknown",
+        status="new",
+        notes=notes,
+        created_by=request.user,
+    )
+
+    assigned_count = _auto_assign_pushed_assessments(contact)
+
+    messages.success(
+        request,
+        (
+            f"{contact.name} pushed to "
+            f"{contact.get_branch_display()} Marketing Outreach."
+        )
+    )
+
+    return redirect("marketing_lead_distribution")
+
+
+
+@login_required(login_url="staff_login")
+def bulk_push_marketing_leads(request):
+    """HO-only bulk distribution. Each lead is its own atomic transaction."""
+    from django.db import connection, transaction
+    from django.views.decorators.http import require_POST
+    from assessments.models import AssessmentAttempt, ScholarshipResult
+    from career_tools.models import CareerProfile
+    from exam_preparation.models import SSCStudent
+
+    if not is_admin_user(request.user):
+        return HttpResponseForbidden("HO / Power User only")
+    if request.method != "POST":
+        return HttpResponseForbidden("POST required")
+
+    branch = request.POST.get("branch", "").strip().lower()
+    valid_branches = {"kharghar", "panvel", "koperkhairane", "kamothe", "ghansoli", "nerul"}
+    if branch not in valid_branches:
+        messages.error(request, "Select a valid destination branch.")
+        return redirect("marketing_lead_distribution")
+
+    selected = request.POST.getlist("lead_keys")
+    if not selected or len(selected) > 100 or len(set(selected)) != len(selected):
+        messages.error(request, "Select 1–100 unique leads.")
+        return redirect("marketing_lead_distribution")
+
+    import re
+    keys=[]
+    for key in selected:
+        match=re.fullmatch(r"(ai_ready|aptitude|scholarship|ssc):(\d{1,12})", key)
+        if not match or int(match.group(2)) < 1:
+            messages.error(request, "Invalid lead selection. Nothing pushed.")
+            return redirect("marketing_lead_distribution")
+        keys.append((match.group(1), int(match.group(2))))
+
+    counts={"created":0,"skipped":0,"failed":0,"assessments":0}
+    for source_type, source_id in keys:
+        try:
+            with transaction.atomic():
+                # Lock per source to prevent concurrent duplicate pushes.
+                with connection.cursor() as cursor:
+                    cursor.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", [f"mcti_bulk_lead:{source_type}:{source_id}"])
+                if OutreachContact.objects.filter(
+                    contact_type="marketing_lead", source_type=source_type, source_record_id=source_id
+                ).exists():
+                    counts["skipped"] += 1
+                    continue
+
+                email=""; notes=""; label=""
+                if source_type=="ai_ready":
+                    obj=AssessmentAttempt.objects.select_related("participant_profile").get(
+                        pk=source_id, assessment__slug__in=["ai-ready-maharashtra-2026","ai-ready-maharashtra-2026-marathi"])
+                    name=obj.participant_name; mobile=obj.participant_mobile; email=obj.participant_email or ""
+                    label="AI Ready Maharashtra"
+                    profile=obj.participant_profile
+                    if profile:
+                        notes=" | ".join(x for x in [f"City: {profile.city}" if profile.city else "", f"Institution: {profile.institution_name}" if profile.institution_name else "", f"Initial interest: {profile.career_interest}" if profile.career_interest else ""] if x)
+                elif source_type=="aptitude":
+                    obj=CareerProfile.objects.get(pk=source_id)
+                    name=obj.full_name; mobile=obj.mobile; email=obj.email or ""; label="Career / Aptitude"
+                    notes=" | ".join(x for x in [f"City: {obj.city}" if obj.city else "", f"Initial interest: {obj.career_interest}" if obj.career_interest else "", f"Job role: {obj.preferred_job_role}" if obj.preferred_job_role else ""] if x)
+                elif source_type=="scholarship":
+                    obj=ScholarshipResult.objects.select_related("attempt","attempt__participant_profile").get(
+                        pk=source_id, attempt__assessment__slug="mcti-scholarship-test-2026")
+                    name=obj.attempt.participant_name; mobile=obj.attempt.participant_mobile
+                    email=obj.attempt.participant_email or ""; label="Scholarship"
+                    details=[f"Scholarship: {obj.scholarship_percentage}%"]
+                    if obj.selected_course: details.append(f"Initial course: {obj.selected_course}")
+                    profile=obj.attempt.participant_profile
+                    if profile and profile.city: details.append(f"City: {profile.city}")
+                    notes=" | ".join(details)
+                else:
+                    obj=SSCStudent.objects.get(pk=source_id)
+                    name=obj.full_name; mobile=obj.mobile; label="SSC Practice"
+                    notes=" | ".join(x for x in [f"City: {obj.city}" if obj.city else "", f"School: {obj.school_name}" if obj.school_name else ""] if x)
+
+                normalized_mobile=_normalize_outreach_mobile(mobile)
+                if len(normalized_mobile)!=10:
+                    raise ValueError("Invalid mobile")
+                contact=OutreachContact.objects.create(
+                    name=name,mobile=mobile,normalized_mobile=normalized_mobile,
+                    email=email or None,branch=branch,contact_type="marketing_lead",
+                    source=label,source_type=source_type,source_record_id=source_id,
+                    pushed_by=request.user,pushed_at=timezone.now(),
+                    permission_status="unknown",status="new",notes=notes,created_by=request.user,
+                )
+                new_assignments=_auto_assign_pushed_assessments(contact)
+                counts["created"]+=1
+                counts["assessments"]+=new_assignments
+        except Exception:
+            counts["failed"]+=1
+            # Details stay in server logs; avoid exposing personal data in UI.
+            import logging
+            logging.getLogger(__name__).exception("Bulk marketing push failed: %s:%s",source_type,source_id)
+
+    messages.success(request,
+        f"Bulk distribution: {counts['created']} pushed to {branch.title()}, "
+        f"{counts['skipped']} already pushed, {counts['failed']} failed; "
+        f"{counts['assessments']} assessment assignments created.")
+    return redirect("marketing_lead_distribution")
+
+
+@login_required(login_url="staff_login")
+def marketing_lead_distribution(request):
+    """
+    HO / Power User lead review dashboard.
+
+    Includes campaign / assessment leads only:
+    - AI Ready Maharashtra
+    - Career / Aptitude
+    - Scholarship
+    - SSC Practice
+
+    Direct website enquiries are intentionally excluded.
+    """
+
+    if not is_admin_user(request.user):
+        messages.error(
+            request,
+            "You do not have permission to access Marketing Lead Distribution."
+        )
+        return redirect("branch_dashboard")
+
+    from assessments.models import (
+        AssessmentAttempt,
+        ScholarshipResult,
+    )
+    from career_tools.models import CareerProfile
+    from exam_preparation.models import SSCStudent
+
+    source_filter = request.GET.get("source", "").strip().lower()
+    search = request.GET.get("q", "").strip()
+
+    rows = []
+
+    # ---------------------------------------------------------
+    # AI READY
+    # ---------------------------------------------------------
+    if source_filter in ("", "ai_ready"):
+        ai_qs = (
+            AssessmentAttempt.objects
+            .filter(
+                assessment__slug__in=[
+                    "ai-ready-maharashtra-2026",
+                    "ai-ready-maharashtra-2026-marathi",
+                ]
+            )
+            .select_related("participant_profile")
+            .order_by("-started_at")
+        )
+
+        if search:
+            ai_qs = ai_qs.filter(
+                Q(participant_name__icontains=search)
+                | Q(participant_mobile__icontains=search)
+                | Q(participant_email__icontains=search)
+                | Q(participant_profile__city__icontains=search)
+            )
+
+        for item in ai_qs[:200]:
+            profile = getattr(item, "participant_profile", None)
+
+            rows.append({
+                "source": "ai_ready",
+                "source_label": "AI Ready Maharashtra",
+                "source_id": item.id,
+                "name": item.participant_name,
+                "mobile": item.participant_mobile,
+                "email": item.participant_email,
+                "city": profile.city if profile else "",
+                "preferred_branch": "",
+                "detail": item.get_status_display(),
+                "created_at": item.started_at,
+            })
+
+    # ---------------------------------------------------------
+    # CAREER / APTITUDE
+    # ---------------------------------------------------------
+    if source_filter in ("", "aptitude"):
+        career_qs = CareerProfile.objects.all().order_by("-created_at")
+
+        if search:
+            career_qs = career_qs.filter(
+                Q(full_name__icontains=search)
+                | Q(mobile__icontains=search)
+                | Q(email__icontains=search)
+                | Q(city__icontains=search)
+                | Q(career_interest__icontains=search)
+            )
+
+        for item in career_qs[:200]:
+            rows.append({
+                "source": "aptitude",
+                "source_label": "Career / Aptitude",
+                "source_id": item.id,
+                "name": item.full_name,
+                "mobile": item.mobile,
+                "email": item.email,
+                "city": item.city,
+                "preferred_branch": item.preferred_branch,
+                "detail": item.career_interest,
+                "created_at": item.created_at,
+            })
+
+    # ---------------------------------------------------------
+    # SCHOLARSHIP
+    # ---------------------------------------------------------
+    if source_filter in ("", "scholarship"):
+        scholarship_qs = (
+            ScholarshipResult.objects
+            .select_related(
+                "attempt",
+                "attempt__participant_profile",
+            )
+            .filter(
+                attempt__assessment__slug="mcti-scholarship-test-2026"
+            )
+            .order_by("-created_at")
+        )
+
+        if search:
+            scholarship_qs = scholarship_qs.filter(
+                Q(attempt__participant_name__icontains=search)
+                | Q(attempt__participant_mobile__icontains=search)
+                | Q(attempt__participant_email__icontains=search)
+                | Q(preferred_branch__icontains=search)
+            )
+
+        for item in scholarship_qs[:200]:
+            profile = getattr(
+                item.attempt,
+                "participant_profile",
+                None
+            )
+
+            rows.append({
+                "source": "scholarship",
+                "source_label": "Scholarship",
+                "source_id": item.id,
+                "name": item.attempt.participant_name,
+                "mobile": item.attempt.participant_mobile,
+                "email": item.attempt.participant_email,
+                "city": profile.city if profile else "",
+                "preferred_branch": item.preferred_branch,
+                "detail": f"{item.scholarship_percentage}% Scholarship",
+                "created_at": item.created_at,
+            })
+
+    # ---------------------------------------------------------
+    # SSC PRACTICE
+    # ---------------------------------------------------------
+    if source_filter in ("", "ssc"):
+        ssc_qs = (
+            SSCStudent.objects
+            .select_related("preferred_branch")
+            .order_by("-created_at")
+        )
+
+        if search:
+            ssc_qs = ssc_qs.filter(
+                Q(full_name__icontains=search)
+                | Q(mobile__icontains=search)
+                | Q(city__icontains=search)
+                | Q(school_name__icontains=search)
+            )
+
+        for item in ssc_qs[:200]:
+            rows.append({
+                "source": "ssc",
+                "source_label": "SSC Practice",
+                "source_id": item.id,
+                "name": item.full_name,
+                "mobile": item.mobile,
+                "email": "",
+                "city": item.city,
+                "preferred_branch": (
+                    item.preferred_branch.branch_name
+                    if item.preferred_branch
+                    else ""
+                ),
+                "detail": item.school_name,
+                "created_at": item.created_at,
+            })
+
+    rows.sort(
+        key=lambda row: row["created_at"],
+        reverse=True
+    )
+
+    rows = rows[:300]
+
+    # Attach current Marketing Outreach routing state.
+    # Keyed by source_type + source_record_id so the same source
+    # record cannot accidentally be treated as a fresh lead.
+    source_ids = {}
+    for row in rows:
+        source_ids.setdefault(row["source"], []).append(row["source_id"])
+
+    pushed_lookup = {}
+
+    for source_name, record_ids in source_ids.items():
+        pushed_contacts = (
+            OutreachContact.objects
+            .filter(
+                contact_type="marketing_lead",
+                source_type=source_name,
+                source_record_id__in=record_ids,
+            )
+            .select_related("converted_enquiry")
+        )
+
+        for contact in pushed_contacts:
+            pushed_lookup[
+                (contact.source_type, contact.source_record_id)
+            ] = contact
+
+    for row in rows:
+        contact = pushed_lookup.get(
+            (row["source"], row["source_id"])
+        )
+
+        row["outreach_contact"] = contact
+        row["is_pushed"] = bool(contact)
+
+    branch_choices = OutreachContact.BRANCH_CHOICES
+
+    source_choices = [
+        ("", "All Marketing Leads"),
+        ("ai_ready", "AI Ready Maharashtra"),
+        ("aptitude", "Career / Aptitude"),
+        ("scholarship", "Scholarship"),
+        ("ssc", "SSC Practice"),
+    ]
+
+    return render(
+        request,
+        "core/marketing_lead_distribution.html",
+        {
+            "rows": rows,
+            "source_filter": source_filter,
+            "search": search,
+            "source_choices": source_choices,
+            "branch_choices": branch_choices,
+        },
+    )
+
 
 def ai_ready_report(request):
 

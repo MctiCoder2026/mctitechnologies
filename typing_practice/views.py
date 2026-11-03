@@ -665,37 +665,13 @@ TYPING_BRANCHES = [
 
 
 def public_typing(request):
-
-    lessons = (
-        TypingLesson.objects
-        .filter(
-            is_active=True,
-            order__in=PUBLIC_TYPING_LESSON_ORDERS
-        )
-        .order_by("order")
-    )
-
-    return render(
-        request,
-        "typing_practice/public_typing.html",
-        {"lessons": lessons}
-    )
+    from .free_lab import home
+    return home(request)
 
 
 def public_practice(request, slug):
-
-    lesson_obj = get_object_or_404(
-        TypingLesson,
-        slug=slug,
-        is_active=True,
-        order__in=PUBLIC_TYPING_LESSON_ORDERS
-    )
-
-    return render(
-        request,
-        "typing_practice/public_practice.html",
-        {"lesson": lesson_obj}
-    )
+    from .free_lab import practice
+    return practice(request, slug)
 
 
 def public_game(request):
@@ -707,102 +683,8 @@ def public_game(request):
 
 
 def public_register(request):
-
-    if request.method == "POST":
-
-        name = request.POST.get(
-            "name", ""
-        ).strip()
-
-        mobile = request.POST.get(
-            "mobile", ""
-        ).strip()
-
-        branch = request.POST.get(
-            "branch", ""
-        ).strip()
-
-        digits = "".join(
-            c for c in mobile if c.isdigit()
-        )
-
-        if len(digits) > 10 and digits.startswith("91"):
-            digits = digits[-10:]
-
-        if (
-            not name or
-            len(digits) != 10
-        ):
-            return render(
-                request,
-                "typing_practice/public_register.html",
-                {
-                    "branches": TYPING_BRANCHES,
-                    "error": (
-                        "Please enter your name "
-                        "and valid 10-digit mobile number."
-                    )
-                }
-            )
-
-        existing_student = (
-            Student.objects
-            .filter(mobile__icontains=digits)
-            .first()
-        )
-
-        if existing_student:
-            return render(
-                request,
-                "typing_practice/public_registered.html",
-                {
-                    "existing_student": True,
-                    "name": existing_student.name,
-                }
-            )
-
-        recent = (
-            Enquiry.objects
-            .filter(
-                mobile=digits,
-                message__icontains="MCTI Typing Lab"
-            )
-            .order_by("-created_at")
-            .first()
-        )
-
-        if not recent:
-            Enquiry.objects.create(
-                name=name,
-                mobile=digits,
-                branch=branch or None,
-                current_status="Student / Typing Practice",
-                message=(
-                    "MCTI Typing Lab - Free Public Registration. "
-                    "Lead Source: Typing Practice."
-                ),
-                status="new"
-            )
-
-        request.session["typing_public_registered"] = True
-        request.session["typing_public_name"] = name
-        request.session["typing_public_mobile"] = digits
-        request.session["typing_public_branch"] = branch
-
-        return render(
-            request,
-            "typing_practice/public_registered.html",
-            {
-                "existing_student": False,
-                "name": name,
-            }
-        )
-
-    return render(
-        request,
-        "typing_practice/public_register.html",
-        {"branches": TYPING_BRANCHES}
-    )
+    from .free_lab import register
+    return register(request)
 
 
 # ============================================================

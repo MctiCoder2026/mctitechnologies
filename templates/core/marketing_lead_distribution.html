@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+
+{% block title %}Marketing Lead Distribution{% endblock %}
+
+{% block content %}
+<style>
+
+    .bulk-panel { background:#fff; border:1px solid #f2c4a8; border-radius:12px; padding:16px; margin:0 0 16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .bulk-panel select { min-height:42px; padding:8px; border:1px solid #ddd; border-radius:7px; }
+    .bulk-count { font-weight:700; color:#d94a0b; }
+    .bulk-panel button { background:#ef4b15; }
+    .lead-wrap {
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .lead-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .lead-head h1 {
+        margin: 0 0 5px;
+        font-size: 28px;
+    }
+
+    .lead-head p {
+        margin: 0;
+        color: #666;
+    }
+
+    .filters {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        background: #fff;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        margin-bottom: 18px;
+    }
+
+    .filters input,
+    .filters select {
+        min-height: 42px;
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
+
+    .filters input {
+        min-width: 260px;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 8px 16px;
+        border: 0;
+        border-radius: 6px;
+        text-decoration: none;
+        cursor: pointer;
+        background: #111;
+        color: #fff;
+    }
+
+    .btn-light {
+        background: #eee;
+        color: #222;
+    }
+
+    .table-box {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1050px;
+    }
+
+    th,
+    td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #eee;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    th {
+        background: #f7f7f7;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    td {
+        font-size: 14px;
+    }
+
+    .source {
+        display: inline-block;
+        padding: 5px 8px;
+        border-radius: 20px;
+        background: #f1f1f1;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .mobile {
+        white-space: nowrap;
+        font-weight: 600;
+    }
+
+    .muted {
+        color: #777;
+        font-size: 12px;
+    }
+
+    .count-box {
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .empty {
+        text-align: center;
+        padding: 35px;
+        color: #777;
+    }
+
+    @media (max-width: 700px) {
+        .lead-wrap {
+            padding: 12px;
+        }
+
+        .lead-head {
+            display: block;
+        }
+
+        .count-box {
+            display: inline-block;
+            margin-top: 12px;
+        }
+
+        .filters input,
+        .filters select,
+        .filters .btn {
+            width: 100%;
+            min-width: 0;
+        }
+    }
+</style>
+
+<div class="lead-wrap">
+
+    <div class="lead-head">
+        <div>
+            <h1>Marketing Lead Distribution</h1>
+            <p>
+                Power User review for assessment and campaign leads.
+                Direct website enquiries are not included.
+            </p>
+        </div>
+
+        <div class="count-box">
+            Showing {{ rows|length }} Leads
+        </div>
+    </div>
+
+    <form method="get" class="filters">
+        <select name="source">
+            {% for value, label in source_choices %}
+                <option value="{{ value }}"
+                    {% if source_filter == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <input
+            type="text"
+            name="q"
+            value="{{ search }}"
+            placeholder="Search name, mobile, email, city..."
+        >
+
+        <button type="submit" class="btn">
+            Filter
+        </button>
+
+        <a href="{% url 'marketing_lead_distribution' %}"
+           class="btn btn-light">
+            Clear
+        </a>
+    </form>
+
+
+    <form id="mcti-bulk-form" method="post" action="{% url 'bulk_push_marketing_leads' %}" onsubmit="return mctiConfirmBulk(event)">
+        {% csrf_token %}
+        <div class="bulk-panel">
+            <label><input id="mcti-select-all" type="checkbox" onchange="mctiToggleAll(this.checked)"> <strong>Select all available (visible)</strong></label>
+            <span class="bulk-count"><span id="mcti-selected-count">0</span> selected</span>
+            <select name="branch" id="mcti-bulk-branch" required>
+                <option value="">Choose destination branch *</option>
+                {% for value, label in branch_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+            </select>
+            <button class="btn" type="submit">Bulk Push to Branch</button>
+            <span class="muted">Maximum 100 per batch. Already pushed leads cannot be selected.</span>
+        </div>
+    </form>
+    <div class="table-box">
+        <table>
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Source</th>
+                    <th>Name</th>
+                    <th>Mobile</th>
+                    <th>City</th>
+                    <th>Preferred Branch</th>
+                    <th>Lead Detail</th>
+                    <th>Date</th>
+                    <th>Distribution</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in rows %}
+                    <tr>
+                        <td>{% if not row.is_pushed %}<input class="mcti-lead-check" type="checkbox" form="mcti-bulk-form" name="lead_keys" value="{{ row.source }}:{{ row.source_id }}" onchange="mctiUpdateSelected()" aria-label="Select {{ row.name }}">{% else %}<span class="muted">Assigned</span>{% endif %}</td>
+                        <td>
+                            <span class="source">
+                                {{ row.source_label }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <strong>{{ row.name|default:"-" }}</strong>
+                            {% if row.email %}
+                                <div class="muted">
+                                    {{ row.email }}
+                                </div>
+                            {% endif %}
+                        </td>
+
+                        <td class="mobile">
+                            {{ row.mobile|default:"-" }}
+                        </td>
+
+                        <td>
+                            {{ row.city|default:"-" }}
+                        </td>
+
+                        <td>
+                            {{ row.preferred_branch|default:"-" }}
+                        </td>
+
+                        <td>
+                            {{ row.detail|default:"-" }}
+                        </td>
+
+                        <td>
+                            {{ row.created_at|date:"d M Y, h:i A" }}
+                        </td>
+
+                        <td style="min-width:230px;">
+                            {% if row.is_pushed %}
+                                <div>
+                                    <strong>
+                                        {{ row.outreach_contact.get_branch_display }}
+                                    </strong>
+                                </div>
+
+                                <div class="muted" style="margin:4px 0 8px;">
+                                    Outreach:
+                                    {{ row.outreach_contact.get_status_display }}
+                                </div>
+
+                                {% if row.outreach_contact.converted_enquiry_id %}
+                                    <div class="muted" style="margin-bottom:8px;">
+                                        Enquiry #{{ row.outreach_contact.converted_enquiry_id }}
+                                    </div>
+                                {% endif %}
+
+                                <a
+                                    href="{% url 'outreach_contact_detail' row.outreach_contact.id %}"
+                                    class="btn"
+                                    style="min-height:34px;padding:5px 10px;"
+                                >
+                                    Open Outreach
+                                </a>
+                            {% else %}
+                                <form
+                                    method="post"
+                                    action="{% url 'push_marketing_lead_to_outreach' row.source row.source_id %}"
+                                    style="display:flex;gap:6px;flex-wrap:wrap;"
+                                    autocomplete="off"
+                                >
+                                    {% csrf_token %}
+
+                                    <select
+                                        name="branch"
+                                        required
+                                        style="min-height:36px;padding:5px 7px;border:1px solid #ccc;border-radius:6px;"
+                                    >
+                                        <option value="" selected disabled>Select Branch *</option>
+
+                                        {% for value, label in branch_choices %}
+                                            <option value="{{ value }}">
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+
+                                    <button
+                                        type="submit"
+                                        class="btn"
+                                        style="min-height:36px;padding:5px 10px;"
+                                        onclick="return confirm('Push this marketing lead to the selected branch?');"
+                                    >
+                                        Push to Branch
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="9" class="empty">
+                            No marketing leads found.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+function mctiUpdateSelected() {
+  const checks=[...document.querySelectorAll('.mcti-lead-check')];
+  const selected=checks.filter(c=>c.checked).length;
+  document.getElementById('mcti-selected-count').textContent=selected;
+  const all=document.getElementById('mcti-select-all');
+  all.checked=checks.length>0 && selected===checks.length;
+  all.indeterminate=selected>0 && selected<checks.length;
+}
+function mctiToggleAll(checked) {
+  const checks=[...document.querySelectorAll('.mcti-lead-check')];
+  if (checked && checks.length>100) { alert('Maximum 100 leads per batch. Please select up to 100.'); document.getElementById('mcti-select-all').checked=false; return; }
+  checks.forEach(c=>c.checked=checked);
+  mctiUpdateSelected();
+}
+function mctiConfirmBulk(event) {
+  const selected=document.querySelectorAll('.mcti-lead-check:checked').length;
+  const branch=document.getElementById('mcti-bulk-branch');
+  if (selected<1 || selected>100) { alert('Select 1 to 100 leads.'); event.preventDefault(); return false; }
+  if (!branch.value) { alert('Choose destination branch.'); event.preventDefault(); return false; }
+  return confirm('Push '+selected+' selected leads to '+branch.options[branch.selectedIndex].text+'? Already pushed leads will be skipped.');
+}
+</script>
+{% endblock %}

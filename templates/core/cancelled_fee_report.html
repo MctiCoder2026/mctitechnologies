@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.left-report{max-width:1450px;margin:35px auto;padding:0 20px;font-family:inherit}
+.left-head{background:linear-gradient(115deg,#171717,#343434);color:white;padding:28px;border-radius:16px;border-top:5px solid #f58220}
+.left-head h1{margin:0 0 8px;font-size:26px;color:white}
+.left-head p{margin:0;color:#ddd}
+.left-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:20px 0}
+.left-kpi{background:white;padding:20px;border:1px solid #e5e7eb;border-radius:12px}
+.left-kpi span{display:block;color:#64748b;font-size:13px}
+.left-kpi strong{display:block;font-size:25px;margin-top:7px;color:#111}
+.left-filters{background:white;padding:18px;border-radius:12px;border:1px solid #eee;display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.left-filters input,.left-filters select{padding:11px;border:1px solid #ddd;border-radius:7px;min-width:180px;flex:1}
+.left-btn{background:#f58220;color:white;border:0;padding:11px 20px;border-radius:7px;font-weight:700;cursor:pointer}
+.left-table-wrap{background:white;border:1px solid #eee;border-radius:12px;overflow-x:auto}
+.left-table{width:100%;border-collapse:collapse;font-size:13px}
+.left-table th{background:#171717;color:white;text-align:left;padding:14px;white-space:nowrap}
+.left-table td{padding:13px;border-bottom:1px solid #eee;vertical-align:top}
+.left-table tr:hover td{background:#fff8f1}
+.left-money{font-weight:800;color:#d35400}
+.left-reason{max-width:240px;white-space:normal;overflow-wrap:anywhere}
+@media(max-width:700px){.left-kpis{grid-template-columns:1fr}.left-head h1{font-size:21px}}
+</style>
+
+<div class="left-report">
+    <div class="left-head">
+        <h1>Left / Cancelled Students — Fee Report</h1>
+        <p>MCTI Management | HO Confidential Report</p>
+    </div>
+
+    <div class="left-kpis">
+        <div class="left-kpi">
+            <span>Cancelled Enrollments</span>
+            <strong>{{ rows|length }}</strong>
+        </div>
+        <div class="left-kpi">
+            <span>Total Fees Collected</span>
+            <strong>₹{{ total_paid|floatformat:2 }}</strong>
+        </div>
+        <div class="left-kpi">
+            <span>Outstanding Balance</span>
+            <strong>₹{{ total_pending|floatformat:2 }}</strong>
+        </div>
+    </div>
+
+    <form method="get" class="left-filters">
+        <select name="branch">
+            <option value="">All Branches</option>
+            {% for value,label in branches %}
+                <option value="{{ value }}" {% if selected_branch == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <input type="search" name="search" value="{{ search }}" placeholder="Search student, course or enrollment">
+        <button class="left-btn" type="submit">Apply Filters</button>
+        <a href="{% url 'cancelled_fee_report' %}" style="padding:11px;color:#555">Reset</a>
+    </form>
+
+    <div class="left-table-wrap">
+        <table class="left-table">
+            <thead>
+                <tr>
+                    <th>Student / Enrollment</th>
+                    <th>Branch</th>
+                    <th>Course</th>
+                    <th>Final Fee</th>
+                    <th>Paid</th>
+                    <th>Pending</th>
+                    <th>Cancellation Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enrollment in rows %}
+                <tr>
+                    <td>
+                        <strong>{{ enrollment.student.name }}</strong>
+                        <div>{{ enrollment.enrollment_number }}</div>
+                        {% if enrollment.student.admission_id %}
+                        <a href="{% url 'admission_detail' enrollment.student.admission_id %}">View Admission</a>
+                        {% endif %}
+                    </td>
+                    <td>{{ enrollment.branch|default:enrollment.student.branch }}</td>
+                    <td>{{ enrollment.course.title }}</td>
+                    <td>₹{{ enrollment.final_fee|floatformat:2 }}</td>
+                    <td>₹{{ enrollment.total_paid|floatformat:2 }}</td>
+                    <td class="left-money">₹{{ enrollment.balance_fee|floatformat:2 }}</td>
+                    <td class="left-reason">
+                        <strong>{{ enrollment.cancelled_at|date:"d M Y, h:i A"|default:"Historical cancellation" }}</strong>
+                        <div>{{ enrollment.cancellation_reason|default:"Not recorded" }}</div>
+                        <small>By: {% if enrollment.cancelled_by %}{{ enrollment.cancelled_by.get_full_name|default:enrollment.cancelled_by.username }}{% else %}Not recorded{% endif %}</small>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align:center;padding:35px">No cancelled enrollments found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

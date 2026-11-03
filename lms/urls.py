@@ -1,12 +1,18 @@
 from django.urls import path
 
-from . import views, delivery_views, classroom_workflow
+from . import views, delivery_views, classroom_workflow, management_progress
 
 
 app_name = "lms"
 
 
 urlpatterns = [
+    path(
+        "management/student-progress/",
+        management_progress.student_progress_dashboard,
+        name="management_student_progress",
+    ),
+
 
     path("classroom/trainer-login/", classroom_workflow.trainer_login, name="trainer_login"),
     path("classroom/trainer-logout/", classroom_workflow.trainer_logout, name="trainer_logout"),

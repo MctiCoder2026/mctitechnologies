@@ -39,6 +39,7 @@ ALLOWED_HOSTS = [
 
 
 INSTALLED_APPS = [
+    'alumni.apps.AlumniConfig',
     'local_site',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -223,3 +224,22 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8081",
 ]
 
+
+
+# MCTI_ALUMNI_SHARED_CACHE
+# Separate cache for temporary alumni Excel imports.
+# Existing default cache remains unchanged.
+CACHES = {
+    **globals().get("CACHES", {}),
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    },
+    "alumni_import": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": "/var/cache/mcti-alumni-import",
+        "TIMEOUT": 900,
+        "OPTIONS": {
+            "MAX_ENTRIES": 100,
+        },
+    },
+}

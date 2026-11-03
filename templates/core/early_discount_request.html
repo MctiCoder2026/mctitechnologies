@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Early Fee Discount | MCTI</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f5f7;margin:0;color:#171717}
+header{background:#111;color:white;padding:20px}
+header strong{color:#ff891c}
+main{max-width:850px;margin:25px auto;padding:0 15px}
+.card{background:white;border:1px solid #ddd;border-radius:12px;padding:22px;margin-bottom:18px}
+h2{margin-top:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px}
+.value{font-size:23px;font-weight:800}
+label{display:block;font-weight:bold;margin:15px 0 6px}
+input,textarea{width:100%;box-sizing:border-box;padding:12px;border:1px solid #ccc;border-radius:7px}
+button{background:#f58220;color:#111;border:0;padding:13px 22px;border-radius:8px;font-weight:bold;cursor:pointer;margin-top:15px}
+a{color:#d45e00}
+table{width:100%;border-collapse:collapse}
+td,th{padding:10px;border-bottom:1px solid #eee;text-align:left}
+.msg{padding:12px;background:#fff0da;margin-bottom:12px;border-radius:7px}
+</style>
+</head>
+<body>
+<header><strong>MCTI TECHNOLOGIES</strong> | Early Fee Discount Request</header>
+<main>
+<a href="{% url 'admission_detail' enrollment.student.admission_id %}">← Back to Student</a>
+{% for message in messages %}<div class="msg">{{ message }}</div>{% endfor %}
+<div class="card">
+<h2>{{ enrollment.student.name }}</h2>
+<p>{{ enrollment.course.title }} | {{ enrollment.enrollment_number }}</p>
+<div class="grid">
+<div>Final Fee<div class="value">₹{{ enrollment.final_fee }}</div></div>
+<div>Pending Fee<div class="value">₹{{ enrollment.balance_fee }}</div></div>
+<div>Next Due Date<div class="value">{{ due_date|date:"d M Y" }}</div></div>
+</div>
+</div>
+<div class="card">
+<h2>Request Early Payment Discount</h2>
+{% if enrollment.status == "active" and enrollment.balance_fee > 0 %}
+<form method="post">
+{% csrf_token %}
+<label>Discount Amount (₹)</label>
+<input type="number" name="amount" min="0.01" max="{{ enrollment.balance_fee }}" step="0.01" required>
+<label>Expected Payment Date</label>
+<input type="date" name="proposed_payment_date" required>
+<label>Reason for Discount</label>
+<textarea name="reason" rows="3" minlength="5" required placeholder="Explain why early payment discount is requested"></textarea>
+<button type="submit">Submit for HO Approval</button>
+</form>
+{% else %}
+<p>This enrollment is not eligible for a new discount request.</p>
+{% endif %}
+</div>
+<div class="card">
+<h2>Discount Request History</h2>
+<div style="overflow-x:auto">
+<table>
+<tr><th>Date</th><th>Amount</th><th>Status</th><th>Reviewed By</th></tr>
+{% for item in requests %}
+<tr>
+<td>{{ item.requested_at|date:"d M Y" }}</td>
+<td>₹{{ item.amount }}</td>
+<td>{{ item.get_status_display }}</td>
+<td>{{ item.reviewed_by|default:"—" }}</td>
+</tr>
+{% empty %}
+<tr><td colspan="4">No requests yet.</td></tr>
+{% endfor %}
+</table>
+</div>
+</div>
+</main>
+</body>
+</html>

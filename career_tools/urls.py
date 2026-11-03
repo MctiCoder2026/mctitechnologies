@@ -155,7 +155,7 @@ urlpatterns = [
     views.career_recommendation,
     name="career_recommendation"
     ),
-    
+
     path(
     "counsellor/",
     views.counsellor_dashboard,
@@ -189,4 +189,8 @@ from . import assessment_report_views
 urlpatterns += [
     path("reports/", assessment_report_views.assessment_reports,
          name="assessment_reports"),
+    path("reports/assign/", assessment_report_views.assign_assessment_branch,
+         name="assign_assessment_branch"),
 ]
+
+urlpatterns += [path("reports/followup/", assessment_report_views.assessment_followup, name="assessment_followup")]
