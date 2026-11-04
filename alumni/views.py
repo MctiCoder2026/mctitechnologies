@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.shortcuts import render
 from core.views import get_user_branch, is_admin_user
 from .models import AlumniContact
@@ -28,6 +28,37 @@ def dashboard(request):
 
     total = contacts.count()
 
+    alumni_tab = request.GET.get("tab", "pending")
+    if alumni_tab not in ("pending", "interested", "do_not_contact", "contact_issues", "all"):
+        alumni_tab = "pending"
+
+    issue_statuses = ("invalid_number", "not_in_service")
+
+    if alumni_tab == "pending":
+        contacts = contacts.filter(
+            permission_status="unknown"
+        ).exclude(
+            status__in=("do_not_contact", *issue_statuses)
+        )
+    elif alumni_tab == "interested":
+        contacts = contacts.filter(
+            permission_status="allowed"
+        ).exclude(
+            status__in=("do_not_contact", *issue_statuses)
+        )
+    elif alumni_tab == "do_not_contact":
+        contacts = contacts.filter(
+            Q(status="do_not_contact") |
+            Q(permission_status="declined")
+        )
+    elif alumni_tab == "contact_issues":
+        contacts = contacts.filter(
+            status__in=issue_statuses
+        ).exclude(
+            Q(status="do_not_contact") |
+            Q(permission_status="declined")
+        )
+
     year = request.GET.get("year", "")
     status = request.GET.get("status", "")
     course = request.GET.get("course", "").strip()
@@ -49,7 +80,9 @@ def dashboard(request):
             Q(mobile__icontains=search)
         )
 
-    contacts = contacts.order_by("-created_at")
+    contacts = contacts.annotate(
+        message_count=Count("message_activities")
+    ).order_by("-created_at")
     filtered_total = contacts.count()
     paginator = Paginator(contacts, 100)
     page_obj = paginator.get_page(request.GET.get("page"))
@@ -67,6 +100,7 @@ def dashboard(request):
     return render(request, "alumni/dashboard.html", {
         "contacts": contacts,
         "total": total,
+        "alumni_tab": alumni_tab,
         "is_admin": admin,
         "selected_branch": branch,
         "selected_year": year,
@@ -284,6 +318,9 @@ def update_contact(request, contact_id):
     from datetime import date
     from django.shortcuts import get_object_or_404
     from django.utils import timezone
+    from django.urls import reverse
+    from django.http import HttpResponseRedirect
+    from urllib.parse import parse_qsl, urlencode
 
     admin, staff_branch = _import_scope(request.user)
 
@@ -342,4 +379,142 @@ def update_contact(request, contact_id):
 
     contact.save(update_fields=update_fields)
     messages.success(request, f"Updated alumni record: {contact.name}")
-    return redirect("alumni:dashboard")
+
+    allowed_filters = {"tab", "branch", "year", "status", "course", "search", "page"}
+    raw_query = request.POST.get("return_query", "")
+    filters = [
+        (key, value)
+        for key, value in parse_qsl(raw_query, keep_blank_values=True)
+        if key in allowed_filters
+    ]
+    query_string = urlencode(filters)
+    dashboard_url = reverse("alumni:dashboard")
+    return HttpResponseRedirect(
+        dashboard_url + ("?" + query_string if query_string else "")
+    )
+
+
+@login_required(login_url="/staff-login/")
+@require_http_methods(["POST"])
+def confirm_message(request, contact_id):
+    """Record staff-confirmed WhatsApp sending, not actual delivery."""
+    import uuid
+
+    from django.db import IntegrityError, transaction
+    from django.http import JsonResponse
+    from django.shortcuts import get_object_or_404
+
+    from .models import AlumniMessageActivity
+
+    admin, staff_branch = _import_scope(request.user)
+
+    queryset = AlumniContact.objects.filter(branch__in=ALUMNI_BRANCHES)
+    if not admin:
+        queryset = queryset.filter(branch=staff_branch)
+
+    message_type = request.POST.get("message_type", "")
+    language = request.POST.get("language", "")
+    raw_token = request.POST.get("confirmation_token", "")
+
+    if message_type not in dict(AlumniMessageActivity.MESSAGE_TYPES):
+        return JsonResponse({"error": "Invalid message type"}, status=400)
+
+    if language not in dict(AlumniMessageActivity.LANGUAGES):
+        return JsonResponse({"error": "Invalid language"}, status=400)
+
+    try:
+        token = uuid.UUID(raw_token)
+    except (ValueError, AttributeError, TypeError):
+        return JsonResponse({"error": "Invalid confirmation token"}, status=400)
+
+    with transaction.atomic():
+        contact = get_object_or_404(
+            queryset.select_for_update(),
+            pk=contact_id,
+        )
+
+        if (
+            contact.status in (
+                "do_not_contact",
+                "invalid_number",
+                "not_in_service",
+            )
+            or contact.permission_status == "declined"
+        ):
+            return JsonResponse(
+                {"error": "Contact is blocked"},
+                status=403,
+            )
+
+        if not contact.normalized_mobile:
+            return JsonResponse(
+                {"error": "Mobile unavailable"},
+                status=400,
+            )
+
+        if (
+            message_type == "followup"
+            and contact.permission_status != "allowed"
+        ):
+            return JsonResponse(
+                {"error": "Follow-up requires permission"},
+                status=403,
+            )
+
+        if (
+            message_type == "permission"
+            and contact.permission_status != "unknown"
+        ):
+            return JsonResponse(
+                {"error": "Permission request not applicable"},
+                status=403,
+            )
+
+        existing = AlumniMessageActivity.objects.filter(
+            confirmation_token=token
+        ).first()
+
+        if existing:
+            if (
+                existing.alumni_id != contact.id
+                or existing.staff_id != request.user.id
+                or existing.message_type != message_type
+                or existing.language != language
+            ):
+                return JsonResponse(
+                    {"error": "Confirmation token conflict"},
+                    status=409,
+                )
+
+            return JsonResponse({
+                "success": True,
+                "duplicate": True,
+                "message_count": AlumniMessageActivity.objects.filter(
+                    alumni=contact
+                ).count(),
+            })
+
+        try:
+            with transaction.atomic():
+                AlumniMessageActivity.objects.create(
+                    alumni=contact,
+                    staff=request.user,
+                    message_type=message_type,
+                    language=language,
+                    confirmation_token=token,
+                )
+        except IntegrityError:
+            return JsonResponse(
+                {"error": "Confirmation conflict; refresh and retry"},
+                status=409,
+            )
+
+        count = AlumniMessageActivity.objects.filter(
+            alumni=contact
+        ).count()
+
+    return JsonResponse({
+        "success": True,
+        "duplicate": False,
+        "message_count": count,
+    })

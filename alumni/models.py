@@ -18,6 +18,8 @@ class AlumniContact(models.Model):
         ("converted", "Converted"),
         ("not_interested", "Not Interested"),
         ("do_not_contact", "Do Not Contact"),
+        ("invalid_number", "Invalid Number"),
+        ("not_in_service", "Not in Service"),
     ]
 
     PERMISSION_CHOICES = [
@@ -100,3 +102,56 @@ class AlumniContact(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.branch}"
+
+
+class AlumniMessageActivity(models.Model):
+    """Staff-confirmed WhatsApp message history; not delivery verification."""
+
+    MESSAGE_TYPES = [
+        ("permission", "Permission Request"),
+        ("followup", "Follow-up"),
+    ]
+
+    LANGUAGES = [
+        ("E", "English"),
+        ("M", "Marathi"),
+        ("H", "Hindi"),
+    ]
+
+    alumni = models.ForeignKey(
+        AlumniContact,
+        on_delete=models.PROTECT,
+        related_name="message_activities",
+    )
+
+    staff = models.ForeignKey(
+        "auth.User",
+        on_delete=models.PROTECT,
+        related_name="alumni_message_activities",
+    )
+
+    message_type = models.CharField(
+        max_length=20,
+        choices=MESSAGE_TYPES,
+    )
+
+    language = models.CharField(
+        max_length=1,
+        choices=LANGUAGES,
+    )
+
+    confirmed_at = models.DateTimeField(auto_now_add=True)
+
+    confirmation_token = models.UUIDField(
+        unique=True,
+        editable=False,
+    )
+
+    class Meta:
+        ordering = ["-confirmed_at"]
+        indexes = [
+            models.Index(fields=["alumni", "-confirmed_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.alumni_id} - {self.message_type} - {self.staff_id}"

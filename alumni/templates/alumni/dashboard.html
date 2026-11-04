@@ -39,6 +39,27 @@ tbody tr:hover{background:#fffaf7}
 .actions{display:grid;gap:8px;min-width:120px}
 .small{font-size:11px;color:var(--muted)}
 @media(max-width:650px){main{padding:0 12px;margin:20px auto}h1{font-size:24px}.cards{grid-template-columns:1fr;gap:10px}.card{padding:16px}.metric{font-size:28px}header{padding:18px 14px}}
+
+.alumni-contact-tabs {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:20px 0;
+}
+.alumni-contact-tabs a {
+  padding:12px 16px;
+  border-radius:9px;
+  background:#fff;
+  color:#171717;
+  border:1px solid #ddd;
+  text-decoration:none;
+  font-weight:750;
+}
+.alumni-contact-tabs a.active {
+  background:#ff4200;
+  color:#fff;
+  border-color:#ff4200;
+}
 </style>
 
 <style>
@@ -193,7 +214,16 @@ a { text-underline-offset: 3px; }
 <div class="card">Historical Branches<div class="metric">3</div></div>
 </div>
 
+<nav aria-label="Alumni contact tabs" class="alumni-contact-tabs">
+<a href="?tab=pending" class="{% if alumni_tab == 'pending' %}active{% endif %}">Pending Permission</a>
+<a href="?tab=interested" class="{% if alumni_tab == 'interested' %}active{% endif %}">Interested</a>
+<a href="?tab=do_not_contact" class="{% if alumni_tab == 'do_not_contact' %}active{% endif %}">Do Not Contact</a>
+<a href="?tab=contact_issues" class="{% if alumni_tab == 'contact_issues' %}active{% endif %}">Contact Issues</a>
+<a href="?tab=all" class="{% if alumni_tab == 'all' %}active{% endif %}">All Alumni</a>
+</nav>
+
 <form method="get" class="card filters">
+<input type="hidden" name="tab" value="{{ alumni_tab }}">
 {% if is_admin %}
 <select name="branch">
 <option value="">All Branches</option>
@@ -229,7 +259,7 @@ a { text-underline-offset: 3px; }
 <table>
 <thead><tr>
 <th>Name / Mobile</th><th>Branch</th><th>Year / Course</th>
-<th>Permission</th><th>Status</th><th>Follow-up</th><th>Remarks / Save</th><th>WhatsApp</th>
+<th>Permission</th><th>Status</th><th>Follow-up</th><th>Remarks / Save</th><th>WhatsApp</th><th>Msg Count</th>
 </tr></thead>
 <tbody>
 {% for c in contacts %}
@@ -262,25 +292,63 @@ a { text-underline-offset: 3px; }
 <div class="actions">
 <form id="edit-{{ c.id }}" method="post" action="{% url 'alumni:update_contact' c.id %}">
 {% csrf_token %}
+<input type="hidden" name="return_query" value="{{ request.GET.urlencode }}">
 </form>
 <button type="submit" form="edit-{{ c.id }}">Save Update</button>
 </div>
 </td>
 
 <td>
-{% if c.permission_status == "allowed" and c.status != "do_not_contact" and c.normalized_mobile %}
-<a class="btn btn-wa" target="_blank" rel="noopener noreferrer" href="https://wa.me/91{{ c.normalized_mobile }}?text=Hello%20{{ c.name|urlencode }}%2C%20greetings%20from%20MCTI%20Technologies.%20We%20would%20love%20to%20reconnect%20with%20you.">WhatsApp</a>
+{% if c.permission_status == "allowed" and c.status != "do_not_contact" and c.status != "invalid_number" and c.status != "not_in_service" and c.normalized_mobile %}
+<select class="alumni-wa-language" aria-label="WhatsApp message language">
+<option value="E">E - English</option>
+<option value="M">M - Marathi</option>
+<option value="H">H - Hindi</option>
+</select>
+<button type="button" class="btn btn-wa alumni-wa-permission"
+data-count-url="{% url 'alumni:confirm_message' c.id %}"
+data-name="{{ c.name }}"
+data-branch="{{ c.branch }}"
+data-mobile="{{ c.normalized_mobile }}"
+data-course="{{ c.previous_course|default_if_none:""|escape }}"
+data-year="{{ c.admission_year|default_if_none:"" }}">>
+WhatsApp
+</button>
 {% elif c.status == "do_not_contact" or c.permission_status == "declined" %}
 <span class="tag">Do not contact</span>
+{% elif c.status == "invalid_number" %}
+<span class="tag">Invalid Number</span>
+{% elif c.status == "not_in_service" %}
+<span class="tag">Not in Service</span>
 {% else %}
-<a class="btn" target="_blank" rel="noopener noreferrer"
-href="https://wa.me/91{{ c.normalized_mobile }}?text=Namaste%20{{ c.name|urlencode }}%2C%20MCTI%20Technologies%20se%20greetings.%20Hum%20apne%20former%20students%20se%20reconnect%20kar%20rahe%20hain.%20Kya%20aap%20MCTI%20ke%20course%20updates%20aur%20career%20opportunities%20WhatsApp%20par%20receive%20karna%20chahenge%3F%20Aapki%20permission%20ke%20bina%20hum%20promotional%20messages%20nahi%20bhejenge.%20Reply%20YES%20if%20you%20agree%2C%20or%20NO%20if%20you%20do%20not.">Request Permission</a>
+{% if c.normalized_mobile %}
+<select class="alumni-wa-language" aria-label="WhatsApp message language">
+<option value="E">E - English</option>
+<option value="M">M - Marathi</option>
+<option value="H">H - Hindi</option>
+</select>
+<button type="button" class="btn alumni-wa-permission"
+data-count-url="{% url 'alumni:confirm_message' c.id %}"
+data-name="{{ c.name }}"
+data-branch="{{ c.branch }}"
+data-mobile="{{ c.normalized_mobile }}"
+data-course="{{ c.previous_course|default_if_none:""|escape }}"
+data-year="{{ c.admission_year|default_if_none:"" }}">>
+Request Permission
+</button>
+{% else %}
+<span class="tag">Mobile unavailable</span>
 {% endif %}
+{% endif %}
+
 {% if c.last_contacted_at %}<div class="small">Last contacted: {{ c.last_contacted_at|date:"d M Y" }}</div>{% endif %}
+</td>
+<td style="text-align:center">
+<strong class="alumni-message-count" data-contact-id="{{ c.id }}">{{ c.message_count|default:0 }}</strong>
 </td>
 </tr>
 {% empty %}
-<tr><td colspan="8" style="text-align:center;padding:35px">No alumni records found.</td></tr>
+<tr><td colspan="9" style="text-align:center;padding:35px">No alumni records found.</td></tr>
 {% endfor %}
 </tbody>
 </table>
@@ -293,5 +361,163 @@ href="https://wa.me/91{{ c.normalized_mobile }}?text=Namaste%20{{ c.name|urlenco
 </nav>
 <p class="muted">Showing {{ contacts|length }} records on this page. Use filters to narrow the alumni list. WhatsApp opens a pre-filled message; staff must review and send it. Only mark consent as verified after permission is actually obtained.</p>
 </main>
+
+<script>
+document.querySelectorAll(".alumni-wa-permission").forEach(function(button) {
+    button.addEventListener("click", function() {
+        const row = button.closest("tr");
+        const language = row.querySelector(".alumni-wa-language").value;
+        const name = button.dataset.name;
+        const branch = button.dataset.branch;
+        const mobile = button.dataset.mobile;
+        const course = button.dataset.course.trim();
+        const year = button.dataset.year.trim();
+        const history = {
+            E: course && year
+                ? `Our records show you enrolled in ${course} in ${year}.`
+                : course
+                ? `Our records show you enrolled in ${course}.`
+                : year
+                ? `Our records show you enrolled with us in ${year}.`
+                : "",
+            M: course && year
+                ? `आमच्या नोंदीनुसार तुम्ही ${year} मध्ये ${course} या कोर्ससाठी प्रवेश घेतला होता.`
+                : course
+                ? `आमच्या नोंदीनुसार तुम्ही ${course} या कोर्ससाठी प्रवेश घेतला होता.`
+                : year
+                ? `आमच्या नोंदीनुसार तुम्ही ${year} मध्ये आमच्या संस्थेत प्रवेश घेतला होता.`
+                : "",
+            H: course && year
+                ? `हमारे रिकॉर्ड के अनुसार आपने ${year} में ${course} कोर्स में प्रवेश लिया था।`
+                : course
+                ? `हमारे रिकॉर्ड के अनुसार आपने ${course} कोर्स में प्रवेश लिया था।`
+                : year
+                ? `हमारे रिकॉर्ड के अनुसार आपने ${year} में हमारे संस्थान में प्रवेश लिया था।`
+                : ""
+        };
+        const institute = "Maharashtra Computer Training Institute, " +
+            branch.charAt(0).toUpperCase() + branch.slice(1);
+
+        const messages = {
+            E: `Namaste ${name},
+
+Greetings from ${institute}!
+
+Would you like to receive our course updates and career opportunities on WhatsApp?
+
+We won't send promotional messages without your permission.
+
+Reply YES or NO.`,
+
+            M: `नमस्कार ${name},
+
+${institute} तर्फे शुभेच्छा!
+
+तुम्हाला आमच्या नवीन कोर्सेस आणि करिअर संधींची माहिती WhatsApp वर हवी आहे का?
+
+तुमच्या परवानगीशिवाय प्रचारात्मक संदेश पाठवणार नाही.
+
+YES किंवा NO उत्तर द्या.`,
+
+            H: `नमस्कार ${name},
+
+${institute} की ओर से शुभकामनाएँ!
+
+क्या आप हमारे नए कोर्स और करियर अवसरों की जानकारी WhatsApp पर पाना चाहेंगे?
+
+आपकी अनुमति के बिना प्रमोशनल मैसेज नहीं भेजेंगे।
+
+YES या NO रिप्लाई करें।`
+        };
+
+        const whatsappWindow = window.open(
+            "https://wa.me/91" + mobile + "?text=" +
+            encodeURIComponent(
+                button.classList.contains("btn-wa")
+                ? {
+                    E: `Namaste ${name},
+
+Greetings from ${institute}!
+
+Thank you for staying connected with us.
+
+We are happy to share our latest courses, skill development programs and career opportunities.
+
+For more details, reply to this message.`,
+
+                    M: `नमस्कार ${name},
+
+${institute} तर्फे शुभेच्छा!
+
+आमच्याशी जोडलेले राहिल्याबद्दल धन्यवाद.
+
+आमचे नवीन कोर्सेस, कौशल्य विकास कार्यक्रम आणि करिअरच्या संधींची माहिती तुमच्यासोबत शेअर करताना आम्हाला आनंद होत आहे.
+
+अधिक माहितीसाठी या संदेशाला उत्तर द्या.`,
+
+                    H: `नमस्कार ${name},
+
+${institute} की ओर से शुभकामनाएँ!
+
+हमसे जुड़े रहने के लिए धन्यवाद।
+
+हमें अपने नए कोर्स, स्किल डेवलपमेंट प्रोग्राम और करियर के अवसर आपके साथ साझा करते हुए खुशी हो रही है।
+
+अधिक जानकारी के लिए इस मैसेज का जवाब दें।`
+                }[language].replace(
+                    /\n\n/,
+                    "\n\n" + (history[language] ? history[language] + "\n\n" : "")
+                )
+                : messages[language].replace(
+                    /\n\n/,
+                    "\n\n" + (history[language] ? history[language] + "\n\n" : "")
+                )
+            ),
+            "_blank",
+            "noopener,noreferrer"
+        );
+
+        const csrfToken = row.querySelector(
+            'input[name="csrfmiddlewaretoken"]'
+        ).value;
+
+        const countUrl = button.dataset.countUrl;
+        const token = crypto.randomUUID();
+
+        const body = new URLSearchParams({
+            message_type: button.classList.contains("btn-wa")
+                ? "followup" : "permission",
+            language: language,
+            confirmation_token: token
+        });
+
+        fetch(countUrl, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+                "X-CSRFToken": csrfToken,
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Accept": "application/json"
+            },
+            body: body.toString()
+        })
+        .then(async function(response) {
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || "Count update failed");
+            }
+            const count = row.querySelector(".alumni-message-count");
+            if (count) count.textContent = result.message_count;
+        })
+        .catch(function(error) {
+            console.error("Alumni WhatsApp count:", error);
+            alert("WhatsApp count update failed: " + error.message);
+        });
+    });
+});
+
+
+</script>
+
 </body>
 </html>
