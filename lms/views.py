@@ -1344,11 +1344,25 @@ def student_performance_report(request):
         ""
     ).strip()
 
+    from django.core.exceptions import PermissionDenied
+    from core.views import get_user_branch, is_admin_user
+
+    admin = is_admin_user(request.user)
+
+    if not admin:
+        branch = (get_user_branch(request.user) or "").strip()
+        if not branch or branch.lower() == "head_office":
+            raise PermissionDenied
+        branch_filter = branch
+
     students = Student.objects.select_related(
         "course"
     ).all().order_by(
         "name"
     )
+
+    if not admin:
+        students = students.filter(branch__iexact=branch)
 
     # -------------------------------------------------
     # STUDENT SEARCH
@@ -1364,10 +1378,10 @@ def student_performance_report(request):
     # BRANCH FILTER
     # -------------------------------------------------
 
-    if branch_filter:
+    if admin and branch_filter:
 
         students = students.filter(
-            branch=branch_filter
+            branch__iexact=branch_filter
         )
 
     # -------------------------------------------------
