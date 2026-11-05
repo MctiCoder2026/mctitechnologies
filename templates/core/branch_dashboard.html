@@ -1460,6 +1460,16 @@ if(el)el.textContent=quotes[day%quotes.length];
         grid-template-columns:minmax(0,1fr);
     }
 }
+
+/* MCTI_CRM_SIDEBAR_WIDTH_V1 */
+@media (min-width:901px){
+    body:has(aside.crm-sidebar) .main{
+        margin-left:300px!important;
+        width:calc(100% - 300px)!important;
+        max-width:calc(100% - 300px)!important;
+        box-sizing:border-box!important;
+    }
+}
 </style>
 
 <section class="mcti-conversion-two-column">

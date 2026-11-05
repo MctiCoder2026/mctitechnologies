@@ -5,7 +5,7 @@
 </div><nav class="menu crm-nav-menu" aria-label="CRM navigation">
 <div class="menu-title crm-nav-heading">OVERVIEW</div>
 {% if nav_power %}
-<a href="/management-command-center-v3/" class="crm-nav-link{% if nav_current == 'management_command_center_v3' %} active{% endif %}">
+<a href="/management-command-center-v3/" class="crm-nav-link{% if nav_current == 'management_command_center_v3' %} active{% endif %} crm-nav-important crm-nav-priority">
 <svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 <rect x="3" y="3" width="18" height="18" rx="3"/>
 <path d="M3 9h18M9 21V9m5 12v-5m4 5v-8"/>
@@ -19,12 +19,28 @@
 {% endif %}
 <a href="{% url 'branch_dashboard' %}" class="crm-nav-link{% if nav_current == 'branch_dashboard' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 16v-5m5 5V7m5 9V4"/></svg><span class="crm-nav-text">Branch Performance</span></a>
 <div class="menu-title crm-nav-heading">ENQUIRIES & SALES</div>
-<a href="{% url 'enquiry_dashboard' %}" class="crm-nav-link{% if nav_current == 'enquiry_dashboard' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h4l2 5-3 2a16 16 0 0 0 6 6l2-3 5 2v4c0 2-2 3-4 2C9 19 5 15 3 7c-1-2 0-4 2-4z"/></svg><span class="crm-nav-text">Enquiries & Follow-ups</span></a>
+<a href="{% url 'enquiry_dashboard' %}" class="crm-nav-link{% if nav_current == 'enquiry_dashboard' %} active{% endif %} crm-nav-important"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h4l2 5-3 2a16 16 0 0 0 6 6l2-3 5 2v4c0 2-2 3-4 2C9 19 5 15 3 7c-1-2 0-4 2-4z"/></svg><span class="crm-nav-text">Enquiries & Follow-ups</span></a>
 <a href="{% url 'career_tools:quick_career_enquiry' %}" class="crm-nav-link{% if nav_current == 'career_tools:quick_career_enquiry' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="10"/></svg><span class="crm-nav-text">New Career Enquiry</span></a>
 <a href="{% url 'career_tools:counsellor_dashboard' %}" class="crm-nav-link{% if nav_current == 'career_tools:counsellor_dashboard' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg><span class="crm-nav-text">Career Counsellor</span></a>
 <a href="{% url 'business_lead_list' %}" class="crm-nav-link{% if nav_current == 'business_lead_list' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V3h8v4M3 12h18m-9-2v5"/></svg><span class="crm-nav-text">Business Leads</span></a>
 {% if nav_outreach %}
 <a href="{% url 'outreach_dashboard' %}" class="crm-nav-link{% if nav_current == 'outreach_dashboard' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M2 21v-3a7 7 0 0 1 14 0v3M17 5a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5"/></svg><span class="crm-nav-text">Outreach</span></a>
+{% endif %}
+<div class="menu-title crm-nav-heading">FINANCE</div>
+{% if request.user.is_superuser %}
+<a href="{% url "fee_payment_list" %}?month={% now "Y-m" %}" class="crm-nav-link crm-nav-important crm-nav-priority" style="border-left:3px solid #ff7200"><span class="crm-nav-text">Monthly Collection Report</span></a>
+{% elif request.user.staff_profile.is_active and request.user.staff_profile.designation|lower == "branch head" %}
+<a href="{% url "fee_payment_list" %}?month={% now "Y-m" %}" class="crm-nav-link crm-nav-important crm-nav-priority" style="border-left:3px solid #ff7200"><span class="crm-nav-text">Monthly Collection Report</span></a>
+{% endif %}
+<a href="{% url 'fee_payment_list' %}" class="crm-nav-link{% if nav_current == 'fee_payment_list' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 8h18m-5 5h5v4h-5z"/></svg><span class="crm-nav-text">Fee Payments & Receipts</span></a>
+<a href="{% url 'fee_due_report' %}" class="crm-nav-link{% if nav_current == 'fee_due_report' %} active{% endif %} crm-nav-important"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6m10-6v6M3 10h18M7 14h3m4 0h3"/></svg><span class="crm-nav-text">Fee Due Report</span></a>
+{% if nav_admin %}
+<a href="{% url 'early_discount_approvals' %}" class="crm-nav-link"><span class="crm-nav-text">Early Discount Approvals</span></a>
+{% endif %}
+<a href="{% url 'daily_expense_list' %}" class="crm-nav-link{% if nav_current == 'daily_expense_list' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 8h18m-5 5h5v4h-5z"/></svg><span class="crm-nav-text">Daily Expenses</span></a>
+<a href="{% url 'monthly_closing_list' %}" class="crm-nav-link{% if nav_current == 'monthly_closing_list' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6m10-6v6M3 10h18M7 14h3m4 0h3"/></svg><span class="crm-nav-text">Monthly Closing</span></a>
+{% if nav_financial %}
+<a href="{% url 'reports_dashboard' %}" class="crm-nav-link{% if nav_current == 'reports_dashboard' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 16v-5m5 5V7m5 9V4"/></svg><span class="crm-nav-text">Business Reports</span></a>
 {% endif %}
 <div class="menu-title crm-nav-heading">STUDENTS & TRAINING</div>
 <a href="{% url 'lms:management_student_progress' %}" class="crm-nav-link{% if nav_current == 'lms:management_student_progress' %} active{% endif %}">
@@ -32,7 +48,7 @@
 <path d="M4 19V5M4 19h17M8 15v-4m5 4V7m5 8V4"/>
 </svg><span class="crm-nav-text">Student Learning Progress</span></a>
 
-<a href="{% url 'admission_list' %}" class="crm-nav-link{% if nav_current == 'admission_list' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v16M12 5C9 3 5 3 2 4v15c3-1 7-1 10 2 3-3 7-3 10-2V4c-3-1-7-1-10 1z"/></svg><span class="crm-nav-text">Admissions</span></a>
+<a href="{% url 'admission_list' %}" class="crm-nav-link{% if nav_current == 'admission_list' %} active{% endif %} crm-nav-important"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v16M12 5C9 3 5 3 2 4v15c3-1 7-1 10 2 3-3 7-3 10-2V4c-3-1-7-1-10 1z"/></svg><span class="crm-nav-text">Admissions</span></a>
 <a href="{% url 'student_list' %}" class="crm-nav-link{% if nav_current == 'student_list' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M2 21v-3a7 7 0 0 1 14 0v3M17 5a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5"/></svg><span class="crm-nav-text">Students & Basic Details</span></a>
 {% if nav_admin %}
 <a href="{% url 'student_quick_view' %}" class="crm-nav-link{% if nav_current == 'student_quick_view' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg><span class="crm-nav-text">Student Quick View</span></a>
@@ -56,11 +72,7 @@
 {% endif %}
 
 <div class="menu-title crm-nav-heading">CAMPAIGN LEADS</div>
-<a href="{% url 'career_tools:assessment_reports' %}?period=all" class="crm-nav-link"><span class="crm-nav-text">All Campaign Leads</span></a>
-<a href="{% url 'career_tools:assessment_reports' %}?kind=ssc&amp;period=all" class="crm-nav-link"><span class="crm-nav-text">SSC Practice Leads</span></a>
-<a href="{% url 'career_tools:assessment_reports' %}?kind=ai&amp;period=all" class="crm-nav-link"><span class="crm-nav-text">AI Ready Maharashtra Leads</span></a>
-<a href="{% url 'career_tools:assessment_reports' %}?kind=scholarship&amp;period=all" class="crm-nav-link"><span class="crm-nav-text">Scholarship Leads</span></a>
-<a href="{% url 'career_tools:assessment_reports' %}?kind=aptitude&amp;period=all" class="crm-nav-link"><span class="crm-nav-text">Aptitude Leads</span></a>
+<a href="{% url 'career_tools:assessment_reports' %}?period=all" class="crm-nav-link crm-nav-important"><span class="crm-nav-text">All Campaign Leads</span></a>
 <div class="menu-title crm-nav-heading">ASSESSMENTS</div>
 <a href="{% url 'career_tools:assessment_reports' %}" class="crm-nav-link{% if nav_current == 'career_tools:assessment_reports' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 16v-5m5 5V7m5 9V4"/></svg><span class="crm-nav-text">Assessment & Aptitude Reports</span></a>
 {% if nav_admin %}
@@ -68,17 +80,6 @@
 <a href="{% url 'ai_ready_report' %}" class="crm-nav-link{% if nav_current == 'ai_ready_report' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v16M12 5C9 3 5 3 2 4v15c3-1 7-1 10 2 3-3 7-3 10-2V4c-3-1-7-1-10 1z"/></svg><span class="crm-nav-text">AI Ready Maharashtra</span></a>
 <a href="{% url 'assessments:scholarship_dashboard' %}" class="crm-nav-link{% if nav_current == 'assessments:scholarship_dashboard' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v16M12 5C9 3 5 3 2 4v15c3-1 7-1 10 2 3-3 7-3 10-2V4c-3-1-7-1-10 1z"/></svg><span class="crm-nav-text">Scholarship Leads</span></a>
 <a href="{% url 'assessments:cyber_fraud_dashboard' %}" class="crm-nav-link{% if nav_current == 'assessments:cyber_fraud_dashboard' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 9 4v6c0 5-5 9-9 10-4-1-9-5-9-10V6z"/><path d="m8 12 3 3 5-6"/></svg><span class="crm-nav-text">Cyber Fraud Awareness</span></a>
-{% endif %}
-<div class="menu-title crm-nav-heading">FINANCE</div>
-<a href="{% url 'fee_payment_list' %}" class="crm-nav-link{% if nav_current == 'fee_payment_list' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 8h18m-5 5h5v4h-5z"/></svg><span class="crm-nav-text">Fee Payments & Receipts</span></a>
-<a href="{% url 'fee_due_report' %}" class="crm-nav-link{% if nav_current == 'fee_due_report' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6m10-6v6M3 10h18M7 14h3m4 0h3"/></svg><span class="crm-nav-text">Fee Due Report</span></a>
-{% if nav_admin %}
-<a href="{% url 'early_discount_approvals' %}" class="crm-nav-link"><span class="crm-nav-text">Early Discount Approvals</span></a>
-{% endif %}
-<a href="{% url 'daily_expense_list' %}" class="crm-nav-link{% if nav_current == 'daily_expense_list' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 8h18m-5 5h5v4h-5z"/></svg><span class="crm-nav-text">Daily Expenses</span></a>
-<a href="{% url 'monthly_closing_list' %}" class="crm-nav-link{% if nav_current == 'monthly_closing_list' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6m10-6v6M3 10h18M7 14h3m4 0h3"/></svg><span class="crm-nav-text">Monthly Closing</span></a>
-{% if nav_financial %}
-<a href="{% url 'reports_dashboard' %}" class="crm-nav-link{% if nav_current == 'reports_dashboard' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 16v-5m5 5V7m5 9V4"/></svg><span class="crm-nav-text">Business Reports</span></a>
 {% endif %}
 <div class="menu-title crm-nav-heading">HR & TEAM</div>
 <a href="{% url 'staff_list' %}" class="crm-nav-link{% if nav_current == 'staff_list' %} active{% endif %}"><svg class="crm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M2 21v-3a7 7 0 0 1 14 0v3M17 5a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5"/></svg><span class="crm-nav-text">Staff</span></a>
@@ -146,4 +147,70 @@ aside.crm-sidebar{
 .crm-sidebar a.crm-nav-link:focus-visible{
     outline:2px solid #ff7200;outline-offset:2px;
 }
+
+
+/* MCTI_CLEAN_PREMIUM_SIDEBAR_V3 */
+.crm-sidebar .crm-nav-brand{
+    border-bottom:1px solid rgba(255,255,255,.07);
+    margin-bottom:12px!important;
+}
+.crm-sidebar .crm-nav-heading{
+    color:#8994a6!important;
+    letter-spacing:1.15px;
+    border:0!important;
+    padding:0!important;
+}
+.crm-sidebar a.crm-nav-link{
+    position:relative;
+    border:0!important;
+    border-left:3px solid transparent!important;
+    border-radius:8px!important;
+    background:transparent!important;
+    color:#d9e0ea!important;
+    font-weight:500!important;
+    transform:none!important;
+    transition:background .18s,color .18s!important;
+}
+.crm-sidebar a.crm-nav-link:hover{
+    background:#242c3b!important;
+    color:#fff!important;
+    transform:none!important;
+}
+.crm-sidebar a.crm-nav-link.active{
+    background:#ff7200!important;
+    color:#fff!important;
+    border-left-color:#ff7200!important;
+    font-weight:700!important;
+}
+.crm-sidebar a.crm-nav-important:not(.active){
+    background:transparent!important;
+    color:#d9e0ea!important;
+    border-left-color:transparent!important;
+    font-weight:500!important;
+}
+.crm-sidebar a.crm-nav-important:not(.active):hover{
+    background:#242c3b!important;
+    color:#fff!important;
+}
+.crm-sidebar a.crm-nav-link.crm-nav-priority:not(.active){
+    color:#ff9b45!important;
+    background:rgba(255,114,0,.055)!important;
+    border-left-color:#ff7200!important;
+    font-weight:600!important;
+}
+
+
+/* MCTI_CRM_SIDEBAR_WIDTH_V1 */
+@media (min-width:901px){
+    aside.crm-sidebar{
+        width:300px!important;
+        box-sizing:border-box!important;
+    }
+    .crm-sidebar .crm-nav-text{
+        white-space:nowrap!important;
+        overflow:hidden;
+        text-overflow:ellipsis;
+    }
+}
+
 </style>
