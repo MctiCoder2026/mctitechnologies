@@ -57,7 +57,7 @@ Topic Quiz
                     • Minimum passing score:
                     <strong>3/5</strong>
                     • Quiz Language:
-                    <strong>English</strong>
+                    <strong>{{ selected_language_name }}</strong>
                 </p>
 
             </div>
@@ -90,7 +90,7 @@ Topic Quiz
     </div>
 
 
-    <form method="POST">
+    <form method="POST" action="{% url 'lms:topic_quiz' topic.id %}{% if topic.module.course.slug == 'professional-spoken-english' %}?lang={{ selected_language }}{% endif %}">
 
         {% csrf_token %}
 
@@ -200,7 +200,7 @@ Topic Quiz
                         color:#64748b;
                         font-size:11px;
                     ">
-                        English quiz questions have not been added for this topic yet.
+                        {{ selected_language_name }} quiz questions have not been added for this topic yet.
                         Please contact your trainer.
                     </p>
 

@@ -274,7 +274,7 @@ Module {{ topic.module.order }}: {{ topic.module.title }}
 
 
         <a
-            href="{% url 'lms:topic_quiz' topic.id %}"
+            href="{% url 'lms:topic_quiz' topic.id %}{% if topic.module.course.slug == 'professional-spoken-english' %}?lang={{ selected_language }}{% endif %}"
             class="btn"
         >
 

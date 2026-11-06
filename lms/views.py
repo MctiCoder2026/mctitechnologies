@@ -108,28 +108,39 @@ def get_student_lms_courses(student):
             )
 
     # Legacy safety fallback.
-    # Once every student is fully enrollment-based,
-    # this fallback can be removed.
     if not courses:
-
         course = student.course
 
-        if not course:
-            return []
+        if course:
+            if course.is_package:
+                included_courses = list(
+                    course.included_courses.filter(
+                        is_active=True
+                    ).order_by("title")
+                )
 
-        if course.is_package:
+                for included_course in included_courses:
+                    if included_course.id not in added_course_ids:
+                        courses.append(included_course)
+                        added_course_ids.add(included_course.id)
 
-            included_courses = list(
-                course.included_courses
-                .filter(is_active=True)
-                .order_by("title")
-            )
+            elif course.is_active and course.id not in added_course_ids:
+                courses.append(course)
+                added_course_ids.add(course.id)
 
-            if included_courses:
-                return included_courses
+    # MCTI_FREE_SPOKEN_ENGLISH_COURSE_V1
+    # Add only the active FREE Spoken English course.
+    from core.models import Course
 
-        if course.is_active:
-            return [course]
+    free_course = Course.objects.filter(
+        slug="professional-spoken-english",
+        is_active=True,
+        fee=0,
+    ).first()
+
+    if free_course and free_course.id not in added_course_ids:
+        courses.append(free_course)
+        added_course_ids.add(free_course.id)
 
     return courses
 
@@ -258,6 +269,16 @@ def get_package_module_position(enrollment, module):
 
 
 def get_module_fee_access(student, module):
+    # MCTI_FREE_SPOKEN_ENGLISH_ACCESS_V1
+    if module.course.slug == 'professional-spoken-english':
+        return {
+            'allowed': True,
+            'required_percent': 0,
+            'paid_percent': 100,
+            'enrollment': None,
+            'message': '',
+        }
+
     from decimal import Decimal
     from .models import LMSModule
 
@@ -866,8 +887,18 @@ def topic_quiz(request, topic_id):
     # QUIZ LANGUAGE - ENGLISH ONLY
     # -------------------------------------------------
 
-    selected_language = "en"
-    selected_language_name = "English"
+    if topic.module.course.slug == "professional-spoken-english":
+        selected_language = request.GET.get("lang", "en")
+        if selected_language not in ("en", "hi", "mr"):
+            selected_language = "en"
+    else:
+        selected_language = "en"
+
+    selected_language_name = {
+        "en": "English",
+        "hi": "हिंदी",
+        "mr": "मराठी",
+    }[selected_language]
 
     # -------------------------------------------------
     # ENGLISH QUIZ QUESTIONS ONLY
@@ -876,7 +907,7 @@ def topic_quiz(request, topic_id):
     questions = list(
         QuizQuestion.objects.filter(
             topic=topic,
-            language="en",
+            language=selected_language,
             is_active=True
         ).order_by("order")[:5]
     )
