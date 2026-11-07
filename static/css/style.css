@@ -10200,3 +10200,48 @@ section.hero + section.divisions{
         grid-template-columns: repeat(2,minmax(0,1fr));
     }
 }
+
+
+/* MCTI_NAVBAR_ORIGINAL_FONT_V1 */
+.navbar .logo a,
+.navbar .logo a strong,
+.navbar .logo a span {
+    font-family: Arial, sans-serif !important;
+}
+
+
+/* MCTI_NAVBAR_BOLD_FINAL_V1 */
+.navbar .logo a strong {
+    font-weight: 900 !important;
+    color: #ff6b00 !important;
+}
+
+.navbar .logo a span {
+    font-weight: 400 !important;
+    color: #111111 !important;
+}
+
+
+/* MCTI CUSTOM MAP LOGO V1 */
+.branch-card .branch-icon {
+    width: 58px;
+    height: 58px;
+    margin: 0 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    background: linear-gradient(145deg, #ffffff, #fff3e8);
+    box-shadow: 0 8px 20px rgba(249, 115, 22, 0.16);
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+.branch-card .mcti-map-image {
+    width: 43px;
+    height: 43px;
+    display: block;
+    object-fit: contain;
+}
+.branch-card:hover .branch-icon {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(249, 115, 22, .25);
+}

@@ -1,52 +1,296 @@
 {% extends "base.html" %}
 
+{% block meta_description %}Explore MCTI Technologies in Navi Mumbai for career-focused computer training, business IT solutions, AI services and cloud software.{% endblock %}
 {% block title %}
 MCTI Technologies | Education, IT Solutions & AI
 {% endblock %}
 
 {% block content %}
 
+<style>
+/* MCTI_HOME_EQUAL_ALIGNMENT_V1 */
+
+/* Consistent 1200px desktop content area */
+.mcti-home-corporate {
+    grid-template-columns:minmax(0,700px) 340px;
+    justify-content:space-between;
+    align-items:center;
+    gap:60px;
+    padding-left:max(24px,calc((100% - 1160px)/2));
+    padding-right:max(24px,calc((100% - 1160px)/2));
+}
+
+.divisions,
+.courses,
+.why-mcti,
+.mcti-stats,
+.branches,
+.testimonials,
+.final-cta {
+    padding-left:max(32px,calc((100% - 1200px)/2)) !important;
+    padding-right:max(32px,calc((100% - 1200px)/2)) !important;
+}
+
+.division-grid,
+.course-grid,
+.why-grid,
+.stats-container,
+.branch-grid,
+.testimonial-grid {
+    max-width:1200px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.mcti-story-carousel {
+    max-width:1200px;
+    box-sizing:border-box;
+}
+
+.mcti-placement-section {
+    padding-left:max(32px,calc((100% - 1200px)/2));
+    padding-right:max(32px,calc((100% - 1200px)/2));
+}
+
+.mcti-placement-inner {
+    max-width:1200px;
+}
+
+@media(max-width:900px) {
+    .mcti-home-corporate {
+        grid-template-columns:1fr;
+        justify-content:stretch;
+        padding-left:24px;
+        padding-right:24px;
+    }
+}
+
+@media(max-width:600px) {
+    .mcti-home-corporate,
+    .divisions,
+    .courses,
+    .why-mcti,
+    .mcti-stats,
+    .branches,
+    .testimonials,
+    .final-cta,
+    .mcti-placement-section {
+        padding-left:20px !important;
+        padding-right:20px !important;
+    }
+}
+</style>
+
+
 <!-- ================================
      HERO
 ================================ -->
 
-<section class="hero">
 
+<!-- MCTI_HOMEPAGE_CORPORATE_HERO_V1 -->
+<style>
+.mcti-home-corporate {
+    background:radial-gradient(circle at 80% 20%,#47301e 0%,#191919 42%,#090909 100%);
+    color:#fff;
+    min-height:570px;
+    padding:85px max(24px,calc((100% - 1160px)/2));
+    display:grid;
+    grid-template-columns:minmax(0,700px) 340px;
+    align-items:center;
+    justify-content:space-between;
+    gap:60px;
+    text-align:left;
+}
+.mcti-home-corporate .mcti-home-copy {
+    max-width:730px;
+}
+.mcti-home-corporate .mcti-home-eyebrow {
+    color:#ff8a35;
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:2px;
+    margin-bottom:20px;
+}
+.mcti-home-corporate .mcti-home-copy h1 {
+    color:#fff;
+    font-size:clamp(36px,4.7vw,62px);
+    font-weight:850;
+    line-height:1.12;
+    letter-spacing:-1.5px;
+    margin:0 0 25px;
+}
+.mcti-home-corporate .mcti-home-copy h1 span {
+    display:block;
+    color:#ff791b;
+}
+.mcti-home-corporate .mcti-home-copy p {
+    color:#dedede;
+    font-size:17px;
+    line-height:1.8;
+    max-width:620px;
+    margin:0 0 32px;
+}
+.mcti-home-corporate .mcti-home-actions {
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+}
+.mcti-home-corporate .mcti-home-actions a {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:13px 21px;
+    border-radius:8px;
+    font-weight:750;
+    text-decoration:none;
+    font-size:14px;
+}
+.mcti-home-corporate .mcti-home-primary {
+    background:#ff6500;
+    color:#fff;
+}
+.mcti-home-corporate .mcti-home-secondary {
+    background:transparent;
+    color:#fff;
+    border:1px solid rgba(255,255,255,.5);
+}
+.mcti-home-corporate .mcti-home-card {
+    background:#fff;
+    color:#1f2937;
+    border:1px solid #ffe0cc;
+    border-top:5px solid #ff6500;
+    border-radius:18px;
+    padding:34px;
+    box-shadow:0 18px 50px rgba(0,0,0,.2);
+}
+.mcti-home-corporate .mcti-home-card-icon {
+    width:52px;
+    height:52px;
+    display:grid;
+    place-items:center;
+    background:#fff1e6;
+    border-radius:14px;
+    font-size:25px;
+    margin-bottom:18px;
+}
+.mcti-home-corporate .mcti-home-card-label {
+    display:block;
+    color:#ff6500;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:1.4px;
+    margin-bottom:10px;
+}
+.mcti-home-corporate .mcti-home-card h2 {
+    color:#1f2937;
+    font-size:26px;
+    line-height:1.25;
+    margin:0 0 15px;
+}
+.mcti-home-corporate .mcti-home-card h2 strong {
+    display:block;
+    color:#ff6500;
+}
+.mcti-home-corporate .mcti-home-card p {
+    color:#666;
+    font-size:14px;
+    line-height:1.7;
+    margin:0 0 22px;
+}
+.mcti-home-corporate .mcti-home-card-action {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#111;
+    color:#fff;
+    padding:14px 16px;
+    border-radius:8px;
+    text-decoration:none;
+    font-weight:800;
+    font-size:14px;
+}
+.mcti-home-corporate .mcti-home-card-action span {
+    color:#ff6500;
+    font-size:20px;
+}
+@media(max-width:900px) {
+    .mcti-home-corporate {
+        grid-template-columns:1fr;
+        gap:35px;
+        padding:65px 6%;
+    }
+    .mcti-home-corporate .mcti-home-card {
+        max-width:600px;
+    }
+}
+@media(max-width:600px) {
+    .mcti-home-corporate {
+        padding:55px 20px;
+        min-height:auto;
+    }
+    .mcti-home-corporate .mcti-home-copy h1 {
+        font-size:36px;
+    }
+    .mcti-home-corporate .mcti-home-copy p {
+        font-size:15px;
+    }
+    .mcti-home-corporate .mcti-home-card {
+        padding:24px;
+    }
+}
+</style>
 
-<div class="hero-content">
+<section class="mcti-home-corporate">
 
-    <h1>
-        Empowering People & Businesses
-        <span>Through Technology</span>
-    </h1>
+    <div class="mcti-home-copy">
+        <div class="mcti-home-eyebrow">MCTI TECHNOLOGIES</div>
 
-    <p>
-        Education, IT Solutions, AI & SaaS —
-        everything you need to learn, build and grow.
-    </p>
+        <h1>
+            Empowering People.
+            <span>Transforming Businesses.</span>
+        </h1>
 
-    <div class="hero-buttons">
+        <p>
+            Education, IT Solutions, Artificial Intelligence and SaaS —
+            one powerful ecosystem to learn, build and grow.
+        </p>
 
-        <a
-            href="{% url 'business_solutions' %}"
-            class="btn-primary"
-        >
-            Explore Solutions
-        </a>
-
-        <a
-            href="{% url 'contact' %}"
-            class="btn-secondary"
-        >
-            Contact Us
-        </a>
-
+        <div class="mcti-home-actions">
+            <a href="{% url 'business_solutions' %}" class="mcti-home-primary">
+                Explore Solutions
+            </a>
+            <a href="#courses" class="mcti-home-secondary">
+                Explore Courses
+            </a>
+            <a href="{% url 'contact' %}" class="mcti-home-secondary">
+                Contact Us
+            </a>
+        </div>
     </div>
 
-</div>
+    <div class="mcti-home-card">
+        <div class="mcti-home-card-icon">✦</div>
 
+        <span class="mcti-home-card-label">MCTI ECOSYSTEM</span>
+
+        <h2>
+            One Partner.
+            <strong>Multiple Possibilities.</strong>
+        </h2>
+
+        <p>
+            Industry-focused education, business technology,
+            AI-powered solutions and scalable SaaS platforms.
+        </p>
+
+        <a href="{% url 'business_solutions' %}" class="mcti-home-card-action">
+            Explore MCTI Solutions
+            <span>→</span>
+        </a>
+    </div>
 
 </section>
+
 
 
 <!-- ================================
@@ -160,7 +404,7 @@ MCTI Technologies | Education, IT Solutions & AI
      MCTI ACADEMY - COURSES
 ================================ -->
 
-<section class="courses">
+<section class="courses" id="courses">
 
 
 <div class="section-heading">
@@ -515,7 +759,9 @@ MCTI Technologies | Education, IT Solutions & AI
 
     <!-- Kharghar -->
     <div class="branch-card">
-        <div class="branch-icon">📍</div>
+        <div class="branch-icon" aria-label="MCTI location">
+<img class="mcti-map-image" src="/static/images/mcti_map_pin.png" alt="MCTI location" width="43" height="43" loading="lazy">
+</div>
 
         <h3>Kharghar</h3>
 
@@ -537,7 +783,9 @@ MCTI Technologies | Education, IT Solutions & AI
 
     <!-- Panvel -->
     <div class="branch-card">
-        <div class="branch-icon">📍</div>
+        <div class="branch-icon" aria-label="MCTI location">
+<img class="mcti-map-image" src="/static/images/mcti_map_pin.png" alt="MCTI location" width="43" height="43" loading="lazy">
+</div>
 
         <h3>Panvel</h3>
 
@@ -559,7 +807,9 @@ MCTI Technologies | Education, IT Solutions & AI
 
     <!-- Koperkhairane -->
     <div class="branch-card">
-        <div class="branch-icon">📍</div>
+        <div class="branch-icon" aria-label="MCTI location">
+<img class="mcti-map-image" src="/static/images/mcti_map_pin.png" alt="MCTI location" width="43" height="43" loading="lazy">
+</div>
 
         <h3>Koperkhairane</h3>
 
@@ -582,7 +832,9 @@ MCTI Technologies | Education, IT Solutions & AI
 
     <!-- Kamothe -->
     <div class="branch-card">
-        <div class="branch-icon">📍</div>
+        <div class="branch-icon" aria-label="MCTI location">
+<img class="mcti-map-image" src="/static/images/mcti_map_pin.png" alt="MCTI location" width="43" height="43" loading="lazy">
+</div>
 
         <h3>Kamothe</h3>
 
@@ -605,7 +857,9 @@ MCTI Technologies | Education, IT Solutions & AI
 
     <!-- Ghansoli -->
     <div class="branch-card">
-        <div class="branch-icon">📍</div>
+        <div class="branch-icon" aria-label="MCTI location">
+<img class="mcti-map-image" src="/static/images/mcti_map_pin.png" alt="MCTI location" width="43" height="43" loading="lazy">
+</div>
 
         <h3>Ghansoli</h3>
 
@@ -628,7 +882,9 @@ MCTI Technologies | Education, IT Solutions & AI
 
     <!-- Nerul -->
 <div class="branch-card">
-    <div class="branch-icon">📍</div>
+    <div class="branch-icon" aria-label="MCTI location">
+<img class="mcti-map-image" src="/static/images/mcti_map_pin.png" alt="MCTI location" width="43" height="43" loading="lazy">
+</div>
 
     <h3>Nerul</h3>
 
